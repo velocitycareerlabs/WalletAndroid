@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">WalletAndroid</string>
+    <string name="disclosing_credentials">Disclosing Credentials (aka Inspection)</string>
+    <string name="receiving_credentials_by_deeplink">Receiving Credentials (aka Issuing) By Deeplink</string>
+    <string name="receiving_credentials_by_services">Receiving Credentials (aka Issuing) By Services</string>
+    <string name="self_reporting_credentials">Self Reporting Credentials (aka Self Attested)</string>
+    <string name="refresh_credentials">Refresh Credentials</string>
+    <string name="get_verified_profile">Get Verified Profile</string>
+    <string name="verify_jwt">Verify JWT</string>
+    <string name="generate_signed_jwt">Generate Signed JWT</string>
+    <string name="initialization_failed">Initialization Failed…</string>
+</resources>

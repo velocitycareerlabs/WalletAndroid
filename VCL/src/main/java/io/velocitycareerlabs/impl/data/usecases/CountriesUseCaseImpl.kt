@@ -1,0 +1,27 @@
+package io.velocitycareerlabs.impl.data.usecases
+
+import android.os.Looper
+import io.velocitycareerlabs.api.entities.VCLCountries
+import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
+import io.velocitycareerlabs.impl.domain.repositories.CountriesRepository
+import io.velocitycareerlabs.impl.domain.usecases.CountriesUseCase
+
+/**
+ * Created by Michael Avoyan on 09/12/2021.
+ */
+internal class CountriesUseCaseImpl(
+    private val countriesRepository: CountriesRepository,
+    private val executor: Executor
+): CountriesUseCase {
+    override fun getCountries(completionBlock: (VCLResult<VCLCountries>) -> Unit) {
+        val callingLooper = Looper.myLooper()
+        executor.runOnBackgroundThread {
+            countriesRepository.getCountries {
+                executor.runOn(callingLooper) {
+                    completionBlock(it)
+                }
+            }
+        }
+    }
+}

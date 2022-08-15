@@ -1,0 +1,3 @@
+include ':VCL'
+include ':app'
+rootProject.name = "WalletAndroid"

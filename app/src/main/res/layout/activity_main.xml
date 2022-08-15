@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/controlsView"
+        android:visibility="gone">
+
+        <Button
+            style="@style/ButtonStyle"
+            android:text="@string/disclosing_credentials"
+            android:id="@+id/disclosingCredentials"
+            android:layout_marginTop="@dimen/btn_margin_top"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            style="@style/ButtonStyle"
+            android:text="@string/receiving_credentials_by_deeplink"
+            android:id="@+id/receivingCredentialsByDeeplink"
+            android:layout_marginTop="@dimen/btn_margin_top"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/disclosingCredentials" />
+
+        <Button
+            style="@style/ButtonStyle"
+            android:text="@string/receiving_credentials_by_services"
+            android:id="@+id/receivingCredentialsByServices"
+            android:layout_marginTop="@dimen/btn_margin_top"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/receivingCredentialsByDeeplink" />
+
+        <Button
+            style="@style/ButtonStyle"
+            android:text="@string/self_reporting_credentials"
+            android:id="@+id/selfReportingCredentials"
+            android:layout_marginTop="@dimen/btn_margin_top"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/receivingCredentialsByServices" />
+
+        <Button
+            style="@style/ButtonStyle"
+            android:text="@string/refresh_credentials"
+            android:id="@+id/refreshCredentials"
+            android:layout_marginTop="@dimen/btn_margin_top"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/selfReportingCredentials" />
+
+        <Button
+            style="@style/ButtonStyle"
+            android:text="@string/get_verified_profile"
+            android:id="@+id/getVerifiedProfile"
+            android:layout_marginTop="@dimen/btn_margin_top"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/refreshCredentials" />
+
+        <Button
+            style="@style/ButtonStyle"
+            android:text="@string/verify_jwt"
+            android:id="@+id/verifyJwt"
+            android:layout_marginTop="@dimen/btn_margin_top"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/getVerifiedProfile" />
+
+        <Button
+            style="@style/ButtonStyle"
+            android:text="@string/generate_signed_jwt"
+            android:id="@+id/generateSignedJwt"
+            android:layout_marginTop="@dimen/btn_margin_top"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/verifyJwt" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/errorView"
+        android:visibility="gone">
+
+        <TextView
+            style="@style/TextStyle"
+            android:text="@string/initialization_failed"
+            android:id="@+id/initializationFailed"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ProgressBar
+        android:id="@+id/loadingIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

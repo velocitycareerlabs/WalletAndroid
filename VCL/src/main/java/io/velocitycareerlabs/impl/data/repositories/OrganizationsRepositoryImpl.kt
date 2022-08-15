@@ -1,0 +1,58 @@
+package io.velocitycareerlabs.impl.data.repositories
+
+import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.impl.data.infrastructure.network.Request
+import io.velocitycareerlabs.impl.domain.repositories.OrganizationsRepository
+import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
+import org.json.JSONObject
+import java.lang.Exception
+
+/**
+ * Created by Michael Avoyan on 4/11/21.
+ */
+internal class OrganizationsRepositoryImpl(
+        private val networkService: NetworkService
+): OrganizationsRepository {
+    private val TAG = OrganizationsRepositoryImpl::class.simpleName
+
+    override fun searchForOrganizations(
+        organizationsSearchDescriptor: VCLOrganizationsSearchDescriptor,
+        completionBlock: (VCLResult<VCLOrganizations>) -> Unit
+    ) {
+        val endpoint = organizationsSearchDescriptor.queryParams
+            ?.let { qp -> Urls.Organizations + "?" + qp } ?: Urls.Organizations
+        networkService.sendRequest(
+            endpoint = endpoint,
+            contentType = Request.ContentTypeApplicationJson,
+            method = Request.HttpMethod.GET,
+            completionBlock = { result ->
+                result.handleResult(
+                    { organizationsResponse ->
+                        try {
+                            completionBlock(VCLResult.Success(
+                                parse(organizationsResponse.payload)
+                            ))
+                        } catch (ex: Exception) {
+                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                        }
+                    },
+                    { error ->
+                        completionBlock(VCLResult.Failure(error))
+                    }
+                )
+            }
+        )
+    }
+
+    private fun parse(organizationsStr: String): VCLOrganizations {
+        val organizations = mutableListOf<VCLOrganization>()
+        JSONObject(organizationsStr).optJSONArray(VCLOrganizations.KeyResult)?.let { organizationsJsonArray ->
+            for (i in 0 until organizationsJsonArray.length()) {
+                organizationsJsonArray.optJSONObject(i)?.let { obj ->
+                    organizations.add(VCLOrganization(obj))
+                }
+            }
+        }
+        return VCLOrganizations(organizations)
+    }
+}

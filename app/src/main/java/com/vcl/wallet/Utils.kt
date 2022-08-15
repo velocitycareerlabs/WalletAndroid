@@ -1,0 +1,21 @@
+package com.vcl.wallet
+
+import io.velocitycareerlabs.api.entities.VCLOffers
+
+/**
+ * Created by Michael Avoyan on 18/07/2021.
+ */
+object Utils {
+    val TAG = Utils::class.simpleName
+
+    fun getApprovedRejectedOfferIdsMock(offers: VCLOffers): Pair<List<String>, List<String>> {
+
+        val approvedOfferIds: List<String> = listOfNotNull(
+            offers.all.optJSONObject(0)?.optString("id")
+        )
+        val rejectedOfferIds: List<String> = listOfNotNull(
+            offers.all.optJSONObject(1)?.optString("id")
+        )
+        return Pair(approvedOfferIds, rejectedOfferIds)
+    }
+}

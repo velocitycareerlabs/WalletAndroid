@@ -1,0 +1,248 @@
+Velocity License Version 1.0
+
+PLEASE READ CAREFULLY THESE LICENSE TERMS (THE “TERMS”) BEFORE OBTAINING A
+COPY, INSTALLING, ACCESSING, OR USING THE SOFTWARE (AS DEFINED BELOW) PROVIDED
+TO YOU (“USER”, “YOU”) BY VCL (AS DEFINED BELOW). BY INSTALLING, HAVING
+INSTALLED, CONTROLLING, ACCESSING OR OTHERWISE USING THE SOFTWARE IN ANY
+MANNER, YOU ARE ACCEPTING AND AGREEING TO BE BOUND BY THE LICENSE TERMS AND
+CONDITIONS HEREOF AND REPRESENTING THAT YOU HAVE FULL RIGHT, POWER, AND
+AUTHORITY TO ENTER INTO AND PERFORM THE TERMS HEREUNDER. THESE TERMS ARE MADE
+BETWEEN YOU AND VELOCITY CAREER LABS, INC., A DELAWARE CORPORATION AND ITS
+AFFILIATES (“VCL”, AND COLLECTIVELY THE “PARTIES”), WITH RESPECT TO THE
+SOFTWARE, AND NOTWITHSTANDING ANYTHING TO THE CONTRARY IN ANY OTHER DOCUMENT,
+AGREEMENT OR ARRANGEMENT BETWEEN YOU AND ANY THIRD PARTY OR ANYONE ON ITS
+BEHALF. YOU ASSUME ALL RESPONSIBILITY FOR THE SELECTION OF THE SOFTWARE, FOR
+YOUR RELIANCE ON THE RESULTS OF USE OF THE SOFTWARE AND FOR ANY USE OF THE
+SOFTWARE NOT IN ACCORDANCE WITH THE TERMS HEREOF.
+
+1.	DEFINITIONS.
+
+1.1	“Affiliate” means any entity which controls, is controlled by or is under
+common control with either of the parties, whether by ownership or management.
+Any entity shall be deemed to “control” another entity if it owns directly or
+indirectly more than 50% of the outstanding voting securities or capital of
+other entity or other comparable equity with respect to an entity other than a
+company.
+
+1.2	“Documentation” means the instructions, user guides, manuals and release
+notes provided by VCL, at any time, in printed and/or electronic form, that
+describe the operation, use or technical specifications of the Software.
+
+1.3	 “Software” means the software components comprised of proprietary software
+and solution currently distributed under the name “Velocity Network”, offering
+developers a blockchain-based “internet of careers” utility layer. Software may
+include one or more of the following components:(i) Credential Holder App –
+SDK\Reference Application, (ii) Credential Agent and\or (iii) Velocity
+Blockchain Node.
+
+2.	RIGHTS TO USE; RESTRICTIONS ON USE
+
+2.1	VCL hereby grants User, during the Term (as defined below), free of charge,
+a limited, revocable, non-exclusive, non-transferable and non-assignable right,
+to 1) access, use, and install (if applicable) the Software, and 2) develop
+applications which are separate from the Software (separate in architecture and
+require only use of the Software in object code for proper functioning) which
+interface with the Software or otherwise include it (“User Applications”),
+solely for (i) internal use in development and testing environments, including
+reviewing the Software code for functionality and/or security evaluations
+purposes, and (ii) demonstrating the functionality and structure of User
+Applications, including when operated in connection with the Software, all
+solely in connection with the Velocity Network and in accordance with the Terms
+herein.
+
+2.2	VCL may make available Documentation to User for User’s internal business
+purposes and solely in connection with the use of the Software during the Term.
+User may print or copy the Documentation as needed for its own internal
+business purposes provided that all copyright notices are included therein. The
+Documentation shall be considered as VCL's Confidential Information (as further
+defined). Unless the Documentation is separately referred to herein, all
+references in these Terms to the Software shall include the Documentation.
+
+2.3	Additional Rights and Restrictions.
+
+2.3.1	The Software is licensed, not sold. These Terms only gives the User
+limited rights to use the Software as explicitly set forth in these Terms
+during the Term and VCL reserves all other rights.  The User may use the
+Software and related Velocity Network services only as expressly permitted in
+the Terms except if otherwise required under applicable law.
+
+2.3.2	User agrees that it will not, and will not permit others to: (i) use a
+derivative work of the Software not in connection with the Velocity Network, or
+in any production capacity, on a temporary or permanent basis; (ii) reverse
+engineer, decompile, disassemble or attempt to derive the underlying know-how
+and algorithms of the Software and/or any part thereof; (iii) exceed the
+license scope as specified in these Terms; (iv) sublicense, transfer, publish
+or make available to the public or any third party, rent, lease or lend the
+Software; (v) use the Software to operate a service bureau or subscription
+service or for commercial software hosting services, or otherwise attempt to
+use the Software to provide or make available materially the same functionality
+of the Software to third parties; (vi) directly or indirectly, take any action
+to contest VCL’s intellectual property rights in or in connection to the
+Software or related services or infringe them in any way; or (vii) use the
+Software or output for the purpose of competing with the Software and/or
+Velocity Network.
+
+2.4	Marks and Use of VCL’s Name.  These Terms do not grant User any rights to
+VCL’s trademarks or service marks.  The User will not remove or modify any
+Software markings or any notice of VCL’s proprietary rights.
+
+3.	DISCLAIMER OF WARRANTIES AND LIMITATION OF LIABILITY
+
+3.1	Disclaimer of Any Warranties. TO THE MAXIMUM EXTENT PERMITTED UNDER
+APPLICABLE LAW, THE SOFTWARE IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND,
+AND VCL EXPRESSLY DISCLAIMS ANY AND ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED,
+REGARDING OR RELATING TO THE SOFTWARE.
+
+3.2	Limitation of Liability.  UNDER NO CIRCUMSTANCES SHALL VCL BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, WITHOUT LIMITATION, FOR ANY LOSS OF PROFITS,
+LOSS OF USE, BUSINESS INTERRUPTION, LOSS OF DATA, COST OF SUBSTITUTE GOODS OR
+SERVICES, PRODUCTION, ANTICIPATED SAVINGS, OR FOR ANY SPECIAL, INCIDENTAL OR
+CONSEQUENTIAL DAMAGES OF ANY KIND, IN CONNECTION WITH OR ARISING OUT OF THE USE
+OR INABILITY TO USE THE SOFTWARE. USER ACKNOWLEDGES THAT THESE LIMITATIONS
+SHALL APPLY NOTWITHSTANDING ANY FAILURE OF ESSENTIAL PURPOSE OF ANY LIMITED
+REMEDY. IN THE EVENT THIS LIMITATION OF LIABILITY SHALL BE FOR ANY REASON HELD
+UNENFORCEABLE OR INAPPLICABLE, VCL’S AGGREGATE LIABILITY SHALL NOT EXCEED THE
+AMOUNT OF US$1,000. YOU HEEREBY WAIVE THE RIGHT TO LITIGATE IN COURT OR
+ARBITRATE ANY CLAIM OR DISPUTE AS A CLASS ACTION, EITHER AS A MEMBER OF A CLASS
+OR AS A REPRESENTATIVE, OR TO ACT AS A PRIVATE ATTORNEY GENERAL.
+
+4.	INTELLECTUAL PROPERTY; Confidential Information
+
+4.1	Intellectual Property. No rights other than the limited license rights
+expressly set forth herein shall pass to the User. User acknowledges and agrees
+that as between User and VCL, the Software including any related services and
+any revisions, corrections, modifications, enhancements and/or upgrades
+thereto, are VCL’s property protected under copyright laws, patent law, and/or
+other laws protecting intellectual property rights and international treaties.
+User further acknowledges and agrees that all right, title, and interest in and
+to the Software, including associated intellectual property rights (including,
+without limitation, copyrights, trade secrets, trademarks, etc.), evidenced by
+or embodied in and/or attached/connected/related to the Software (including,
+without limitation, the code), Documentation and any related services, are and
+shall remain with VCL. Nothing in these Terms constitutes a waiver of VCL’s
+intellectual property rights under any law. In the event User provides VCL with
+any suggestions, comments or other feedback relating to the Software, or if VCL
+generates any knowledge in connection with its provision of the Software
+including any related services (collectively “Feedback”), whether such Feedback
+is provided or generated (as applicable) prior to, on or after the Term, such
+Feedback shall become the sole and exclusive property of VCL and/or its
+affiliates, and User hereby irrevocably assigns to VCL and/or its affiliates
+all of its right, title and interest in and to such Feedback. Without
+derogating from the aforementioned, VCL acknowledges and agrees that as between
+VCL and User, User shall exclusively own intellectual property rights to any
+User Applications, subject to its compliance with these Terms.
+
+4.2	 Confidential Information. Prior to or during the Term, VCL may, directly
+or indirectly, disclose to you, or allow you access to, certain Confidential
+Information (as defined below), whether in writing, oral form or in any other
+manner. For the purposes of these Terms, "Confidential Information" means any
+and all information, data and know-how of a private, non-public or confidential
+nature, in whatever form, that relates to the technology and/or products of
+VCL, its Affiliates, vendors, suppliers, provided or disclosed to you or which
+becomes known to you, whether or not marked as such. “Confidential Information”
+shall not include information or any matter that you can demonstrate by written
+and dated evidence: (a) was already known to you from a source other than VCL
+prior to disclosure; (b) was independently developed by you without use of, or
+reference to, the Confidential Information; (c) has become a part of the public
+knowledge, through no fault of, or breach of these Terms; (d) was lawfully
+received by you from another person or entity having no confidentiality
+obligation to VCL or its affiliates; or (e) is explicitly approved in writing
+by VCL for release by the User. The User shall treat all Confidential
+Information as strictly confidential, and except as expressly contemplated
+hereunder it shall: (a) not, directly or indirectly use or otherwise exploit
+Confidential Information for any other purpose other than for performing
+hereunder; (b) protect and safeguard the Confidential Information against any
+unauthorized use, disclosure, transfer or publication with at least the same
+degree of care as it uses for its own confidential or proprietary information,
+but in no event using less than a reasonable degree of care; (c) restrict
+disclosure of the Confidential Information to those directors, officers,
+employees, agents, consultants, contractors, or representatives of itself or of
+its affiliates (“Representatives”) who clearly have a need-to-know such
+Confidential Information; (d) advise such Representatives of their obligations
+to comply with these Terms, and the User shall be liable for any failure of its
+Representatives to comply with any of the Terms; and (e) notify VCL immediately
+upon discovery of any unauthorized use or disclosure of the Confidential
+Information and take reasonable steps to regain possession of the Confidential
+Information and prevent further unauthorized actions or other breach of these
+Terms.
+
+5.	THIRD PARTY COMPONENTS. The Software includes third party software, files
+and components that are subject to open source and third party license terms (
+“Third Party Components”). User’s right to use such Third Party Components as
+part of, or in connection with, the Software is subject to any applicable
+acknowledgements and license terms accompanying such Third Party Components,
+contained therein or related thereto. If there is a conflict between the
+licensing terms of such Third Party Components and these Terms, the licensing
+terms of the Third Party Components shall prevail only in connection with the
+related Third Party Components. These Terms do not apply to any Third Party
+Components accompanying or contained in the Software and VCL disclaims all
+liability related thereto. User acknowledge that VCL is not the author, owner
+or licensor of any Third Party Components, and that VCL makes no warranties or
+representations, express or implied, as to the quality, capabilities,
+operations, performance or suitability of Third Party Components.
+
+6.	USAGE DATA. User acknowledges and agrees that VCL may from time to time use
+and process data about User’s use of the Software for the purposes of creating
+statistics and analytics data. VCL may use such data for its own internal
+purposes, including to maintain and improve the Software and to monitor its
+activities and performance. User acknowledges that certain features of the
+Software are configured to collect and report telemetry data to VCL.
+
+7.	TERM AND TERMINATION.  User will have the rights set forth herein for the
+duration of the period commencing upon User accessing the Software and shall
+continue for a period of six (6) months thereafter (the “Initial Term”). Upon
+the lapse of the Initial Term, these Terms shall automatically renew for
+subsequent periods of six (6) months (each, a “Renewal Term”, and collectively
+with the Initial Term – the “Term”). During the Renewal Term, VCL may terminate
+these Terms at any time by providing the User at least thirty (30) days prior
+written notice. These Terms and all rights and licenses granted hereunder shall
+automatically terminate if you breach the terms hereof and such breach is not
+cured within fourteen (14) days of written notice of such breach. Sections 2.1-
+2.3, 3, 4, 5, 7, 8 and 9 will survive any termination or expiration of these
+Terms.
+
+8.	SUSPENTION, RETURN OR DESTRUCTION OF SOFTWARE AND DOCUMENTATION UPON
+TERMINATION OF SUBSCRIPTION.  Upon termination or expiration of these Terms:
+User must within thirty (30) days thereafter cease using the Software and
+promptly return to VCL or permanently destroy, the Software, Documentation,
+Confidential Information of VCL and any copies thereof (in all forms, partial
+and complete, in and on all types of media and computer memory, and whether or
+not modified or merged into other materials) and certify in writing the same.
+VCL reserves the rights to suspend unilaterally and without notice the use of
+the Software, upon termination or expiration or upon any breach by User of
+these Terms or otherwise any event of harmful use or misuse by or on behalf of
+User of the Software.
+
+9.	GENERAL
+
+9.1	Severability.  In the event any provision or part of these Terms are held
+to be invalid or unenforceable by any court of competent jurisdiction, it shall
+be amended to the extent required to render it valid, legal and enforceable, or
+deleted if no such amendment is feasible, and such amendment or deletion shall
+not affect the enforceability of the other provisions hereof.
+
+9.2	Waiver.  No waiver of any breach of these Terms will be a waiver of any
+other breach, and no waiver will be effective unless made in writing and signed
+by an authorized representative of VCL. The failure of VCL to enforce any
+rights granted hereunder or to take action against the User in the event of any
+breach hereunder shall not be deemed a waiver by VCL as to subsequent
+enforcement of rights or subsequent actions in the event of future breaches.
+
+9.3	 Governing Law.  The validity, interpretation, and performance of these
+Terms shall be controlled by and construed under the laws of the State of New
+York as if performed wholly within New York and without giving effect to the
+principles of conflicts of laws. The User hereby consents to the exclusive
+jurisdiction of the courts located in New York, NY to settle any dispute or
+claim that arises out of or in connection with these Terms or its subject
+matter. The User specifically excludes application of the United Nations
+Convention on Contracts for the International Sale of Goods to these Terms.
+
+9.4	 Entire Terms.  These Terms supersede all previous agreements or
+representations, written or oral, with respect to the subject matter hereof
+between User and VCL. VCL has sole discretion to amend or publish revised
+and/or new versions of these Terms from time to time and will either provide
+generally available notice, or otherwise notify User directly of such changes
+or modifications. Changes to these Terms shall become effective as of seven (7)
+days after such notification. The continued use of any part of the Software by
+User will constitute its binding acceptance of such applicable changes to these
+Terms.

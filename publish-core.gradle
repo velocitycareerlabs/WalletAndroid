@@ -1,0 +1,30 @@
+Properties properties = new Properties()
+properties.load(new FileInputStream(rootProject.file('/Volumes/Keybase (michaelavoyan)/team/velocitycareers/mobile/android/sonatype.properties')))
+
+ext {
+    signingKeyId = System.getenv("SIGNING_KEY_ID") ?: properties["signingKeyId"]
+    signingPassword = System.getenv("SIGNING_PASSWORD") ?: properties["signingPassword"]
+    ossrhUsername = System.getenv("OSSRH_USERNAME") ?: properties["ossrhUsername"]
+    ossrhPassword = System.getenv("OSSRH_PASSWORD") ?: properties["ossrhPassword"]
+    sonatypeStagingProfileId = System.getenv("SONATYPE_STAGING_PROFILE_ID") ?: properties["sonatypeStagingProfileId"]
+    signingPrivateKey = System.getenv("SIGNING_KEY") ?: properties["signingPrivateKey"]
+}
+
+//println("signingKeyId: ${signingKeyId}")
+//println("signingPassword: ${signingPassword}")
+//println("ossrhUsername: ${ossrhUsername}")
+//println("ossrhPassword: ${ossrhPassword}")
+//println("sonatypeStagingProfileId: ${sonatypeStagingProfileId}")
+//println("signingPrivateKey: ${signingPrivateKey}")
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            stagingProfileId = sonatypeStagingProfileId
+            username = ossrhUsername
+            password = ossrhPassword
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        }
+    }
+}
