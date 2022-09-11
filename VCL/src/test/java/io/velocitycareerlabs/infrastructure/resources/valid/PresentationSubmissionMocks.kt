@@ -12,7 +12,7 @@ class PresentationSubmissionMocks {
         val PresentationRequest = VCLPresentationRequest(
             JwtServiceMocks.JWT,
             JwtServiceMocks.PublicKey,
-            DeepLinkMocks.PresentationRequestDeepLink
+            DeepLinkMocks.CredentialManifestDeepLinkMainNet
         )
 
         val SelectionsList = listOf(
