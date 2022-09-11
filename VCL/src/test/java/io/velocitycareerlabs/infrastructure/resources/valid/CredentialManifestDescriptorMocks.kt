@@ -8,7 +8,7 @@ import io.velocitycareerlabs.api.entities.VCLPushDelegate
 class CredentialManifestDescriptorMocks {
     companion object {
 
-        val DeepLink = DeepLinkMocks.CredentialManifestDeepLink
+        val DeepLink = DeepLinkMocks.CredentialManifestDeepLinkMainNet
 
         const val DeepLinkRequestUri = DeepLinkMocks.CredentialManifestRequestUriStr
 

@@ -31,9 +31,6 @@ data class VCLDeepLink(val value: String) {
     }
 
     companion object CodingKeys {
-        const val KeyPresentationRequestPrefix = "velocity-network://inspect?request_uri="
-        const val KeyCredentialManifestPrefix = "velocity-network://issue?request_uri="
-
         const val KeyRequestUri = "request_uri"
         const val KeyVendorOriginContext = "vendorOriginContext"
     }

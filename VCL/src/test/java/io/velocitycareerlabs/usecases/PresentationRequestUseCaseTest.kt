@@ -1,9 +1,6 @@
 package io.velocitycareerlabs.usecases
 
-import io.velocitycareerlabs.api.entities.VCLPresentationRequest
-import io.velocitycareerlabs.api.entities.VCLPublicKey
-import io.velocitycareerlabs.api.entities.VCLResult
-import io.velocitycareerlabs.api.entities.data
+import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.PresentationRequestRepositoryImpl
@@ -31,7 +28,7 @@ internal class PresentationRequestUseCaseTest {
     }
 
     @Test
-    fun testGetPresentationRequest() {
+    fun testGetPresentationRequestDevNet() {
 //        Arrange
         subject = PresentationRequestUseCaseImpl(
                 PresentationRequestRepositoryImpl(
@@ -48,7 +45,7 @@ internal class PresentationRequestUseCaseTest {
         var result: VCLResult<VCLPresentationRequest>? = null
 
 //        Action
-        subject.getPresentationRequest(DeepLinkMocks.PresentationRequestDeepLink) {
+        subject.getPresentationRequest(VCLDeepLink("")) {
             result = it
         }
 
