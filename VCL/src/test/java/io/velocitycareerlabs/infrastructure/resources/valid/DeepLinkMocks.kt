@@ -1,10 +1,14 @@
+/**
+ * Created by Michael Avoyan on 8/15/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.infrastructure.resources.valid
 
 import io.velocitycareerlabs.api.entities.VCLDeepLink
 
-/**
- * Created by Michael Avoyan on 8/15/21.
- */
 class DeepLinkMocks {
     companion object {
         private const val DevNetProtocol = "velocity-network-devnet"

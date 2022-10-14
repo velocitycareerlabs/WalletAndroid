@@ -1,12 +1,16 @@
+/**
+ * Created by Michael Avoyan on 8/05/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.api.entities
 
 import io.velocitycareerlabs.impl.extensions.decode
 import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.extensions.getUrlQueryParams
 
-/**
- * Created by Michael Avoyan on 8/05/21.
- */
 data class VCLDeepLink(val value: String) {
     var requestUri = generateRequestUri()
 

@@ -1,12 +1,16 @@
+/**
+ * Created by Michael Avoyan on 18/07/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.data.models
 
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.models.IdentificationModel
 import io.velocitycareerlabs.impl.domain.usecases.IdentificationSubmissionUseCase
 
-/**
- * Created by Michael Avoyan on 18/07/2021.
- */
 internal class IdentificationModelImpl(
     private val identificationSubmissionUseCase: IdentificationSubmissionUseCase
 ): IdentificationModel {

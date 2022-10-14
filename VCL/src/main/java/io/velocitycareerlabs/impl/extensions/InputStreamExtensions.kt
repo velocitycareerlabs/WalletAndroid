@@ -1,12 +1,16 @@
+/**
+ * Created by Michael Avoyan on 3/18/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.extensions
 
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 
-/**
- * Created by Michael Avoyan on 3/18/21.
- */
 internal fun InputStream.convertToString(encoding: String): String {
     val sb = StringBuilder()
     try {

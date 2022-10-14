@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 4/28/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.repositories
 
 import io.velocitycareerlabs.api.entities.*
@@ -12,9 +19,6 @@ import org.junit.Before
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 
-/**
- * Created by Michael Avoyan on 4/28/21.
- */
 internal class PresentationRequestRepositoryTest {
 
     lateinit var subject: PresentationRequestRepository

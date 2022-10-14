@@ -1,10 +1,14 @@
+/**
+ * Created by Michael Avoyan on 13/06/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.api.entities
 
 import org.json.JSONObject
 
-/**
- * Created by Michael Avoyan on 13/06/2021.
- */
 data class VCLCredentialTypesUIFormSchema(val payload: JSONObject) {
     companion object CodingKeys {
         const val KeyAddressRegion = "addressRegion"

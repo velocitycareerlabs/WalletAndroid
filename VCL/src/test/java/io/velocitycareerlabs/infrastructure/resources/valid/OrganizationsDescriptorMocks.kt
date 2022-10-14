@@ -1,12 +1,16 @@
+/**
+ * Created by Michael Avoyan on 8/15/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.infrastructure.resources.valid
 
 import io.velocitycareerlabs.api.entities.VCLServiceType
 import io.velocitycareerlabs.api.entities.VCLFilter
 import io.velocitycareerlabs.api.entities.VCLPage
 
-/**
- * Created by Michael Avoyan on 8/15/21.
- */
 class OrganizationsDescriptorMocks {
     companion object {
         val Filter = VCLFilter(

@@ -1,12 +1,15 @@
+/**
+ * Created by Michael Avoyan on 3/14/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.extensions
 
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-
-/**
- * Created by Michael Avoyan on 3/14/21.
- */
 
 @Throws(JSONException::class)
 internal fun JSONObject.toMap(): Map<String, Any> {

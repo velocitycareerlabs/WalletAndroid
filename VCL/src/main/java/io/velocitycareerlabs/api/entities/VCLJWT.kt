@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 4/26/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.api.entities
 
 import com.nimbusds.jose.JWSHeader
@@ -5,9 +12,6 @@ import com.nimbusds.jose.Payload
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jwt.SignedJWT
 
-/**
- * Created by Michael Avoyan on 4/26/21.
- */
 class VCLJWT {
     val signedJwt: SignedJWT
 

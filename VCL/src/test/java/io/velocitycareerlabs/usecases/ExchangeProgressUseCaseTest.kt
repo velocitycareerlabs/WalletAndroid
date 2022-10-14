@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 30/05/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.*
@@ -16,9 +23,6 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
-/**
- * Created by Michael Avoyan on 30/05/2021.
- */
 internal class ExchangeProgressUseCaseTest {
 
     lateinit var subject: ExchangeProgressUseCase

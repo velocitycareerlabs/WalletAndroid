@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 4/28/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.domain.infrastructure.network
 
 import io.velocitycareerlabs.api.entities.VCLResult
@@ -5,9 +12,6 @@ import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.infrastructure.network.Response
 import java.util.*
 
-/**
- * Created by Michael Avoyan on 4/28/21.
- */
 internal interface NetworkService {
     fun sendRequest(endpoint: String,
                     body: String? = null,

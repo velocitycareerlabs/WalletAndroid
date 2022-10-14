@@ -1,13 +1,15 @@
+/**
+ * Created by Michael Avoyan on 3/12/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.utils
 
 import android.util.Log
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.GlobalConfig.LogTagPrefix
-
-
-/**
- * Created by Michael Avoyan on 3/12/21.
- */
 
 internal object VCLLog {
     /**

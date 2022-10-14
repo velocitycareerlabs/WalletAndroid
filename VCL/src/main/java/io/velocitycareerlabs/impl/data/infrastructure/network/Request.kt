@@ -1,8 +1,12 @@
-package io.velocitycareerlabs.impl.data.infrastructure.network
-
 /**
  * Created by Michael Avoyan on 3/12/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
  */
+
+package io.velocitycareerlabs.impl.data.infrastructure.network
+
 internal class Request(
         val endpoint: String,
         val body: String?,

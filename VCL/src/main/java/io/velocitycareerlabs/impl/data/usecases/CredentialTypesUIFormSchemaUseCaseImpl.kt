@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 13/06/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.data.usecases
 
 import android.os.Looper
@@ -9,9 +16,6 @@ import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.CredentialTypesUIFormSchemaRepository
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUIFormSchemaUseCase
 
-/**
- * Created by Michael Avoyan on 13/06/2021.
- */
 internal class CredentialTypesUIFormSchemaUseCaseImpl(
     private val credentialTypesUIFormSchemaRepository: CredentialTypesUIFormSchemaRepository,
     private val executor: Executor

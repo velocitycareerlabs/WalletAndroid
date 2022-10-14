@@ -1,3 +1,7 @@
+/**
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package com.vcl.wallet
 
 import androidx.appcompat.app.AppCompatActivity

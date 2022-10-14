@@ -1,8 +1,12 @@
+/**
+ * Created by Michael Avoyan on 8/15/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.infrastructure.resources.valid
 
-/**
- * Created by Michael Avoyan on 28/06/2021.
- */
 class OrganizationsMocks {
     companion object {
         const val OrganizationJson =

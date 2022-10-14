@@ -1,11 +1,15 @@
+/**
+ * Created by Michael Avoyan on 3/12/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl
 
 import io.velocitycareerlabs.BuildConfig
 import io.velocitycareerlabs.api.VCLEnvironment
 
-/**
- * Created by Michael Avoyan on 3/12/21.
- */
 internal object GlobalConfig {
     const val VclPackage = BuildConfig.LIBRARY_PACKAGE_NAME
 
