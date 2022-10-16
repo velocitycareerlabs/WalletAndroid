@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 3/14/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl
 
 import android.content.Context
@@ -12,9 +19,6 @@ import io.velocitycareerlabs.impl.data.usecases.*
 import io.velocitycareerlabs.impl.domain.models.*
 import io.velocitycareerlabs.impl.domain.usecases.*
 
-/**
- * Created by Michael Avoyan on 3/14/21.
- */
 internal object VclBlocksProvider {
         fun provideCredentialTypeSchemasModel(
                 context: Context,

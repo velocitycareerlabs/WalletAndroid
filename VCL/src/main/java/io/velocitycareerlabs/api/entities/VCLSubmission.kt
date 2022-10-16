@@ -1,12 +1,16 @@
+/**
+ * Created by Michael Avoyan on 8/05/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.api.entities
 
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
 
-/**
- * Created by Michael Avoyan on 8/05/21.
- */
 abstract class VCLSubmission(
     val submitUri: String,
     val iss: String,

@@ -1,10 +1,14 @@
+/**
+ * Created by Michael Avoyan on 3/21/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.api.entities
 
 import org.json.JSONObject
 
-/**
- * Created by Michael Avoyan on 3/21/21.
- */
 data class VCLCredentialType (
     val payload: JSONObject,
         val id: String?,

@@ -1,8 +1,12 @@
-package io.velocitycareerlabs.infrastructure.resources.valid
-
 /**
  * Created by Michael Avoyan on 4/30/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
  */
+
+package io.velocitycareerlabs.infrastructure.resources.valid
+
 class CredentialTypesMocks {
     companion object {
         const val CredentialType1 = "{\"credentialType\":\"EducationDegree\",\"schemaName\":\"education-degree\",\"recommended\":false,\"id\":\"5fe4a315d8b45dd2e80bd739\",\"createdAt\":\"2022-03-17T09:24:38.448Z\",\"updatedAt\":\"2022-03-17T09:24:38.448Z\"}"

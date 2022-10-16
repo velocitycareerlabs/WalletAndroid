@@ -1,10 +1,14 @@
+/**
+ * Created by Michael Avoyan on 17/06/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.infrastructure.db
 
 import io.velocitycareerlabs.impl.domain.infrastructure.db.CacheService
 
-/**
- * Created by Michael Avoyan on 17/06/2021.
- */
 internal class CacheServiceEmptyMock: CacheService {
     override var countryCodes: String?
         get() = null

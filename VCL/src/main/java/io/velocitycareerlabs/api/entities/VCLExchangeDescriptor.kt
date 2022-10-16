@@ -1,8 +1,12 @@
+/**
+ * Created by Michael Avoyan on 30/05/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.api.entities
 
-/**
- * Created by Michael Avoyan on 30/05/2021.
- */
 data class VCLExchangeDescriptor(
     val presentationSubmission: VCLPresentationSubmission,
     val submissionResult: VCLSubmissionResult

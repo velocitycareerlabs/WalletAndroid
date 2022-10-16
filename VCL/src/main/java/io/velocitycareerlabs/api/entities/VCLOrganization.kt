@@ -1,12 +1,16 @@
+/**
+ * Created by Michael Avoyan on 8/05/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.api.entities
 
 import io.velocitycareerlabs.impl.utils.VCLLog
 import org.json.JSONObject
 import java.lang.Exception
 
-/**
- * Created by Michael Avoyan on 8/05/21.
- */
 data class VCLOrganization(val payload: JSONObject) {
 
     val TAG = VCLOrganization::class.simpleName

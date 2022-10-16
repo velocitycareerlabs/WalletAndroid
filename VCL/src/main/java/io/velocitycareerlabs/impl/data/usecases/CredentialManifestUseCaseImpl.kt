@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 09/05/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.data.usecases
 
 import android.os.Looper
@@ -9,9 +16,6 @@ import io.velocitycareerlabs.impl.domain.repositories.ResolveKidRepository
 import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
 import io.velocitycareerlabs.impl.extensions.encode
 
-/**
- * Created by Michael Avoyan on 09/05/2021.
- */
 internal class CredentialManifestUseCaseImpl(
     private val credentialManifestRepository: CredentialManifestRepository,
     private val resolveKidRepository: ResolveKidRepository,

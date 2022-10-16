@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 14/06/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.infrastructure.resources.valid
 
 import com.nimbusds.jose.util.Base64URL
@@ -6,9 +13,6 @@ import io.velocitycareerlabs.api.entities.VCLJWT
 import io.velocitycareerlabs.api.entities.VCLPublicKey
 import org.json.JSONObject
 
-/**
- * Created by Michael Avoyan on 14/06/2021.
- */
 class JwtServiceMocks {
     companion object {
         const val AdamSmithEmailJwt =

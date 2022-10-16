@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 28/06/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.VCLOrganizations
@@ -17,9 +24,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-/**
- * Created by Michael Avoyan on 28/06/2021.
- */
 internal class OrganizationsUseCaseTest {
 
     lateinit var subject: OrganizationsUseCase

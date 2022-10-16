@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 9/15/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.repositories
 
 import io.velocitycareerlabs.api.VCLEnvironment
@@ -7,9 +14,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-/**
- * Created by Michael Avoyan on 9/15/21.
- */
 internal class UrlsTest {
 
     lateinit var  subject: Urls

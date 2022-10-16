@@ -1,10 +1,14 @@
+/**
+ * Created by Michael Avoyan on 28/10/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.api.entities
 
 import org.json.JSONObject
 
-/**
- * Created by Michael Avoyan on 28/10/21.
- */
 data class VCLVerifiedProfile(val payload: JSONObject) {
 
     val credentialSubject: JSONObject? get() = payload.optJSONObject(VCLVerifiedProfile.KeyCredentialSubject)

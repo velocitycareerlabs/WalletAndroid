@@ -1,8 +1,12 @@
-package io.velocitycareerlabs.infrastructure.resources.valid
-
 /**
  * Created by Michael Avoyan on 9/12/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
  */
+
+package io.velocitycareerlabs.infrastructure.resources.valid
+
 class CountriesMocks {
     companion object {
 

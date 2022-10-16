@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 09/12/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.data.usecases
 
 import android.os.Looper
@@ -7,9 +14,6 @@ import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.CountriesRepository
 import io.velocitycareerlabs.impl.domain.usecases.CountriesUseCase
 
-/**
- * Created by Michael Avoyan on 09/12/2021.
- */
 internal class CountriesUseCaseImpl(
     private val countriesRepository: CountriesRepository,
     private val executor: Executor

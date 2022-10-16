@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 3/13/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.VCLEnvironment
@@ -5,9 +12,6 @@ import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.data.repositories.Params.Companion.CredentialType
 import io.velocitycareerlabs.impl.data.repositories.Params.Companion.Did
 
-/**
- * Created by Michael Avoyan on 3/13/21.
- */
 internal class Urls {
     companion object {
         private val EnvironmentPrefix get(): String =

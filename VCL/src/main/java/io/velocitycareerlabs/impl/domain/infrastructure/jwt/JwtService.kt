@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 4/28/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.domain.infrastructure.jwt
 
 import com.nimbusds.jose.*
@@ -6,9 +13,6 @@ import io.velocitycareerlabs.api.entities.VCLJWT
 import org.json.JSONObject
 import java.text.ParseException
 
-/**
- * Created by Michael Avoyan on 4/28/21.
- */
 internal interface JwtService {
     @Throws(ParseException::class)
     fun parse(jwt: String): SignedJWT?
