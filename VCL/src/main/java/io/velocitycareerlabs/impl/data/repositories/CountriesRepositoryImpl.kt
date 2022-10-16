@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 12/9/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.*
@@ -8,11 +15,7 @@ import io.velocitycareerlabs.impl.domain.repositories.CountriesRepository
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
-import java.util.*
 
-/**
- * Created by Michael Avoyan on 12/9/21.
- */
 internal class CountriesRepositoryImpl(
     private val networkService: NetworkService,
     private val cacheService: CacheService

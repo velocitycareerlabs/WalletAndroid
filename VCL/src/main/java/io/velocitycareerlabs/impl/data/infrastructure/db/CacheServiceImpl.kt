@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 16/06/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.data.infrastructure.db
 
 import android.content.Context
@@ -7,9 +14,6 @@ import io.velocitycareerlabs.impl.domain.infrastructure.db.CacheService
 import io.velocitycareerlabs.impl.extensions.decodeBase64
 import io.velocitycareerlabs.impl.extensions.encodeBase64
 
-/**
- * Created by Michael Avoyan on 16/06/2021.
- */
 internal class CacheServiceImpl(
     context: Context
 ): CacheService {

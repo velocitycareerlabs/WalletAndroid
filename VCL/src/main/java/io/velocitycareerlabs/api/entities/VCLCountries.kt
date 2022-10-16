@@ -1,8 +1,12 @@
-package io.velocitycareerlabs.api.entities
-
 /**
  * Created by Michael Avoyan on 12/9/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
  */
+
+package io.velocitycareerlabs.api.entities
+
 data class VCLCountries(val all: List<VCLCountry>?) {
 
     fun countryByCode(code: String): VCLCountry? =

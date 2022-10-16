@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 09/05/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.*
@@ -7,9 +14,6 @@ import io.velocitycareerlabs.impl.domain.repositories.CredentialManifestReposito
 import org.json.JSONObject
 import java.lang.Exception
 
-/**
- * Created by Michael Avoyan on 09/05/2021.
- */
 internal class CredentialManifestRepositoryImpl(
     val networkService: NetworkService
 ): CredentialManifestRepository {

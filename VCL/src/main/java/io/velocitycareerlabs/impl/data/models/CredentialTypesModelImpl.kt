@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 3/11/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.data.models
 
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUseCase
@@ -7,9 +14,6 @@ import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.data
 import io.velocitycareerlabs.api.entities.handleResult
 
-/**
- * Created by Michael Avoyan on 3/11/21.
- */
 internal class CredentialTypesModelImpl(
         private val credentialTypesUseCase: CredentialTypesUseCase
 ): CredentialTypesModel {

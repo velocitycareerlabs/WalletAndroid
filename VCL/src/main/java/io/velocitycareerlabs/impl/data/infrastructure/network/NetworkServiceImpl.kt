@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 3/11/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.data.infrastructure.network
 
 import android.accounts.NetworkErrorException
@@ -18,9 +25,6 @@ import java.net.UnknownHostException
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
 
-/**
- * Created by Michael Avoyan on 3/11/21.
- */
 internal class NetworkServiceImpl: NetworkService {
     private val TAG = NetworkServiceImpl::class.simpleName
 

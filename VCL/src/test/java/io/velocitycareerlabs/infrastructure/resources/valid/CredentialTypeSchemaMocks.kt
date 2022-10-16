@@ -1,12 +1,16 @@
+/**
+ * Created by Michael Avoyan on 4/29/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.infrastructure.resources.valid
 
 import io.velocitycareerlabs.api.entities.VCLCredentialType
 import io.velocitycareerlabs.api.entities.VCLCredentialTypes
 import org.json.JSONObject
 
-/**
- * Created by Michael Avoyan on 4/29/21.
- */
 class CredentialTypeSchemaMocks {
     companion object {
         const val CredentialTypeSchemaJson = "{\n" +

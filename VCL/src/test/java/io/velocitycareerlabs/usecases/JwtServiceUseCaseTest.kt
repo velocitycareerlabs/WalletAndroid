@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 14/06/2021.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.usecases
 
 import com.nimbusds.jose.crypto.ECDSAVerifier
@@ -12,9 +19,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-/**
- * Created by Michael Avoyan on 14/06/2021.
- */
 internal class JwtServiceUseCaseTest {
 
     lateinit var subject: JwtServiceUseCase

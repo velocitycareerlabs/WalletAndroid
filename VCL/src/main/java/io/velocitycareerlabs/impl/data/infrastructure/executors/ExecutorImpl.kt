@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 4/29/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.data.infrastructure.executors
 
 import android.os.Handler
@@ -7,9 +14,6 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-/**
- * Created by Michael Avoyan on 4/29/21.
- */
 internal class ExecutorImpl: Executor {
 
     private val mainThread: Handler = Handler(Looper.getMainLooper())

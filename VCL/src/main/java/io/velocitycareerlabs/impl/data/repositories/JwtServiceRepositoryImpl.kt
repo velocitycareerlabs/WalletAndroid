@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 4/6/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.*
@@ -6,9 +13,6 @@ import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
 import org.json.JSONObject
 import java.lang.Exception
 
-/**
- * Created by Michael Avoyan on 4/6/21.
- */
 internal class JwtServiceRepositoryImpl(
         private val jwtService: JwtService
 ): JwtServiceRepository {

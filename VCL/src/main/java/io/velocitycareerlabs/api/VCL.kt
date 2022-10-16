@@ -1,3 +1,10 @@
+/**
+ * Created by Michael Avoyan on 3/11/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.api
 
 import android.content.Context
@@ -9,9 +16,6 @@ import io.velocitycareerlabs.impl.utils.VCLLog
 import org.json.JSONObject
 import java.lang.Exception
 
-/**
- * Created by Michael Avoyan on 3/11/21.
- */
 interface VCL {
     fun initialize(
         context: Context,

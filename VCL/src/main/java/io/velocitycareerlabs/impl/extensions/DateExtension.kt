@@ -1,10 +1,13 @@
+/**
+ * Created by Michael Avoyan on 4/22/21.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.velocitycareerlabs.impl.extensions
 
 import java.util.*
-
-/**
- * Created by Michael Avoyan on 4/22/21.
- */
 
 internal fun Date.addDaysToNow(days: Int): Date {
     val calendar = Calendar.getInstance()
