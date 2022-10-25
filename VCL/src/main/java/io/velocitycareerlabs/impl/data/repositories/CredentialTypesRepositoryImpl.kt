@@ -21,13 +21,29 @@ internal class CredentialTypesRepositoryImpl(
         private val cacheService: CacheService
 ): CredentialTypesRepository {
 
-    override fun getCredentialTypes(completionBlock: (VCLResult<VCLCredentialTypes>) -> Unit) {
-        fetchCredentialTypes(completionBlock)
+    override fun getCredentialTypes(
+        resetCache: Boolean,
+        completionBlock: (VCLResult<VCLCredentialTypes>) -> Unit
+    ) {
+        val endpoint = Urls.CredentialTypes
+        if (resetCache) {
+            fetchCredentialTypes(endpoint, completionBlock)
+        } else {
+            cacheService.getCredentialTypes(endpoint)?.let { credentialTypes ->
+                completionBlock(
+                    VCLResult.Success(
+                        parse(JSONArray(credentialTypes))
+                    )
+                )
+            } ?: run {
+                fetchCredentialTypes(endpoint, completionBlock)
+            }
+        }
     }
 
-    private fun fetchCredentialTypes(completionBlock: (VCLResult<VCLCredentialTypes>) -> Unit) {
+    private fun fetchCredentialTypes(endpoint: String, completionBlock: (VCLResult<VCLCredentialTypes>) -> Unit) {
         networkService.sendRequest(
-            endpoint = Urls.CredentialTypes,
+            endpoint = endpoint,
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.GET,
             useCaches = true,
@@ -35,7 +51,7 @@ internal class CredentialTypesRepositoryImpl(
                 result.handleResult(
                     { credentialTypesResponse->
                         try {
-                            cacheService.credentialTypes = credentialTypesResponse.payload
+                            cacheService.setCredentialTypes(endpoint, credentialTypesResponse.payload)
                             completionBlock(VCLResult.Success(
                                 parse(JSONArray(credentialTypesResponse.payload))
                             ))

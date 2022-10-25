@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.infrastructure
+package io.velocitycareerlabs.infrastructure.resources
 
 import android.os.Looper
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor

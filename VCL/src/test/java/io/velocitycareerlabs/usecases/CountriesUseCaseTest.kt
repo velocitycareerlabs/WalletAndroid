@@ -13,8 +13,8 @@ import io.velocitycareerlabs.api.entities.data
 import io.velocitycareerlabs.impl.data.repositories.CountriesRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CountriesUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CountriesUseCase
-import io.velocitycareerlabs.infrastructure.EmptyExecutor
-import io.velocitycareerlabs.infrastructure.db.CacheServiceEmptyMock
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.EmptyCacheService
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.CountriesMocks
 import org.junit.After
@@ -39,14 +39,14 @@ class CountriesUseCaseTest {
                 NetworkServiceSuccess(
                     CountriesMocks.CountriesJson
                 ),
-                CacheServiceEmptyMock()
+                EmptyCacheService()
             ),
             EmptyExecutor()
         )
         var result: VCLResult<VCLCountries>? = null
 
 //        Action
-        subject.getCountries {
+        subject.getCountries(false) {
             result = it
         }
 

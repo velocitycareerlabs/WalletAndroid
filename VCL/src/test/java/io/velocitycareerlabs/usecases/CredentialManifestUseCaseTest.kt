@@ -18,7 +18,7 @@ import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.ResolveKidRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialManifestUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
-import io.velocitycareerlabs.infrastructure.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import org.json.JSONObject

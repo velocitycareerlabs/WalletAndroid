@@ -17,7 +17,6 @@ import io.velocitycareerlabs.impl.domain.infrastructure.db.CacheService
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import org.json.JSONObject
 import java.lang.Exception
-import java.util.*
 
 internal class CredentialTypeSchemaRepositoryImpl(
         private val networkService: NetworkService,
@@ -25,16 +24,33 @@ internal class CredentialTypeSchemaRepositoryImpl(
 ): CredentialTypeSchemaRepository {
 
     override fun getCredentialTypeSchema(
-        schemaName: String, completionBlock: (VCLResult<VCLCredentialTypeSchema>) -> Unit
+        schemaName: String,
+        resetCache: Boolean,
+        completionBlock: (VCLResult<VCLCredentialTypeSchema>) -> Unit
     ) {
-        fetchCredentialTypeSchema(schemaName, completionBlock)
+        val endpoint = Urls.CredentialTypeSchemas + schemaName
+        if(resetCache) {
+            fetchCredentialTypeSchema(endpoint, completionBlock)
+        } else {
+            cacheService.getCredentialTypeSchema(endpoint)?.let { credentialTypeSchema ->
+                completionBlock(
+                    VCLResult.Success(
+                        VCLCredentialTypeSchema(
+                            JSONObject(credentialTypeSchema)
+                        )
+                    )
+                )
+            } ?: run {
+                fetchCredentialTypeSchema(endpoint, completionBlock)
+            }
+        }
     }
 
     private fun fetchCredentialTypeSchema(
-        schemaName: String, completionBlock: (VCLResult<VCLCredentialTypeSchema>) -> Unit
+        endpoint: String, completionBlock: (VCLResult<VCLCredentialTypeSchema>) -> Unit
     ) {
         networkService.sendRequest(
-            endpoint = Urls.CredentialTypeSchemas + schemaName,
+            endpoint = endpoint,
             method = Request.HttpMethod.GET,
             useCaches = true,
             completionBlock = { result ->
@@ -42,7 +58,7 @@ internal class CredentialTypeSchemaRepositoryImpl(
                     { credentialTypeSchemaResponse ->
                         try {
                             cacheService.setCredentialTypeSchema(
-                                schemaName, credentialTypeSchemaResponse.payload
+                                endpoint, credentialTypeSchemaResponse.payload
                             )
                             completionBlock(VCLResult.Success(
                                 VCLCredentialTypeSchema(

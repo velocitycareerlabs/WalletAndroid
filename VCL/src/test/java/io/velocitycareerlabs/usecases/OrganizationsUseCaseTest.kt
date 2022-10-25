@@ -16,7 +16,7 @@ import io.velocitycareerlabs.impl.data.repositories.OrganizationsRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.OrganizationsUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.OrganizationsUseCase
 import io.velocitycareerlabs.impl.extensions.toList
-import io.velocitycareerlabs.infrastructure.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.OrganizationsMocks
 import org.json.JSONObject

@@ -11,7 +11,7 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.GenerateOffersUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.GenerateOffersUseCase
-import io.velocitycareerlabs.infrastructure.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.GenerateOffersMocks
 import org.json.JSONArray

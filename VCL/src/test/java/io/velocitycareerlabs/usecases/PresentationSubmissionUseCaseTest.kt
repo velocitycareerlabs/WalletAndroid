@@ -13,7 +13,7 @@ import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.SubmissionRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.PresentationSubmissionUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.PresentationSubmissionUseCase
-import io.velocitycareerlabs.infrastructure.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationSubmissionMocks
 import org.json.JSONObject

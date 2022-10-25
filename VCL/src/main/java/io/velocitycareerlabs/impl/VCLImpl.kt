@@ -48,24 +48,25 @@ internal class VCLImpl: VCL {
     private var initializationWatcher = InitializationWatcher(ModelsToInitilizeAmount)
 
     override fun initialize(
-        context: Context,
-        environment: VCLEnvironment,
+        initializationDescriptor: VCLInitializationDescriptor,
         successHandler: () -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         initializationWatcher = InitializationWatcher(ModelsToInitilizeAmount)
 
-        initGlobalConfigurations(environment)
+        initGlobalConfigurations(initializationDescriptor.environment)
 
-        printVersion(context)
+        printVersion(initializationDescriptor.context)
 
-        credentialTypesModel = VclBlocksProvider.provideCredentialTypesModel(context)
-        countriesModel = VclBlocksProvider.provideCountryCodesModel(context)
+        credentialTypesModel =
+            VclBlocksProvider.provideCredentialTypesModel(initializationDescriptor.context)
+        countriesModel =
+            VclBlocksProvider.provideCountryCodesModel(initializationDescriptor.context)
         val completionHandler = {
             initializationWatcher.firstError()?.let { errorHandler(it) }
                 ?: successHandler()
         }
-        countriesModel?.initialize { result ->
+        countriesModel?.initialize(initializationDescriptor.resetCache) { result ->
             result.handleResult(
                 {
                     if (initializationWatcher.onInitializedModel(null))
@@ -76,7 +77,7 @@ internal class VCLImpl: VCL {
                         completionHandler()
                 })
         }
-        credentialTypesModel?.initialize { result ->
+        credentialTypesModel?.initialize(initializationDescriptor.resetCache) { result ->
             result.handleResult(
                 {
                     if (initializationWatcher.onInitializedModel(null)) {
@@ -86,10 +87,10 @@ internal class VCLImpl: VCL {
                             credentialTypesModel?.data?.let { credentialTypes ->
                                 credentialTypeSchemasModel =
                                     VclBlocksProvider.provideCredentialTypeSchemasModel(
-                                        context,
+                                        initializationDescriptor.context,
                                         credentialTypes
                                     )
-                                credentialTypeSchemasModel?.initialize { result ->
+                                credentialTypeSchemasModel?.initialize(initializationDescriptor.resetCache) { result ->
                                     result.handleResult(
                                         {
                                             if (initializationWatcher.onInitializedModel(null)) {

@@ -13,7 +13,7 @@ import io.velocitycareerlabs.impl.data.repositories.FinalizeOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.FinalizeOffersUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.FinalizeOffersUseCase
-import io.velocitycareerlabs.infrastructure.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.FinalizeOffersMocks
 import org.json.JSONObject
