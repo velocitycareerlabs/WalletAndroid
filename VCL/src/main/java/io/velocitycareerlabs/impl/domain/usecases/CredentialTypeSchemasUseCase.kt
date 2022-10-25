@@ -11,5 +11,5 @@ import io.velocitycareerlabs.api.entities.VCLCredentialTypeSchemas
 import io.velocitycareerlabs.api.entities.VCLResult
 
 internal interface CredentialTypeSchemasUseCase {
-    fun getCredentialTypeSchemas(completionBlock:(VCLResult<VCLCredentialTypeSchemas>) -> Unit)
+    fun getCredentialTypeSchemas(resetCache: Boolean, completionBlock:(VCLResult<VCLCredentialTypeSchemas>) -> Unit)
 }

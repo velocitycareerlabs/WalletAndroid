@@ -13,7 +13,7 @@ import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.JwtServiceUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.JwtServiceUseCase
-import io.velocitycareerlabs.infrastructure.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
 import org.junit.After
 import org.junit.Before

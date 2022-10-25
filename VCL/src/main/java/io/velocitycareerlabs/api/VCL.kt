@@ -14,12 +14,10 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.utils.VCLLog
 import org.json.JSONObject
-import java.lang.Exception
 
 interface VCL {
     fun initialize(
-        context: Context,
-        environment: VCLEnvironment = VCLEnvironment.PROD,
+        initializationDescriptor: VCLInitializationDescriptor,
         successHandler: () -> Unit,
         errorHandler: (VCLError) -> Unit
     )

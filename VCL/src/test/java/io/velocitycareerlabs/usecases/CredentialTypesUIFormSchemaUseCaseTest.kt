@@ -11,7 +11,7 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.data.repositories.CredentialTypesUIFormSchemaRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialTypesUIFormSchemaUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUIFormSchemaUseCase
-import io.velocitycareerlabs.infrastructure.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypesUIFormSchemaMocks
 import org.json.JSONArray

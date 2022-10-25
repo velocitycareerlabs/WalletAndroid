@@ -55,8 +55,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         vcl.initialize(
-            context = this.applicationContext,
-            environment = environment,
+            initializationDescriptor = VCLInitializationDescriptor(
+                context = this.applicationContext,
+                environment = environment,
+                resetCache = false
+            ),
             successHandler = {
                 Log.d(TAG, "VCL initialization succeed!")
 

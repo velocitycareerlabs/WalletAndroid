@@ -18,10 +18,13 @@ internal class CountriesUseCaseImpl(
     private val countriesRepository: CountriesRepository,
     private val executor: Executor
 ): CountriesUseCase {
-    override fun getCountries(completionBlock: (VCLResult<VCLCountries>) -> Unit) {
+    override fun getCountries(
+        resetCache: Boolean,
+        completionBlock: (VCLResult<VCLCountries>) -> Unit
+    ) {
         val callingLooper = Looper.myLooper()
         executor.runOnBackgroundThread {
-            countriesRepository.getCountries {
+            countriesRepository.getCountries(resetCache) {
                 executor.runOn(callingLooper) {
                     completionBlock(it)
                 }

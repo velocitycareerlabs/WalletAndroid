@@ -59,6 +59,5 @@ dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:9.23"
     implementation project(':VCL')
 
-//    api files('libs/VCL.aar')
 //    implementation "io.velocitycareerlabs:vcl:x.y.z"
 }

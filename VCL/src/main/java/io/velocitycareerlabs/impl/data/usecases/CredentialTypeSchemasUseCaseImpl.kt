@@ -18,18 +18,27 @@ internal class CredentialTypeSchemasUseCaseImpl (
     private val executor: Executor
 ): CredentialTypeSchemasUseCase {
 
-    override fun getCredentialTypeSchemas(completionBlock:(VCLResult<VCLCredentialTypeSchemas>) -> Unit) {
+    override fun getCredentialTypeSchemas(
+        resetCache: Boolean,
+        completionBlock: (VCLResult<VCLCredentialTypeSchemas>) -> Unit
+    ) {
         val credentialTypeSchemasMap = HashMap<String, VCLCredentialTypeSchema>()
         var credentialTypeSchemasMapIsEmpty = true
 
-        val schemaNamesArr = this.credentialTypes.all?.filter { it.schemaName != null }?.map { it.schemaName } ?: listOf()
+        val schemaNamesArr =
+            this.credentialTypes.all?.filter { it.schemaName != null }?.map { it.schemaName }
+                ?: listOf()
 
         schemaNamesArr.forEach { schemaName ->
             schemaName?.let {
                 executor.runOnBackgroundThread {
-                    credentialTypeSchemaRepository.getCredentialTypeSchema(schemaName) { result ->
+                    credentialTypeSchemaRepository.getCredentialTypeSchema(
+                        schemaName,
+                        resetCache
+                    ) { result ->
                         result.data?.let { credentialTypeSchemasMap[schemaName] = it }
-                        credentialTypeSchemasMapIsEmpty = credentialTypeSchemasMap.isEmpty() // like in Swift
+                        credentialTypeSchemasMapIsEmpty =
+                            credentialTypeSchemasMap.isEmpty() // like in Swift
                     }
                 }
             }

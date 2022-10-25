@@ -36,15 +36,8 @@ internal fun String.getUrlQueryParams(): Map<String, String>? {
     return map
 }
 
-internal fun String.decodeBase64() = String(Base64.decode(this, 0))
-internal fun String.encodeBase64(): String {
-    var data: ByteArray? = null
-    try {
-        data = toByteArray(Charsets.UTF_8)
-    } catch (e: UnsupportedEncodingException)
-    { }
-    return Base64.encodeToString(data, Base64.DEFAULT)
-}
+internal fun String.decodeBase64() = Base64.decode(this, Base64.DEFAULT).toString(Charsets.UTF_8)
+internal fun String.encodeToBase64() = Base64.encodeToString(this.toByteArray(), Base64.DEFAULT)
 
 internal fun String.toDate(): Date? {
     val format = SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH)
