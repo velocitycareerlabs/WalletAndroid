@@ -12,7 +12,7 @@ import io.velocitycareerlabs.api.entities.VCLExchangeDescriptor
 import io.velocitycareerlabs.impl.data.repositories.ExchangeProgressRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.ExchangeProgressUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.ExchangeProgressUseCase
-import io.velocitycareerlabs.infrastructure.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.ExchangeProgressMocks
 import org.json.JSONObject

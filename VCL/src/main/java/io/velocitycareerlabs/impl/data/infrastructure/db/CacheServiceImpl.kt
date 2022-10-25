@@ -12,7 +12,7 @@ import android.content.SharedPreferences
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.domain.infrastructure.db.CacheService
 import io.velocitycareerlabs.impl.extensions.decodeBase64
-import io.velocitycareerlabs.impl.extensions.encodeBase64
+import io.velocitycareerlabs.impl.extensions.encodeToBase64
 
 internal class CacheServiceImpl(
     context: Context
@@ -20,11 +20,6 @@ internal class CacheServiceImpl(
     companion object {
         private const val NAME = GlobalConfig.VclPackage
         private const val MODE = Context.MODE_PRIVATE
-
-        private val CountryCodesKeyValue = Pair("CountryCodes", null)
-        private val StateCodesKeyValue = Pair("StateCodes", null)
-        private val CredentialTypesKeyValue = Pair("CredentialTypes", null)
-        private val CredentialTypeSchemasKeyValue = Pair("CredentialTypeSchemas", null)
     }
     private var preferences: SharedPreferences = context.getSharedPreferences(NAME, MODE)
 
@@ -35,33 +30,18 @@ internal class CacheServiceImpl(
         editor.apply()
     }
 
-    override var countryCodes: String?
-        get() = preferences.getString(CountryCodesKeyValue.first, CountryCodesKeyValue.second)?.decodeBase64()
-        set(value) = preferences.edit {
-            it.putString(CountryCodesKeyValue.first, value?.encodeBase64())
-        }
-
-    override var stateCodes: String?
-        get() = preferences.getString(StateCodesKeyValue.first, StateCodesKeyValue.second)?.decodeBase64()
-        set(value) = preferences.edit {
-            it.putString(StateCodesKeyValue.first, value?.encodeBase64())
-        }
-
-    override var credentialTypes: String?
-        get() = preferences.getString(CredentialTypesKeyValue.first, CredentialTypesKeyValue.second)?.decodeBase64()
-        set(value) = preferences.edit {
-            it.putString(CredentialTypesKeyValue.first, value?.encodeBase64())
-        }
-
-    override fun getCredentialTypeSchema(schemaName: String) =
-        preferences.getString(
-            CredentialTypeSchemasKeyValue.first + schemaName,
-            CredentialTypeSchemasKeyValue.second
-        )?.decodeBase64()
-
-    override fun setCredentialTypeSchema(schemaName: String, schema: String) =
+    private fun getString(key: String) = preferences.getString(key, null)?.decodeBase64()
+    private fun setString(key: String, value: String) =
         preferences.edit {
-            it.putString(CredentialTypeSchemasKeyValue.first + schemaName,
-                schema.encodeBase64())
+            it.putString(key, value.encodeToBase64())
         }
+
+    override fun getCountries(keyUrl: String) = getString(keyUrl)
+    override fun setCountries(keyUrl: String, value: String) = setString(keyUrl, value)
+
+    override fun getCredentialTypes(keyUrl: String) = getString(keyUrl)
+    override fun setCredentialTypes(keyUrl: String, value: String) = setString(keyUrl, value)
+
+    override fun getCredentialTypeSchema(keyUrl: String) = getString(keyUrl)
+    override fun setCredentialTypeSchema(keyUrl: String, value: String) = setString(keyUrl, value)
 }

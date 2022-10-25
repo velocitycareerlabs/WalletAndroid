@@ -11,11 +11,10 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.data.repositories.CredentialTypesRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialTypesUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUseCase
-import io.velocitycareerlabs.infrastructure.EmptyExecutor
-import io.velocitycareerlabs.infrastructure.db.CacheServiceEmptyMock
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.EmptyCacheService
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypesMocks
-import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
@@ -35,14 +34,14 @@ internal class CredentialTypesUseCaseTest {
         subject = CredentialTypesUseCaseImpl(
             CredentialTypesRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesMocks.CredentialTypesJson),
-                CacheServiceEmptyMock()
+                EmptyCacheService()
             ),
             EmptyExecutor()
         )
         var result: VCLResult<VCLCredentialTypes>? = null
 
 //        Action
-        subject.getCredentialTypes {
+        subject.getCredentialTypes(false) {
             result = it
         }
 

@@ -8,9 +8,12 @@
 package io.velocitycareerlabs.impl.domain.infrastructure.db
 
 internal interface CacheService {
-    var countryCodes: String?
-    var stateCodes: String?
-    var credentialTypes: String?
-    fun getCredentialTypeSchema(schemaName: String): String?
-    fun setCredentialTypeSchema(schemaName: String, schema: String)
+    fun getCountries(keyUrl: String): String?
+    fun setCountries(keyUrl: String, value: String)
+
+    fun getCredentialTypes(keyUrl: String): String?
+    fun setCredentialTypes(keyUrl: String, value: String)
+
+    fun getCredentialTypeSchema(keyUrl: String): String?
+    fun setCredentialTypeSchema(keyUrl: String, value: String)
 }

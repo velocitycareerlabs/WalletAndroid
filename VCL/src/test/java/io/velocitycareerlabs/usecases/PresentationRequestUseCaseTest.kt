@@ -14,11 +14,10 @@ import io.velocitycareerlabs.impl.data.repositories.PresentationRequestRepositor
 import io.velocitycareerlabs.impl.data.repositories.ResolveKidRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.PresentationRequestUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.PresentationRequestUseCase
-import io.velocitycareerlabs.infrastructure.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestMocks
-import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

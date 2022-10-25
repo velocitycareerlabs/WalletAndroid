@@ -19,8 +19,11 @@ internal class CountriesModelImpl(
 ): CountriesModel {
     override var data: VCLCountries? = null
 
-    override fun initialize(completionBlock: (VCLResult<VCLCountries>) -> Unit) {
-        countriesUseCase.getCountries { result ->
+    override fun initialize(
+        resetCache: Boolean,
+        completionBlock: (VCLResult<VCLCountries>) -> Unit
+    ) {
+        countriesUseCase.getCountries(resetCache) { result ->
             result.handleResult({ data = result.data }, { })
             completionBlock(result)
         }
