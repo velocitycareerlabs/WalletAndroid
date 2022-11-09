@@ -14,7 +14,6 @@ import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.repositories.CredentialTypesRepository
 import org.json.JSONArray
 import java.lang.Exception
-import java.util.*
 
 internal class CredentialTypesRepositoryImpl(
         private val networkService: NetworkService,
@@ -22,12 +21,12 @@ internal class CredentialTypesRepositoryImpl(
 ): CredentialTypesRepository {
 
     override fun getCredentialTypes(
-        resetCache: Boolean,
+        cacheSequence: Int,
         completionBlock: (VCLResult<VCLCredentialTypes>) -> Unit
     ) {
         val endpoint = Urls.CredentialTypes
-        if (resetCache) {
-            fetchCredentialTypes(endpoint, completionBlock)
+        if (cacheService.isResetCacheCredentialTypes(cacheSequence)) {
+            fetchCredentialTypes(endpoint, cacheSequence, completionBlock)
         } else {
             cacheService.getCredentialTypes(endpoint)?.let { credentialTypes ->
                 completionBlock(
@@ -36,12 +35,16 @@ internal class CredentialTypesRepositoryImpl(
                     )
                 )
             } ?: run {
-                fetchCredentialTypes(endpoint, completionBlock)
+                fetchCredentialTypes(endpoint, cacheSequence, completionBlock)
             }
         }
     }
 
-    private fun fetchCredentialTypes(endpoint: String, completionBlock: (VCLResult<VCLCredentialTypes>) -> Unit) {
+    private fun fetchCredentialTypes(
+        endpoint: String,
+        cacheSequence: Int,
+        completionBlock: (VCLResult<VCLCredentialTypes>) -> Unit
+    ) {
         networkService.sendRequest(
             endpoint = endpoint,
             contentType = Request.ContentTypeApplicationJson,
@@ -51,7 +54,11 @@ internal class CredentialTypesRepositoryImpl(
                 result.handleResult(
                     { credentialTypesResponse->
                         try {
-                            cacheService.setCredentialTypes(endpoint, credentialTypesResponse.payload)
+                            cacheService.setCredentialTypes(
+                                endpoint,
+                                credentialTypesResponse.payload,
+                                cacheSequence
+                            )
                             completionBlock(VCLResult.Success(
                                 parse(JSONArray(credentialTypesResponse.payload))
                             ))

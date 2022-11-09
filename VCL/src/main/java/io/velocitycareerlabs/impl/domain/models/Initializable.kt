@@ -10,5 +10,5 @@ package io.velocitycareerlabs.impl.domain.models
 import io.velocitycareerlabs.api.entities.VCLResult
 
 internal interface Initializable<T> {
-    fun initialize(resetCache: Boolean, completionBlock: (VCLResult<T>) -> Unit)
+    fun initialize(cacheSequence: Int, completionBlock: (VCLResult<T>) -> Unit)
 }

@@ -22,12 +22,12 @@ internal class CountriesRepositoryImpl(
 ): CountriesRepository {
 
     override fun getCountries(
-        resetCache: Boolean,
+        cacheSequence: Int,
         completionBlock: (VCLResult<VCLCountries>) -> Unit
     ) {
         val endpoint = Urls.Countries
-        if (resetCache) {
-            fetchCountries(endpoint, completionBlock)
+        if (cacheService.isResetCacheCountries(cacheSequence)) {
+            fetchCountries(endpoint, cacheSequence, completionBlock)
         } else {
             cacheService.getCountries(endpoint)?.let { countries ->
                 completionBlock(
@@ -36,12 +36,16 @@ internal class CountriesRepositoryImpl(
                     )
                 )
             } ?: run {
-                fetchCountries(endpoint, completionBlock)
+                fetchCountries(endpoint, cacheSequence, completionBlock)
             }
         }
     }
 
-    private fun fetchCountries(endpoint: String, completionBlock: (VCLResult<VCLCountries>) -> Unit) {
+    private fun fetchCountries(
+        endpoint: String,
+        cacheSequence: Int,
+        completionBlock: (VCLResult<VCLCountries>) -> Unit
+    ) {
         networkService.sendRequest(
             endpoint = endpoint,
             method = Request.HttpMethod.GET,
@@ -50,7 +54,7 @@ internal class CountriesRepositoryImpl(
                 result.handleResult(
                     { countriesResponse ->
                         try {
-                            cacheService.setCountries(endpoint, countriesResponse.payload)
+                            cacheService.setCountries(endpoint, countriesResponse.payload, cacheSequence)
                             completionBlock(VCLResult.Success(
                                 jsonArrToCountries(JSONArray(countriesResponse.payload))
                             ))

@@ -66,7 +66,7 @@ internal class VCLImpl: VCL {
             initializationWatcher.firstError()?.let { errorHandler(it) }
                 ?: successHandler()
         }
-        countriesModel?.initialize(initializationDescriptor.resetCache) { result ->
+        countriesModel?.initialize(initializationDescriptor.cacheSequence) { result ->
             result.handleResult(
                 {
                     if (initializationWatcher.onInitializedModel(null))
@@ -77,7 +77,7 @@ internal class VCLImpl: VCL {
                         completionHandler()
                 })
         }
-        credentialTypesModel?.initialize(initializationDescriptor.resetCache) { result ->
+        credentialTypesModel?.initialize(initializationDescriptor.cacheSequence) { result ->
             result.handleResult(
                 {
                     if (initializationWatcher.onInitializedModel(null)) {
@@ -90,7 +90,7 @@ internal class VCLImpl: VCL {
                                         initializationDescriptor.context,
                                         credentialTypes
                                     )
-                                credentialTypeSchemasModel?.initialize(initializationDescriptor.resetCache) { result ->
+                                credentialTypeSchemasModel?.initialize(initializationDescriptor.cacheSequence) { result ->
                                     result.handleResult(
                                         {
                                             if (initializationWatcher.onInitializedModel(null)) {

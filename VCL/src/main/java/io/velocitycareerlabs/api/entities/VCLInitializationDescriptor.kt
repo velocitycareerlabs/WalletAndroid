@@ -13,5 +13,5 @@ import io.velocitycareerlabs.api.VCLEnvironment
 data class VCLInitializationDescriptor(
     val context: Context,
     val environment: VCLEnvironment = VCLEnvironment.PROD,
-    val resetCache: Boolean = false,
+    val cacheSequence: Int = 0
 )
