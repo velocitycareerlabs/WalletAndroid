@@ -25,12 +25,12 @@ internal class CredentialTypeSchemaRepositoryImpl(
 
     override fun getCredentialTypeSchema(
         schemaName: String,
-        resetCache: Boolean,
+        cacheSequence: Int,
         completionBlock: (VCLResult<VCLCredentialTypeSchema>) -> Unit
     ) {
         val endpoint = Urls.CredentialTypeSchemas + schemaName
-        if(resetCache) {
-            fetchCredentialTypeSchema(endpoint, completionBlock)
+        if(cacheService.isResetCacheCredentialTypeSchema(cacheSequence)) {
+            fetchCredentialTypeSchema(endpoint, cacheSequence, completionBlock)
         } else {
             cacheService.getCredentialTypeSchema(endpoint)?.let { credentialTypeSchema ->
                 completionBlock(
@@ -41,13 +41,15 @@ internal class CredentialTypeSchemaRepositoryImpl(
                     )
                 )
             } ?: run {
-                fetchCredentialTypeSchema(endpoint, completionBlock)
+                fetchCredentialTypeSchema(endpoint, cacheSequence, completionBlock)
             }
         }
     }
 
     private fun fetchCredentialTypeSchema(
-        endpoint: String, completionBlock: (VCLResult<VCLCredentialTypeSchema>) -> Unit
+        endpoint: String,
+        cacheSequence: Int,
+        completionBlock: (VCLResult<VCLCredentialTypeSchema>) -> Unit
     ) {
         networkService.sendRequest(
             endpoint = endpoint,
@@ -58,7 +60,9 @@ internal class CredentialTypeSchemaRepositoryImpl(
                     { credentialTypeSchemaResponse ->
                         try {
                             cacheService.setCredentialTypeSchema(
-                                endpoint, credentialTypeSchemaResponse.payload
+                                endpoint,
+                                credentialTypeSchemaResponse.payload,
+                                cacheSequence
                             )
                             completionBlock(VCLResult.Success(
                                 VCLCredentialTypeSchema(

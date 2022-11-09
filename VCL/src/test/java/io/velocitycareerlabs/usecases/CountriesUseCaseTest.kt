@@ -46,7 +46,7 @@ class CountriesUseCaseTest {
         var result: VCLResult<VCLCountries>? = null
 
 //        Action
-        subject.getCountries(false) {
+        subject.getCountries(0) {
             result = it
         }
 

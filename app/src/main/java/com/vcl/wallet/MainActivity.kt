@@ -57,8 +57,7 @@ class MainActivity : AppCompatActivity() {
         vcl.initialize(
             initializationDescriptor = VCLInitializationDescriptor(
                 context = this.applicationContext,
-                environment = environment,
-                resetCache = false
+                environment = environment
             ),
             successHandler = {
                 Log.d(TAG, "VCL initialization succeed!")

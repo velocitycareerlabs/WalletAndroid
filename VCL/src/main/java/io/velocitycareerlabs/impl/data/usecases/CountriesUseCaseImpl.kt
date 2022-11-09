@@ -19,12 +19,12 @@ internal class CountriesUseCaseImpl(
     private val executor: Executor
 ): CountriesUseCase {
     override fun getCountries(
-        resetCache: Boolean,
+        cacheSequence: Int,
         completionBlock: (VCLResult<VCLCountries>) -> Unit
     ) {
         val callingLooper = Looper.myLooper()
         executor.runOnBackgroundThread {
-            countriesRepository.getCountries(resetCache) {
+            countriesRepository.getCountries(cacheSequence) {
                 executor.runOn(callingLooper) {
                     completionBlock(it)
                 }

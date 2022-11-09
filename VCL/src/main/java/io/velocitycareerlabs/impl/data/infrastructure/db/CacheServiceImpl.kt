@@ -13,6 +13,7 @@ import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.domain.infrastructure.db.CacheService
 import io.velocitycareerlabs.impl.extensions.decodeBase64
 import io.velocitycareerlabs.impl.extensions.encodeToBase64
+import io.velocitycareerlabs.impl.utils.VCLLog
 
 internal class CacheServiceImpl(
     context: Context
@@ -20,6 +21,10 @@ internal class CacheServiceImpl(
     companion object {
         private const val NAME = GlobalConfig.VclPackage
         private const val MODE = Context.MODE_PRIVATE
+
+        internal const val KEY_CACHE_SEQUENCE_COUNTRIES = "KEY_CACHE_SEQUENCE_COUNTRIES"
+        internal const val KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES = "KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES"
+        internal const val KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA = "KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA"
     }
     private var preferences: SharedPreferences = context.getSharedPreferences(NAME, MODE)
 
@@ -30,18 +35,39 @@ internal class CacheServiceImpl(
         editor.apply()
     }
 
-    private fun getString(key: String) = preferences.getString(key, null)?.decodeBase64()
-    private fun setString(key: String, value: String) =
+    internal fun getString(key: String) = preferences.getString(key, null)?.decodeBase64()
+    internal fun setString(key: String, value: String) =
         preferences.edit {
             it.putString(key, value.encodeToBase64())
         }
 
-    override fun getCountries(keyUrl: String) = getString(keyUrl)
-    override fun setCountries(keyUrl: String, value: String) = setString(keyUrl, value)
+    internal fun getInt(key: String) = preferences.getInt(key, 0)
+    internal fun setInt(key: String, value: Int) =
+        preferences.edit {
+            it.putInt(key, value)
+        }
 
-    override fun getCredentialTypes(keyUrl: String) = getString(keyUrl)
-    override fun setCredentialTypes(keyUrl: String, value: String) = setString(keyUrl, value)
+    override fun getCountries(key: String) = getString(key)
+    override fun setCountries(key: String, value: String, cacheSequence: Int) {
+        setString(key, value)
+        setInt(KEY_CACHE_SEQUENCE_COUNTRIES, cacheSequence)
+    }
+    override fun isResetCacheCountries(cacheSequence: Int) =
+        getInt(KEY_CACHE_SEQUENCE_COUNTRIES) < cacheSequence
 
-    override fun getCredentialTypeSchema(keyUrl: String) = getString(keyUrl)
-    override fun setCredentialTypeSchema(keyUrl: String, value: String) = setString(keyUrl, value)
+    override fun getCredentialTypes(key: String) = getString(key)
+    override fun setCredentialTypes(key: String, value: String, cacheSequence: Int) {
+        setString(key, value)
+        setInt(KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES, cacheSequence)
+    }
+    override fun isResetCacheCredentialTypes(cacheSequence: Int) =
+        getInt(KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES) < cacheSequence
+
+    override fun getCredentialTypeSchema(key: String) = getString(key)
+    override fun setCredentialTypeSchema(key: String, value: String, cacheSequence: Int) {
+        setString(key, value)
+        setInt(KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA, cacheSequence)
+    }
+    override fun isResetCacheCredentialTypeSchema(cacheSequence: Int) =
+        getInt(KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA) < cacheSequence
 }

@@ -41,7 +41,7 @@ internal class CredentialTypesUseCaseTest {
         var result: VCLResult<VCLCredentialTypes>? = null
 
 //        Action
-        subject.getCredentialTypes(false) {
+        subject.getCredentialTypes(0) {
             result = it
         }
 

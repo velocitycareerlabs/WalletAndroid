@@ -20,11 +20,12 @@ internal class CredentialTypesUseCaseImpl(
 ): CredentialTypesUseCase {
 
     override fun getCredentialTypes(
-        resetCache: Boolean, completionBlock: (VCLResult<VCLCredentialTypes>) -> Unit
+        cacheSequence: Int,
+        completionBlock: (VCLResult<VCLCredentialTypes>) -> Unit
     ) {
         val callingLooper = Looper.myLooper()
         executor.runOnBackgroundThread {
-            credentialTypes.getCredentialTypes(resetCache) {
+            credentialTypes.getCredentialTypes(cacheSequence) {
                 executor.runOn(callingLooper) { completionBlock(it) }
             }
         }

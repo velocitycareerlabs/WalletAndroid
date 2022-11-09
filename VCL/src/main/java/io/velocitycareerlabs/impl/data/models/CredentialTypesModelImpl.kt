@@ -21,9 +21,10 @@ internal class CredentialTypesModelImpl(
     override var data: VCLCredentialTypes? = null
 
     override fun initialize(
-        resetCache: Boolean, completionBlock: (VCLResult<VCLCredentialTypes>) -> Unit
+        cacheSequence: Int,
+        completionBlock: (VCLResult<VCLCredentialTypes>) -> Unit
     ) {
-        credentialTypesUseCase.getCredentialTypes(resetCache) { result ->
+        credentialTypesUseCase.getCredentialTypes(cacheSequence) { result ->
             result.handleResult({ data = result.data }, { })
             completionBlock(result)
         }
