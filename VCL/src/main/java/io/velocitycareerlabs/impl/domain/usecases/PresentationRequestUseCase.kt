@@ -9,8 +9,12 @@ package io.velocitycareerlabs.impl.domain.usecases
 
 import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.api.entities.VCLPresentationRequest
+import io.velocitycareerlabs.api.entities.VCLPresentationRequestDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
 
 internal interface PresentationRequestUseCase {
-    fun getPresentationRequest(deepLink: VCLDeepLink, completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit)
+    fun getPresentationRequest(
+        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
+        completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
+    )
 }

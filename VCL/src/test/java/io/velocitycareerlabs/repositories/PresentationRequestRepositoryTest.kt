@@ -36,7 +36,7 @@ internal class PresentationRequestRepositoryTest {
         val latch = CountDownLatch(1)
 
 //        Action
-        subject.getPresentationRequest(VCLDeepLink("")) {
+        subject.getPresentationRequest(VCLPresentationRequestDescriptor(VCLDeepLink(""))) {
             result = it
             latch.countDown()
         }
@@ -53,7 +53,7 @@ internal class PresentationRequestRepositoryTest {
         var result: VCLResult<String>? = null
         val latch = CountDownLatch(1)
 //        Action
-        subject.getPresentationRequest(VCLDeepLink("")) {
+        subject.getPresentationRequest(VCLPresentationRequestDescriptor(VCLDeepLink(""))) {
             result = it
             latch.countDown()
         }

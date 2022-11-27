@@ -15,16 +15,16 @@ import org.json.JSONObject
 import java.lang.Exception
 
 internal class PresentationRequestRepositoryImpl(
-        private val networkService: NetworkService
+    private val networkService: NetworkService
 ): PresentationRequestRepository {
     val TAG = PresentationRequestRepositoryImpl::class.simpleName
 
     override fun getPresentationRequest(
-        deepLink: VCLDeepLink,
+        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         completionBlock: (VCLResult<String>) -> Unit
     ) {
         networkService.sendRequest(
-            endpoint = deepLink.requestUri,
+            endpoint = presentationRequestDescriptor.endpoint,
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.GET,
             completionBlock = { encodedJwtResult ->
@@ -42,5 +42,4 @@ internal class PresentationRequestRepositoryImpl(
             }
         )
     }
-
 }

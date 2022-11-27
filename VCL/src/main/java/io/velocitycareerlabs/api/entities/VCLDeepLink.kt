@@ -7,6 +7,7 @@
 
 package io.velocitycareerlabs.api.entities
 
+import io.velocitycareerlabs.impl.extensions.appendQueryParams
 import io.velocitycareerlabs.impl.extensions.decode
 import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.extensions.getUrlQueryParams
@@ -28,7 +29,7 @@ data class VCLDeepLink(val value: String) {
                 .sortedBy { it } // Sort is needed for unit tests
                 .joinToString("&")
             if (queryItems.isNotEmpty()) {
-                resRequestUri += "&$queryItems"
+                resRequestUri = resRequestUri.appendQueryParams(queryItems)
             }
         }
         return resRequestUri
