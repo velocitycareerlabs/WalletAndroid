@@ -36,7 +36,7 @@ internal class SubmissionRepositoryImpl(
                             { submissionResponse ->
                                 try {
                                     val jsonObj = JSONObject(submissionResponse.payload)
-                                    val submissionResult = parse(jsonObj)
+                                    val submissionResult = parse(jsonObj, submission.id)
                                     completionBlock(VCLResult.Success(submissionResult))
                                 } catch (ex: Exception) {
                                     completionBlock(VCLResult.Failure(VCLError(ex.message)))
@@ -50,11 +50,12 @@ internal class SubmissionRepositoryImpl(
         )
     }
 
-    private fun parse(jsonObj: JSONObject): VCLPresentationSubmissionResult {
+    private fun parse(jsonObj: JSONObject, id: String): VCLPresentationSubmissionResult {
         val exchangeJsonObj = jsonObj.getJSONObject(VCLPresentationSubmissionResult.KeyExchange)
         return VCLPresentationSubmissionResult(
-                token = VCLToken(jsonObj.getString(VCLPresentationSubmissionResult.KeyToken)),
-                exchange = parseExchange(exchangeJsonObj)
+            token = VCLToken(jsonObj.getString(VCLPresentationSubmissionResult.KeyToken)),
+            exchange = parseExchange(exchangeJsonObj),
+            id = id
         )
     }
 
