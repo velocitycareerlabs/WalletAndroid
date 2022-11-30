@@ -19,9 +19,10 @@ abstract class VCLSubmission(
     val verifiableCredentials: List<VCLVerifiableCredential>,
     val vendorOriginContext: String? = null
 ) {
-    val payload get() = generatePayload()
     val jti = UUID.randomUUID().toString()
     val submissionId = UUID.randomUUID().toString()
+
+    val payload get() = generatePayload()
 
     private fun generatePayload(): JSONObject {
         val retVal = JSONObject()
