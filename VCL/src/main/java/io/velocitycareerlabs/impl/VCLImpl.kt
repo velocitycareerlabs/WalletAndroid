@@ -369,10 +369,11 @@ internal class VCLImpl: VCL {
     override fun generateSignedJwt(
         payload: JSONObject,
         iss: String,
+        jti:String,
         successHandler: (VCLJWT) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        jwtServiceUseCase.generateSignedJwt(payload, iss) { jwtResult ->
+        jwtServiceUseCase.generateSignedJwt(payload, iss, jti) { jwtResult ->
             jwtResult.handleResult(
                 {
                     successHandler(it)

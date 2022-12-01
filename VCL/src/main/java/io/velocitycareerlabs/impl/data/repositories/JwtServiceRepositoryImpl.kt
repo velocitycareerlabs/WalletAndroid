@@ -34,9 +34,9 @@ internal class JwtServiceRepositoryImpl(
         }
     }
 
-    override fun generateSignedJwt(payload: JSONObject, iss: String, completionBlock: (VCLResult<VCLJWT>) -> Unit) {
+    override fun generateSignedJwt(payload: JSONObject, iss: String, jti:String, completionBlock: (VCLResult<VCLJWT>) -> Unit) {
         try {
-            jwtService.sign(payload, iss)?.let { completionBlock(VCLResult.Success(VCLJWT(it))) }
+            jwtService.sign(payload, iss, jti)?.let { completionBlock(VCLResult.Success(VCLJWT(it))) }
                     ?: throw Exception("Failed to sign $payload")
         } catch (ex: Exception) {
             completionBlock(VCLResult.Failure(VCLError(ex.message)))

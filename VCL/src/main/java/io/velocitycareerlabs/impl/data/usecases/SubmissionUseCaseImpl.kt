@@ -25,7 +25,8 @@ internal class SubmissionUseCaseImpl(
         executor.runOnBackgroundThread {
             jwtServiceRepository.generateSignedJwt(
                 submission.payload,
-                submission.iss
+                submission.iss,
+                submission.jti
             ) { signedJwtResult ->
                 signedJwtResult.handleResult(
                     { jwt ->
