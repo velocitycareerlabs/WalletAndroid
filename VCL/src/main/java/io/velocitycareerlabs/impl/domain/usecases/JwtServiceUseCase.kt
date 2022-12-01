@@ -14,5 +14,5 @@ import org.json.JSONObject
 
 internal interface JwtServiceUseCase {
     fun verifyJwt(jwt: VCLJWT, publicKey: VCLPublicKey, completionBlock: (VCLResult<Boolean>) -> Unit)
-    fun generateSignedJwt(payload: JSONObject, iss: String, completionBlock: (VCLResult<VCLJWT>) -> Unit)
+    fun generateSignedJwt(payload: JSONObject, iss: String, jti: String, completionBlock: (VCLResult<VCLJWT>) -> Unit)
 }

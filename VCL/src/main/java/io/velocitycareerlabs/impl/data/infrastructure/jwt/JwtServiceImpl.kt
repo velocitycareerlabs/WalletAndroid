@@ -35,17 +35,19 @@ internal class JwtServiceImpl: JwtService {
     override fun encode(str: String): String = encode(str.toByteArray()).toString()
 
     @Throws(JOSEException::class)
-    override fun verify(jwt: VCLJWT, jwk: String): Boolean = jwt.signedJwt.verify(ECDSAVerifier(JWK.parse(jwk).toECKey()))
+    override fun verify(jwt: VCLJWT, jwk: String): Boolean =
+        jwt.signedJwt.verify(ECDSAVerifier(JWK.parse(jwk).toECKey()))
 
-    override fun sign(payload: JSONObject, iss: String): SignedJWT? {
+    override fun sign(payload: JSONObject, iss: String, jti: String): SignedJWT? {
         try {
 //            https://connect2id.com/products/nimbus-jose-jwt/examples/jwk-generation
             val jwk: ECKey = ECKeyGenerator(Curve.SECP256K1)
-                    .keyUse(KeyUse.SIGNATURE) // indicate the intended use of the key
-                    .keyID(UUID.randomUUID().toString()) // give the key a unique ID
-                    .generate()
+                .keyUse(KeyUse.SIGNATURE) // indicate the intended use of the key
+                .keyID(UUID.randomUUID().toString()) // give the key a unique ID
+                .generate()
 
-            val header = JWSHeader.Builder(JWSAlgorithm.ES256K).jwk(jwk.toPublicJWK()).type(JOSEObjectType("JWT")).build()
+            val header = JWSHeader.Builder(JWSAlgorithm.ES256K).jwk(jwk.toPublicJWK())
+                .type(JOSEObjectType("JWT")).build()
 
 
             val claimsSetBuilder = JWTClaimsSet.Builder()
@@ -55,12 +57,13 @@ internal class JwtServiceImpl: JwtService {
 //                "issuer": "31903091301-12332-32111-000001",  // generate a uuid. will be the holder's DID in the future
 //                "expiresIn": "P1W" // 1 week encoded using https://en.wikipedia.org/wiki/ISO_8601#Durations
 //            }
-                    .audience(iss)
-                    .issuer(iss)
-                    .issueTime(Date()) // iat
-                    .expirationTime(Date().addDaysToNow(7)) // nbf
-                    .subject(randomString(10))
-                    .jwtID(UUID.randomUUID().toString()) // jti
+                .audience(iss)
+                .issuer(iss)
+                .jwtID(jti)
+                .issueTime(Date()) // iat
+                .expirationTime(Date().addDaysToNow(7)) // nbf
+                .subject(randomString(10))
+                .jwtID(UUID.randomUUID().toString()) // jti
 
             claimsSetBuilder.addClaims(payload)
 
@@ -71,7 +74,7 @@ internal class JwtServiceImpl: JwtService {
             signedJWT.sign(signer)
 
             return signedJWT
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             return null
         }
     }

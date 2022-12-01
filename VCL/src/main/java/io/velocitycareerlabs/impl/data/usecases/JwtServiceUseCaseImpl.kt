@@ -29,10 +29,10 @@ internal class JwtServiceUseCaseImpl(
         }
     }
 
-    override fun generateSignedJwt(payload: JSONObject, iss: String, completionBlock: (VCLResult<VCLJWT>) -> Unit) {
+    override fun generateSignedJwt(payload: JSONObject, iss: String, jti: String, completionBlock: (VCLResult<VCLJWT>) -> Unit) {
         val callingLooper = Looper.myLooper()
         executor.runOnBackgroundThread() {
-            jwtServiceRepository.generateSignedJwt(payload, iss) {
+            jwtServiceRepository.generateSignedJwt(payload, iss, jti) {
                 executor.runOn(callingLooper) { completionBlock(it) }
             }
         }

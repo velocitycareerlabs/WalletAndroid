@@ -37,11 +37,12 @@ internal class JwtServiceUseCaseTest {
             EmptyExecutor()
         )
         val iss = "some iss"
+        val jti = "some jti"
         var resultJwt: VCLResult<VCLJWT>? = null
         var resultVerified: VCLResult<Boolean>? = null
 
 //        Action
-        subject.generateSignedJwt(JwtServiceMocks.JsonObject, iss){
+        subject.generateSignedJwt(JwtServiceMocks.JsonObject, iss, jti){
             resultJwt = it
         }
         subject.verifyJwt(resultJwt?.data!!, VCLPublicKey(resultJwt?.data!!.header.jwk.toString())) {
