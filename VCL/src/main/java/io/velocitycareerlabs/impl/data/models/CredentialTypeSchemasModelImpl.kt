@@ -21,10 +21,10 @@ internal class CredentialTypeSchemasModelImpl(
     override var data: VCLCredentialTypeSchemas? = null
 
     override fun initialize(
-        resetCache: Boolean,
+        cacheSequence: Int,
         completionBlock: (VCLResult<VCLCredentialTypeSchemas>) -> Unit
     ) {
-        credentialTypeSchemasUseCase.getCredentialTypeSchemas(resetCache) { result ->
+        credentialTypeSchemasUseCase.getCredentialTypeSchemas(cacheSequence) { result ->
             result.handleResult({ data = result.data }, { })
             completionBlock(result)
         }

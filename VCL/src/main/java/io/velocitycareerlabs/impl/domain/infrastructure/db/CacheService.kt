@@ -8,12 +8,16 @@
 package io.velocitycareerlabs.impl.domain.infrastructure.db
 
 internal interface CacheService {
-    fun getCountries(keyUrl: String): String?
-    fun setCountries(keyUrl: String, value: String)
+    fun getCountries(key: String): String?
+    fun setCountries(key: String, value: String, cacheSequence: Int)
+    fun isResetCacheCountries(cacheSequence: Int): Boolean
 
-    fun getCredentialTypes(keyUrl: String): String?
-    fun setCredentialTypes(keyUrl: String, value: String)
+    fun getCredentialTypes(key: String): String?
+    fun setCredentialTypes(key: String, value: String, cacheSequence: Int)
+    fun isResetCacheCredentialTypes(cacheSequence: Int): Boolean
 
-    fun getCredentialTypeSchema(keyUrl: String): String?
-    fun setCredentialTypeSchema(keyUrl: String, value: String)
+    fun getCredentialTypeSchema(key: String): String?
+    fun setCredentialTypeSchema(key: String, value: String, cacheSequence: Int)
+    fun isResetCacheCredentialTypeSchema(cacheSequence: Int): Boolean
+
 }

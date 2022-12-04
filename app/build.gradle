@@ -12,8 +12,6 @@ android {
         applicationId "com.vcl.wallet"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 1
-        versionName "0.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -56,7 +54,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
 //    Must: be added:
-    implementation "com.nimbusds:nimbus-jose-jwt:9.23"
+    implementation "com.nimbusds:nimbus-jose-jwt:9.25.6"
     implementation project(':VCL')
 
 //    implementation "io.velocitycareerlabs:vcl:x.y.z"

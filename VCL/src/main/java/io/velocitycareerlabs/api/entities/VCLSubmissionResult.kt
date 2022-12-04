@@ -7,10 +7,17 @@
 
 package io.velocitycareerlabs.api.entities
 
-data class VCLSubmissionResult(val token: VCLToken, val exchange: VCLExchange) {
+data class VCLSubmissionResult(
+    val token: VCLToken,
+    val exchange: VCLExchange,
+    val jti: String,
+    val submissionId: String
+    ) {
 
     companion object CodingKeys {
         const val KeyToken = "token"
         const val KeyExchange = "exchange"
+        const val KeyJti = "jti"
+        const val KeySubmissionId = "submissionId"
     }
 }

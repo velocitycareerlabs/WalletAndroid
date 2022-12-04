@@ -33,13 +33,13 @@ internal class PresentationSubmissionUseCaseTest {
     fun testSubmitPresentationSuccess() {
 //        Arrange
         subject = PresentationSubmissionUseCaseImpl(
-                SubmissionRepositoryImpl(
-                    NetworkServiceSuccess(PresentationSubmissionMocks.PresentationSubmissionResultJson)
-                ),
-                JwtServiceRepositoryImpl(
-                        JwtServiceImpl()
-                ),
-                EmptyExecutor()
+            SubmissionRepositoryImpl(
+                NetworkServiceSuccess(PresentationSubmissionMocks.PresentationSubmissionResultJson)
+            ),
+            JwtServiceRepositoryImpl(
+                JwtServiceImpl()
+            ),
+            EmptyExecutor()
         )
         val presentationSubmission = VCLPresentationSubmission(
             PresentationSubmissionMocks.PresentationRequest,
@@ -48,30 +48,46 @@ internal class PresentationSubmissionUseCaseTest {
         var result: VCLResult<VCLPresentationSubmissionResult>? = null
 
 //        Action
-        subject.submit(presentationSubmission){
+        subject.submit(presentationSubmission) {
             result = it
         }
+        val expectedPresentationSubmissionResult =
+            expectedPresentationSubmissionResult(
+                JSONObject(PresentationSubmissionMocks.PresentationSubmissionResultJson),
+                presentationSubmission.jti,
+                presentationSubmission.submissionId
+            )
 
 //        Assert
         assert(result!!.data is VCLPresentationSubmissionResult)
-        assert(result!!.data == expectedPresentationSubmissionResult(JSONObject(PresentationSubmissionMocks.PresentationSubmissionResultJson)))
+        assert(result!!.data == expectedPresentationSubmissionResult)
+        assert(result!!.data!!.exchange.id == expectedPresentationSubmissionResult.exchange.id)
+        assert(result!!.data!!.token.value == expectedPresentationSubmissionResult.token.value)
+        assert(result!!.data!!.jti == expectedPresentationSubmissionResult.jti)
+        assert(result!!.data!!.submissionId == expectedPresentationSubmissionResult.submissionId)
     }
 
-    private fun expectedPresentationSubmissionResult(jsonObj: JSONObject): VCLPresentationSubmissionResult {
+    private fun expectedPresentationSubmissionResult(
+        jsonObj: JSONObject,
+        jti: String,
+        submissionId: String
+    ): VCLPresentationSubmissionResult {
         val exchangeJsonObj = jsonObj.getJSONObject(VCLPresentationSubmissionResult.KeyExchange)
         return VCLPresentationSubmissionResult(
-                token = VCLToken(jsonObj.getString(VCLPresentationSubmissionResult.KeyToken)),
-                exchange = expectedExchange(exchangeJsonObj)
+            token = VCLToken(jsonObj.getString(VCLPresentationSubmissionResult.KeyToken)),
+            exchange = expectedExchange(exchangeJsonObj),
+            jti = jti,
+            submissionId = submissionId
         )
     }
 
     private fun expectedExchange(exchangeJsonObj: JSONObject) =
-            VCLExchange(
-                    id = exchangeJsonObj.getString(VCLExchange.KeyId),
-                    type = exchangeJsonObj.getString(VCLExchange.KeyType),
-                    disclosureComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyDisclosureComplete),
-                    exchangeComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyExchangeComplete)
-            )
+        VCLExchange(
+            id = exchangeJsonObj.getString(VCLExchange.KeyId),
+            type = exchangeJsonObj.getString(VCLExchange.KeyType),
+            disclosureComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyDisclosureComplete),
+            exchangeComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyExchangeComplete)
+        )
 
     @After
     fun tearDown() {

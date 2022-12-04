@@ -19,7 +19,7 @@ internal class CredentialTypeSchemasUseCaseImpl (
 ): CredentialTypeSchemasUseCase {
 
     override fun getCredentialTypeSchemas(
-        resetCache: Boolean,
+        cacheSequence: Int,
         completionBlock: (VCLResult<VCLCredentialTypeSchemas>) -> Unit
     ) {
         val credentialTypeSchemasMap = HashMap<String, VCLCredentialTypeSchema>()
@@ -34,7 +34,7 @@ internal class CredentialTypeSchemasUseCaseImpl (
                 executor.runOnBackgroundThread {
                     credentialTypeSchemaRepository.getCredentialTypeSchema(
                         schemaName,
-                        resetCache
+                        cacheSequence
                     ) { result ->
                         result.data?.let { credentialTypeSchemasMap[schemaName] = it }
                         credentialTypeSchemasMapIsEmpty =

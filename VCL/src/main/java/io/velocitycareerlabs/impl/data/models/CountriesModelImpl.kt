@@ -20,10 +20,10 @@ internal class CountriesModelImpl(
     override var data: VCLCountries? = null
 
     override fun initialize(
-        resetCache: Boolean,
+        cacheSequence: Int,
         completionBlock: (VCLResult<VCLCountries>) -> Unit
     ) {
-        countriesUseCase.getCountries(resetCache) { result ->
+        countriesUseCase.getCountries(cacheSequence) { result ->
             result.handleResult({ data = result.data }, { })
             completionBlock(result)
         }

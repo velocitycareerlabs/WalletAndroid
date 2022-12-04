@@ -19,18 +19,21 @@ abstract class VCLSubmission(
     val verifiableCredentials: List<VCLVerifiableCredential>,
     val vendorOriginContext: String? = null
 ) {
+    val jti = UUID.randomUUID().toString()
+    val submissionId = UUID.randomUUID().toString()
+
     val payload get() = generatePayload()
 
     private fun generatePayload(): JSONObject {
         val retVal = JSONObject()
-        retVal.putOpt(VCLSubmission.KeyJti, UUID.randomUUID().toString())
+        retVal.putOpt(VCLSubmission.KeyJti, jti)
         val vp = JSONObject()
             .putOpt(
                 VCLSubmission.KeyType,
                 VCLSubmission.ValueVerifiablePresentation
             )
             .putOpt(VCLSubmission.KeyPresentationSubmission, JSONObject()
-                .putOpt(VCLSubmission.KeyId, UUID.randomUUID().toString())
+                .putOpt(VCLSubmission.KeyId, submissionId)
                 .putOpt(VCLSubmission.KeyDefinitionId, presentationDefinitionId)
                 .putOpt(VCLSubmission.KeyDescriptorMap, JSONArray(verifiableCredentials.mapIndexed { index, credential ->
                     JSONObject()

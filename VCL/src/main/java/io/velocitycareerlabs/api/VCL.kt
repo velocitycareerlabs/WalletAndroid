@@ -98,6 +98,7 @@ interface VCL {
     fun generateSignedJwt(
         payload: JSONObject,
         iss: String,
+        jti:String,
         successHandler: (VCLJWT) -> Unit,
         errorHandler: (VCLError) -> Unit
     )

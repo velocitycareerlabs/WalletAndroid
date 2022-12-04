@@ -19,50 +19,59 @@ internal class SubmissionRepositoryImpl(
 ): SubmissionRepository {
     val TAG = SubmissionRepositoryImpl::class.simpleName
 
-    override fun submit(submission: VCLSubmission,
-                        jwt: VCLJWT,
-                        completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit) {
+    override fun submit(
+        submission: VCLSubmission,
+        jwt: VCLJWT,
+        completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
+    ) {
         val body = JSONObject()
             .putOpt(VCLSubmission.KeyDid, submission.iss)
             .putOpt(VCLSubmission.KeyExchangeId, submission.exchangeId)
             .putOpt(VCLSubmission.KeyJwtVp, jwt.signedJwt.serialize())
         networkService.sendRequest(
-                endpoint = submission.submitUri,
-                body = body.toString(),
-                method = Request.HttpMethod.POST,
-                contentType = Request.ContentTypeApplicationJson,
-                completionBlock = { result ->
-                    result.handleResult(
-                            { submissionResponse ->
-                                try {
-                                    val jsonObj = JSONObject(submissionResponse.payload)
-                                    val submissionResult = parse(jsonObj)
-                                    completionBlock(VCLResult.Success(submissionResult))
-                                } catch (ex: Exception) {
-                                    completionBlock(VCLResult.Failure(VCLError(ex.message)))
-                                }
-                            },
-                            { error ->
-                                completionBlock(VCLResult.Failure(error))
-                            }
-                    )
-                }
+            endpoint = submission.submitUri,
+            body = body.toString(),
+            method = Request.HttpMethod.POST,
+            contentType = Request.ContentTypeApplicationJson,
+            completionBlock = { result ->
+                result.handleResult(
+                    { submissionResponse ->
+                        try {
+                            val jsonObj = JSONObject(submissionResponse.payload)
+                            val submissionResult =
+                                parse(jsonObj, submission.jti, submission.submissionId)
+                            completionBlock(VCLResult.Success(submissionResult))
+                        } catch (ex: Exception) {
+                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                        }
+                    },
+                    { error ->
+                        completionBlock(VCLResult.Failure(error))
+                    }
+                )
+            }
         )
     }
 
-    private fun parse(jsonObj: JSONObject): VCLPresentationSubmissionResult {
+    private fun parse(
+        jsonObj: JSONObject,
+        jti: String,
+        submissionId: String
+    ): VCLPresentationSubmissionResult {
         val exchangeJsonObj = jsonObj.getJSONObject(VCLPresentationSubmissionResult.KeyExchange)
         return VCLPresentationSubmissionResult(
-                token = VCLToken(jsonObj.getString(VCLPresentationSubmissionResult.KeyToken)),
-                exchange = parseExchange(exchangeJsonObj)
+            token = VCLToken(jsonObj.getString(VCLPresentationSubmissionResult.KeyToken)),
+            exchange = parseExchange(exchangeJsonObj),
+            jti = jti,
+            submissionId = submissionId
         )
     }
 
     private fun parseExchange(exchangeJsonObj: JSONObject) =
-            VCLExchange(
-                    id = exchangeJsonObj.getString(VCLExchange.KeyId),
-                    type = exchangeJsonObj.getString(VCLExchange.KeyType),
-                    disclosureComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyDisclosureComplete),
-                    exchangeComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyExchangeComplete)
-            )
+        VCLExchange(
+            id = exchangeJsonObj.getString(VCLExchange.KeyId),
+            type = exchangeJsonObj.getString(VCLExchange.KeyType),
+            disclosureComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyDisclosureComplete),
+            exchangeComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyExchangeComplete)
+        )
 }

@@ -13,7 +13,7 @@ import io.velocitycareerlabs.api.entities.VCLResult
 internal interface CredentialTypeSchemaRepository {
     fun getCredentialTypeSchema(
         schemaName: String,
-        resetCache: Boolean,
+        cacheSequence: Int,
         completionBlock: (VCLResult<VCLCredentialTypeSchema>) -> Unit
     )
 }

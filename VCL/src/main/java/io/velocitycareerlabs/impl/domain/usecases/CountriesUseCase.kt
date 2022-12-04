@@ -11,5 +11,8 @@ import io.velocitycareerlabs.api.entities.VCLCountries
 import io.velocitycareerlabs.api.entities.VCLResult
 
 internal interface CountriesUseCase {
-    fun getCountries(resetCache: Boolean, completionBlock: (VCLResult<VCLCountries>) -> Unit)
+    fun getCountries(
+        cacheSequence: Int,
+        completionBlock: (VCLResult<VCLCountries>) -> Unit
+    )
 }

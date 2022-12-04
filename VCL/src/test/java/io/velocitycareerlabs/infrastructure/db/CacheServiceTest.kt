@@ -7,9 +7,12 @@ package io.velocitycareerlabs.infrastructure.db
 import android.content.Context
 import android.content.SharedPreferences
 import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl
+import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl.Companion.KEY_CACHE_SEQUENCE_COUNTRIES
+import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl.Companion.KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES
+import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl.Companion.KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA
 import io.velocitycareerlabs.impl.domain.infrastructure.db.CacheService
 import io.velocitycareerlabs.impl.extensions.encodeToBase64
-import junit.framework.Assert.assertEquals
+import junit.framework.Assert.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -44,20 +47,35 @@ internal class CacheServiceTest {
 
     @Test
     fun testGetCountries() {
-        Mockito.`when`(sharedPreferences.getString("key1", null)).thenReturn("value1".encodeToBase64())
-        assertEquals(subject.getCountries("key1"), "value1")
+        Mockito.`when`(sharedPreferences.getString("key", null)).thenReturn("country".encodeToBase64())
+        assertEquals(subject.getCountries("key"), "country")
+
+        Mockito.`when`(sharedPreferences.getInt(KEY_CACHE_SEQUENCE_COUNTRIES, 0)).thenReturn(1)
+        assertFalse(subject.isResetCacheCountries(0))
+        assertFalse(subject.isResetCacheCountries(1))
+        assertTrue(subject.isResetCacheCountries(2))
     }
 
     @Test
     fun testGetCredentialTypes() {
-        Mockito.`when`(sharedPreferences.getString("key2", null)).thenReturn("value2".encodeToBase64())
-        assertEquals(subject.getCredentialTypes("key2"), "value2")
+        Mockito.`when`(sharedPreferences.getString("key", null)).thenReturn("credential types".encodeToBase64())
+        assertEquals(subject.getCredentialTypes("key"), "credential types")
+
+        Mockito.`when`(sharedPreferences.getInt(KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES, 0)).thenReturn(1)
+        assertFalse(subject.isResetCacheCredentialTypes(0))
+        assertFalse(subject.isResetCacheCredentialTypes(1))
+        assertTrue(subject.isResetCacheCredentialTypes(2))
     }
 
     @Test
     fun testGetCredentialTypeSchema() {
-        Mockito.`when`(sharedPreferences.getString("key3", null)).thenReturn("value3".encodeToBase64())
-        assertEquals(subject.getCredentialTypeSchema("key3"), "value3")
+        Mockito.`when`(sharedPreferences.getString("key", null)).thenReturn("credential type schemas".encodeToBase64())
+        assertEquals(subject.getCredentialTypeSchema("key"), "credential type schemas")
+
+        Mockito.`when`(sharedPreferences.getInt(KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA, 0)).thenReturn(1)
+        assertFalse(subject.isResetCacheCredentialTypeSchema(0))
+        assertFalse(subject.isResetCacheCredentialTypeSchema(1))
+        assertTrue(subject.isResetCacheCredentialTypeSchema(2))
     }
 
     @After

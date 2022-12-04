@@ -22,5 +22,5 @@ internal interface JwtService {
     @Throws(JOSEException::class)
     fun verify(jwt: VCLJWT, jwk: String): Boolean
 
-    fun sign(payload: JSONObject, iss: String): SignedJWT?
+    fun sign(payload: JSONObject, iss: String, jti: String): SignedJWT?
 }

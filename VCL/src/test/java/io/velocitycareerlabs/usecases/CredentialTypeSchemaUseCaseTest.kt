@@ -42,7 +42,7 @@ internal class CredentialTypeSchemaUseCaseTest {
         var result: VCLResult<VCLCredentialTypeSchemas>? = null
 
 //        Action
-        subject.getCredentialTypeSchemas(false) {
+        subject.getCredentialTypeSchemas(0) {
             result = it
         }
 
