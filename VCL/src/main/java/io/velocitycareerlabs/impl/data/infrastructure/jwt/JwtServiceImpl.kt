@@ -59,11 +59,10 @@ internal class JwtServiceImpl: JwtService {
 //            }
                 .audience(iss)
                 .issuer(iss)
-                .jwtID(jti)
+                .jwtID(jti) // jti
                 .issueTime(Date()) // iat
                 .expirationTime(Date().addDaysToNow(7)) // nbf
                 .subject(randomString(10))
-                .jwtID(UUID.randomUUID().toString()) // jti
 
             claimsSetBuilder.addClaims(payload)
 

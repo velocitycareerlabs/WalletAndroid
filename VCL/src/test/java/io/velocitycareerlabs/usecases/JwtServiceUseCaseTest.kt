@@ -28,7 +28,7 @@ internal class JwtServiceUseCaseTest {
     }
 
     @Test
-    fun testSignVerify() {
+    fun testGenerateSignedJwt() {
 //        Arrange
         subject = JwtServiceUseCaseImpl(
             JwtServiceRepositoryImpl(
@@ -39,10 +39,31 @@ internal class JwtServiceUseCaseTest {
         val iss = "some iss"
         val jti = "some jti"
         var resultJwt: VCLResult<VCLJWT>? = null
-        var resultVerified: VCLResult<Boolean>? = null
 
 //        Action
         subject.generateSignedJwt(JwtServiceMocks.JsonObject, iss, jti){
+            resultJwt = it
+        }
+        val jwtJson = resultJwt?.data!!.payload.toJSONObject()!!
+
+        assert(jwtJson["iss"] == iss)
+        assert(jwtJson["jti"] == jti)
+    }
+
+    @Test
+    fun testSignVerify() {
+//        Arrange
+        subject = JwtServiceUseCaseImpl(
+            JwtServiceRepositoryImpl(
+                JwtServiceImpl()
+            ),
+            EmptyExecutor()
+        )
+        var resultJwt: VCLResult<VCLJWT>? = null
+        var resultVerified: VCLResult<Boolean>? = null
+
+//        Action
+        subject.generateSignedJwt(JwtServiceMocks.JsonObject, "", ""){
             resultJwt = it
         }
         subject.verifyJwt(resultJwt?.data!!, VCLPublicKey(resultJwt?.data!!.header.jwk.toString())) {
