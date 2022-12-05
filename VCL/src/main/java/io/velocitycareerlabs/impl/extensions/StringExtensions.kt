@@ -18,12 +18,12 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 
+internal fun String.appendQueryParams(queryParams: String) =
+    this + ( URI(this).query?.let { "&" } ?: "?" ) + queryParams
+
 internal fun String.decode(): String = URLDecoder.decode(this, "UTF-8")
 
 internal fun String.encode(): String = URLEncoder.encode(this, "UTF-8")
-
-internal fun String.appendQueryParams(queryParams: String) =
-    this + ( URI(this).query?.let { "&" } ?: "?" ) + queryParams
 
 internal fun String.getUrlQueryParams(): Map<String, String>? {
     var map: MutableMap<String, String>? = null

@@ -13,7 +13,7 @@ import java.net.URI
 
 class VCLPresentationRequestDescriptor(
     val deepLink: VCLDeepLink,
-    private val pushDelegate: VCLPushDelegate? = null
+    val pushDelegate: VCLPushDelegate? = null
 ) {
     companion object CodingKeys {
         const val KeyId = "id"
@@ -22,7 +22,7 @@ class VCLPresentationRequestDescriptor(
         const val KeyPushDelegatePushToken = "push_delegate.push_token"
     }
 
-    val endpoint =  generateQueryParams()?.let { queryParams ->
+    val endpoint get() = generateQueryParams()?.let { queryParams ->
         deepLink.requestUri.appendQueryParams(queryParams)
     } ?: deepLink.requestUri
 

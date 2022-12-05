@@ -27,9 +27,10 @@ internal class PresentationRequestUseCaseImpl(
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
         val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread() {
-            presentationRequestRepository.getPresentationRequest(presentationRequestDescriptor)
-            { encodedJwtStrResult ->
+        executor.runOnBackgroundThread {
+            presentationRequestRepository.getPresentationRequest(
+                presentationRequestDescriptor
+            ) { encodedJwtStrResult ->
                 encodedJwtStrResult.handleResult(
                     { encodedJwtStr ->
                         onGetJwtSuccess(
