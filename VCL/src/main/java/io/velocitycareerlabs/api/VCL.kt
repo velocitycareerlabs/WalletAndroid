@@ -7,9 +7,6 @@
 
 package io.velocitycareerlabs.api
 
-import android.content.Context
-import android.os.Build
-import io.velocitycareerlabs.BuildConfig
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.utils.VCLLog
@@ -27,7 +24,7 @@ interface VCL {
     val credentialTypeSchemas: VCLCredentialTypeSchemas?
 
     fun getPresentationRequest(
-        deepLink: VCLDeepLink,
+        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         successHandler: (VCLPresentationRequest) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -104,7 +101,7 @@ interface VCL {
     )
 }
 
-fun VCL.printVersion(context: Context) {
+fun VCL.printVersion() {
     VCLLog.d("VCL", "Version: ${GlobalConfig.VersionName}")
     VCLLog.d("VCL", "Build: ${GlobalConfig.VersionCode}")
 }

@@ -89,7 +89,13 @@ class MainActivity : AppCompatActivity() {
             else
                 VCLDeepLink(Constants.PresentationRequestDeepLinkStrStaging)
         vcl.getPresentationRequest(
-            deepLink = deepLink,
+            presentationRequestDescriptor = VCLPresentationRequestDescriptor(
+                deepLink = deepLink,
+                pushDelegate = VCLPushDelegate(
+                    pushUrl = "pushUrl",
+                    pushToken = "pushToken"
+                )
+            ),
             { presentationRequest ->
                 Log.d(TAG, "VCL Presentation request received: ${presentationRequest.jwt.payload}")
 //                Log.d(TAG, "VCL Presentation request received")

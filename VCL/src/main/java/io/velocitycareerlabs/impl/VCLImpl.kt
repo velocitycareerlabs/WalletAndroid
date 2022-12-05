@@ -56,7 +56,7 @@ internal class VCLImpl: VCL {
 
         initGlobalConfigurations(initializationDescriptor.environment)
 
-        printVersion(initializationDescriptor.context)
+        printVersion()
 
         credentialTypesModel =
             VclBlocksProvider.provideCredentialTypesModel(initializationDescriptor.context)
@@ -127,11 +127,11 @@ internal class VCLImpl: VCL {
     override val credentialTypeSchemas: VCLCredentialTypeSchemas? get() = credentialTypeSchemasModel?.data
 
     override fun getPresentationRequest(
-        deepLink: VCLDeepLink,
+        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         successHandler: (VCLPresentationRequest) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        presentationRequestUseCase.getPresentationRequest(deepLink) { presentationRequestResult ->
+        presentationRequestUseCase.getPresentationRequest(presentationRequestDescriptor) { presentationRequestResult ->
             presentationRequestResult.handleResult(
                 {
                     successHandler(it)
