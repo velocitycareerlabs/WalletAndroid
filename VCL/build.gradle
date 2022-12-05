@@ -14,7 +14,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 32
         versionName "1.2.0"
-        versionCode 48
+        versionCode 44
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -165,7 +165,7 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    implementation "com.nimbusds:nimbus-jose-jwt:9.23"
+    implementation "com.nimbusds:nimbus-jose-jwt:9.25.6"
 
     // Required -- JUnit 4 framework
     testImplementation 'junit:junit:4.13.2'
