@@ -7,6 +7,7 @@
 
 package io.velocitycareerlabs.api.entities
 
+import io.velocitycareerlabs.impl.extensions.appendQueryParams
 import io.velocitycareerlabs.impl.extensions.encode
 import java.net.URI
 
@@ -22,9 +23,7 @@ class VCLCredentialManifestDescriptorByService(
 //    TODO: validate credentialTypes by services.credentialTypes
 
     override val endpoint =  generateQueryParams()?.let { queryParams ->
-        val originUri = URI(uri)
-        val allQueryParams = ( originUri.query?.let { "&" } ?: "?" ) + queryParams
-        uri + allQueryParams
+        uri.appendQueryParams(queryParams)
     } ?: uri
 
     private fun generateQueryParams(): String? {

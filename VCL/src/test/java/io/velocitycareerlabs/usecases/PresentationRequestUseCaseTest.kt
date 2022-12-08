@@ -48,7 +48,7 @@ internal class PresentationRequestUseCaseTest {
         var result: VCLResult<VCLPresentationRequest>? = null
 
 //        Action
-        subject.getPresentationRequest(VCLDeepLink("")) {
+        subject.getPresentationRequest(VCLPresentationRequestDescriptor(VCLDeepLink(""))) {
             result = it
         }
 

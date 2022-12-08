@@ -10,12 +10,16 @@ package io.velocitycareerlabs.impl.extensions
 import android.util.Base64
 import org.json.JSONObject
 import java.io.UnsupportedEncodingException
+import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
+
+internal fun String.appendQueryParams(queryParams: String) =
+    this + ( URI(this).query?.let { "&" } ?: "?" ) + queryParams
 
 internal fun String.decode(): String = URLDecoder.decode(this, "UTF-8")
 

@@ -9,7 +9,11 @@ package io.velocitycareerlabs.impl.domain.repositories
 
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLDeepLink
+import io.velocitycareerlabs.api.entities.VCLPresentationRequestDescriptor
 
 internal interface PresentationRequestRepository {
-    fun getPresentationRequest(deepLink: VCLDeepLink, completionBlock: (VCLResult<String>) -> Unit)
+    fun getPresentationRequest(
+        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
+        completionBlock: (VCLResult<String>) -> Unit
+    )
 }

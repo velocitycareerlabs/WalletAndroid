@@ -23,18 +23,19 @@ internal class PresentationRequestUseCaseImpl(
 ): PresentationRequestUseCase {
 
     override fun getPresentationRequest(
-        deepLink: VCLDeepLink,
+        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
         val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread() {
-            presentationRequestRepository.getPresentationRequest(deepLink)
-            { encodedJwtStrResult ->
+        executor.runOnBackgroundThread {
+            presentationRequestRepository.getPresentationRequest(
+                presentationRequestDescriptor
+            ) { encodedJwtStrResult ->
                 encodedJwtStrResult.handleResult(
                     { encodedJwtStr ->
                         onGetJwtSuccess(
                             encodedJwtStr,
-                            deepLink,
+                            presentationRequestDescriptor.deepLink,
                             callingLooper,
                             completionBlock
                         )
