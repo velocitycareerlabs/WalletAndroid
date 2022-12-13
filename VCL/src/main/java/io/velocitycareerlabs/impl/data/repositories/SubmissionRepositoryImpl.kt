@@ -24,27 +24,22 @@ internal class SubmissionRepositoryImpl(
         jwt: VCLJWT,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     ) {
-        val body = JSONObject()
-            .putOpt(VCLSubmission.KeyDid, submission.iss)
-            .putOpt(VCLSubmission.KeyExchangeId, submission.exchangeId)
-            .putOpt(VCLSubmission.KeyJwtVp, jwt.signedJwt.serialize())
         networkService.sendRequest(
             endpoint = submission.submitUri,
-            body = body.toString(),
+            body = submission.generateRequestBody(jwt).toString(),
             method = Request.HttpMethod.POST,
             contentType = Request.ContentTypeApplicationJson,
             completionBlock = { result ->
-                result.handleResult(
-                    { submissionResponse ->
-                        try {
-                            val jsonObj = JSONObject(submissionResponse.payload)
-                            val submissionResult =
-                                parse(jsonObj, submission.jti, submission.submissionId)
-                            completionBlock(VCLResult.Success(submissionResult))
-                        } catch (ex: Exception) {
-                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
-                        }
-                    },
+                result.handleResult({ submissionResponse ->
+                    try {
+                        val jsonObj = JSONObject(submissionResponse.payload)
+                        val submissionResult =
+                            parse(jsonObj, submission.jti, submission.submissionId)
+                        completionBlock(VCLResult.Success(submissionResult))
+                    } catch (ex: Exception) {
+                        completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                    }
+                },
                     { error ->
                         completionBlock(VCLResult.Failure(error))
                     }

@@ -20,7 +20,7 @@ class CredentialManifestDescriptorMocks {
 
         val PushDelegate = VCLPushDelegate(
             pushUrl = "https://devservices.velocitycareerlabs.io/api/push-gateway",
-            pushToken = "if0123asd129smw321"
+            pushToken = "if0123asd129smw321",
         )
 
         const val IssuingServiceEndPoint =
