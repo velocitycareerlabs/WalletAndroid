@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.infrastructure.resources.valid
 
 import io.velocitycareerlabs.api.entities.VCLDeepLink
+import io.velocitycareerlabs.impl.extensions.encode
 
 class DeepLinkMocks {
     companion object {
@@ -15,8 +16,10 @@ class DeepLinkMocks {
         private const val TestNetProtocol = "velocity-network-testnet"
         private const val MainNetProtocol = "velocity-network"
 
-        const val PresentationRequestRequestDecodedUriStr =
-            "https://stagingagent.velocitycareerlabs.io/api/holder/v0.6/org/did:ion:EiByBvq95tfmhl41DOxJeaa26HjSxAUoz908PITFwMRDNA/inspect/get-presentation-request?id=62e0e80c5ebfe73230b0becc&inspectorDid=did%3Aion%3AEiByBvq95tfmhl41DOxJeaa26HjSxAUoz908PITFwMRDNA&vendorOriginContext=%7B%22SubjectKey%22%3A%7B%22BusinessUnit%22%3A%22ZC%22,%22KeyCode%22%3A%2254514480%22%7D,%22Token%22%3A%22832077a4%22%7D"
+        const val InspectorDid = "did:ion:EiByBvq95tfmhl41DOxJeaa26HjSxAUoz908PITFwMRDNA"
+
+        var PresentationRequestRequestDecodedUriStr =
+            "https://stagingagent.velocitycareerlabs.io/api/holder/v0.6/org/$InspectorDid/inspect/get-presentation-request?id=62e0e80c5ebfe73230b0becc&inspectorDid=${InspectorDid.encode()}&vendorOriginContext=%7B%22SubjectKey%22%3A%7B%22BusinessUnit%22%3A%22ZC%22,%22KeyCode%22%3A%2254514480%22%7D,%22Token%22%3A%22832077a4%22%7D"
 
         const val PresentationRequestRequestUriStr =
             "https%3A%2F%2Fstagingagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Aion%3AEiByBvq95tfmhl41DOxJeaa26HjSxAUoz908PITFwMRDNA%2Finspect%2Fget-presentation-request%3Fid%3D62e0e80c5ebfe73230b0becc&inspectorDid=did%3Aion%3AEiByBvq95tfmhl41DOxJeaa26HjSxAUoz908PITFwMRDNA&vendorOriginContext=%7B%22SubjectKey%22%3A%7B%22BusinessUnit%22%3A%22ZC%22,%22KeyCode%22%3A%2254514480%22%7D,%22Token%22%3A%22832077a4%22%7D"
@@ -44,5 +47,7 @@ class DeepLinkMocks {
         val CredentialManifestDeepLinkDevNet = VCLDeepLink(value = CredentialManifestDeepLinkDevNetStr)
         val CredentialManifestDeepLinkTestNet = VCLDeepLink(value = CredentialManifestDeepLinkTestNetStr)
         val CredentialManifestDeepLinkMainNet = VCLDeepLink(value = CredentialManifestDeepLinkMainNetStr)
+
+        val PresentationRequestDeepLinkDevNet = VCLDeepLink(value = DeepLinkMocks.PresentationRequestDeepLinkDevNetStr)
     }
 }

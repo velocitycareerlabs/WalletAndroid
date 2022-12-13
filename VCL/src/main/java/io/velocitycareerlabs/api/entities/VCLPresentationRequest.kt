@@ -10,7 +10,8 @@ package io.velocitycareerlabs.api.entities
 data class VCLPresentationRequest(
     val jwt: VCLJWT,
     val publicKey: VCLPublicKey,
-    val deepLink: VCLDeepLink
+    val deepLink: VCLDeepLink,
+    val pushDelegate: VCLPushDelegate? = null
     ) {
     companion object CodingKeys {
         const val KeyId = "id"

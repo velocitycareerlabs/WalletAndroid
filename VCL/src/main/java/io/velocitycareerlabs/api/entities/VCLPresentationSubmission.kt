@@ -16,6 +16,7 @@ class VCLPresentationSubmission(
     exchangeId = presentationRequest.exchangeId,
     presentationDefinitionId = presentationRequest.presentationDefinitionId,
     verifiableCredentials = verifiableCredentials,
+    pushDelegate = presentationRequest.pushDelegate,
     vendorOriginContext = presentationRequest.vendorOriginContext
 ) {
     val progressUri = presentationRequest.progressUri

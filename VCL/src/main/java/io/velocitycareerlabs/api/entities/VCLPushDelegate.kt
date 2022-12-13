@@ -7,4 +7,24 @@
 
 package io.velocitycareerlabs.api.entities
 
-data class VCLPushDelegate(val pushUrl: String, val pushToken: String)
+import org.json.JSONObject
+
+data class VCLPushDelegate(
+    /**
+     * the url of the endpoint that will send pushes to the device
+     */
+    val pushUrl: String,
+    /**
+     * the token to use for identifying the group of devices this device belongs to
+     */
+    val pushToken: String,
+) {
+    companion object CodingKeys {
+        const val KeyPushUrl = "pushUrl"
+        const val KeyPushToken = "pushToken"
+    }
+
+    internal fun toJsonObject() =
+        JSONObject().putOpt(KeyPushUrl, pushUrl)
+            .putOpt(KeyPushToken, pushToken)
+}

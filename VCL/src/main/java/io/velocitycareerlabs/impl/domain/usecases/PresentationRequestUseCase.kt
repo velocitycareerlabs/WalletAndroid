@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.impl.domain.usecases
 
-import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.api.entities.VCLPresentationRequest
 import io.velocitycareerlabs.api.entities.VCLPresentationRequestDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
