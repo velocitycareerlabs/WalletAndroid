@@ -9,20 +9,15 @@ package io.velocitycareerlabs.impl.data.infrastructure.network
 
 import android.accounts.NetworkErrorException
 import io.velocitycareerlabs.api.entities.VCLError
-import io.velocitycareerlabs.api.entities.VCLErrorCodes
+import io.velocitycareerlabs.api.entities.VCLErrorCode
 import io.velocitycareerlabs.api.entities.VCLResult
-import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.extensions.convertToString
-import io.velocitycareerlabs.impl.extensions.decode
-import io.velocitycareerlabs.impl.extensions.equalsTo
-import io.velocitycareerlabs.impl.extensions.toDate
 import io.velocitycareerlabs.impl.utils.VCLLog
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.UnknownHostException
-import java.util.*
 import javax.net.ssl.HttpsURLConnection
 
 internal class NetworkServiceImpl: NetworkService {
@@ -67,20 +62,20 @@ internal class NetworkServiceImpl: NetworkService {
 
             writePostBody(connection, request)
 
-            if (connection.responseCode in HttpURLConnection.HTTP_OK..299) {
+            if (connection.responseCode >= HttpURLConnection.HTTP_OK && connection.responseCode <= 299) {
                 val response = Response(
-                    payload = connection.inputStream.convertToString(request.encoding),
+                    payload = connection.inputStream.convertToString(),
                     code = connection.responseCode
                 )
                 completionBlock(VCLResult.Success(response))
             } else {
                 val errorMessageStream = connection.errorStream ?: connection.inputStream
-                completionBlock(VCLResult.Failure(VCLError(errorMessageStream.convertToString(request.encoding), connection.responseCode)))
+                completionBlock(VCLResult.Failure(VCLError(errorMessageStream.convertToString(), connection.responseCode)))
             }
         } catch (ex: NetworkErrorException) {
-            completionBlock(VCLResult.Failure(VCLError(ex.message, VCLErrorCodes.NetworkError.value)))
+            completionBlock(VCLResult.Failure(VCLError(ex.message, VCLErrorCode.NetworkError.value)))
         } catch (ex: UnknownHostException) {
-            completionBlock(VCLResult.Failure(VCLError(ex.message, VCLErrorCodes.NetworkError.value)))
+            completionBlock(VCLResult.Failure(VCLError(ex.message, VCLErrorCode.NetworkError.value)))
         } catch (ex: Exception) {
             completionBlock(VCLResult.Failure(VCLError(ex.message)))
         } finally {
@@ -130,48 +125,6 @@ internal class NetworkServiceImpl: NetworkService {
         request.headers?.let { headers -> setHeaders(connection, headers) }
 
         return connection
-    }
-
-//    override fun isCacheValid(endpoint: String,
-//                              method: Request.HttpMethod,
-//                              cacheDate: Date,
-//                              completionBlock: (VCLResult<Boolean>) -> Unit) {
-//        if(GlobalConfig.IsToLoadFromCacheInitialization) {
-//            isCacheValid(
-//                Request.Builder()
-//                    .setEndpoint(endpoint)
-//                    .setBody(null)
-//                    .setMethod(method)
-//                    .setDoOutput(false)
-//                    .addHeaders(null)
-//                    .setContentType(null)
-//                    .build(),
-//                cacheDate,
-//                completionBlock
-//            )
-//        } else {
-//            completionBlock(VCLResult.Success(false))
-//        }
-//    }
-
-    private fun isCacheValid(request: Request, cacheDate: Date, completionBlock: (VCLResult<Boolean>) -> Unit) {
-        var connection: HttpURLConnection? = null
-        try {
-            connection = createConnection(request)
-
-            if (connection.responseCode in HttpURLConnection.HTTP_OK..299) {
-                completionBlock(VCLResult.Success(
-                    connection.getHeaderField("Date").toDate()?.equalsTo(cacheDate) == true
-                ))
-            } else {
-                val errorMessageStream = connection.errorStream ?: connection.inputStream
-                completionBlock(VCLResult.Failure(VCLError(errorMessageStream.convertToString(request.encoding), connection.responseCode)))
-            }
-        } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex.message)))
-        } finally {
-            connection?.disconnect()
-        }
     }
 
     private fun logRequest(request: Request) {

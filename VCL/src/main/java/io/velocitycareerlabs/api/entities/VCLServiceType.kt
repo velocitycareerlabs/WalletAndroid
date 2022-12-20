@@ -7,13 +7,46 @@
 
 package io.velocitycareerlabs.api.entities
 
-enum class VCLServiceType {
-    Issuer,
-    Inspector,
-    CredentialAgentOperator,
-    NodeOperator,
-    TrustRoot,
-    NotaryIssuer,
-    IdentityIssuer,
-    HolderAppProvider
+enum class VCLServiceType(val value: String) {
+    Issuer("Issuer"),
+    Inspector("Inspector"),
+    TrustRoot("TrustRoot"),
+    NodeOperator("NodeOperator"),
+    NotaryIssuer("NotaryIssuer"),
+    IdentityIssuer("IdentityIssuer"),
+    HolderAppProvider("HolderAppProvider"),
+    CredentialAgentOperator("CredentialAgentOperator"),
+    Undefined("Undefined");
+
+    companion object {
+        fun fromString(value: String): VCLServiceType {
+            if(value.contains(VCLServiceType.NotaryIssuer.value)) {
+                return VCLServiceType.NotaryIssuer
+            }
+            if(value.contains(VCLServiceType.IdentityIssuer.value)) {
+                return VCLServiceType.IdentityIssuer
+            }
+            if(value.contains(VCLServiceType.Issuer.value)) {
+                return VCLServiceType.Issuer
+            }
+            if(value.contains(VCLServiceType.Inspector.value)) {
+                return VCLServiceType.Inspector
+            }
+            if(value.contains(VCLServiceType.TrustRoot.value)) {
+                return VCLServiceType.TrustRoot
+            }
+            if(value.contains(VCLServiceType.NodeOperator.value)) {
+                return VCLServiceType.NodeOperator
+            }
+            if(value.contains(VCLServiceType.HolderAppProvider.value)) {
+                return VCLServiceType.HolderAppProvider
+            }
+            if(value.contains(VCLServiceType.CredentialAgentOperator.value)) {
+                return VCLServiceType.CredentialAgentOperator
+            }
+            else {
+                return VCLServiceType.Undefined
+            }
+        }
+    }
 }

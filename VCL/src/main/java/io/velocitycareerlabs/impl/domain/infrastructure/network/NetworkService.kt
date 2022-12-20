@@ -20,8 +20,4 @@ internal interface NetworkService {
                     headers: List<Pair<String, String>>? = null,
                     useCaches: Boolean = false,
                     completionBlock: (VCLResult<Response>) -> Unit)
-//    fun isCacheValid(endpoint: String,
-//                     method: Request.HttpMethod,
-//                     cacheDate: Date,
-//                     completionBlock: (VCLResult<Boolean>) -> Unit)
 }

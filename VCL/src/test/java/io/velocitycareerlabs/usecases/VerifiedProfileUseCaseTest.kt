@@ -24,21 +24,26 @@ internal class VerifiedProfileUseCaseTest {
 
     @Before
     fun setUp() {
-    }
-
-    @Test
-    fun testGetVerifiedProfile() {
-//        Arrange
         subject = VerifiedProfileUseCaseImpl(
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileJsonStr)
             ),
             EmptyExecutor()
         )
+    }
+
+    @Test
+    fun testGetVerifiedProfileSuccess() {
+//        Arrange
         var result: VCLResult<VCLVerifiedProfile>? = null
 
 //        Action
-        subject.getVerifiedProfile(VerifiedProfileMocks.VerifiedProfileDescriptor) {
+        subject.getVerifiedProfile(
+            VCLVerifiedProfileDescriptor(
+                did = "did123",
+                serviceType = VCLServiceType.Issuer
+            )
+        ) {
             result = it
         }
 
@@ -47,6 +52,27 @@ internal class VerifiedProfileUseCaseTest {
         assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
         assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
         assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+    }
+
+    @Test
+    fun testGetVerifiedProfileError() {
+//        Arrange
+        var result: VCLResult<VCLVerifiedProfile>? = null
+
+//        Action
+        subject.getVerifiedProfile(
+            VCLVerifiedProfileDescriptor(
+                did = "did123",
+                serviceType = VCLServiceType.IdentityIssuer
+            )
+        ) { verifiedProfileResult ->
+            verifiedProfileResult.handleResult(
+                {},
+                { error ->
+                    assert(error.code == VCLErrorCode.VerificationError.value)
+                }
+            )
+        }
     }
 
     @After

@@ -10,7 +10,16 @@ package io.velocitycareerlabs.api.entities
 data class VCLError(
         val description: String? = null,
         val code: Int? = null
-): Error(description)
+): Error(description) {
+        constructor(
+                description: String? = null,
+                code: VCLErrorCode? = null
+        ): this(description, code?.value)
+
+        constructor(
+                description: String? = null,
+        ): this(description, 0)
+}
 
 sealed class VCLResult<out R> {
         data class Success<out T>(val data: T) : VCLResult<T>()
@@ -30,7 +39,3 @@ fun <T> VCLResult<T>.handleResult(successHandler:(d: T) -> Unit, errorHandler: (
 
 val <T> VCLResult<T>.data: T?
         get() = (this as? VCLResult.Success)?.data
-
-enum class VCLErrorCodes(val value: Int) {
-        NetworkError(1)
-}
