@@ -13,10 +13,8 @@ import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.extensions.getUrlQueryParams
 
 data class VCLDeepLink(val value: String) {
-    var requestUri = generateRequestUri()
-
-    val vendorOriginContext =
-        value.decode().getUrlQueryParams()?.get(KeyVendorOriginContext)
+    val requestUri: String = generateRequestUri()
+    val vendorOriginContext: String? = retrieveVendorOriginContext()
 
     private fun generateRequestUri(): String {
         var resRequestUri = ""
@@ -25,7 +23,7 @@ data class VCLDeepLink(val value: String) {
             val queryItems = queryParams
                 .mapValues { it.value }
                 .filter { it.key != KeyRequestUri && it.value.isNotEmpty() }
-                .map { (key, value) -> "$key=${value ?: ""}" }
+                .map { (key, value) -> "$key=${value}" }
                 .sortedBy { it } // Sort is needed for unit tests
                 .joinToString("&")
             if (queryItems.isNotEmpty()) {
@@ -34,6 +32,9 @@ data class VCLDeepLink(val value: String) {
         }
         return resRequestUri
     }
+
+    private fun retrieveVendorOriginContext(): String? =
+        this.value.decode().getUrlQueryParams()?.get(KeyVendorOriginContext)
 
     companion object CodingKeys {
         const val KeyRequestUri = "request_uri"

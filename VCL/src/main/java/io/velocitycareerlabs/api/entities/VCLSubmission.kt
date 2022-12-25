@@ -17,6 +17,7 @@ abstract class VCLSubmission(
     val exchangeId: String,
     val presentationDefinitionId: String,
     val verifiableCredentials: List<VCLVerifiableCredential>,
+    val pushDelegate: VCLPushDelegate? = null,
     val vendorOriginContext: String? = null
 ) {
     val jti = UUID.randomUUID().toString()
@@ -27,6 +28,7 @@ abstract class VCLSubmission(
     private fun generatePayload(): JSONObject {
         val retVal = JSONObject()
         retVal.putOpt(VCLSubmission.KeyJti, jti)
+            .putOpt(VCLSubmission.KeyIss, iss)
         val vp = JSONObject()
             .putOpt(
                 VCLSubmission.KeyType,
@@ -46,11 +48,19 @@ abstract class VCLSubmission(
         return retVal
     }
 
+    fun generateRequestBody(jwt: VCLJWT) = JSONObject()
+            .putOpt(VCLSubmission.KeyExchangeId, exchangeId)
+            .putOpt(VCLSubmission.KeyJwtVp, jwt.signedJwt.serialize())
+            .putOpt(VCLSubmission.KeyPushDelegate, pushDelegate?.toJsonObject())
+
     companion object CodingKeys {
         const val KeyJti = "jti"
+        const val KeyIss = "iss"
         const val KeyId = "id"
         const val KeyVp = "vp"
         const val KeyDid = "did"
+        const val KeyPushDelegate = "push_delegate"
+
         const val KeyType = "type"
         const val KeyPresentationSubmission = "presentation_submission"
         const val KeyDefinitionId = "definition_id"

@@ -16,10 +16,10 @@ import io.velocitycareerlabs.impl.extensions.encode
 import java.lang.Exception
 
 internal class PresentationRequestUseCaseImpl(
-        private val presentationRequestRepository: PresentationRequestRepository,
-        private val resolveKidRepository: ResolveKidRepository,
-        private val jwtServiceRepository: JwtServiceRepository,
-        private val executor: Executor
+    private val presentationRequestRepository: PresentationRequestRepository,
+    private val resolveKidRepository: ResolveKidRepository,
+    private val jwtServiceRepository: JwtServiceRepository,
+    private val executor: Executor
 ): PresentationRequestUseCase {
 
     override fun getPresentationRequest(
@@ -35,7 +35,7 @@ internal class PresentationRequestUseCaseImpl(
                     { encodedJwtStr ->
                         onGetJwtSuccess(
                             encodedJwtStr,
-                            presentationRequestDescriptor.deepLink,
+                            presentationRequestDescriptor,
                             callingLooper,
                             completionBlock
                         )
@@ -50,7 +50,7 @@ internal class PresentationRequestUseCaseImpl(
 
     private fun onGetJwtSuccess(
         encodedJwtStr: String,
-        deepLink: VCLDeepLink,
+        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         callingLooper: Looper?,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
@@ -59,7 +59,7 @@ internal class PresentationRequestUseCaseImpl(
                 jwtResult.handleResult({ jwt ->
                     onDecodeJwtSuccess(
                         jwt,
-                        deepLink,
+                        presentationRequestDescriptor,
                         callingLooper,
                         completionBlock
                     )
@@ -74,7 +74,7 @@ internal class PresentationRequestUseCaseImpl(
 
     private fun onDecodeJwtSuccess(
         jwt: VCLJWT,
-        deepLink: VCLDeepLink,
+        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         callingLooper: Looper?,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
@@ -84,7 +84,7 @@ internal class PresentationRequestUseCaseImpl(
                     onResolvePublicKeySuccess(
                         publicKey,
                         jwt,
-                        deepLink,
+                        presentationRequestDescriptor,
                         callingLooper,
                         completionBlock
                     )
@@ -100,11 +100,16 @@ internal class PresentationRequestUseCaseImpl(
     private fun onResolvePublicKeySuccess(
         publicKey: VCLPublicKey,
         jwt: VCLJWT,
-        deepLink: VCLDeepLink,
+        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         callingLooper: Looper?,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
-        val presentationRequest = VCLPresentationRequest(jwt, publicKey, deepLink)
+        val presentationRequest = VCLPresentationRequest(
+            jwt = jwt,
+            publicKey = publicKey,
+            deepLink = presentationRequestDescriptor.deepLink,
+            pushDelegate = presentationRequestDescriptor.pushDelegate
+        )
         jwtServiceRepository.verifyJwt(
             presentationRequest.jwt,
             presentationRequest.publicKey

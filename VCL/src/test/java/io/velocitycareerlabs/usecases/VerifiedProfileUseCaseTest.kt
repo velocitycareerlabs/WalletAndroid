@@ -24,29 +24,70 @@ internal class VerifiedProfileUseCaseTest {
 
     @Before
     fun setUp() {
-    }
-
-    @Test
-    fun testGetVerifiedProfile() {
-//        Arrange
         subject = VerifiedProfileUseCaseImpl(
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileJsonStr)
             ),
             EmptyExecutor()
         )
+    }
+
+    @Test
+    fun testGetVerifiedProfileAnyServiceSuccess() {
         var result: VCLResult<VCLVerifiedProfile>? = null
 
-//        Action
-        subject.getVerifiedProfile(VerifiedProfileMocks.VerifiedProfileDescriptor) {
+        subject.getVerifiedProfile(
+            VCLVerifiedProfileDescriptor(
+                did = "did123"
+            )
+        ) {
             result = it
         }
 
         val verifiedProfile = result!!.data!!
-//        Assert
+
         assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
         assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
         assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+    }
+
+    @Test
+    fun testGetVerifiedProfileSuccess() {
+        var result: VCLResult<VCLVerifiedProfile>? = null
+
+        subject.getVerifiedProfile(
+            VCLVerifiedProfileDescriptor(
+                did = "did123",
+                serviceType = VCLServiceType.Issuer
+            )
+        ) {
+            result = it
+        }
+
+        val verifiedProfile = result!!.data!!
+
+        assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
+        assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
+        assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+    }
+
+    @Test
+    fun testGetVerifiedProfileError() {
+        var result: VCLResult<VCLVerifiedProfile>? = null
+
+        subject.getVerifiedProfile(
+            VCLVerifiedProfileDescriptor(
+                did = "did123",
+                serviceType = VCLServiceType.IdentityIssuer
+            )
+        ) { verifiedProfileResult ->
+            verifiedProfileResult.handleResult(
+                {},
+                { error ->
+                    assert(error.code == VCLErrorCode.VerificationError.value)
+                }
+            )
+        }
     }
 
     @After

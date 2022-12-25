@@ -137,7 +137,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getOrganizationsThenCredentialManifestByService() {
-        vcl.searchForOrganizations(Constants.OrganizationsSearchDescriptorByDid,
+        val organizationDescriptor =
+            if (environment == VCLEnvironment.DEV)
+                Constants.OrganizationsSearchDescriptorByDidDev
+            else
+                Constants.OrganizationsSearchDescriptorByDidStaging
+        vcl.searchForOrganizations(organizationDescriptor,
             { organizations ->
                 Log.d(TAG, "VCL Organizations received: ${organizations.all}")
 //                Log.d(TAG, "VCL Organizations received")

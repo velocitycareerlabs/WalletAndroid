@@ -37,6 +37,8 @@ class VCLPresentationRequestDescriptorTest {
         val mockEndpoint = (PresentationRequestDescriptorMocks.RequestUri.decode() + "?" + queryParams)
 
         assert(subject.endpoint == mockEndpoint)
+        assert(subject.pushDelegate!!.pushUrl == PresentationRequestDescriptorMocks.PushDelegate.pushUrl)
+        assert(subject.pushDelegate!!.pushToken == PresentationRequestDescriptorMocks.PushDelegate.pushToken)
     }
 
     @Test
@@ -46,6 +48,7 @@ class VCLPresentationRequestDescriptorTest {
         )
 
         assert(subject.endpoint == PresentationRequestDescriptorMocks.RequestUri.decode())
+        assert(subject.pushDelegate == null)
     }
 
     @Test
@@ -63,6 +66,8 @@ class VCLPresentationRequestDescriptorTest {
                 )
 
         assert(subject.endpoint == mockEndpoint)
+        assert(subject.pushDelegate!!.pushUrl == PresentationRequestDescriptorMocks.PushDelegate.pushUrl)
+        assert(subject.pushDelegate!!.pushToken == PresentationRequestDescriptorMocks.PushDelegate.pushToken)
     }
 
     @Test
@@ -74,6 +79,7 @@ class VCLPresentationRequestDescriptorTest {
         val mockEndpoint = (PresentationRequestDescriptorMocks.RequestUri.decode() + "?" + PresentationRequestDescriptorMocks.QParms)
 
         assert(subject.endpoint == mockEndpoint)
+        assert(subject.pushDelegate == null)
     }
 
     @After
