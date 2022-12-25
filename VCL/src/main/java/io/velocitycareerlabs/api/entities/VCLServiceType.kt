@@ -11,6 +11,7 @@ enum class VCLServiceType(val value: String) {
     Issuer("Issuer"),
     Inspector("Inspector"),
     TrustRoot("TrustRoot"),
+    CareerIssuer("CareerIssuer"),
     NodeOperator("NodeOperator"),
     NotaryIssuer("NotaryIssuer"),
     IdentityIssuer("IdentityIssuer"),
@@ -25,6 +26,9 @@ enum class VCLServiceType(val value: String) {
             }
             if(value.contains(VCLServiceType.IdentityIssuer.value)) {
                 return VCLServiceType.IdentityIssuer
+            }
+            if(value.contains(VCLServiceType.CareerIssuer.value)) {
+                return VCLServiceType.CareerIssuer
             }
             if(value.contains(VCLServiceType.Issuer.value)) {
                 return VCLServiceType.Issuer
@@ -44,9 +48,7 @@ enum class VCLServiceType(val value: String) {
             if(value.contains(VCLServiceType.CredentialAgentOperator.value)) {
                 return VCLServiceType.CredentialAgentOperator
             }
-            else {
-                return VCLServiceType.Undefined
-            }
+            return VCLServiceType.Undefined
         }
     }
 }

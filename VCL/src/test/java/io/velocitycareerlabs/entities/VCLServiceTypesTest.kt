@@ -18,12 +18,14 @@ class VCLServiceTypesTest {
         val serviceTypes = VCLServiceTypes(listOf(
             VCLServiceType.Issuer,
             VCLServiceType.Inspector,
-            VCLServiceType.TrustRoot
+            VCLServiceType.TrustRoot,
+            VCLServiceType.CareerIssuer
         ))
 
         assert(serviceTypes.contains(VCLServiceType.Issuer))
         assert(serviceTypes.contains(VCLServiceType.Inspector))
         assert(serviceTypes.contains(VCLServiceType.TrustRoot))
+        assert(serviceTypes.contains(VCLServiceType.CareerIssuer))
 
         assert(!serviceTypes.contains(VCLServiceType.NodeOperator))
         assert(!serviceTypes.contains(VCLServiceType.NotaryIssuer))
@@ -40,6 +42,7 @@ class VCLServiceTypesTest {
         assert(!serviceTypes.contains(VCLServiceType.Issuer))
         assert(!serviceTypes.contains(VCLServiceType.Inspector))
         assert(!serviceTypes.contains(VCLServiceType.TrustRoot))
+        assert(!serviceTypes.contains(VCLServiceType.CareerIssuer))
         assert(!serviceTypes.contains(VCLServiceType.NodeOperator))
         assert(!serviceTypes.contains(VCLServiceType.NotaryIssuer))
         assert(!serviceTypes.contains(VCLServiceType.IdentityIssuer))

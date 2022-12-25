@@ -33,11 +33,28 @@ internal class VerifiedProfileUseCaseTest {
     }
 
     @Test
-    fun testGetVerifiedProfileSuccess() {
-//        Arrange
+    fun testGetVerifiedProfileAnyServiceSuccess() {
         var result: VCLResult<VCLVerifiedProfile>? = null
 
-//        Action
+        subject.getVerifiedProfile(
+            VCLVerifiedProfileDescriptor(
+                did = "did123"
+            )
+        ) {
+            result = it
+        }
+
+        val verifiedProfile = result!!.data!!
+
+        assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
+        assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
+        assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+    }
+
+    @Test
+    fun testGetVerifiedProfileSuccess() {
+        var result: VCLResult<VCLVerifiedProfile>? = null
+
         subject.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123",
@@ -48,7 +65,7 @@ internal class VerifiedProfileUseCaseTest {
         }
 
         val verifiedProfile = result!!.data!!
-//        Assert
+
         assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
         assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
         assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
@@ -56,10 +73,8 @@ internal class VerifiedProfileUseCaseTest {
 
     @Test
     fun testGetVerifiedProfileError() {
-//        Arrange
         var result: VCLResult<VCLVerifiedProfile>? = null
 
-//        Action
         subject.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123",
