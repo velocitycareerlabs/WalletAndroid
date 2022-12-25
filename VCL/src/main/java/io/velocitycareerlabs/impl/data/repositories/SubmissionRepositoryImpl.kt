@@ -15,7 +15,7 @@ import org.json.JSONObject
 import java.lang.Exception
 
 internal class SubmissionRepositoryImpl(
-        private val networkService: NetworkService
+    private val networkService: NetworkService
 ): SubmissionRepository {
     val TAG = SubmissionRepositoryImpl::class.simpleName
 

@@ -21,31 +21,31 @@ enum class VCLServiceType(val value: String) {
 
     companion object {
         fun fromString(value: String): VCLServiceType {
-            if(value.contains(VCLServiceType.NotaryIssuer.value)) {
+            if (value.contains(VCLServiceType.NotaryIssuer.value)) {
                 return VCLServiceType.NotaryIssuer
             }
-            if(value.contains(VCLServiceType.IdentityIssuer.value)) {
+            if (value.contains(VCLServiceType.IdentityIssuer.value)) {
                 return VCLServiceType.IdentityIssuer
             }
-            if(value.contains(VCLServiceType.CareerIssuer.value)) {
+            if (value.contains(VCLServiceType.CareerIssuer.value)) {
                 return VCLServiceType.CareerIssuer
             }
-            if(value.contains(VCLServiceType.Issuer.value)) {
+            if (value.contains(VCLServiceType.Issuer.value)) {
                 return VCLServiceType.Issuer
             }
-            if(value.contains(VCLServiceType.Inspector.value)) {
+            if (value.contains(VCLServiceType.Inspector.value)) {
                 return VCLServiceType.Inspector
             }
-            if(value.contains(VCLServiceType.TrustRoot.value)) {
+            if (value.contains(VCLServiceType.TrustRoot.value)) {
                 return VCLServiceType.TrustRoot
             }
-            if(value.contains(VCLServiceType.NodeOperator.value)) {
+            if (value.contains(VCLServiceType.NodeOperator.value)) {
                 return VCLServiceType.NodeOperator
             }
-            if(value.contains(VCLServiceType.HolderAppProvider.value)) {
+            if (value.contains(VCLServiceType.HolderAppProvider.value)) {
                 return VCLServiceType.HolderAppProvider
             }
-            if(value.contains(VCLServiceType.CredentialAgentOperator.value)) {
+            if (value.contains(VCLServiceType.CredentialAgentOperator.value)) {
                 return VCLServiceType.CredentialAgentOperator
             }
             return VCLServiceType.Undefined
