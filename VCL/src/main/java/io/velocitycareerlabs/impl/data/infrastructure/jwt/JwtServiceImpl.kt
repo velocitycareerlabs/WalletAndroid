@@ -18,12 +18,12 @@ import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import com.nimbusds.jose.util.Base64URL.encode
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import io.velocitycareerlabs.api.entities.VCLJWT
+import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.infrastructure.jwt.JwtService
 import io.velocitycareerlabs.impl.extensions.addClaims
 import io.velocitycareerlabs.impl.extensions.addDaysToNow
+import io.velocitycareerlabs.impl.extensions.encodeToBase64
 import io.velocitycareerlabs.impl.extensions.randomString
-import org.json.JSONObject
 import java.text.ParseException
 import java.util.*
 
@@ -35,20 +35,15 @@ internal class JwtServiceImpl: JwtService {
     override fun encode(str: String): String = encode(str.toByteArray()).toString()
 
     @Throws(JOSEException::class)
-    override fun verify(jwt: VCLJWT, jwk: String): Boolean =
+    override fun verify(jwt: VCLJwt, jwk: String): Boolean =
         jwt.signedJwt.verify(ECDSAVerifier(JWK.parse(jwk).toECKey()))
 
-    override fun sign(payload: JSONObject, iss: String, jti: String): SignedJWT? {
+    override fun sign(jwtDescriptor: VCLJwtDescriptor): SignedJWT? {
         try {
-//            https://connect2id.com/products/nimbus-jose-jwt/examples/jwk-generation
-            val jwk: ECKey = ECKeyGenerator(Curve.SECP256K1)
-                .keyUse(KeyUse.SIGNATURE) // indicate the intended use of the key
-                .keyID(UUID.randomUUID().toString()) // give the key a unique ID
-                .generate()
+            val jwk: ECKey = generateJwkSECP256K1()
 
             val header = JWSHeader.Builder(JWSAlgorithm.ES256K).jwk(jwk.toPublicJWK())
                 .type(JOSEObjectType("JWT")).build()
-
 
             val claimsSetBuilder = JWTClaimsSet.Builder()
 //            OPTIONS:    https://dev.azure.com/velocitycareerlabs/velocity/_wiki/wikis/velocity.wiki/100/SDK?anchor=jwt-options-(jwt-options)
@@ -57,14 +52,14 @@ internal class JwtServiceImpl: JwtService {
 //                "issuer": "31903091301-12332-32111-000001",  // generate a uuid. will be the holder's DID in the future
 //                "expiresIn": "P1W" // 1 week encoded using https://en.wikipedia.org/wiki/ISO_8601#Durations
 //            }
-                .audience(iss)
-                .issuer(iss)
-                .jwtID(jti) // jti
+                .audience(jwtDescriptor.iss)
+                .issuer(jwtDescriptor.iss)
+                .jwtID(jwtDescriptor.jti) // jti
                 .issueTime(Date()) // iat
                 .expirationTime(Date().addDaysToNow(7)) // nbf
                 .subject(randomString(10))
 
-            claimsSetBuilder.addClaims(payload)
+            claimsSetBuilder.addClaims(jwtDescriptor.payload)
 
             val signedJWT = SignedJWT(header, claimsSetBuilder.build())
 
@@ -77,4 +72,17 @@ internal class JwtServiceImpl: JwtService {
             return null
         }
     }
+
+    override fun generateDidJwk() =
+        VCLDidJwk("${VCLDidJwk.DidJwkPrefix}${generateJwkPublic().valueStr.encodeToBase64()}")
+
+//  https://connect2id.com/products/nimbus-jose-jwt/examples/jwk-generation
+    private fun generateJwkPublic() =
+        VCLJwkPublic(generateJwkSECP256K1().toPublicJWK().toJSONString().toString())
+
+    private fun generateJwkSECP256K1() =
+        ECKeyGenerator(Curve.SECP256K1)
+        .keyUse(KeyUse.SIGNATURE) // indicate the intended use of the key
+        .keyID(UUID.randomUUID().toString()) // give the key a unique ID
+        .generate()
 }

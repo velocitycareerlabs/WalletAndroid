@@ -15,13 +15,13 @@ import org.json.JSONObject
 import java.lang.Exception
 
 internal class SubmissionRepositoryImpl(
-        private val networkService: NetworkService
+    private val networkService: NetworkService
 ): SubmissionRepository {
     val TAG = SubmissionRepositoryImpl::class.simpleName
 
     override fun submit(
         submission: VCLSubmission,
-        jwt: VCLJWT,
+        jwt: VCLJwt,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     ) {
         networkService.sendRequest(

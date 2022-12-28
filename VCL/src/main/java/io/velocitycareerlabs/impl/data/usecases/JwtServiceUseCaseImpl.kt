@@ -8,31 +8,46 @@
 package io.velocitycareerlabs.impl.data.usecases
 
 import android.os.Looper
-import io.velocitycareerlabs.api.entities.VCLJWT
-import io.velocitycareerlabs.api.entities.VCLPublicKey
-import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
 import io.velocitycareerlabs.impl.domain.usecases.JwtServiceUseCase
-import org.json.JSONObject
 
 internal class JwtServiceUseCaseImpl(
     private val jwtServiceRepository: JwtServiceRepository,
     private val executor: Executor
 ): JwtServiceUseCase {
-    override fun verifyJwt(jwt: VCLJWT, publicKey: VCLPublicKey, completionBlock: (VCLResult<Boolean>) -> Unit) {
+    override fun verifyJwt(
+        jwt: VCLJwt,
+        jwkPublic: VCLJwkPublic,
+        completionBlock: (VCLResult<Boolean>) -> Unit
+    ) {
         val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread() {
-            jwtServiceRepository.verifyJwt(jwt, publicKey) {
+        executor.runOnBackgroundThread {
+            jwtServiceRepository.verifyJwt(jwt, jwkPublic) {
                 executor.runOn(callingLooper) { completionBlock(it) }
             }
         }
     }
 
-    override fun generateSignedJwt(payload: JSONObject, iss: String, jti: String, completionBlock: (VCLResult<VCLJWT>) -> Unit) {
+    override fun generateSignedJwt(
+        jwtDescriptor: VCLJwtDescriptor,
+        completionBlock: (VCLResult<VCLJwt>) -> Unit
+    ) {
         val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread() {
-            jwtServiceRepository.generateSignedJwt(payload, iss, jti) {
+        executor.runOnBackgroundThread {
+            jwtServiceRepository.generateSignedJwt(jwtDescriptor) {
+                executor.runOn(callingLooper) { completionBlock(it) }
+            }
+        }
+    }
+
+    override fun generateDidJwk(
+        completionBlock: (VCLResult<VCLDidJwk>) -> Unit
+    ) {
+        val callingLooper = Looper.myLooper()
+        executor.runOnBackgroundThread {
+            jwtServiceRepository.generateDidJwk {
                 executor.runOn(callingLooper) { completionBlock(it) }
             }
         }

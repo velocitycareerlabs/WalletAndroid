@@ -11,6 +11,6 @@ import io.velocitycareerlabs.api.entities.*
 
 internal interface SubmissionRepository {
     fun submit(submission: VCLSubmission,
-               jwt: VCLJWT,
+               jwt: VCLJwt,
                completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit)
 }

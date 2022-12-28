@@ -8,8 +8,8 @@
 package io.velocitycareerlabs.api.entities
 
 data class VCLPresentationRequest(
-    val jwt: VCLJWT,
-    val publicKey: VCLPublicKey,
+    val jwt: VCLJwt,
+    val jwkPublic: VCLJwkPublic,
     val deepLink: VCLDeepLink,
     val pushDelegate: VCLPushDelegate? = null
     ) {

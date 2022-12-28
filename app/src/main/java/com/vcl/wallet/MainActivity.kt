@@ -53,7 +53,9 @@ class MainActivity : AppCompatActivity() {
         binding.generateSignedJwt.setOnClickListener {
             generateSignedJwt()
         }
-
+        binding.generateDidJwk.setOnClickListener {
+            generateDidJwk()
+        }
         vcl.initialize(
             initializationDescriptor = VCLInitializationDescriptor(
                 context = this.applicationContext,
@@ -321,7 +323,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun verifyJwt() {
         vcl.verifyJwt(
-            Constants.SomeJwt, Constants.SomePublicKey, { isVerified ->
+            Constants.SomeJwt, Constants.SomeJwkPublic, { isVerified ->
                 Log.d(TAG, "VCL JWT verified: $isVerified")
             },
             { error ->
@@ -331,11 +333,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun generateSignedJwt() {
-        vcl.generateSignedJwt(Constants.SomeJson, "iss123", "jti123", { jwt ->
+        vcl.generateSignedJwt(
+            VCLJwtDescriptor(Constants.SomeJson, "iss123", "jti123"),
+            { jwt ->
                 Log.d(TAG, "VCL JWT generated: ${jwt.signedJwt.serialize()}")
             },
             { error ->
                 Log.e(TAG, "VCL JWT generation failed: $error")
+            }
+        )
+    }
+
+    private fun generateDidJwk() {
+        vcl.generateDidJwk(
+            { didJwk ->
+                Log.d(TAG, "VCL DID:JWK generated: ${didJwk.value}")
+            },
+            { error ->
+                Log.e(TAG, "VCL DID:JWK generation failed: $error")
             }
         )
     }

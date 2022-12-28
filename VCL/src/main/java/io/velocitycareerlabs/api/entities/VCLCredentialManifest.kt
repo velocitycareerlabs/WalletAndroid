@@ -8,7 +8,7 @@
 package io.velocitycareerlabs.api.entities
 
 data class VCLCredentialManifest(
-    val jwt: VCLJWT,
+    val jwt: VCLJwt,
     val vendorOriginContext: String? = null
 ) {
     val iss: String get() = jwt.payload.toJSONObject()?.get(KeyIss) as? String ?: ""

@@ -8,5 +8,6 @@
     <string name="get_verified_profile">Get Verified Profile</string>
     <string name="verify_jwt">Verify JWT</string>
     <string name="generate_signed_jwt">Generate Signed JWT</string>
+    <string name="generate_did_jwk">Generate DID:JWK</string>
     <string name="initialization_failed">Initialization Failed…</string>
 </resources>

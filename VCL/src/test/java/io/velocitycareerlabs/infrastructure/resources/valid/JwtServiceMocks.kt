@@ -9,8 +9,8 @@ package io.velocitycareerlabs.infrastructure.resources.valid
 
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jwt.SignedJWT
-import io.velocitycareerlabs.api.entities.VCLJWT
-import io.velocitycareerlabs.api.entities.VCLPublicKey
+import io.velocitycareerlabs.api.entities.VCLJwt
+import io.velocitycareerlabs.api.entities.VCLJwkPublic
 import org.json.JSONObject
 
 class JwtServiceMocks {
@@ -37,8 +37,8 @@ class JwtServiceMocks {
 
         val SignedJWT = SignedJWT(Base64URL(splittedPresentationRequestJwt[0]), Base64URL(splittedPresentationRequestJwt[1]), Base64URL(splittedPresentationRequestJwt[2]))
 
-        val PublicKey = VCLPublicKey(JWK)
+        val JwkPublic = VCLJwkPublic(JWK)
 
-        val JWT = VCLJWT(SignedJWT)
+        val JWT = VCLJwt(SignedJWT)
     }
 }

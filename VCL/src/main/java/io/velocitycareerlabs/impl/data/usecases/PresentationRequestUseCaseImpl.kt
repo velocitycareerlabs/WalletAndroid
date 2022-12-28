@@ -73,7 +73,7 @@ internal class PresentationRequestUseCaseImpl(
     }
 
     private fun onDecodeJwtSuccess(
-        jwt: VCLJWT,
+        jwt: VCLJwt,
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         callingLooper: Looper?,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
@@ -98,21 +98,21 @@ internal class PresentationRequestUseCaseImpl(
     }
 
     private fun onResolvePublicKeySuccess(
-        publicKey: VCLPublicKey,
-        jwt: VCLJWT,
+        jwkPublic: VCLJwkPublic,
+        jwt: VCLJwt,
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         callingLooper: Looper?,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
         val presentationRequest = VCLPresentationRequest(
             jwt = jwt,
-            publicKey = publicKey,
+            jwkPublic = jwkPublic,
             deepLink = presentationRequestDescriptor.deepLink,
             pushDelegate = presentationRequestDescriptor.pushDelegate
         )
         jwtServiceRepository.verifyJwt(
             presentationRequest.jwt,
-            presentationRequest.publicKey
+            presentationRequest.jwkPublic
         ) { isVerifiedResult ->
             isVerifiedResult.handleResult({ isVerified ->
                 onVerificationSuccess(
