@@ -12,7 +12,7 @@ import com.nimbusds.jose.Payload
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jwt.SignedJWT
 
-class VCLJWT {
+class VCLJwt {
     val signedJwt: SignedJWT
 
     constructor(signedJwt: SignedJWT) {

@@ -85,6 +85,15 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@id/verifyJwt" />
 
+        <Button
+            style="@style/ButtonStyle"
+            android:text="@string/generate_did_jwk"
+            android:id="@+id/generateDidJwk"
+            android:layout_marginTop="@dimen/btn_margin_top"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/generateSignedJwt" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

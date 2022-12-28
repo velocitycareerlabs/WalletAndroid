@@ -7,41 +7,46 @@
 
 package io.velocitycareerlabs.usecases
 
+import android.os.Build
 import com.nimbusds.jose.crypto.ECDSAVerifier
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.JwtServiceUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.JwtServiceUseCase
+import io.velocitycareerlabs.impl.extensions.decodeBase64
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.O_MR1])
 internal class JwtServiceUseCaseTest {
 
     lateinit var subject: JwtServiceUseCase
 
     @Before
     fun setUp() {
-    }
-
-    @Test
-    fun testGenerateSignedJwt() {
-//        Arrange
         subject = JwtServiceUseCaseImpl(
             JwtServiceRepositoryImpl(
                 JwtServiceImpl()
             ),
             EmptyExecutor()
         )
+    }
+
+    @Test
+    fun testGenerateSignedJwt() {
         val iss = "some iss"
         val jti = "some jti"
-        var resultJwt: VCLResult<VCLJWT>? = null
+        var resultJwt: VCLResult<VCLJwt>? = null
 
-//        Action
-        subject.generateSignedJwt(JwtServiceMocks.JsonObject, iss, jti){
+        subject.generateSignedJwt(VCLJwtDescriptor(JwtServiceMocks.JsonObject, iss, jti)) {
             resultJwt = it
         }
         val jwtJson = resultJwt?.data!!.payload.toJSONObject()!!
@@ -52,21 +57,13 @@ internal class JwtServiceUseCaseTest {
 
     @Test
     fun testSignVerify() {
-//        Arrange
-        subject = JwtServiceUseCaseImpl(
-            JwtServiceRepositoryImpl(
-                JwtServiceImpl()
-            ),
-            EmptyExecutor()
-        )
-        var resultJwt: VCLResult<VCLJWT>? = null
+        var resultJwt: VCLResult<VCLJwt>? = null
         var resultVerified: VCLResult<Boolean>? = null
 
-//        Action
-        subject.generateSignedJwt(JwtServiceMocks.JsonObject, "", ""){
+        subject.generateSignedJwt(VCLJwtDescriptor(JwtServiceMocks.JsonObject, "", "")) {
             resultJwt = it
         }
-        subject.verifyJwt(resultJwt?.data!!, VCLPublicKey(resultJwt?.data!!.header.jwk.toString())) {
+        subject.verifyJwt(resultJwt?.data!!, VCLJwkPublic(resultJwt?.data!!.header.jwk.toString())) {
             resultVerified = it
         }
 //        Verification actual algorithm
@@ -74,6 +71,19 @@ internal class JwtServiceUseCaseTest {
 
 //        Assert both have the same result
         assert(resultVerified?.data!! == isVerified)
+    }
+
+    @Test
+    fun testGenerateDidJwk() {
+        var resultDidJwk: VCLResult<VCLDidJwk>? = null
+
+        subject.generateDidJwk {
+            resultDidJwk = it
+        }
+        val didJwk = resultDidJwk?.data!!
+
+        assert(didJwk.value.startsWith(VCLDidJwk.DidJwkPrefix))
+        assert(didJwk.value.substringAfter(VCLDidJwk.DidJwkPrefix).decodeBase64().isNotEmpty())
     }
 
     @After

@@ -24,7 +24,7 @@ internal class FinalizeOffersUseCaseImpl(
                                 finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
                                 completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit) {
         val callingLooper = Looper.myLooper()
-        val jwts = mutableListOf<VCLJWT>()
+        val jwts = mutableListOf<VCLJwt>()
         executor.runOnBackgroundThread {
             finalizeOffersRepository.finalizeOffers(token, finalizeOffersDescriptor) { encodedJwtOffersListResult ->
                 encodedJwtOffersListResult.handleResult(

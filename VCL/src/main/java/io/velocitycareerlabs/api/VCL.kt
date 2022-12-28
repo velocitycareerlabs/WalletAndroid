@@ -10,7 +10,6 @@ package io.velocitycareerlabs.api
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.utils.VCLLog
-import org.json.JSONObject
 
 interface VCL {
     fun initialize(
@@ -86,17 +85,20 @@ interface VCL {
     )
 
     fun verifyJwt(
-        jwt: VCLJWT,
-        publicKey: VCLPublicKey,
+        jwt: VCLJwt,
+        jwkPublic: VCLJwkPublic,
         successHandler: (Boolean) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
 
     fun generateSignedJwt(
-        payload: JSONObject,
-        iss: String,
-        jti:String,
-        successHandler: (VCLJWT) -> Unit,
+        jwtDescriptor: VCLJwtDescriptor,
+        successHandler: (VCLJwt) -> Unit,
+        errorHandler: (VCLError) -> Unit
+    )
+
+    fun generateDidJwk(
+        successHandler: (VCLDidJwk) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
 }

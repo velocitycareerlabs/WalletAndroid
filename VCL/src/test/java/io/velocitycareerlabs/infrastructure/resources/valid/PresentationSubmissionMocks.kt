@@ -20,7 +20,7 @@ class PresentationSubmissionMocks {
         const val PresentationSubmissionResultJson ="{\"token\":\"u7yLD8KS2eTEqkg9aRQE\",\"exchange\":{\"id\":\"64131231\",\"type\":\"DISCLOSURE\",\"disclosureComplete\":true,\"exchangeComplete\":true}}"
         val PresentationRequest = VCLPresentationRequest(
             jwt = JwtServiceMocks.JWT,
-            publicKey = JwtServiceMocks.PublicKey,
+            jwkPublic = JwtServiceMocks.JwkPublic,
             deepLink = DeepLinkMocks.CredentialManifestDeepLinkMainNet,
             pushDelegate = PushDelegate
         )

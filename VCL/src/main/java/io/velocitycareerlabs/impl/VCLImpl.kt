@@ -7,19 +7,16 @@
 
 package io.velocitycareerlabs.impl
 
-import android.content.Context
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.models.CredentialTypeSchemasModel
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.printVersion
-import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.models.CountriesModel
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
 import io.velocitycareerlabs.impl.utils.InitializationWatcher
 import io.velocitycareerlabs.impl.utils.VCLLog
-import org.json.JSONObject
 
 internal class VCLImpl: VCL {
     val TAG = VCLImpl::class.simpleName
@@ -348,12 +345,12 @@ internal class VCLImpl: VCL {
     }
 
     override fun verifyJwt(
-        jwt: VCLJWT,
-        publicKey: VCLPublicKey,
+        jwt: VCLJwt,
+        jwkPublic: VCLJwkPublic,
         successHandler: (Boolean) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        jwtServiceUseCase.verifyJwt(jwt, publicKey) { isVerifiedResult ->
+        jwtServiceUseCase.verifyJwt(jwt, jwkPublic) { isVerifiedResult ->
             isVerifiedResult.handleResult(
                 {
                     successHandler(it)
@@ -367,19 +364,34 @@ internal class VCLImpl: VCL {
     }
 
     override fun generateSignedJwt(
-        payload: JSONObject,
-        iss: String,
-        jti:String,
-        successHandler: (VCLJWT) -> Unit,
+        jwtDescriptor: VCLJwtDescriptor,
+        successHandler: (VCLJwt) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        jwtServiceUseCase.generateSignedJwt(payload, iss, jti) { jwtResult ->
+        jwtServiceUseCase.generateSignedJwt(jwtDescriptor) { jwtResult ->
             jwtResult.handleResult(
                 {
                     successHandler(it)
                 },
                 {
                     logError("generateSignedJwt", it)
+                    errorHandler(it)
+                }
+            )
+        }
+    }
+
+    override fun generateDidJwk(
+        successHandler: (VCLDidJwk) -> Unit,
+        errorHandler: (VCLError) -> Unit
+    ) {
+        jwtServiceUseCase.generateDidJwk { didJwkResult ->
+            didJwkResult.handleResult(
+                {
+                    successHandler(it)
+                },
+                {
+                    logError("generateDidJwk", it)
                     errorHandler(it)
                 }
             )

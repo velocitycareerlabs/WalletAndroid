@@ -9,8 +9,7 @@ package io.velocitycareerlabs.impl.domain.infrastructure.jwt
 
 import com.nimbusds.jose.*
 import com.nimbusds.jwt.SignedJWT
-import io.velocitycareerlabs.api.entities.VCLJWT
-import org.json.JSONObject
+import io.velocitycareerlabs.api.entities.*
 import java.text.ParseException
 
 internal interface JwtService {
@@ -20,7 +19,9 @@ internal interface JwtService {
     fun encode(str: String): String
 
     @Throws(JOSEException::class)
-    fun verify(jwt: VCLJWT, jwk: String): Boolean
+    fun verify(jwt: VCLJwt, jwk: String): Boolean
 
-    fun sign(payload: JSONObject, iss: String, jti: String): SignedJWT?
+    fun sign(jwtDescriptor: VCLJwtDescriptor): SignedJWT?
+
+    fun generateDidJwk(): VCLDidJwk
 }
