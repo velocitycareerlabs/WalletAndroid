@@ -9,6 +9,7 @@ package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.impl.extensions.decode
+import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import org.junit.After
 import org.junit.Before
@@ -23,68 +24,78 @@ internal class VCLDeepLinkTest {
     }
 
     @Test
-    fun testPresentationRequestDeepLinkDevNetValidAggregation() {
+    fun testOpenidInitiateIssuance() {
+        subject = VCLDeepLink(value = DeepLinkMocks.OpenidInitiateIssuanceStrDev)
 
+        assert(subject.value == DeepLinkMocks.OpenidInitiateIssuanceStrDev)
+        assert(subject.value.decode() == DeepLinkMocks.OpenidInitiateIssuanceStrDev.decode())
+        assert(subject.requestUri == null)
+        assert(subject.issuer == DeepLinkMocks.IssuerDecoded)
+    }
+
+    @Test
+    fun testPresentationRequestDeepLinkDevNetValidAggregation() {
         subject = VCLDeepLink(value = DeepLinkMocks.PresentationRequestDeepLinkDevNetStr)
 
         assert(subject.value == DeepLinkMocks.PresentationRequestDeepLinkDevNetStr)
         assert(subject.value.decode() == DeepLinkMocks.PresentationRequestDeepLinkDevNetStr.decode())
-        assert(subject.requestUri == DeepLinkMocks.PresentationRequestRequestDecodedUriStr)
+        assert(subject.requestUri!!.decode() == DeepLinkMocks.PresentationRequestRequestDecodedUriStr)
+        assert(subject.issuer == null)
         assert(subject.vendorOriginContext == DeepLinkMocks.PresentationRequestVendorOriginContext)
     }
 
     @Test
     fun testPresentationRequestDeepLinkTestNetValidAggregation() {
-
         subject = VCLDeepLink(value = DeepLinkMocks.PresentationRequestDeepLinkTestNetStr)
 
         assert(subject.value == DeepLinkMocks.PresentationRequestDeepLinkTestNetStr)
         assert(subject.value.decode() == DeepLinkMocks.PresentationRequestDeepLinkTestNetStr.decode())
-        assert(subject.requestUri == DeepLinkMocks.PresentationRequestRequestDecodedUriStr)
+        assert(subject.requestUri!!.decode() == DeepLinkMocks.PresentationRequestRequestDecodedUriStr)
+        assert(subject.issuer == null)
         assert(subject.vendorOriginContext == DeepLinkMocks.PresentationRequestVendorOriginContext)
     }
 
     @Test
     fun testPresentationRequestDeepLinkMainNetValidAggregation() {
-
         subject = VCLDeepLink(value = DeepLinkMocks.PresentationRequestDeepLinkMainNetStr)
 
         assert(subject.value == DeepLinkMocks.PresentationRequestDeepLinkMainNetStr)
         assert(subject.value.decode() == DeepLinkMocks.PresentationRequestDeepLinkMainNetStr.decode())
-        assert(subject.requestUri == DeepLinkMocks.PresentationRequestRequestDecodedUriStr)
+        assert(subject.requestUri!!.decode() == DeepLinkMocks.PresentationRequestRequestDecodedUriStr)
+        assert(subject.issuer == null)
         assert(subject.vendorOriginContext == DeepLinkMocks.PresentationRequestVendorOriginContext)
     }
 
     @Test
     fun testCredentialManifestDeepLinkDevNetValidAggregation() {
-
         subject = VCLDeepLink(value = DeepLinkMocks.CredentialManifestDeepLinkDevNetStr)
 
         assert(subject.value == DeepLinkMocks.CredentialManifestDeepLinkDevNetStr)
         assert(subject.value.decode() == DeepLinkMocks.CredentialManifestDeepLinkDevNetStr.decode())
-        assert(subject.requestUri == DeepLinkMocks.CredentialManifestRequestDecodedUriStr)
+        assert(subject.requestUri!!.decode().isUrlEquivalentTo(DeepLinkMocks.CredentialManifestRequestDecodedUriStr))
+        assert(subject.issuer == null)
         assert(subject.vendorOriginContext == null)
     }
 
     @Test
     fun testCredentialManifestDeepLinkTestNetValidAggregation() {
-
         subject = VCLDeepLink(value = DeepLinkMocks.CredentialManifestDeepLinkTestNetStr)
 
         assert(subject.value == DeepLinkMocks.CredentialManifestDeepLinkTestNetStr)
         assert(subject.value.decode() == DeepLinkMocks.CredentialManifestDeepLinkTestNetStr.decode())
-        assert(subject.requestUri == DeepLinkMocks.CredentialManifestRequestDecodedUriStr)
+        assert(subject.requestUri!!.decode().isUrlEquivalentTo(DeepLinkMocks.CredentialManifestRequestDecodedUriStr))
+        assert(subject.issuer == null)
         assert(subject.vendorOriginContext == null)
     }
 
     @Test
     fun testCredentialManifestDeepLinkMainNetValidAggregation() {
-
         subject = VCLDeepLink(value = DeepLinkMocks.CredentialManifestDeepLinkMainNetStr)
 
         assert(subject.value == DeepLinkMocks.CredentialManifestDeepLinkMainNetStr)
         assert(subject.value.decode() == DeepLinkMocks.CredentialManifestDeepLinkMainNetStr.decode())
-        assert(subject.requestUri == DeepLinkMocks.CredentialManifestRequestDecodedUriStr)
+        assert(subject.requestUri!!.decode().isUrlEquivalentTo(DeepLinkMocks.CredentialManifestRequestDecodedUriStr))
+        assert(subject.issuer == null)
         assert(subject.vendorOriginContext == null)
     }
 

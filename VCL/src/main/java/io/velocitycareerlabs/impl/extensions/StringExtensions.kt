@@ -18,6 +18,19 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 
+internal fun String.isUrlEquivalentTo(url: String): Boolean {
+    var retVal = true
+    val thisQueryParams = this.getUrlQueryParams()!!
+    val urlQueryParams = url.getUrlQueryParams()!!
+
+    thisQueryParams.forEach {
+        retVal = retVal && urlQueryParams[it.key] == it.value
+    }
+    retVal = retVal && URI(this).host == URI(url).host
+    retVal = retVal && URI(this).path == URI(url).path
+    return retVal
+}
+
 internal fun String.appendQueryParams(queryParams: String) =
     this + ( URI(this).query?.let { "&" } ?: "?" ) + queryParams
 

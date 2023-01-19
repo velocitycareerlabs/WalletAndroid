@@ -9,6 +9,7 @@ package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorByDeepLink
 import io.velocitycareerlabs.impl.extensions.decode
+import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestDescriptorMocks
 
 import org.junit.After
@@ -29,7 +30,9 @@ internal class VCLCredentialManifestDescriptorByDeepLinkTest {
             deepLink = CredentialManifestDescriptorMocks.DeepLink
         )
 
-        assert(subject.endpoint == CredentialManifestDescriptorMocks.DeepLinkRequestUri.decode())
+        assert(
+            subject.endpoint?.isUrlEquivalentTo(CredentialManifestDescriptorMocks.DeepLinkRequestUri.decode())!!
+        )
     }
 
     @After

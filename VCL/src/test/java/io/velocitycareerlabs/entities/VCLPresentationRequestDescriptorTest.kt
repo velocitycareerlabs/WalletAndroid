@@ -10,6 +10,7 @@ package io.velocitycareerlabs.entities
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.extensions.decode
 import io.velocitycareerlabs.impl.extensions.encode
+import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestDescriptorMocks
 import org.junit.After
@@ -36,7 +37,7 @@ class VCLPresentationRequestDescriptorTest {
                     "&${VCLPresentationRequestDescriptor.KeyPushDelegatePushToken}=${PresentationRequestDescriptorMocks.PushDelegate.pushToken.encode()}"
         val mockEndpoint = (PresentationRequestDescriptorMocks.RequestUri.decode() + "?" + queryParams)
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
         assert(subject.pushDelegate!!.pushUrl == PresentationRequestDescriptorMocks.PushDelegate.pushUrl)
         assert(subject.pushDelegate!!.pushToken == PresentationRequestDescriptorMocks.PushDelegate.pushToken)
     }
@@ -47,7 +48,7 @@ class VCLPresentationRequestDescriptorTest {
             deepLink = PresentationRequestDescriptorMocks.DeepLink
         )
 
-        assert(subject.endpoint == PresentationRequestDescriptorMocks.RequestUri.decode())
+        assert(subject.endpoint?.isUrlEquivalentTo(PresentationRequestDescriptorMocks.RequestUri.decode())!!)
         assert(subject.pushDelegate == null)
     }
 
@@ -65,7 +66,7 @@ class VCLPresentationRequestDescriptorTest {
                 PresentationRequestDescriptorMocks.RequestUri.decode() + "?" + PresentationRequestDescriptorMocks.QParms + "&" + queryParams
                 )
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
         assert(subject.pushDelegate!!.pushUrl == PresentationRequestDescriptorMocks.PushDelegate.pushUrl)
         assert(subject.pushDelegate!!.pushToken == PresentationRequestDescriptorMocks.PushDelegate.pushToken)
     }
@@ -78,7 +79,7 @@ class VCLPresentationRequestDescriptorTest {
 
         val mockEndpoint = (PresentationRequestDescriptorMocks.RequestUri.decode() + "?" + PresentationRequestDescriptorMocks.QParms)
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
         assert(subject.pushDelegate == null)
     }
 

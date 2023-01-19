@@ -23,7 +23,7 @@ class VCLCredentialManifestDescriptorByService(
 //    TODO: validate credentialTypes by services.credentialTypes
 
     override val endpoint =  generateQueryParams()?.let { queryParams ->
-        uri.appendQueryParams(queryParams)
+        uri?.appendQueryParams(queryParams)
     } ?: uri
 
     private fun generateQueryParams(): String? {

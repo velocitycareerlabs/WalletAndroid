@@ -17,31 +17,34 @@ import java.lang.Exception
 internal class CredentialManifestRepositoryImpl(
     val networkService: NetworkService
 ): CredentialManifestRepository {
-    private val TAG = CredentialManifestRepositoryImpl::class.simpleName
 
     override fun getCredentialManifest(
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
         completionBlock: (VCLResult<String>) -> Unit
     ) {
-        networkService.sendRequest(
-            endpoint = credentialManifestDescriptor.endpoint,
-            method = Request.HttpMethod.GET,
-            completionBlock = { result ->
-                result.handleResult(
-                    { credentialManifestResponse ->
-                        try {
-                            val jwtStr = JSONObject(credentialManifestResponse.payload)
+        credentialManifestDescriptor.endpoint?.let { endpoint ->
+            networkService.sendRequest(
+                endpoint = endpoint,
+                method = Request.HttpMethod.GET,
+                completionBlock = { result ->
+                    result.handleResult(
+                        { credentialManifestResponse ->
+                            try {
+                                val jwtStr = JSONObject(credentialManifestResponse.payload)
                                     .getString(VCLCredentialManifest.KeyIssuingRequest)
-                            completionBlock(VCLResult.Success(jwtStr))
-                        } catch (ex: Exception) {
-                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                                completionBlock(VCLResult.Success(jwtStr))
+                            } catch (ex: Exception) {
+                                completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                            }
+                        },
+                        { error ->
+                            completionBlock(VCLResult.Failure(error))
                         }
-                    },
-                    { error ->
-                        completionBlock(VCLResult.Failure(error))
-                    }
-                )
-            }
-        )
+                    )
+                }
+            )
+        } ?: run {
+            completionBlock(VCLResult.Failure(VCLError("credentialManifestDescriptor.endpoint = null")))
+        }
     }
 }

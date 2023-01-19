@@ -23,7 +23,7 @@ class VCLPresentationRequestDescriptor(
     }
 
     val endpoint get() = generateQueryParams()?.let { queryParams ->
-        deepLink.requestUri.appendQueryParams(queryParams)
+        deepLink.requestUri?.appendQueryParams(queryParams)
     } ?: deepLink.requestUri
 
     private fun generateQueryParams(): String? {

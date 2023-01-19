@@ -8,7 +8,7 @@
 package io.velocitycareerlabs.api.entities
 
 open class VCLCredentialManifestDescriptor(
-    val uri: String,
+    val uri: String? = null,
     val credentialTypes: List<String>? = null,
     val pushDelegate: VCLPushDelegate? = null
 ) {
@@ -23,5 +23,5 @@ open class VCLCredentialManifestDescriptor(
         const val KeyRefresh = "refresh"
     }
 
-    open val endpoint get() =  uri
+    open val endpoint: String? get() =  uri
 }

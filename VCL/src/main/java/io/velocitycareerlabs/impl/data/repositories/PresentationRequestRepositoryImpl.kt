@@ -23,23 +23,27 @@ internal class PresentationRequestRepositoryImpl(
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         completionBlock: (VCLResult<String>) -> Unit
     ) {
-        networkService.sendRequest(
-            endpoint = presentationRequestDescriptor.endpoint,
-            contentType = Request.ContentTypeApplicationJson,
-            method = Request.HttpMethod.GET,
-            completionBlock = { encodedJwtResult ->
-                encodedJwtResult.handleResult({ presentationRequestResponse ->
-                    try {
-                        val encodedJwtStr = JSONObject(presentationRequestResponse.payload)
+        presentationRequestDescriptor.endpoint?.let { endpoint ->
+            networkService.sendRequest(
+                endpoint = endpoint,
+                contentType = Request.ContentTypeApplicationJson,
+                method = Request.HttpMethod.GET,
+                completionBlock = { encodedJwtResult ->
+                    encodedJwtResult.handleResult({ presentationRequestResponse ->
+                        try {
+                            val encodedJwtStr = JSONObject(presentationRequestResponse.payload)
                                 .getString(VCLPresentationRequest.KeyPresentationRequest)
-                        completionBlock(VCLResult.Success(encodedJwtStr))
-                    } catch (ex: Exception) {
-                        completionBlock(VCLResult.Failure(VCLError(ex.message)))
-                    }
-                }, {
-                    completionBlock(VCLResult.Failure(it))
-                })
-            }
-        )
+                            completionBlock(VCLResult.Success(encodedJwtStr))
+                        } catch (ex: Exception) {
+                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                        }
+                    }, {
+                        completionBlock(VCLResult.Failure(it))
+                    })
+                }
+            )
+        } ?: run {
+            completionBlock(VCLResult.Failure(VCLError("presentationRequestDescriptor.endpoint = null")))
+        }
     }
 }

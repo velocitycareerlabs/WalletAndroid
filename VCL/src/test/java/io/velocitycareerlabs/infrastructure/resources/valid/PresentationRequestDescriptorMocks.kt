@@ -18,7 +18,7 @@ class PresentationRequestDescriptorMocks {
 
         val DeepLink = VCLDeepLink(value = "velocity-network-devnet://inspect?request_uri=${RequestUri}")
 
-        var QParms = "id=61efe084b2658481a3d9248c&inspectorDid=${inspectorDid.encode()}&vendorOriginContext=%7B%22SubjectKey%22%3A%7B%22BusinessUnit%22%3A%22ZC%22,%22KeyCode%22%3A%2254514480%22%7D,%22Token%22%3A%22832077a4%22%7D"
+        var QParms = "id=61efe084b2658481a3d9248c&inspectorDid=${inspectorDid.encode()}&vendorOriginContext=%7B%22SubjectKey%22%3A%7B%22BusinessUnit%22%3A%22ZC%22%22KeyCode%22%3A%2254514480%22%7D%22Token%22%3A%22832077a4%22%7D"
 
         var RequestUriWithQParams = "$RequestUri?$QParms"
 

@@ -10,7 +10,9 @@ package io.velocitycareerlabs.entities
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptor
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorByService
 import io.velocitycareerlabs.api.entities.VCLServiceCredentialAgentIssuer
+import io.velocitycareerlabs.impl.extensions.decode
 import io.velocitycareerlabs.impl.extensions.encode
+import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestDescriptorMocks
 import org.json.JSONObject
 import org.junit.After
@@ -56,7 +58,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
                     "&${VCLCredentialManifestDescriptor.KeyCredentialTypes}=${CredentialManifestDescriptorMocks.CredentialTypesList[1]}"
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
     }
 
     @Test
@@ -72,7 +74,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
                 "&${VCLCredentialManifestDescriptor.KeyPushDelegatePushToken}=${CredentialManifestDescriptorMocks.PushDelegate.pushToken}"
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
     }
 
     @Test
@@ -83,7 +85,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
         )
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint)
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
     }
 
     @Test
@@ -102,7 +104,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
                     "&${VCLCredentialManifestDescriptor.KeyPushDelegatePushToken}=${CredentialManifestDescriptorMocks.PushDelegate.pushToken}"
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceWithParamEndPoint + "&" + credentialTypesQuery)
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
     }
 
     @Test
@@ -117,7 +119,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
                     "&${VCLCredentialManifestDescriptor.KeyCredentialTypes}=${CredentialManifestDescriptorMocks.CredentialTypesList[1]}"
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceWithParamEndPoint + "&" + credentialTypesQuery)
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
     }
 
     @Test
@@ -133,7 +135,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
                     "&${VCLCredentialManifestDescriptor.KeyPushDelegatePushToken}=${CredentialManifestDescriptorMocks.PushDelegate.pushToken}"
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceWithParamEndPoint + "&" + credentialTypesQuery)
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
     }
 
     @Test
@@ -144,7 +146,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
         )
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceWithParamEndPoint)
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
     }
 
     @After

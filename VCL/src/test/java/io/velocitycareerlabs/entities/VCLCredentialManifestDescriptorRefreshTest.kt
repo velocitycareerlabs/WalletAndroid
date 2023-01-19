@@ -11,6 +11,7 @@ import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptor
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorRefresh
 import io.velocitycareerlabs.api.entities.VCLService
 import io.velocitycareerlabs.impl.extensions.encode
+import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestDescriptorMocks
 import org.json.JSONObject
 import org.junit.After
@@ -44,7 +45,7 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
                     "&${VCLCredentialManifestDescriptor.KeyCredentialId}=${CredentialManifestDescriptorMocks.CredentialId2.encode()}"
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint.isUrlEquivalentTo(mockEndpoint))
     }
 
     @Test
@@ -62,7 +63,7 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
                     "&${VCLCredentialManifestDescriptor.KeyCredentialId}=${CredentialManifestDescriptorMocks.CredentialId1.encode()}"
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint.isUrlEquivalentTo(mockEndpoint))
     }
 
     @Test
@@ -79,7 +80,7 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         val credentialTypesQuery = "${VCLCredentialManifestDescriptor.KeyRefresh}=${true}"
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
-        assert(subject.endpoint == mockEndpoint)
+        assert(subject.endpoint.isUrlEquivalentTo(mockEndpoint))
     }
 
     @After
