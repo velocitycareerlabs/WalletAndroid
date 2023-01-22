@@ -10,11 +10,13 @@ package io.velocitycareerlabs.api.entities
 import io.velocitycareerlabs.impl.extensions.encode
 import java.net.URI
 
-data class VCLCredentialManifestDescriptorRefresh(
-    val service: VCLService,
+class VCLCredentialManifestDescriptorRefresh(
+    service: VCLService,
+    serviceType: VCLServiceType,
     val credentialIds: List<String>
 ): VCLCredentialManifestDescriptor(
-    uri = service.serviceEndpoint
+    uri = service.serviceEndpoint,
+    serviceType = serviceType
 ) {
     override val endpoint =  generateQueryParams()?.let { queryParams ->
         val originUri = URI(uri)

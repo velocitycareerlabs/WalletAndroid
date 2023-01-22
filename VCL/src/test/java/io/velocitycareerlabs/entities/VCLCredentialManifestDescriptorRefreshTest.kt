@@ -10,6 +10,7 @@ package io.velocitycareerlabs.entities
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptor
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorRefresh
 import io.velocitycareerlabs.api.entities.VCLService
+import io.velocitycareerlabs.api.entities.VCLServiceType
 import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestDescriptorMocks
@@ -34,6 +35,7 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         )
         subject = VCLCredentialManifestDescriptorRefresh(
             service = service,
+            serviceType = VCLServiceType.Issuer,
             credentialIds = listOf(
                 CredentialManifestDescriptorMocks.CredentialId1,
                 CredentialManifestDescriptorMocks.CredentialId2
@@ -46,6 +48,7 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
         assert(subject.endpoint.isUrlEquivalentTo(mockEndpoint))
+        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
     }
 
     @Test
@@ -56,6 +59,7 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         )
         subject = VCLCredentialManifestDescriptorRefresh(
             service = service,
+            serviceType = VCLServiceType.Issuer,
             credentialIds = listOf(CredentialManifestDescriptorMocks.CredentialId1)
         )
 
@@ -64,6 +68,7 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
         assert(subject.endpoint.isUrlEquivalentTo(mockEndpoint))
+        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
     }
 
     @Test
@@ -74,6 +79,7 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         )
         subject = VCLCredentialManifestDescriptorRefresh(
             service = service,
+            serviceType = VCLServiceType.Issuer,
             credentialIds = listOf()
         )
 
@@ -81,6 +87,7 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
         assert(subject.endpoint.isUrlEquivalentTo(mockEndpoint))
+        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
     }
 
     @After

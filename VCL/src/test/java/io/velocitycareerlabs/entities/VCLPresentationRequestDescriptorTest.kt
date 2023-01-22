@@ -11,7 +11,6 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.extensions.decode
 import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
-import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestDescriptorMocks
 import org.junit.After
 import org.junit.Before
@@ -29,6 +28,7 @@ class VCLPresentationRequestDescriptorTest {
     fun testPresentationRequestDescriptorWithPushDelegateSuccess() {
         subject = VCLPresentationRequestDescriptor(
             deepLink = PresentationRequestDescriptorMocks.DeepLink,
+            serviceType = VCLServiceType.Inspector,
             pushDelegate = PresentationRequestDescriptorMocks.PushDelegate
         )
 
@@ -40,22 +40,26 @@ class VCLPresentationRequestDescriptorTest {
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
         assert(subject.pushDelegate!!.pushUrl == PresentationRequestDescriptorMocks.PushDelegate.pushUrl)
         assert(subject.pushDelegate!!.pushToken == PresentationRequestDescriptorMocks.PushDelegate.pushToken)
+        assert(subject.did == PresentationRequestDescriptorMocks.InspectorDid)
     }
 
     @Test
     fun testPresentationRequestDescriptorWithoutPushDelegateOnlySuccess() {
         subject = VCLPresentationRequestDescriptor(
-            deepLink = PresentationRequestDescriptorMocks.DeepLink
+            deepLink = PresentationRequestDescriptorMocks.DeepLink,
+            serviceType = VCLServiceType.Inspector
         )
 
         assert(subject.endpoint?.isUrlEquivalentTo(PresentationRequestDescriptorMocks.RequestUri.decode())!!)
         assert(subject.pushDelegate == null)
+        assert(subject.did == PresentationRequestDescriptorMocks.InspectorDid)
     }
 
     @Test
     fun testPresentationRequestDescriptorWithQParamsWithPushDelegateSuccess() {
         subject = VCLPresentationRequestDescriptor(
             deepLink = PresentationRequestDescriptorMocks.DeepLinkWithQParams,
+            serviceType = VCLServiceType.Inspector,
             pushDelegate = PresentationRequestDescriptorMocks.PushDelegate
         )
 
@@ -69,18 +73,22 @@ class VCLPresentationRequestDescriptorTest {
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
         assert(subject.pushDelegate!!.pushUrl == PresentationRequestDescriptorMocks.PushDelegate.pushUrl)
         assert(subject.pushDelegate!!.pushToken == PresentationRequestDescriptorMocks.PushDelegate.pushToken)
+        assert(subject.did == PresentationRequestDescriptorMocks.InspectorDid)
     }
 
     @Test
     fun testPresentationRequestDescriptorWithQParamsWithoutPushDelegateOnlySuccess() {
         subject = VCLPresentationRequestDescriptor(
-            deepLink = PresentationRequestDescriptorMocks.DeepLinkWithQParams
+            deepLink = PresentationRequestDescriptorMocks.DeepLinkWithQParams,
+            serviceType = VCLServiceType.Inspector
         )
 
-        val mockEndpoint = (PresentationRequestDescriptorMocks.RequestUri.decode() + "?" + PresentationRequestDescriptorMocks.QParms)
+        val mockEndpoint =
+            (PresentationRequestDescriptorMocks.RequestUri.decode() + "?" + PresentationRequestDescriptorMocks.QParms)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
         assert(subject.pushDelegate == null)
+        assert(subject.did == PresentationRequestDescriptorMocks.InspectorDid)
     }
 
     @After
