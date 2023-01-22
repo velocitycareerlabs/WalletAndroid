@@ -10,7 +10,7 @@ package io.velocitycareerlabs.entities
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptor
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorByService
 import io.velocitycareerlabs.api.entities.VCLServiceCredentialAgentIssuer
-import io.velocitycareerlabs.impl.extensions.decode
+import io.velocitycareerlabs.api.entities.VCLServiceType
 import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestDescriptorMocks
@@ -32,6 +32,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
         val service = VCLServiceCredentialAgentIssuer(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceJsonStr))
         subject = VCLCredentialManifestDescriptorByService(
             service = service,
+            serviceType = VCLServiceType.Issuer,
             credentialTypes = CredentialManifestDescriptorMocks.CredentialTypesList,
             pushDelegate = CredentialManifestDescriptorMocks.PushDelegate
         )
@@ -44,6 +45,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
         assert(subject.endpoint == mockEndpoint)
+        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
     }
 
     @Test
@@ -51,6 +53,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
         val service = VCLServiceCredentialAgentIssuer(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceJsonStr))
         subject = VCLCredentialManifestDescriptorByService(
             service = service,
+            serviceType = VCLServiceType.Issuer,
             credentialTypes = CredentialManifestDescriptorMocks.CredentialTypesList)
 
         val credentialTypesQuery =
@@ -59,6 +62,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
+        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
     }
 
     @Test
@@ -66,6 +70,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
         val service = VCLServiceCredentialAgentIssuer(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceJsonStr))
         subject = VCLCredentialManifestDescriptorByService(
             service = service,
+            serviceType = VCLServiceType.Issuer,
             pushDelegate = CredentialManifestDescriptorMocks.PushDelegate
         )
 
@@ -75,24 +80,28 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
+        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
     }
 
     @Test
     fun testCredentialManifestDescriptorServiceOnlySuccess() {
         val service = VCLServiceCredentialAgentIssuer(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceJsonStr))
         subject = VCLCredentialManifestDescriptorByService(
-            service = service
-        )
+            service = service,
+            serviceType = VCLServiceType.Issuer,
+            )
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
+        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
     }
 
     @Test
     fun testCredentialManifestDescriptorWithFullInputByServiceWithParamSuccess() {
-        val service = VCLServiceCredentialAgentIssuer(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceWithPAramJsonStr))
+        val service = VCLServiceCredentialAgentIssuer(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceWithParamJsonStr))
         subject = VCLCredentialManifestDescriptorByService(
             service = service,
+            serviceType = VCLServiceType.Issuer,
             credentialTypes = CredentialManifestDescriptorMocks.CredentialTypesList,
             pushDelegate = CredentialManifestDescriptorMocks.PushDelegate
         )
@@ -105,13 +114,15 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceWithParamEndPoint + "&" + credentialTypesQuery)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
+        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
     }
 
     @Test
     fun testCredentialManifestDescriptorWithCredentialTypesByServiceWithParamSuccess() {
-        val service = VCLServiceCredentialAgentIssuer(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceWithPAramJsonStr))
+        val service = VCLServiceCredentialAgentIssuer(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceWithParamJsonStr))
         subject = VCLCredentialManifestDescriptorByService(
             service = service,
+            serviceType = VCLServiceType.Issuer,
             credentialTypes = CredentialManifestDescriptorMocks.CredentialTypesList)
 
         val credentialTypesQuery =
@@ -120,13 +131,15 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceWithParamEndPoint + "&" + credentialTypesQuery)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
+        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
     }
 
     @Test
     fun testCredentialManifestDescriptorWithPushDelegateByServiceWithPAramSuccess() {
-        val service = VCLServiceCredentialAgentIssuer(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceWithPAramJsonStr))
+        val service = VCLServiceCredentialAgentIssuer(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceWithParamJsonStr))
         subject = VCLCredentialManifestDescriptorByService(
             service = service,
+            serviceType = VCLServiceType.Issuer,
             pushDelegate = CredentialManifestDescriptorMocks.PushDelegate
         )
 
@@ -136,17 +149,20 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceWithParamEndPoint + "&" + credentialTypesQuery)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
+        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
     }
 
     @Test
     fun testCredentialManifestDescriptorServiceWitParamOnlySuccess() {
-        val service = VCLServiceCredentialAgentIssuer(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceWithPAramJsonStr))
+        val service = VCLServiceCredentialAgentIssuer(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceWithParamJsonStr))
         subject = VCLCredentialManifestDescriptorByService(
-            service = service
-        )
+            service = service,
+            serviceType = VCLServiceType.Issuer,
+            )
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceWithParamEndPoint)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
+        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
     }
 
     @After

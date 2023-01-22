@@ -53,6 +53,7 @@ internal class PresentationRequestUseCaseTest {
 //        Action
         subject.getPresentationRequest(VCLPresentationRequestDescriptor(
             deepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet,
+            serviceType = VCLServiceType.Inspector,
             pushDelegate = VCLPushDelegate(
                 pushUrl = pushUrl,
                 pushToken = pushToken

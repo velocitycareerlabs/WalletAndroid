@@ -7,10 +7,7 @@
 
 package io.velocitycareerlabs.usecases
 
-import io.velocitycareerlabs.api.entities.VCLCredentialManifest
-import io.velocitycareerlabs.api.entities.VCLResult
-import io.velocitycareerlabs.api.entities.data
-import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorByDeepLink
+import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
 import io.velocitycareerlabs.impl.data.repositories.CredentialManifestRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
@@ -52,13 +49,20 @@ internal class CredentialManifestUseCaseTest {
         var result: VCLResult<VCLCredentialManifest>? = null
 
         // Action
-        subject.getCredentialManifest(VCLCredentialManifestDescriptorByDeepLink(DeepLinkMocks.CredentialManifestDeepLinkDevNet)){
+        subject.getCredentialManifest(
+            VCLCredentialManifestDescriptorByDeepLink(
+                DeepLinkMocks.CredentialManifestDeepLinkDevNet,
+                serviceType = VCLServiceType.Issuer
+            )
+        ) {
             result = it
         }
 
         // Assert
-        assert(result!!.data!!.jwt.signedJwt.serialize() ==
-                JSONObject(CredentialManifestMocks.CredentialManifestEncodedJwt).optString("issuing_request"))
+        assert(
+            result!!.data!!.jwt.signedJwt.serialize() ==
+                    JSONObject(CredentialManifestMocks.CredentialManifestEncodedJwt).optString("issuing_request")
+        )
     }
 
     @After

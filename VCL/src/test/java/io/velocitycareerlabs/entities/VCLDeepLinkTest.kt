@@ -31,6 +31,7 @@ internal class VCLDeepLinkTest {
         assert(subject.value.decode() == DeepLinkMocks.OpenidInitiateIssuanceStrDev.decode())
         assert(subject.requestUri == null)
         assert(subject.issuer == DeepLinkMocks.IssuerDecoded)
+        assert(subject.did == DeepLinkMocks.OIDIssuerDid)
     }
 
     @Test
@@ -42,6 +43,7 @@ internal class VCLDeepLinkTest {
         assert(subject.requestUri!!.decode() == DeepLinkMocks.PresentationRequestRequestDecodedUriStr)
         assert(subject.issuer == null)
         assert(subject.vendorOriginContext == DeepLinkMocks.PresentationRequestVendorOriginContext)
+        assert(subject.did == DeepLinkMocks.InspectorDid)
     }
 
     @Test
@@ -53,6 +55,7 @@ internal class VCLDeepLinkTest {
         assert(subject.requestUri!!.decode() == DeepLinkMocks.PresentationRequestRequestDecodedUriStr)
         assert(subject.issuer == null)
         assert(subject.vendorOriginContext == DeepLinkMocks.PresentationRequestVendorOriginContext)
+        assert(subject.did == DeepLinkMocks.InspectorDid)
     }
 
     @Test
@@ -64,6 +67,7 @@ internal class VCLDeepLinkTest {
         assert(subject.requestUri!!.decode() == DeepLinkMocks.PresentationRequestRequestDecodedUriStr)
         assert(subject.issuer == null)
         assert(subject.vendorOriginContext == DeepLinkMocks.PresentationRequestVendorOriginContext)
+        assert(subject.did == DeepLinkMocks.InspectorDid)
     }
 
     @Test
@@ -75,6 +79,7 @@ internal class VCLDeepLinkTest {
         assert(subject.requestUri!!.decode().isUrlEquivalentTo(DeepLinkMocks.CredentialManifestRequestDecodedUriStr))
         assert(subject.issuer == null)
         assert(subject.vendorOriginContext == null)
+        assert(subject.did == DeepLinkMocks.IssuerDid)
     }
 
     @Test
@@ -86,6 +91,7 @@ internal class VCLDeepLinkTest {
         assert(subject.requestUri!!.decode().isUrlEquivalentTo(DeepLinkMocks.CredentialManifestRequestDecodedUriStr))
         assert(subject.issuer == null)
         assert(subject.vendorOriginContext == null)
+        assert(subject.did == DeepLinkMocks.IssuerDid)
     }
 
     @Test
@@ -97,6 +103,7 @@ internal class VCLDeepLinkTest {
         assert(subject.requestUri!!.decode().isUrlEquivalentTo(DeepLinkMocks.CredentialManifestRequestDecodedUriStr))
         assert(subject.issuer == null)
         assert(subject.vendorOriginContext == null)
+        assert(subject.did == DeepLinkMocks.IssuerDid)
     }
 
     @After
