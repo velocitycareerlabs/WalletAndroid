@@ -11,7 +11,7 @@ import io.velocitycareerlabs.impl.extensions.getUrlSubPath
 
 open class VCLCredentialManifestDescriptor(
     val uri: String? = null,
-    val serviceType: VCLServiceType,
+    val serviceType: VCLServiceType = VCLServiceType.Issuer,
     val credentialTypes: List<String>? = null,
     val pushDelegate: VCLPushDelegate? = null
 ) {
