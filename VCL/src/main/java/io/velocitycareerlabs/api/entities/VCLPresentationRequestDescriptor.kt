@@ -13,7 +13,7 @@ import java.net.URI
 
 class VCLPresentationRequestDescriptor(
     val deepLink: VCLDeepLink,
-    val serviceType: VCLServiceType,
+    val serviceType: VCLServiceType = VCLServiceType.Inspector,
     val pushDelegate: VCLPushDelegate? = null
 ) {
     val endpoint get() = generateQueryParams()?.let { queryParams ->

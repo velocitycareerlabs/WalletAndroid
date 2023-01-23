@@ -13,7 +13,7 @@ import java.net.URI
 
 class VCLCredentialManifestDescriptorByService(
     service: VCLService,
-    serviceType: VCLServiceType,
+    serviceType: VCLServiceType = VCLServiceType.Issuer,
     credentialTypes: List<String>? = null,
     pushDelegate: VCLPushDelegate? = null
 ): VCLCredentialManifestDescriptor(

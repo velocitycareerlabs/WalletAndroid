@@ -9,7 +9,7 @@ package io.velocitycareerlabs.api.entities
 
 class VCLCredentialManifestDescriptorByDeepLink(
     deepLink: VCLDeepLink,
-    serviceType: VCLServiceType,
+    serviceType: VCLServiceType = VCLServiceType.Issuer,
     ): VCLCredentialManifestDescriptor(
     uri = deepLink.requestUri,
     serviceType = serviceType
