@@ -29,6 +29,7 @@ internal class OrganizationsRepositoryImpl(
             endpoint = endpoint,
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.GET,
+            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
             completionBlock = { result ->
                 result.handleResult(
                     { organizationsResponse ->

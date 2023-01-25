@@ -26,12 +26,13 @@ internal class CredentialManifestRepositoryImpl(
             networkService.sendRequest(
                 endpoint = endpoint,
                 method = Request.HttpMethod.GET,
+                headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
                 completionBlock = { result ->
                     result.handleResult(
                         { credentialManifestResponse ->
                             try {
                                 val jwtStr = JSONObject(credentialManifestResponse.payload)
-                                    .getString(VCLCredentialManifest.KeyIssuingRequest)
+                                    .optString(VCLCredentialManifest.KeyIssuingRequest)
                                 completionBlock(VCLResult.Success(jwtStr))
                             } catch (ex: Exception) {
                                 completionBlock(VCLResult.Failure(VCLError(ex.message)))

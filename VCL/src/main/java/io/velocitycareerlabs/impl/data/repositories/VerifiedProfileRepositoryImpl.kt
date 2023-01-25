@@ -24,7 +24,7 @@ internal class VerifiedProfileRepositoryImpl(
         networkService.sendRequest(
             endpoint = Urls.VerifiedProfile.replace(Params.Did, verifiedProfileDescriptor.did),
             method = Request.HttpMethod.GET,
-            useCaches = true,
+            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
             completionBlock = { result ->
                 result.handleResult(
                     { verifiedProfileResponse ->

@@ -25,10 +25,10 @@ internal class GenerateOffersRepositoryImpl(
                                 completionBlock: (VCLResult<VCLOffers>) -> Unit) {
         networkService.sendRequest(
             endpoint = generateOffersDescriptor.checkOffersUri,
-            headers = listOf(Pair(
-                HeaderKeys.HeaderKeyAuthorization,
-                "${HeaderKeys.HeaderValuePrefixBearer} ${token.value}"
-            )),
+            headers = listOf(
+                Pair(HeaderKeys.HeaderKeyAuthorization, "${HeaderKeys.HeaderValuePrefixBearer} ${token.value}"),
+                Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)
+            ),
             body = generateOffersDescriptor.payload.toString(),
             method = Request.HttpMethod.POST,
             contentType = Request.ContentTypeApplicationJson,
