@@ -24,10 +24,10 @@ internal class ExchangeProgressRepositoryImpl(
         networkService.sendRequest(
             endpoint = exchangeDescriptor.processUri +
                     "?${VCLExchangeDescriptor.KeyExchangeId}=${exchangeDescriptor.exchangeId.encode()}",
-            headers = listOf(Pair(
-                HeaderKeys.HeaderKeyAuthorization,
-                "${HeaderKeys.HeaderValuePrefixBearer} ${exchangeDescriptor.token.value}"
-            )),
+            headers = listOf(
+                Pair(HeaderKeys.HeaderKeyAuthorization, "${HeaderKeys.HeaderValuePrefixBearer} ${exchangeDescriptor.token.value}"),
+                Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)
+                ),
             method = Request.HttpMethod.GET,
             contentType = Request.ContentTypeApplicationJson,
             completionBlock = { submissionResult ->
@@ -51,9 +51,9 @@ internal class ExchangeProgressRepositoryImpl(
 
     private fun parseExchange(exchangeJsonObj: JSONObject) =
         VCLExchange(
-            id = exchangeJsonObj.getString(VCLExchange.KeyId),
-            type = exchangeJsonObj.getString(VCLExchange.KeyType),
-            disclosureComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyDisclosureComplete),
-            exchangeComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyExchangeComplete)
+            id = exchangeJsonObj.optString(VCLExchange.KeyId),
+            type = exchangeJsonObj.optString(VCLExchange.KeyType),
+            disclosureComplete = exchangeJsonObj.optBoolean(VCLExchange.KeyDisclosureComplete),
+            exchangeComplete = exchangeJsonObj.optBoolean(VCLExchange.KeyExchangeComplete)
         )
 }

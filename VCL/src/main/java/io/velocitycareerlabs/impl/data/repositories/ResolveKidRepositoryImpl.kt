@@ -20,6 +20,7 @@ internal class ResolveKidRepositoryImpl(
         networkService.sendRequest(
             endpoint = Urls.ResolveKid + keyID + "?format=${VCLJwkPublic.Format.jwk}",
             method = Request.HttpMethod.GET,
+            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
             completionBlock = { result ->
                 result.handleResult(
                     { publicKeyResponse ->

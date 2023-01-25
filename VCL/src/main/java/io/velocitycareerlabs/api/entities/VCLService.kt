@@ -10,9 +10,9 @@ package io.velocitycareerlabs.api.entities
 import org.json.JSONObject
 
 open class VCLService(val payload: JSONObject) {
-    val id: String = payload.getString(VCLService.KeyId)
-    val type: String = payload.getString(VCLService.KeyType)
-    val serviceEndpoint: String = payload.getString(VCLService.KeyServiceEndpoint)
+    val id: String = payload.optString(VCLService.KeyId)
+    val type: String = payload.optString(VCLService.KeyType)
+    val serviceEndpoint: String = payload.optString(VCLService.KeyServiceEndpoint)
 
     companion object CodingKeys {
         const val KeyId = "id"

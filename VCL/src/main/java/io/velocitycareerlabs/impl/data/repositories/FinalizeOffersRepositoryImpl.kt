@@ -25,10 +25,10 @@ internal class FinalizeOffersRepositoryImpl(
                                 completionBlock: (VCLResult<List<String>>) -> Unit) {
         networkService.sendRequest(
             endpoint = finalizeOffersDescriptor.finalizeOffersUri,
-            headers = listOf(Pair(
-                HeaderKeys.HeaderKeyAuthorization,
-                "${HeaderKeys.HeaderValuePrefixBearer} ${token.value}"
-            )),
+            headers = listOf(
+                Pair(HeaderKeys.HeaderKeyAuthorization, "${HeaderKeys.HeaderValuePrefixBearer} ${token.value}"),
+                Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)
+            ),
             body = finalizeOffersDescriptor.payload.toString(),
             method = Request.HttpMethod.POST,
             contentType = Request.ContentTypeApplicationJson,

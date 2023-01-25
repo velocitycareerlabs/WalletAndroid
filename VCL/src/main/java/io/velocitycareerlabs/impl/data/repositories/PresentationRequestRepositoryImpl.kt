@@ -28,11 +28,12 @@ internal class PresentationRequestRepositoryImpl(
                 endpoint = endpoint,
                 contentType = Request.ContentTypeApplicationJson,
                 method = Request.HttpMethod.GET,
+                headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
                 completionBlock = { encodedJwtResult ->
                     encodedJwtResult.handleResult({ presentationRequestResponse ->
                         try {
                             val encodedJwtStr = JSONObject(presentationRequestResponse.payload)
-                                .getString(VCLPresentationRequest.KeyPresentationRequest)
+                                .optString(VCLPresentationRequest.KeyPresentationRequest)
                             completionBlock(VCLResult.Success(encodedJwtStr))
                         } catch (ex: Exception) {
                             completionBlock(VCLResult.Failure(VCLError(ex.message)))

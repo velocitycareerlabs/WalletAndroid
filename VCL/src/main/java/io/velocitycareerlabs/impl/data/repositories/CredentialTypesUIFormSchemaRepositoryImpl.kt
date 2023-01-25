@@ -29,6 +29,7 @@ internal class CredentialTypesUIFormSchemaRepositoryImpl(
                 credentialTypesUIFormSchemaDescriptor.credentialType
             ),
             method = Request.HttpMethod.GET,
+            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
             completionBlock = { result ->
                 result.handleResult(
                     { credentialTypesFormSchemaResponse ->
