@@ -9,7 +9,6 @@ package io.velocitycareerlabs.impl.extensions
 
 import android.util.Base64
 import org.json.JSONObject
-import java.io.UnsupportedEncodingException
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -17,6 +16,19 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
+
+internal fun String.isUrlEquivalentTo(url: String): Boolean {
+    var retVal = true
+    val thisQueryParams = this.getUrlQueryParams()!!
+    val urlQueryParams = url.getUrlQueryParams()!!
+
+    thisQueryParams.forEach {
+        retVal = retVal && urlQueryParams[it.key] == it.value
+    }
+    retVal = retVal && URI(this).host == URI(url).host
+    retVal = retVal && URI(this).path == URI(url).path
+    return retVal
+}
 
 internal fun String.appendQueryParams(queryParams: String) =
     this + ( URI(this).query?.let { "&" } ?: "?" ) + queryParams
@@ -39,6 +51,11 @@ internal fun String.getUrlQueryParams(): Map<String, String>? {
     {}
     return map
 }
+
+internal fun String.getUrlSubPath(subPathPrefix: String) =
+    URI(this)
+    .path.split("/")
+    .find { it.startsWith(subPathPrefix) }
 
 internal fun String.decodeBase64() = Base64.decode(this, Base64.DEFAULT).toString(Charsets.UTF_8)
 internal fun String.encodeToBase64() = Base64.encodeToString(this.toByteArray(), Base64.DEFAULT)

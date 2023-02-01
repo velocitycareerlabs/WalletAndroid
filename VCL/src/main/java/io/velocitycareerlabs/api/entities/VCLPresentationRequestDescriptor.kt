@@ -13,17 +13,11 @@ import java.net.URI
 
 class VCLPresentationRequestDescriptor(
     val deepLink: VCLDeepLink,
+    val serviceType: VCLServiceType = VCLServiceType.Inspector,
     val pushDelegate: VCLPushDelegate? = null
 ) {
-    companion object CodingKeys {
-        const val KeyId = "id"
-
-        const val KeyPushDelegatePushUrl = "push_delegate.push_url"
-        const val KeyPushDelegatePushToken = "push_delegate.push_token"
-    }
-
     val endpoint get() = generateQueryParams()?.let { queryParams ->
-        deepLink.requestUri.appendQueryParams(queryParams)
+        deepLink.requestUri?.appendQueryParams(queryParams)
     } ?: deepLink.requestUri
 
     private fun generateQueryParams(): String? {
@@ -32,5 +26,14 @@ class VCLPresentationRequestDescriptor(
         }
         val qParams = listOfNotNull(pPushDelegate).filter { it.isNotBlank() }
         return if(qParams.isNotEmpty()) qParams.joinToString("&") else null
+    }
+
+    val did get() = deepLink.did
+
+    companion object CodingKeys {
+        const val KeyId = "id"
+
+        const val KeyPushDelegatePushUrl = "push_delegate.push_url"
+        const val KeyPushDelegatePushToken = "push_delegate.push_token"
     }
 }

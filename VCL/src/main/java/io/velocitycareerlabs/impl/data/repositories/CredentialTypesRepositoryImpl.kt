@@ -49,6 +49,7 @@ internal class CredentialTypesRepositoryImpl(
             endpoint = endpoint,
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.GET,
+            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
             useCaches = true,
             completionBlock = { result ->
                 result.handleResult(

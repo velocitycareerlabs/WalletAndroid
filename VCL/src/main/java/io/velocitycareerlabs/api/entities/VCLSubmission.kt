@@ -48,7 +48,7 @@ abstract class VCLSubmission(
         return retVal
     }
 
-    fun generateRequestBody(jwt: VCLJWT) = JSONObject()
+    fun generateRequestBody(jwt: VCLJwt) = JSONObject()
             .putOpt(VCLSubmission.KeyExchangeId, exchangeId)
             .putOpt(VCLSubmission.KeyJwtVp, jwt.signedJwt.serialize())
             .putOpt(VCLSubmission.KeyPushDelegate, pushDelegate?.toJsonObject())

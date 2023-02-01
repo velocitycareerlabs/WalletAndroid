@@ -7,13 +7,23 @@
 
 package io.velocitycareerlabs.impl.domain.repositories
 
-import io.velocitycareerlabs.api.entities.VCLJWT
-import io.velocitycareerlabs.api.entities.VCLPublicKey
-import io.velocitycareerlabs.api.entities.VCLResult
-import org.json.JSONObject
+import io.velocitycareerlabs.api.entities.*
 
 internal interface JwtServiceRepository {
-    fun decode(encodedJwt: String, completionBlock: (VCLResult<VCLJWT>) -> Unit)
-    fun verifyJwt(jwt: VCLJWT, publicKey: VCLPublicKey, completionBlock: (VCLResult<Boolean>) -> Unit)
-    fun generateSignedJwt(payload: JSONObject, iss: String, jti: String, completionBlock: (VCLResult<VCLJWT>) -> Unit)
+    fun decode(
+        encodedJwt: String,
+        completionBlock: (VCLResult<VCLJwt>) -> Unit
+    )
+    fun verifyJwt(
+        jwt: VCLJwt,
+        jwkPublic: VCLJwkPublic,
+        completionBlock: (VCLResult<Boolean>) -> Unit
+    )
+    fun generateSignedJwt(
+        jwtDescriptor: VCLJwtDescriptor,
+        completionBlock: (VCLResult<VCLJwt>) -> Unit
+    )
+    fun generateDidJwk(
+        completionBlock: (VCLResult<VCLDidJwk>) -> Unit
+    )
 }

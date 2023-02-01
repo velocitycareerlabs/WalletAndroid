@@ -66,7 +66,7 @@ internal class CredentialManifestUseCaseImpl(
     }
 
     private fun onDecodeJwtSuccess(
-        jwt: VCLJWT,
+        jwt: VCLJwt,
         callingLooper: Looper?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
@@ -87,12 +87,12 @@ internal class CredentialManifestUseCaseImpl(
     }
 
     private fun onResolvePublicKeySuccess(
-        publicKey: VCLPublicKey,
-        jwt: VCLJWT,
+        jwkPublic: VCLJwkPublic,
+        jwt: VCLJwt,
         callingLooper: Looper?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        jwtServiceRepository.verifyJwt(jwt, publicKey)
+        jwtServiceRepository.verifyJwt(jwt, jwkPublic)
         { verificationResult ->
             verificationResult.handleResult(
                 { isVerified ->
@@ -107,7 +107,7 @@ internal class CredentialManifestUseCaseImpl(
 
     private fun onVerificationSuccess(
         isVerified: Boolean,
-        jwt: VCLJWT,
+        jwt: VCLJwt,
         callingLooper: Looper?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {

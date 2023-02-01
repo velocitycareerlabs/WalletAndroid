@@ -53,6 +53,7 @@ internal class PresentationRequestUseCaseTest {
 //        Action
         subject.getPresentationRequest(VCLPresentationRequestDescriptor(
             deepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet,
+            serviceType = VCLServiceType.Inspector,
             pushDelegate = VCLPushDelegate(
                 pushUrl = pushUrl,
                 pushToken = pushToken
@@ -63,7 +64,7 @@ internal class PresentationRequestUseCaseTest {
 
 //        Assert
         assert(result!!.data!!.jwt.signedJwt.serialize() == PresentationRequestMocks.EncodedPresentationRequest)
-        assert(result!!.data!!.publicKey == VCLPublicKey(JwtServiceMocks.JWK))
+        assert(result!!.data!!.jwkPublic.valueStr == VCLJwkPublic(JwtServiceMocks.JWK).valueStr)
 
         assert(result!!.data!!.pushDelegate!!.pushUrl == pushUrl)
         assert(result!!.data!!.pushDelegate!!.pushToken == pushToken)

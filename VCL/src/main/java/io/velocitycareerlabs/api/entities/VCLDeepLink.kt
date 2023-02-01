@@ -7,36 +7,42 @@
 
 package io.velocitycareerlabs.api.entities
 
+import io.velocitycareerlabs.impl.extensions.*
 import io.velocitycareerlabs.impl.extensions.appendQueryParams
 import io.velocitycareerlabs.impl.extensions.decode
 import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.extensions.getUrlQueryParams
+import java.net.URI
 
 data class VCLDeepLink(val value: String) {
-    val requestUri: String = generateRequestUri()
+    val issuer: String? = generateUri(uriKey = KeyIssuer, asSubParams = true)
+    val requestUri: String? = generateUri(uriKey = KeyRequestUri)
     val vendorOriginContext: String? = retrieveVendorOriginContext()
+    val did: String? = requestUri?.getUrlSubPath(KeyDidPrefix) ?: issuer?.getUrlSubPath(KeyDidPrefix)
 
-    private fun generateRequestUri(): String {
-        var resRequestUri = ""
-        this.value.getUrlQueryParams()?.let { queryParams ->
-            resRequestUri = queryParams[KeyRequestUri]?.decode() ?: ""
-            val queryItems = queryParams
-                .mapValues { it.value }
-                .filter { it.key != KeyRequestUri && it.value.isNotEmpty() }
-                .map { (key, value) -> "$key=${value}" }
-                .sortedBy { it } // Sort is needed for unit tests
-                .joinToString("&")
-            if (queryItems.isNotEmpty()) {
-                resRequestUri = resRequestUri.appendQueryParams(queryItems)
+    private fun generateUri(uriKey: String, asSubParams: Boolean = false): String? {
+        this.value.decode().getUrlQueryParams()?.let { queryParams ->
+            queryParams[uriKey]?.let { uri ->
+                val queryItems = queryParams
+                    .filter { it.key != uriKey && it.value.isNotEmpty() }
+                    .map { (key, value) -> "$key=${value.encode()}" }
+                    .sortedBy { it } // Sort is needed for unit tests
+                    .joinToString("&")
+                if (queryItems.isNotEmpty()) {
+                    return if(asSubParams) "$uri&$queryItems" else uri.appendQueryParams(queryItems)
+                }
+                return uri
             }
         }
-        return resRequestUri
+        return null
     }
 
     private fun retrieveVendorOriginContext(): String? =
         this.value.decode().getUrlQueryParams()?.get(KeyVendorOriginContext)
 
     companion object CodingKeys {
+        const val KeyDidPrefix = "did:"
+        const val KeyIssuer = "issuer"
         const val KeyRequestUri = "request_uri"
         const val KeyVendorOriginContext = "vendorOriginContext"
     }

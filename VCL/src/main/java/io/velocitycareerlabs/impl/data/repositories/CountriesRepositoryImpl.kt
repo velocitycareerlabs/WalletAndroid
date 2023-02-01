@@ -49,6 +49,7 @@ internal class CountriesRepositoryImpl(
         networkService.sendRequest(
             endpoint = endpoint,
             method = Request.HttpMethod.GET,
+            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
             useCaches = true,
             completionBlock = { result ->
                 result.handleResult(

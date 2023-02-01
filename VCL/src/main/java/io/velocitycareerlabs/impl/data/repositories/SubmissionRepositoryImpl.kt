@@ -21,13 +21,14 @@ internal class SubmissionRepositoryImpl(
 
     override fun submit(
         submission: VCLSubmission,
-        jwt: VCLJWT,
+        jwt: VCLJwt,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     ) {
         networkService.sendRequest(
             endpoint = submission.submitUri,
             body = submission.generateRequestBody(jwt).toString(),
             method = Request.HttpMethod.POST,
+            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
             contentType = Request.ContentTypeApplicationJson,
             completionBlock = { result ->
                 result.handleResult({ submissionResponse ->
@@ -53,20 +54,20 @@ internal class SubmissionRepositoryImpl(
         jti: String,
         submissionId: String
     ): VCLPresentationSubmissionResult {
-        val exchangeJsonObj = jsonObj.getJSONObject(VCLPresentationSubmissionResult.KeyExchange)
+        val exchangeJsonObj = jsonObj.optJSONObject(VCLPresentationSubmissionResult.KeyExchange)
         return VCLPresentationSubmissionResult(
-            token = VCLToken(jsonObj.getString(VCLPresentationSubmissionResult.KeyToken)),
+            token = VCLToken(jsonObj.optString(VCLPresentationSubmissionResult.KeyToken)),
             exchange = parseExchange(exchangeJsonObj),
             jti = jti,
             submissionId = submissionId
         )
     }
 
-    private fun parseExchange(exchangeJsonObj: JSONObject) =
+    private fun parseExchange(exchangeJsonObj: JSONObject?) =
         VCLExchange(
-            id = exchangeJsonObj.getString(VCLExchange.KeyId),
-            type = exchangeJsonObj.getString(VCLExchange.KeyType),
-            disclosureComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyDisclosureComplete),
-            exchangeComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyExchangeComplete)
+            id = exchangeJsonObj?.optString(VCLExchange.KeyId) ?: "",
+            type = exchangeJsonObj?.optString(VCLExchange.KeyType) ?: "",
+            disclosureComplete = exchangeJsonObj?.optBoolean(VCLExchange.KeyDisclosureComplete) ?: false,
+            exchangeComplete = exchangeJsonObj?.optBoolean(VCLExchange.KeyExchangeComplete) ?: false
         )
 }

@@ -7,25 +7,23 @@
 
 package io.velocitycareerlabs.impl
 
-import android.content.Context
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.models.CredentialTypeSchemasModel
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.printVersion
-import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.models.CountriesModel
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
 import io.velocitycareerlabs.impl.utils.InitializationWatcher
 import io.velocitycareerlabs.impl.utils.VCLLog
-import org.json.JSONObject
 
 internal class VCLImpl: VCL {
-    val TAG = VCLImpl::class.simpleName
+    companion object {
+        val TAG = VCLImpl::class.simpleName
 
-    private val ModelsToInitilizeAmount = 3
-
+        private const val ModelsToInitializeAmount = 3
+    }
     private var credentialTypesModel: CredentialTypesModel? = null
     private var credentialTypeSchemasModel: CredentialTypeSchemasModel? = null
     private var countriesModel: CountriesModel? = null
@@ -45,14 +43,14 @@ internal class VCLImpl: VCL {
     private val verifiedProfileUseCase = VclBlocksProvider.provideVerifiedProfileUseCase()
     private val jwtServiceUseCase = VclBlocksProvider.provideJwtServiceUseCase()
 
-    private var initializationWatcher = InitializationWatcher(ModelsToInitilizeAmount)
+    private var initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
 
     override fun initialize(
         initializationDescriptor: VCLInitializationDescriptor,
         successHandler: () -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        initializationWatcher = InitializationWatcher(ModelsToInitilizeAmount)
+        initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
 
         initGlobalConfigurations(initializationDescriptor.environment)
 
@@ -131,16 +129,40 @@ internal class VCLImpl: VCL {
         successHandler: (VCLPresentationRequest) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        presentationRequestUseCase.getPresentationRequest(presentationRequestDescriptor) { presentationRequestResult ->
-            presentationRequestResult.handleResult(
-                {
-                    successHandler(it)
-                },
-                {
-                    logError("getPresentationRequest", it)
-                    errorHandler(it)
-                }
-            )
+        presentationRequestDescriptor.did?.let { did ->
+            verifiedProfileUseCase.getVerifiedProfile(
+                VCLVerifiedProfileDescriptor(
+                    did = did,
+                    serviceType = presentationRequestDescriptor.serviceType
+                )
+            ) { verifiedProfileResult ->
+                verifiedProfileResult.handleResult(
+                    {
+                        presentationRequestUseCase.getPresentationRequest(
+                            presentationRequestDescriptor
+                        ) { presentationRequestResult ->
+                            presentationRequestResult.handleResult(
+                                {
+                                    successHandler(it)
+                                },
+                                {
+                                    logError("getPresentationRequest", it)
+                                    errorHandler(it)
+                                }
+                            )
+                        }
+                    },
+                    {
+                        logError("getPresentationRequest::verifiedProfile", it)
+                        errorHandler(it)
+                    }
+                )
+            }
+        } ?: run {
+            VCLError("did was not found in $presentationRequestDescriptor").let {
+                logError("getPresentationRequest::verifiedProfile", it)
+                errorHandler(it)
+            }
         }
     }
 
@@ -203,16 +225,38 @@ internal class VCLImpl: VCL {
         successHandler: (VCLCredentialManifest) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        credentialManifestUseCase.getCredentialManifest(credentialManifestDescriptor) { credentialManifest ->
-            credentialManifest.handleResult(
-                {
-                    successHandler(it)
-                },
-                {
-                    logError("getCredentialManifest", it)
-                    errorHandler(it)
-                }
-            )
+        credentialManifestDescriptor.did?.let { did ->
+            verifiedProfileUseCase.getVerifiedProfile(
+                VCLVerifiedProfileDescriptor(
+                    did = did,
+                    serviceType = credentialManifestDescriptor.serviceType
+                )
+            ) { verifiedProfileResult ->
+                verifiedProfileResult.handleResult(
+                    {
+                        credentialManifestUseCase.getCredentialManifest(credentialManifestDescriptor) { credentialManifest ->
+                            credentialManifest.handleResult(
+                                {
+                                    successHandler(it)
+                                },
+                                {
+                                    logError("getCredentialManifest", it)
+                                    errorHandler(it)
+                                }
+                            )
+                        }
+                    },
+                    {
+                        logError("getCredentialManifest::verifiedProfile", it)
+                        errorHandler(it)
+                    }
+                )
+            }
+        } ?: run {
+            VCLError("did was not found in $credentialManifestDescriptor").let {
+                logError("getCredentialManifest::verifiedProfile", it)
+                errorHandler(it)
+            }
         }
     }
 
@@ -348,12 +392,12 @@ internal class VCLImpl: VCL {
     }
 
     override fun verifyJwt(
-        jwt: VCLJWT,
-        publicKey: VCLPublicKey,
+        jwt: VCLJwt,
+        jwkPublic: VCLJwkPublic,
         successHandler: (Boolean) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        jwtServiceUseCase.verifyJwt(jwt, publicKey) { isVerifiedResult ->
+        jwtServiceUseCase.verifyJwt(jwt, jwkPublic) { isVerifiedResult ->
             isVerifiedResult.handleResult(
                 {
                     successHandler(it)
@@ -367,13 +411,11 @@ internal class VCLImpl: VCL {
     }
 
     override fun generateSignedJwt(
-        payload: JSONObject,
-        iss: String,
-        jti:String,
-        successHandler: (VCLJWT) -> Unit,
+        jwtDescriptor: VCLJwtDescriptor,
+        successHandler: (VCLJwt) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        jwtServiceUseCase.generateSignedJwt(payload, iss, jti) { jwtResult ->
+        jwtServiceUseCase.generateSignedJwt(jwtDescriptor) { jwtResult ->
             jwtResult.handleResult(
                 {
                     successHandler(it)
@@ -385,8 +427,25 @@ internal class VCLImpl: VCL {
             )
         }
     }
+
+    override fun generateDidJwk(
+        successHandler: (VCLDidJwk) -> Unit,
+        errorHandler: (VCLError) -> Unit
+    ) {
+        jwtServiceUseCase.generateDidJwk { didJwkResult ->
+            didJwkResult.handleResult(
+                {
+                    successHandler(it)
+                },
+                {
+                    logError("generateDidJwk", it)
+                    errorHandler(it)
+                }
+            )
+        }
+    }
 }
 
 internal fun VCLImpl.logError(message: String = "", error: Error) {
-    VCLLog.e(TAG, "${message}: $error")
+    VCLLog.e(VCLImpl.TAG, "${message}: $error")
 }

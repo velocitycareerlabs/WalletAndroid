@@ -6,6 +6,7 @@ package io.velocitycareerlabs.infrastructure.db
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl.Companion.KEY_CACHE_SEQUENCE_COUNTRIES
 import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl.Companion.KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES
@@ -24,8 +25,10 @@ import org.mockito.MockitoAnnotations
 
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.O_MR1])
 internal class CacheServiceTest {
     lateinit var subject: CacheService
 

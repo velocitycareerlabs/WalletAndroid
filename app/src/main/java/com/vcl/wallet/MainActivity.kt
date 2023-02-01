@@ -53,7 +53,9 @@ class MainActivity : AppCompatActivity() {
         binding.generateSignedJwt.setOnClickListener {
             generateSignedJwt()
         }
-
+        binding.generateDidJwk.setOnClickListener {
+            generateDidJwk()
+        }
         vcl.initialize(
             initializationDescriptor = VCLInitializationDescriptor(
                 context = this.applicationContext,
@@ -124,8 +126,8 @@ class MainActivity : AppCompatActivity() {
                         presentationSubmission,
                         presentationSubmissionResult
                     ),
-                    { submissionResult ->
-                        Log.d(TAG, "VCL Presentation exchange progress $submissionResult")
+                    { exchange ->
+                        Log.d(TAG, "VCL Presentation exchange progress $exchange")
                     },
                     { error ->
                         Log.e(TAG, "VCL Presentation exchange progress failed: $error")
@@ -144,7 +146,7 @@ class MainActivity : AppCompatActivity() {
                 Constants.OrganizationsSearchDescriptorByDidStaging
         vcl.searchForOrganizations(organizationDescriptor,
             { organizations ->
-                Log.d(TAG, "VCL Organizations received: ${organizations.all}")
+                Log.d(TAG, "VCL Organizations received: $organizations")
 //                Log.d(TAG, "VCL Organizations received")
 
                 // choosing services[0] for testing purposes
@@ -154,7 +156,8 @@ class MainActivity : AppCompatActivity() {
             },
             { error ->
                 Log.e(TAG, "VCL Organizations search failed: $error")
-            })
+            }
+        )
     }
 
     private fun refreshCredentials() {
@@ -180,6 +183,7 @@ class MainActivity : AppCompatActivity() {
         val credentialManifestDescriptorByOrganization =
             VCLCredentialManifestDescriptorByService(
                 service = serviceCredentialAgentIssuer,
+                serviceType = VCLServiceType.Issuer,
                 credentialTypes = serviceCredentialAgentIssuer.credentialTypes // Can come from any where
             )
         vcl.getCredentialManifest(credentialManifestDescriptorByOrganization,
@@ -201,9 +205,7 @@ class MainActivity : AppCompatActivity() {
             else
                 VCLDeepLink(Constants.CredentialManifestDeepLinkStrStaging)
         val credentialManifestDescriptorByDeepLink =
-            VCLCredentialManifestDescriptorByDeepLink(
-                deepLink = deepLink
-            )
+            VCLCredentialManifestDescriptorByDeepLink(deepLink = deepLink)
         vcl.getCredentialManifest(credentialManifestDescriptorByDeepLink,
             { credentialManifest ->
                 Log.d(TAG, "VCL Credential Manifest received: ${credentialManifest.jwt.payload}")
@@ -297,10 +299,8 @@ class MainActivity : AppCompatActivity() {
                 VCLCountries.CA
             ),
             { credentialTypesUIFormSchema ->
-                Log.d(
-                    TAG, "VCL received Credential Types UI Form Schema:" +
-                            " ${credentialTypesUIFormSchema.payload}"
-                )
+                Log.d(TAG, "VCL received Credential Types UI Form Schema: $credentialTypesUIFormSchema")
+
             },
             { error ->
                 Log.e(TAG, "VCL failed to get Credential Types UI Form Schema: $error")
@@ -311,7 +311,7 @@ class MainActivity : AppCompatActivity() {
     private fun getVerifiedProfile() {
         vcl.getVerifiedProfile(Constants.VerifiedProfileDescriptor,
             { verifiedProfile ->
-                Log.d(TAG, "VCL Verified Profile: ${verifiedProfile.credentialSubject}")
+                Log.d(TAG, "VCL Verified Profile: $verifiedProfile")
             },
             { error ->
                 Log.e(TAG, "VCL Verified Profile failed: $error")
@@ -321,7 +321,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun verifyJwt() {
         vcl.verifyJwt(
-            Constants.SomeJwt, Constants.SomePublicKey, { isVerified ->
+            Constants.SomeJwt, Constants.SomeJwkPublic, { isVerified ->
                 Log.d(TAG, "VCL JWT verified: $isVerified")
             },
             { error ->
@@ -331,11 +331,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun generateSignedJwt() {
-        vcl.generateSignedJwt(Constants.SomeJson, "iss123", "jti123", { jwt ->
+        vcl.generateSignedJwt(
+            VCLJwtDescriptor(Constants.SomeJson, "iss123", "jti123"),
+            { jwt ->
                 Log.d(TAG, "VCL JWT generated: ${jwt.signedJwt.serialize()}")
             },
             { error ->
                 Log.e(TAG, "VCL JWT generation failed: $error")
+            }
+        )
+    }
+
+    private fun generateDidJwk() {
+        vcl.generateDidJwk(
+            { didJwk ->
+                Log.d(TAG, "VCL DID:JWK generated: ${didJwk.value}")
+            },
+            { error ->
+                Log.e(TAG, "VCL DID:JWK generation failed: $error")
             }
         )
     }

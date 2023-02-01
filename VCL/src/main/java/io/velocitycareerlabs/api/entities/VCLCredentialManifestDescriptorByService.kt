@@ -13,17 +13,19 @@ import java.net.URI
 
 class VCLCredentialManifestDescriptorByService(
     service: VCLService,
+    serviceType: VCLServiceType = VCLServiceType.Issuer,
     credentialTypes: List<String>? = null,
     pushDelegate: VCLPushDelegate? = null
 ): VCLCredentialManifestDescriptor(
     uri = service.serviceEndpoint,
+    serviceType = serviceType,
     credentialTypes = credentialTypes,
     pushDelegate = pushDelegate
 ) {
 //    TODO: validate credentialTypes by services.credentialTypes
 
     override val endpoint =  generateQueryParams()?.let { queryParams ->
-        uri.appendQueryParams(queryParams)
+        uri?.appendQueryParams(queryParams)
     } ?: uri
 
     private fun generateQueryParams(): String? {

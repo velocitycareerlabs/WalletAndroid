@@ -7,4 +7,4 @@
 
 package io.velocitycareerlabs.api.entities
 
-data class VCLJwtVerifiableCredentials(val all: List<VCLJWT>)
+data class VCLJwtVerifiableCredentials(val all: List<VCLJwt>)
