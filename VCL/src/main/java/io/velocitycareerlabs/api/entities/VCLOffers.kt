@@ -9,4 +9,8 @@ package io.velocitycareerlabs.api.entities
 
 import org.json.JSONArray
 
-data class VCLOffers(val all: JSONArray, val responseCode: Int, val token: VCLToken)
+data class VCLOffers(
+    val all: JSONArray,
+    val responseCode: Int,
+    val token: VCLToken
+    )

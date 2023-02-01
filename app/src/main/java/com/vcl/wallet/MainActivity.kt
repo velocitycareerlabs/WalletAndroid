@@ -126,8 +126,8 @@ class MainActivity : AppCompatActivity() {
                         presentationSubmission,
                         presentationSubmissionResult
                     ),
-                    { submissionResult ->
-                        Log.d(TAG, "VCL Presentation exchange progress $submissionResult")
+                    { exchange ->
+                        Log.d(TAG, "VCL Presentation exchange progress $exchange")
                     },
                     { error ->
                         Log.e(TAG, "VCL Presentation exchange progress failed: $error")
@@ -146,7 +146,7 @@ class MainActivity : AppCompatActivity() {
                 Constants.OrganizationsSearchDescriptorByDidStaging
         vcl.searchForOrganizations(organizationDescriptor,
             { organizations ->
-                Log.d(TAG, "VCL Organizations received: ${organizations.all}")
+                Log.d(TAG, "VCL Organizations received: $organizations")
 //                Log.d(TAG, "VCL Organizations received")
 
                 // choosing services[0] for testing purposes
@@ -156,7 +156,8 @@ class MainActivity : AppCompatActivity() {
             },
             { error ->
                 Log.e(TAG, "VCL Organizations search failed: $error")
-            })
+            }
+        )
     }
 
     private fun refreshCredentials() {
@@ -298,10 +299,8 @@ class MainActivity : AppCompatActivity() {
                 VCLCountries.CA
             ),
             { credentialTypesUIFormSchema ->
-                Log.d(
-                    TAG, "VCL received Credential Types UI Form Schema:" +
-                            " ${credentialTypesUIFormSchema.payload}"
-                )
+                Log.d(TAG, "VCL received Credential Types UI Form Schema: $credentialTypesUIFormSchema")
+
             },
             { error ->
                 Log.e(TAG, "VCL failed to get Credential Types UI Form Schema: $error")
@@ -312,7 +311,7 @@ class MainActivity : AppCompatActivity() {
     private fun getVerifiedProfile() {
         vcl.getVerifiedProfile(Constants.VerifiedProfileDescriptor,
             { verifiedProfile ->
-                Log.d(TAG, "VCL Verified Profile: ${verifiedProfile.credentialSubject}")
+                Log.d(TAG, "VCL Verified Profile: $verifiedProfile")
             },
             { error ->
                 Log.e(TAG, "VCL Verified Profile failed: $error")
