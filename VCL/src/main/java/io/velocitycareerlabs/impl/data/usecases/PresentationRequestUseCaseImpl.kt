@@ -16,10 +16,10 @@ import io.velocitycareerlabs.impl.extensions.encode
 import java.lang.Exception
 
 internal class PresentationRequestUseCaseImpl(
-        private val presentationRequestRepository: PresentationRequestRepository,
-        private val resolveKidRepository: ResolveKidRepository,
-        private val jwtServiceRepository: JwtServiceRepository,
-        private val executor: Executor
+    private val presentationRequestRepository: PresentationRequestRepository,
+    private val resolveKidRepository: ResolveKidRepository,
+    private val jwtServiceRepository: JwtServiceRepository,
+    private val executor: Executor
 ): PresentationRequestUseCase {
 
     override fun getPresentationRequest(
