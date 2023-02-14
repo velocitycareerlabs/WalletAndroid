@@ -11,5 +11,5 @@ import io.velocitycareerlabs.api.entities.*
 
 internal interface IdentificationModel: Model<VCLToken> {
     fun submit(identificationSubmission: VCLIdentificationSubmission,
-               completionBlock: (VCLResult<VCLIdentificationSubmissionResult>) -> Unit)
+               completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit)
 }
