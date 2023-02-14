@@ -17,7 +17,7 @@ internal class IdentificationModelImpl(
     override var data: VCLToken? = null
 
     override fun submit(identificationSubmission: VCLIdentificationSubmission,
-                        completionBlock: (VCLResult<VCLIdentificationSubmissionResult>) -> Unit){
+                        completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit){
         identificationSubmissionUseCase.submit(
             identificationSubmission,
         ) { result ->

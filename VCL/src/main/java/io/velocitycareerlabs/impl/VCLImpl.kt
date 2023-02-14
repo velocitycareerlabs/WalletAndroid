@@ -168,7 +168,7 @@ internal class VCLImpl: VCL {
 
     override fun submitPresentation(
         presentationSubmission: VCLPresentationSubmission,
-        successHandler: (VCLPresentationSubmissionResult) -> Unit,
+        successHandler: (VCLSubmissionResult) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         presentationSubmissionUseCase.submit(presentationSubmission) { presentationSubmissionResult ->
