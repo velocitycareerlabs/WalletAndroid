@@ -44,14 +44,14 @@ android {
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.appcompat:appcompat:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 //    Must: be added:
-    implementation "com.nimbusds:nimbus-jose-jwt:9.25.6"
+    implementation "com.nimbusds:nimbus-jose-jwt:9.29"
     implementation project(':VCL')
 
 //    implementation "io.velocitycareerlabs:vcl:x.y.z"

@@ -30,7 +30,7 @@ interface VCL {
 
     fun submitPresentation(
         presentationSubmission: VCLPresentationSubmission,
-        successHandler: (VCLPresentationSubmissionResult) -> Unit,
+        successHandler: (VCLSubmissionResult) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
 

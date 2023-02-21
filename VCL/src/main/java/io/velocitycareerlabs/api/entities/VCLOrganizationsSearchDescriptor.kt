@@ -23,13 +23,12 @@ data class VCLOrganizationsSearchDescriptor(
      */
     val query: String? = null
 ) {
-
     val queryParams = generateQueryParams()
 
     private fun generateQueryParams(): String? {
         val pFilterDid = filter?.did?.let { "$KeyFilterDid=$it" }
         val pFilterServiceTypes = filter?.serviceTypes?.let { serviceTypes ->
-            "$KeyFilterServiceTypes=${serviceTypes.joinToString(separator = ",") { it.toString() }}" }
+            "$KeyFilterServiceTypes=${serviceTypes.all.joinToString(separator = ",") { it.toString() }}" }
         val pFilterCredentialTypes = filter?.credentialTypes?.let { credentialTypes ->
             "$KeyFilterCredentialTypes=${credentialTypes.map { it.encode() }.joinToString(separator = ",") { it }}"}
         val pSort = sort?.mapIndexed{index, list -> "$KeySort[$index]=${list.joinToString(separator = ",")}" }?.joinToString(separator = "&")
@@ -70,7 +69,7 @@ data class VCLFilter(
     /**
      * Filters organizations based on Service Types e.g. [VCLServiceType]
      */
-    val serviceTypes: List<VCLServiceType>? = null,
+    val serviceTypes: VCLServiceTypes? = null,
     /**
      * Filters organizations based on credential types e.g. [EducationDegree]
      */

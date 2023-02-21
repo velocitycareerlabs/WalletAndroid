@@ -17,10 +17,14 @@ import io.velocitycareerlabs.impl.domain.models.CountriesModel
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
 import io.velocitycareerlabs.impl.utils.InitializationWatcher
 import io.velocitycareerlabs.impl.utils.VCLLog
+import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
 
 internal class VCLImpl: VCL {
     companion object {
         val TAG = VCLImpl::class.simpleName
+
+        private const val ModelsToInitializeAmount = 3
+    }
 
         private const val ModelsToInitializeAmount = 3
     }
@@ -34,7 +38,8 @@ internal class VCLImpl: VCL {
     private val exchangeProgressUseCase = VclBlocksProvider.provideExchangeProgressUseCase()
     private val organizationsUseCase = VclBlocksProvider.provideOrganizationsUseCase()
     private val credentialManifestUseCase = VclBlocksProvider.provideCredentialManifestUseCase()
-//    private val identificationModel = VclBlocksProvider.provideIdentificationModel()
+
+    //    private val identificationModel = VclBlocksProvider.provideIdentificationModel()
     private val identificationUseCase = VclBlocksProvider.provideIdentificationUseCase()
     private val generateOffersUseCase = VclBlocksProvider.provideGenerateOffersUseCase()
     private val finalizeOffersUseCase = VclBlocksProvider.provideFinalizeOffersUseCase()
@@ -44,6 +49,7 @@ internal class VCLImpl: VCL {
     private val jwtServiceUseCase = VclBlocksProvider.provideJwtServiceUseCase()
 
     private var initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
+    private val profileServiceTypeVerifier = ProfileServiceTypeVerifier(verifiedProfileUseCase)
 
     override fun initialize(
         initializationDescriptor: VCLInitializationDescriptor,
@@ -130,34 +136,29 @@ internal class VCLImpl: VCL {
         errorHandler: (VCLError) -> Unit
     ) {
         presentationRequestDescriptor.did?.let { did ->
-            verifiedProfileUseCase.getVerifiedProfile(
-                VCLVerifiedProfileDescriptor(
-                    did = did,
-                    serviceType = presentationRequestDescriptor.serviceType
-                )
-            ) { verifiedProfileResult ->
-                verifiedProfileResult.handleResult(
-                    {
-                        presentationRequestUseCase.getPresentationRequest(
-                            presentationRequestDescriptor
-                        ) { presentationRequestResult ->
-                            presentationRequestResult.handleResult(
-                                {
-                                    successHandler(it)
-                                },
-                                {
-                                    logError("getPresentationRequest", it)
-                                    errorHandler(it)
-                                }
-                            )
-                        }
-                    },
-                    {
-                        logError("getPresentationRequest::verifiedProfile", it)
-                        errorHandler(it)
+            profileServiceTypeVerifier.verifyServiceTypeOfVerifiedProfile(
+                verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = did),
+                expectedServiceTypes = VCLServiceTypes(VCLServiceType.Inspector),
+                successHandler = {
+                    presentationRequestUseCase.getPresentationRequest(
+                        presentationRequestDescriptor
+                    ) { presentationRequestResult ->
+                        presentationRequestResult.handleResult(
+                            {
+                                successHandler(it)
+                            },
+                            {
+                                logError("getPresentationRequest", it)
+                                errorHandler(it)
+                            }
+                        )
                     }
-                )
-            }
+                },
+                errorHandler = {
+                    logError("profile verification failed", it)
+                    errorHandler(it)
+                }
+            )
         } ?: run {
             VCLError("did was not found in $presentationRequestDescriptor").let {
                 logError("getPresentationRequest::verifiedProfile", it)
@@ -168,7 +169,7 @@ internal class VCLImpl: VCL {
 
     override fun submitPresentation(
         presentationSubmission: VCLPresentationSubmission,
-        successHandler: (VCLPresentationSubmissionResult) -> Unit,
+        successHandler: (VCLSubmissionResult) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         presentationSubmissionUseCase.submit(presentationSubmission) { presentationSubmissionResult ->
@@ -226,32 +227,29 @@ internal class VCLImpl: VCL {
         errorHandler: (VCLError) -> Unit
     ) {
         credentialManifestDescriptor.did?.let { did ->
-            verifiedProfileUseCase.getVerifiedProfile(
-                VCLVerifiedProfileDescriptor(
-                    did = did,
-                    serviceType = credentialManifestDescriptor.serviceType
-                )
-            ) { verifiedProfileResult ->
-                verifiedProfileResult.handleResult(
-                    {
-                        credentialManifestUseCase.getCredentialManifest(credentialManifestDescriptor) { credentialManifest ->
-                            credentialManifest.handleResult(
-                                {
-                                    successHandler(it)
-                                },
-                                {
-                                    logError("getCredentialManifest", it)
-                                    errorHandler(it)
-                                }
-                            )
-                        }
-                    },
-                    {
-                        logError("getCredentialManifest::verifiedProfile", it)
-                        errorHandler(it)
+            profileServiceTypeVerifier.verifyServiceTypeOfVerifiedProfile(
+                verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = did),
+                expectedServiceTypes = VCLServiceTypes(credentialManifestDescriptor.issuingType),
+                successHandler = {
+                    credentialManifestUseCase.getCredentialManifest(
+                        credentialManifestDescriptor
+                    ) { credentialManifest ->
+                        credentialManifest.handleResult(
+                            {
+                                successHandler(it)
+                            },
+                            {
+                                logError("getCredentialManifest", it)
+                                errorHandler(it)
+                            }
+                        )
                     }
-                )
-            }
+                },
+                errorHandler = {
+                    logError("profile verification failed", it)
+                    errorHandler(it)
+                }
+            )
         } ?: run {
             VCLError("did was not found in $credentialManifestDescriptor").let {
                 logError("getCredentialManifest::verifiedProfile", it)

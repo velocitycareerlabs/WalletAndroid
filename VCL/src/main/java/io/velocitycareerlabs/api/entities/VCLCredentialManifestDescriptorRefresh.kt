@@ -12,11 +12,10 @@ import java.net.URI
 
 class VCLCredentialManifestDescriptorRefresh(
     service: VCLService,
-    serviceType: VCLServiceType = VCLServiceType.Issuer,
     val credentialIds: List<String>
 ): VCLCredentialManifestDescriptor(
     uri = service.serviceEndpoint,
-    serviceType = serviceType
+    issuingType = VCLIssuingType.Refresh
 ) {
     override val endpoint =  generateQueryParams()?.let { queryParams ->
         val originUri = URI(uri)

@@ -53,10 +53,10 @@ internal class SubmissionRepositoryImpl(
         jsonObj: JSONObject,
         jti: String,
         submissionId: String
-    ): VCLPresentationSubmissionResult {
-        val exchangeJsonObj = jsonObj.optJSONObject(VCLPresentationSubmissionResult.KeyExchange)
-        return VCLPresentationSubmissionResult(
-            token = VCLToken(jsonObj.optString(VCLPresentationSubmissionResult.KeyToken)),
+    ): VCLSubmissionResult {
+        val exchangeJsonObj = jsonObj.optJSONObject(VCLSubmissionResult.KeyExchange)
+        return VCLSubmissionResult(
+            token = VCLToken(jsonObj.optString(VCLSubmissionResult.KeyToken)),
             exchange = parseExchange(exchangeJsonObj),
             jti = jti,
             submissionId = submissionId

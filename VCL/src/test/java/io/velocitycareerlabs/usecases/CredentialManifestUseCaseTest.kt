@@ -52,7 +52,7 @@ internal class CredentialManifestUseCaseTest {
         subject.getCredentialManifest(
             VCLCredentialManifestDescriptorByDeepLink(
                 DeepLinkMocks.CredentialManifestDeepLinkDevNet,
-                serviceType = VCLServiceType.Issuer
+                issuingType = VCLIssuingType.Career
             )
         ) {
             result = it

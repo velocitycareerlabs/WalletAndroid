@@ -8,12 +8,15 @@
 package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.VCLServiceType
+import io.velocitycareerlabs.api.entities.VCLServiceTypes
 import io.velocitycareerlabs.impl.data.repositories.VerifiedProfileRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.VerifiedProfileUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.VerifiedProfileUseCase
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -22,18 +25,14 @@ internal class VerifiedProfileUseCaseTest {
 
     lateinit var subject: VerifiedProfileUseCase
 
-    @Before
-    fun setUp() {
+    @Test
+    fun testGetVerifiedProfileIssuerSuccess() {
         subject = VerifiedProfileUseCaseImpl(
             VerifiedProfileRepositoryImpl(
-                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileJsonStr)
+                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr)
             ),
             EmptyExecutor()
         )
-    }
-
-    @Test
-    fun testGetVerifiedProfileAnyServiceSuccess() {
         var result: VCLResult<VCLVerifiedProfile>? = null
 
         subject.getVerifiedProfile(
@@ -52,13 +51,19 @@ internal class VerifiedProfileUseCaseTest {
     }
 
     @Test
-    fun testGetVerifiedProfileSuccess() {
+    fun testGetVerifiedProfileIssuerInspector1Success() {
+        subject = VerifiedProfileUseCaseImpl(
+            VerifiedProfileRepositoryImpl(
+                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
+            ),
+            EmptyExecutor()
+        )
+
         var result: VCLResult<VCLVerifiedProfile>? = null
 
         subject.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
-                did = "did123",
-                serviceType = VCLServiceType.Issuer
+                did = "did123"
             )
         ) {
             result = it
@@ -72,25 +77,80 @@ internal class VerifiedProfileUseCaseTest {
     }
 
     @Test
-    fun testGetVerifiedProfileError() {
+    fun testGetVerifiedProfileIssuerInspector2Success() {
+        subject = VerifiedProfileUseCaseImpl(
+            VerifiedProfileRepositoryImpl(
+                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
+            ),
+            EmptyExecutor()
+        )
+
         var result: VCLResult<VCLVerifiedProfile>? = null
 
         subject.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
-                did = "did123",
-                serviceType = VCLServiceType.IdentityIssuer
+                did = "did123"
             )
-        ) { verifiedProfileResult ->
-            verifiedProfileResult.handleResult(
-                {},
-                { error ->
-                    assert(error.code == VCLErrorCode.VerificationError.value)
-                }
-            )
+        ) {
+            result = it
         }
+
+        val verifiedProfile = result!!.data!!
+
+        assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
+        assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
+        assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
     }
 
-    @After
-    fun tearDown() {
+    @Test
+    fun testGetVerifiedProfileIssuerNotaryIssuer2Success() {
+        subject = VerifiedProfileUseCaseImpl(
+            VerifiedProfileRepositoryImpl(
+                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
+            ),
+            EmptyExecutor()
+        )
+
+        var result: VCLResult<VCLVerifiedProfile>? = null
+
+        subject.getVerifiedProfile(
+            VCLVerifiedProfileDescriptor(
+                did = "did123"
+            )
+        ) {
+            result = it
+        }
+
+        val verifiedProfile = result!!.data!!
+
+        assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
+        assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
+        assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+    }
+
+    @Test
+    fun testGetVerifiedProfileIssuerNotaryIssuerSuccess() {
+        subject = VerifiedProfileUseCaseImpl(
+            VerifiedProfileRepositoryImpl(
+                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
+            ),
+            EmptyExecutor()
+        )
+
+        var result: VCLResult<VCLVerifiedProfile>? = null
+
+        subject.getVerifiedProfile(
+            VCLVerifiedProfileDescriptor(
+                did = "did123"
+            )
+        ) {
+            result = it
+        }
+
+        val verifiedProfile = result!!.data!!
+
+        assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
+        assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
+        assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
     }
 }
