@@ -5,6 +5,8 @@
 package com.vcl.wallet
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.VCLServiceType
+import io.velocitycareerlabs.api.entities.VCLServiceTypes
 import org.json.JSONObject
 
 /**
@@ -56,7 +58,7 @@ object Constants {
     val OrganizationsSearchDescriptor = VCLOrganizationsSearchDescriptor(
         filter = VCLFilter(
 //            did = DID,
-            serviceTypes = listOf(VCLServiceType.Issuer),
+            serviceTypes = VCLServiceTypes(VCLServiceType.Issuer),
             credentialTypes = listOf("EducationDegree")
         ),
         page = VCLPage("1", "1"),
@@ -107,8 +109,7 @@ object Constants {
     )
 
     val VerifiedProfileDescriptor = VCLVerifiedProfileDescriptor(
-        did = DidDev,
-        serviceType = VCLServiceType.Issuer
+        did = DidDev
     )
 
     val SomeJwt = VCLJwt(

@@ -11,12 +11,14 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.repositories.VerifiedProfileRepository
+import io.velocitycareerlabs.impl.utils.VCLLog
 import org.json.JSONObject
 import java.lang.Exception
 
 internal class VerifiedProfileRepositoryImpl(
     private val networkService: NetworkService
 ): VerifiedProfileRepository {
+    private val TAG = VerifiedProfileRepositoryImpl::class.simpleName
     override fun getVerifiedProfile(
         verifiedProfileDescriptor: VCLVerifiedProfileDescriptor,
         completionBlock: (VCLResult<VCLVerifiedProfile>) -> Unit
@@ -29,11 +31,7 @@ internal class VerifiedProfileRepositoryImpl(
                 result.handleResult(
                     { verifiedProfileResponse ->
                         try {
-                            verifyServiceType(
-                                verifiedProfilePayload = verifiedProfileResponse.payload,
-                                expectedServiceType = verifiedProfileDescriptor.serviceType,
-                                completionBlock = completionBlock
-                            )
+                            completionBlock(VCLResult.Success(VCLVerifiedProfile(JSONObject(verifiedProfileResponse.payload))))
                         } catch (ex: Exception){
                             completionBlock(VCLResult.Failure(VCLError(ex.message)))
                         }
@@ -44,24 +42,5 @@ internal class VerifiedProfileRepositoryImpl(
                 )
             }
         )
-    }
-
-    private fun verifyServiceType(
-        verifiedProfilePayload: String,
-        expectedServiceType: VCLServiceType?,
-        completionBlock: (VCLResult<VCLVerifiedProfile>) -> Unit
-    ) {
-        val verifiedProfile = VCLVerifiedProfile(JSONObject(verifiedProfilePayload))
-        expectedServiceType?.let {
-            if (verifiedProfile.serviceTypes.contains(it))
-                completionBlock(VCLResult.Success(verifiedProfile))
-            else
-                completionBlock(VCLResult.Failure(VCLError(
-                    "Wrong service type - expected: ${it.value}, found: ${verifiedProfile.serviceTypes.all}",
-                    VCLErrorCode.VerificationError
-                )))
-        } ?: run {
-            completionBlock(VCLResult.Success(verifiedProfile))
-        }
     }
 }

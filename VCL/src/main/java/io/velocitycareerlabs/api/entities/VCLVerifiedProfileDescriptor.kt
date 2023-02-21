@@ -8,6 +8,5 @@
 package io.velocitycareerlabs.api.entities
 
 data class VCLVerifiedProfileDescriptor(
-    val did: String,
-    val serviceType: VCLServiceType? = null
+    val did: String
 )

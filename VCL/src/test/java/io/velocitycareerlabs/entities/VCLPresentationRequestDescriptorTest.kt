@@ -28,7 +28,6 @@ class VCLPresentationRequestDescriptorTest {
     fun testPresentationRequestDescriptorWithPushDelegateSuccess() {
         subject = VCLPresentationRequestDescriptor(
             deepLink = PresentationRequestDescriptorMocks.DeepLink,
-            serviceType = VCLServiceType.Inspector,
             pushDelegate = PresentationRequestDescriptorMocks.PushDelegate
         )
 
@@ -46,8 +45,7 @@ class VCLPresentationRequestDescriptorTest {
     @Test
     fun testPresentationRequestDescriptorWithoutPushDelegateOnlySuccess() {
         subject = VCLPresentationRequestDescriptor(
-            deepLink = PresentationRequestDescriptorMocks.DeepLink,
-            serviceType = VCLServiceType.Inspector
+            deepLink = PresentationRequestDescriptorMocks.DeepLink
         )
 
         assert(subject.endpoint?.isUrlEquivalentTo(PresentationRequestDescriptorMocks.RequestUri.decode())!!)
@@ -59,7 +57,6 @@ class VCLPresentationRequestDescriptorTest {
     fun testPresentationRequestDescriptorWithQParamsWithPushDelegateSuccess() {
         subject = VCLPresentationRequestDescriptor(
             deepLink = PresentationRequestDescriptorMocks.DeepLinkWithQParams,
-            serviceType = VCLServiceType.Inspector,
             pushDelegate = PresentationRequestDescriptorMocks.PushDelegate
         )
 
@@ -79,8 +76,7 @@ class VCLPresentationRequestDescriptorTest {
     @Test
     fun testPresentationRequestDescriptorWithQParamsWithoutPushDelegateOnlySuccess() {
         subject = VCLPresentationRequestDescriptor(
-            deepLink = PresentationRequestDescriptorMocks.DeepLinkWithQParams,
-            serviceType = VCLServiceType.Inspector
+            deepLink = PresentationRequestDescriptorMocks.DeepLinkWithQParams
         )
 
         val mockEndpoint =
