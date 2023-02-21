@@ -33,7 +33,6 @@ internal class VerifiedProfileUseCaseTest {
             ),
             EmptyExecutor()
         )
-
         var result: VCLResult<VCLVerifiedProfile>? = null
 
         subject.getVerifiedProfile(

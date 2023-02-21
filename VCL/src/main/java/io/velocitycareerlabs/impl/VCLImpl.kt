@@ -26,6 +26,8 @@ internal class VCLImpl: VCL {
         private const val ModelsToInitializeAmount = 3
     }
 
+        private const val ModelsToInitializeAmount = 3
+    }
     private var credentialTypesModel: CredentialTypesModel? = null
     private var credentialTypeSchemasModel: CredentialTypeSchemasModel? = null
     private var countriesModel: CountriesModel? = null
