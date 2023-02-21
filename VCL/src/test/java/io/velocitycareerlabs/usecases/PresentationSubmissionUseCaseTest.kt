@@ -45,7 +45,7 @@ internal class PresentationSubmissionUseCaseTest {
             PresentationSubmissionMocks.PresentationRequest,
             PresentationSubmissionMocks.SelectionsList
         )
-        var result: VCLResult<VCLPresentationSubmissionResult>? = null
+        var result: VCLResult<VCLSubmissionResult>? = null
 
 //        Action
         subject.submit(presentationSubmission) {
@@ -59,7 +59,7 @@ internal class PresentationSubmissionUseCaseTest {
             )
 
 //        Assert
-        assert(result!!.data is VCLPresentationSubmissionResult)
+        assert(result!!.data is VCLSubmissionResult)
         assert(result!!.data == expectedPresentationSubmissionResult)
         assert(result!!.data!!.exchange.id == expectedPresentationSubmissionResult.exchange.id)
         assert(result!!.data!!.token.value == expectedPresentationSubmissionResult.token.value)
@@ -71,10 +71,10 @@ internal class PresentationSubmissionUseCaseTest {
         jsonObj: JSONObject,
         jti: String,
         submissionId: String
-    ): VCLPresentationSubmissionResult {
-        val exchangeJsonObj = jsonObj.getJSONObject(VCLPresentationSubmissionResult.KeyExchange)
-        return VCLPresentationSubmissionResult(
-            token = VCLToken(jsonObj.getString(VCLPresentationSubmissionResult.KeyToken)),
+    ): VCLSubmissionResult {
+        val exchangeJsonObj = jsonObj.getJSONObject(VCLSubmissionResult.KeyExchange)
+        return VCLSubmissionResult(
+            token = VCLToken(jsonObj.getString(VCLSubmissionResult.KeyToken)),
             exchange = expectedExchange(exchangeJsonObj),
             jti = jti,
             submissionId = submissionId

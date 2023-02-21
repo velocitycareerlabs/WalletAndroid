@@ -9,16 +9,15 @@ package io.velocitycareerlabs.api.entities
 
 import io.velocitycareerlabs.impl.extensions.appendQueryParams
 import io.velocitycareerlabs.impl.extensions.encode
-import java.net.URI
 
 class VCLCredentialManifestDescriptorByService(
     service: VCLService,
-    serviceType: VCLServiceType = VCLServiceType.Issuer,
+    issuingType: VCLIssuingType = VCLIssuingType.Career,
     credentialTypes: List<String>? = null,
     pushDelegate: VCLPushDelegate? = null
 ): VCLCredentialManifestDescriptor(
     uri = service.serviceEndpoint,
-    serviceType = serviceType,
+    issuingType = issuingType,
     credentialTypes = credentialTypes,
     pushDelegate = pushDelegate
 ) {

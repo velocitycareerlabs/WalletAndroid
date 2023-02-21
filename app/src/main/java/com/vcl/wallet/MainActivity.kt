@@ -183,7 +183,7 @@ class MainActivity : AppCompatActivity() {
         val credentialManifestDescriptorByOrganization =
             VCLCredentialManifestDescriptorByService(
                 service = serviceCredentialAgentIssuer,
-                serviceType = VCLServiceType.Issuer,
+                issuingType = VCLIssuingType.Career,
                 credentialTypes = serviceCredentialAgentIssuer.credentialTypes // Can come from any where
             )
         vcl.getCredentialManifest(credentialManifestDescriptorByOrganization,
@@ -205,7 +205,10 @@ class MainActivity : AppCompatActivity() {
             else
                 VCLDeepLink(Constants.CredentialManifestDeepLinkStrStaging)
         val credentialManifestDescriptorByDeepLink =
-            VCLCredentialManifestDescriptorByDeepLink(deepLink = deepLink)
+            VCLCredentialManifestDescriptorByDeepLink(
+                deepLink = deepLink,
+//                issuingType = VCLIssuingType.Career
+                )
         vcl.getCredentialManifest(credentialManifestDescriptorByDeepLink,
             { credentialManifest ->
                 Log.d(TAG, "VCL Credential Manifest received: ${credentialManifest.jwt.payload}")
