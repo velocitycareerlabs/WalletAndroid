@@ -43,23 +43,4 @@ internal class VerifiedProfileRepositoryImpl(
             }
         )
     }
-
-    private fun verifyServiceType(
-        verifiedProfilePayload: String,
-        expectedServiceType: VCLServiceType?,
-        completionBlock: (VCLResult<VCLVerifiedProfile>) -> Unit
-    ) {
-        val verifiedProfile = VCLVerifiedProfile(JSONObject(verifiedProfilePayload))
-        expectedServiceType?.let {
-            if (verifiedProfile.serviceTypes.contains(it))
-                completionBlock(VCLResult.Success(verifiedProfile))
-            else
-                completionBlock(VCLResult.Failure(VCLError(
-                    "Wrong service type - expected: ${it.value}, found: ${verifiedProfile.serviceTypes.all}",
-                    VCLErrorCode.VerificationError
-                )))
-        } ?: run {
-            completionBlock(VCLResult.Success(verifiedProfile))
-        }
-    }
 }

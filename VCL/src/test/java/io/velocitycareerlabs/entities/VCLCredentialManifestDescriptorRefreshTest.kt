@@ -35,7 +35,6 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         )
         subject = VCLCredentialManifestDescriptorRefresh(
             service = service,
-            serviceType = VCLServiceType.Issuer,
             credentialIds = listOf(
                 CredentialManifestDescriptorMocks.CredentialId1,
                 CredentialManifestDescriptorMocks.CredentialId2
@@ -59,7 +58,6 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         )
         subject = VCLCredentialManifestDescriptorRefresh(
             service = service,
-            serviceType = VCLServiceType.Issuer,
             credentialIds = listOf(CredentialManifestDescriptorMocks.CredentialId1)
         )
 
@@ -79,7 +77,6 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         )
         subject = VCLCredentialManifestDescriptorRefresh(
             service = service,
-            serviceType = VCLServiceType.Issuer,
             credentialIds = listOf()
         )
 
