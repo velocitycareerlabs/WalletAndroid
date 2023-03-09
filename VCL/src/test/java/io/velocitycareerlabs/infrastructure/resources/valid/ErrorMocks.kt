@@ -9,6 +9,7 @@ package io.velocitycareerlabs.infrastructure.resources.valid
 
 class ErrorMocks {
 
+    companion object {
         val Payload = "{\"error\":\"Bad Request\",\"errorCode\": \"proof_jwt_is_required\",\"message\":\"proof.jwt is missing\",\"statusCode\": 400}"
         val Error = "Bad Request"
         val ErrorCode = "proof_jwt_is_required"
