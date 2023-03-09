@@ -28,7 +28,7 @@ internal class PresentationRequestRepositoryImpl(
                 endpoint = endpoint,
                 contentType = Request.ContentTypeApplicationJson,
                 method = Request.HttpMethod.GET,
-                headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
+                headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)),
                 completionBlock = { encodedJwtResult ->
                     encodedJwtResult.handleResult({ presentationRequestResponse ->
                         try {
@@ -36,7 +36,7 @@ internal class PresentationRequestRepositoryImpl(
                                 .optString(VCLPresentationRequest.KeyPresentationRequest)
                             completionBlock(VCLResult.Success(encodedJwtStr))
                         } catch (ex: Exception) {
-                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                            completionBlock(VCLResult.Failure(VCLError(ex)))
                         }
                     }, {
                         completionBlock(VCLResult.Failure(it))

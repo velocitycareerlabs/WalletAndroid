@@ -26,7 +26,7 @@ internal class CredentialManifestRepositoryImpl(
             networkService.sendRequest(
                 endpoint = endpoint,
                 method = Request.HttpMethod.GET,
-                headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
+                headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)),
                 completionBlock = { result ->
                     result.handleResult(
                         { credentialManifestResponse ->
@@ -35,7 +35,7 @@ internal class CredentialManifestRepositoryImpl(
                                     .optString(VCLCredentialManifest.KeyIssuingRequest)
                                 completionBlock(VCLResult.Success(jwtStr))
                             } catch (ex: Exception) {
-                                completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                                completionBlock(VCLResult.Failure(VCLError(ex)))
                             }
                         },
                         { error ->

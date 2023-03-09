@@ -55,11 +55,11 @@ internal class ProfileServiceTypeVerifier(
         else
             errorHandler(
                 VCLError(
-                    toJasonString(
+                    message = toJasonString(
                         verifiedProfile.name,
                         "Wrong service type - expected: ${expectedServiceTypes.all}, found: ${verifiedProfile.serviceTypes.all}"
                     ),
-                    VCLErrorCode.VerificationError
+                    statusCode = VCLStatusCode.VerificationError.value
                 )
             )
     }

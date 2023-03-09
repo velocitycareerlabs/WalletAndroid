@@ -442,6 +442,6 @@ internal class VCLImpl: VCL {
     }
 }
 
-internal fun VCLImpl.logError(message: String = "", error: Error) {
-    VCLLog.e(VCLImpl.TAG, "${message}: $error")
+internal fun VCLImpl.logError(message: String = "", error: VCLError) {
+    VCLLog.e(VCLImpl.TAG, "${message}: ${error.toJsonObject()}")
 }

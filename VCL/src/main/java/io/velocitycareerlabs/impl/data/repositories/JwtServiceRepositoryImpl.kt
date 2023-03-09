@@ -24,7 +24,7 @@ internal class JwtServiceRepositoryImpl(
             jwtService.parse(encodedJwt)?.let { completionBlock(VCLResult.Success(VCLJwt(it))) }
                     ?: throw Exception("Failed to parse $encodedJwt")
         } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+            completionBlock(VCLResult.Failure(VCLError(ex)))
         }
     }
 
@@ -36,7 +36,7 @@ internal class JwtServiceRepositoryImpl(
         try {
             completionBlock(VCLResult.Success(jwtService.verify(jwt, jwkPublic.valueStr)))
         } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+            completionBlock(VCLResult.Failure(VCLError(ex)))
         }
     }
 
@@ -48,7 +48,7 @@ internal class JwtServiceRepositoryImpl(
             jwtService.sign(jwtDescriptor)?.let { completionBlock(VCLResult.Success(VCLJwt(it))) }
                     ?: throw Exception("Failed to sign ${jwtDescriptor.payload}")
         } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+            completionBlock(VCLResult.Failure(VCLError(ex)))
         }
     }
 
@@ -58,7 +58,7 @@ internal class JwtServiceRepositoryImpl(
         try {
             completionBlock(VCLResult.Success(jwtService.generateDidJwk()))
         } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+            completionBlock(VCLResult.Failure(VCLError(ex)))
         }
     }
 }

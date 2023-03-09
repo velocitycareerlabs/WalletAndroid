@@ -108,8 +108,8 @@ class ProfileServiceTypeVerifierTest {
                 assert(false)
             },
             errorHandler = { error ->
-                assert(error.code == VCLErrorCode.VerificationError.value)
-                assert(JSONObject(error.description!!).optString("profileName") == "University of Massachusetts Amherst")
+                assert(error.statusCode == VCLStatusCode.VerificationError.value)
+                assert(JSONObject(error.message!!).optString("profileName") == "University of Massachusetts Amherst")
             }
         )
     }
@@ -132,8 +132,8 @@ class ProfileServiceTypeVerifierTest {
                 assert(false)
             },
             errorHandler = { error ->
-                assert(error.code == VCLErrorCode.VerificationError.value)
-                assert(JSONObject(error.description!!).optString("profileName") == "University of Massachusetts Amherst")
+                assert(error.statusCode == VCLStatusCode.VerificationError.value)
+                assert(JSONObject(error.message!!).optString("profileName") == "University of Massachusetts Amherst")
             }
         )
     }
@@ -156,8 +156,8 @@ class ProfileServiceTypeVerifierTest {
                 assert(false)
             },
             errorHandler = { error ->
-                assert(error.code == VCLErrorCode.VerificationError.value)
-                assert(JSONObject(error.description!!).optString("profileName") == "University of Massachusetts Amherst")
+                assert(error.statusCode == VCLStatusCode.VerificationError.value)
+                assert(JSONObject(error.message!!).optString("profileName") == "University of Massachusetts Amherst")
             }
         )
     }
