@@ -9,6 +9,7 @@ package io.velocitycareerlabs.repositories
 
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.impl.GlobalConfig
+import io.velocitycareerlabs.impl.data.repositories.HeaderValues
 import io.velocitycareerlabs.impl.data.repositories.Urls
 import org.junit.After
 import org.junit.Before
@@ -62,6 +63,11 @@ internal class UrlsTest {
         assert(Urls.Organizations.startsWith(expectedUrlPrefix))
         assert(Urls.ResolveKid.startsWith(expectedUrlPrefix))
         assert(Urls.CredentialTypesFormSchema.startsWith(expectedUrlPrefix))
+    }
+
+    @Test
+    fun testVersion() {
+        assert(HeaderValues.XVnfProtocolVersion == "1.0")
     }
 
     @After

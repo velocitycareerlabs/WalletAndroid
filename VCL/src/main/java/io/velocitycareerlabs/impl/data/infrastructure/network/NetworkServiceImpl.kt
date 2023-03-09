@@ -9,7 +9,7 @@ package io.velocitycareerlabs.impl.data.infrastructure.network
 
 import android.accounts.NetworkErrorException
 import io.velocitycareerlabs.api.entities.VCLError
-import io.velocitycareerlabs.api.entities.VCLErrorCode
+import io.velocitycareerlabs.api.entities.VCLStatusCode
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.extensions.convertToString
@@ -70,14 +70,16 @@ internal class NetworkServiceImpl: NetworkService {
                 completionBlock(VCLResult.Success(response))
             } else {
                 val errorMessageStream = connection.errorStream ?: connection.inputStream
-                completionBlock(VCLResult.Failure(VCLError(errorMessageStream.convertToString(), connection.responseCode)))
+                completionBlock(VCLResult.Failure(VCLError(
+                    payload = errorMessageStream.convertToString()
+                )))
             }
         } catch (ex: NetworkErrorException) {
-            completionBlock(VCLResult.Failure(VCLError(ex.message, VCLErrorCode.NetworkError.value)))
+            completionBlock(VCLResult.Failure(VCLError(exception = ex, statusCode = VCLStatusCode.NetworkError.value)))
         } catch (ex: UnknownHostException) {
-            completionBlock(VCLResult.Failure(VCLError(ex.message, VCLErrorCode.NetworkError.value)))
+            completionBlock(VCLResult.Failure(VCLError(exception = ex, statusCode = VCLStatusCode.NetworkError.value)))
         } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+            completionBlock(VCLResult.Failure(VCLError(exception = ex)))
         } finally {
             connection?.disconnect()
         }

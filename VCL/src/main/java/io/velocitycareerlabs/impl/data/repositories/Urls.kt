@@ -53,6 +53,6 @@ object HeaderKeys {
     const val XVnfProtocolVersion = "x-vnf-protocol-version"
 }
 
-object HeaderKValues {
+object HeaderValues {
     const val XVnfProtocolVersion = "1.0"
 }

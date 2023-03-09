@@ -29,7 +29,7 @@ internal class CredentialTypesUIFormSchemaRepositoryImpl(
                 credentialTypesUIFormSchemaDescriptor.credentialType
             ),
             method = Request.HttpMethod.GET,
-            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
+            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)),
             completionBlock = { result ->
                 result.handleResult(
                     { credentialTypesFormSchemaResponse ->
@@ -49,7 +49,7 @@ internal class CredentialTypesUIFormSchemaRepositoryImpl(
                                 )
                             )
                         } catch (ex: Exception) {
-                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                            completionBlock(VCLResult.Failure(VCLError(ex)))
                         }
                     },
                     { error ->

@@ -27,7 +27,7 @@ internal class GenerateOffersRepositoryImpl(
             endpoint = generateOffersDescriptor.checkOffersUri,
             headers = listOf(
                 Pair(HeaderKeys.HeaderKeyAuthorization, "${HeaderKeys.HeaderValuePrefixBearer} ${token.value}"),
-                Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)
+                Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
             body = generateOffersDescriptor.payload.toString(),
             method = Request.HttpMethod.POST,
@@ -40,7 +40,7 @@ internal class GenerateOffersRepositoryImpl(
                                 parse(offersResponse, token)
                             ))
                         } catch (ex: Exception) {
-                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                            completionBlock(VCLResult.Failure(VCLError(ex)))
                         }
                     },
                     { error ->

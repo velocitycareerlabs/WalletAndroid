@@ -28,7 +28,7 @@ internal class SubmissionRepositoryImpl(
             endpoint = submission.submitUri,
             body = submission.generateRequestBody(jwt).toString(),
             method = Request.HttpMethod.POST,
-            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
+            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)),
             contentType = Request.ContentTypeApplicationJson,
             completionBlock = { result ->
                 result.handleResult({ submissionResponse ->
@@ -38,7 +38,7 @@ internal class SubmissionRepositoryImpl(
                             parse(jsonObj, submission.jti, submission.submissionId)
                         completionBlock(VCLResult.Success(submissionResult))
                     } catch (ex: Exception) {
-                        completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                        completionBlock(VCLResult.Failure(VCLError(ex)))
                     }
                 },
                     { error ->

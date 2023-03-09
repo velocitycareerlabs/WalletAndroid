@@ -49,7 +49,7 @@ internal class CredentialTypesRepositoryImpl(
             endpoint = endpoint,
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.GET,
-            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
+            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)),
             useCaches = true,
             completionBlock = { result ->
                 result.handleResult(
@@ -64,7 +64,7 @@ internal class CredentialTypesRepositoryImpl(
                                 parse(JSONArray(credentialTypesResponse.payload))
                             ))
                         } catch (ex: Exception) {
-                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                            completionBlock(VCLResult.Failure(VCLError(ex)))
                         }
                     },
                     { error ->

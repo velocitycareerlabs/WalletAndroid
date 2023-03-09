@@ -11,6 +11,7 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.repositories.OrganizationsRepository
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
+import io.velocitycareerlabs.impl.extensions.toJsonObject
 import org.json.JSONObject
 import java.lang.Exception
 
@@ -29,7 +30,7 @@ internal class OrganizationsRepositoryImpl(
             endpoint = endpoint,
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.GET,
-            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
+            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)),
             completionBlock = { result ->
                 result.handleResult(
                     { organizationsResponse ->
@@ -38,7 +39,7 @@ internal class OrganizationsRepositoryImpl(
                                 parse(organizationsResponse.payload)
                             ))
                         } catch (ex: Exception) {
-                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                            completionBlock(VCLResult.Failure(VCLError(ex)))
                         }
                     },
                     { error ->
@@ -51,7 +52,7 @@ internal class OrganizationsRepositoryImpl(
 
     private fun parse(organizationsStr: String): VCLOrganizations {
         val organizations = mutableListOf<VCLOrganization>()
-        JSONObject(organizationsStr).optJSONArray(VCLOrganizations.KeyResult)?.let { organizationsJsonArray ->
+        organizationsStr.toJsonObject()?.optJSONArray(VCLOrganizations.KeyResult)?.let { organizationsJsonArray ->
             for (i in 0 until organizationsJsonArray.length()) {
                 organizationsJsonArray.optJSONObject(i)?.let { obj ->
                     organizations.add(VCLOrganization(obj))
