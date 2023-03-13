@@ -7,6 +7,7 @@
 
 package io.velocitycareerlabs.impl
 
+import android.util.Log
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.entities.*
@@ -442,6 +443,7 @@ internal class VCLImpl: VCL {
     }
 }
 
-internal fun VCLImpl.logError(message: String = "", error: VCLError) {
-    VCLLog.e(VCLImpl.TAG, "${message}: ${error.toJsonObject()}")
+internal fun logError(message: String = "", error: VCLError) {
+//    VCLLog.e(VCLImpl.TAG, "error.payload: ${error.payload}, error.message: ${error.message}, error.error: ${error.error}, error.errorCode: ${error.errorCode}, error.statusCode: ${error.statusCode}")
+    VCLLog.e(VCLImpl.TAG, "$message: ${error.toJsonObject()}")
 }

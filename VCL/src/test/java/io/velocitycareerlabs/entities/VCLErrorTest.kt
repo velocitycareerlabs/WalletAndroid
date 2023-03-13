@@ -36,4 +36,33 @@ class VCLErrorTest {
         assert(error.message == ErrorMocks.Message)
         assert(error.statusCode == ErrorMocks.StatusCode)
     }
+
+    @Test
+    fun testErrorToJsonFromPayload() {
+        val error = VCLError(ErrorMocks.Payload)
+        val errorJsonObject = error.toJsonObject()
+
+        assert(errorJsonObject.optString(VCLError.KeyPayload) == ErrorMocks.Payload)
+        assert(errorJsonObject.optString(VCLError.KeyError) == ErrorMocks.Error)
+        assert(errorJsonObject.optString(VCLError.KeyErrorCode) == ErrorMocks.ErrorCode)
+        assert(errorJsonObject.optString(VCLError.KeyMessage) == ErrorMocks.Message)
+        assert(errorJsonObject.optInt(VCLError.KeyStatusCode) == ErrorMocks.StatusCode)
+    }
+
+    @Test
+    fun testErrorToJsonFromProperties() {
+        val error = VCLError(
+            error = ErrorMocks.Error,
+            errorCode = ErrorMocks.ErrorCode,
+            message = ErrorMocks.Message,
+            statusCode = ErrorMocks.StatusCode
+        )
+        val errorJsonObject = error.toJsonObject()
+
+        assert(errorJsonObject.optString(VCLError.KeyPayload) == "")
+        assert(errorJsonObject.optString(VCLError.KeyError) == ErrorMocks.Error)
+        assert(errorJsonObject.optString(VCLError.KeyErrorCode) == ErrorMocks.ErrorCode)
+        assert(errorJsonObject.optString(VCLError.KeyMessage) == ErrorMocks.Message)
+        assert(errorJsonObject.optInt(VCLError.KeyStatusCode) == ErrorMocks.StatusCode)
+    }
 }

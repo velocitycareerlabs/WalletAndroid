@@ -11,12 +11,15 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.CredentialTypeSchemaRepository
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypeSchemasUseCase
+import io.velocitycareerlabs.impl.utils.VCLLog
 
 internal class CredentialTypeSchemasUseCaseImpl (
     private val credentialTypeSchemaRepository: CredentialTypeSchemaRepository,
     private val credentialTypes: VCLCredentialTypes,
     private val executor: Executor
 ): CredentialTypeSchemasUseCase {
+
+    private val TAG = CredentialTypeSchemasUseCaseImpl::class.simpleName
 
     override fun getCredentialTypeSchemas(
         cacheSequence: Int,
@@ -46,9 +49,8 @@ internal class CredentialTypeSchemasUseCaseImpl (
         executor.waitForTermination()
 
         if (credentialTypeSchemasMapIsEmpty) {
-            completionBlock(VCLResult.Failure(VCLError("Failed to get credential type schemas")))
-        } else {
-            completionBlock(VCLResult.Success(VCLCredentialTypeSchemas(credentialTypeSchemasMap)))
+            VCLLog.e(TAG, "Credential type schemas were not fount.")
         }
+        completionBlock(VCLResult.Success(VCLCredentialTypeSchemas(credentialTypeSchemasMap)))
     }
 }

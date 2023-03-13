@@ -26,6 +26,13 @@ class GlobalConfigTest {
     }
 
     @Test
+    fun testQaEnvironment() {
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.QA
+
+        assert(GlobalConfig.IsLoggerOn)
+    }
+
+    @Test
     fun testStagingEnvironment() {
         GlobalConfig.CurrentEnvironment = VCLEnvironment.STAGING
 
