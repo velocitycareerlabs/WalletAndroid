@@ -52,6 +52,20 @@ internal class UrlsTest {
     }
 
     @Test
+    fun testQaEnvironment() {
+        val expectedUrlPrefix = "https://qaregistrar.velocitynetwork.foundation"
+
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.QA
+
+        assert(Urls.CredentialTypes.startsWith(expectedUrlPrefix))
+        assert(Urls.CredentialTypeSchemas.startsWith(expectedUrlPrefix))
+        assert(Urls.Countries.startsWith(expectedUrlPrefix))
+        assert(Urls.Organizations.startsWith(expectedUrlPrefix))
+        assert(Urls.ResolveKid.startsWith(expectedUrlPrefix))
+        assert(Urls.CredentialTypesFormSchema.startsWith(expectedUrlPrefix))
+    }
+
+    @Test
     fun testDevEnvironment() {
         val expectedUrlPrefix = "https://devregistrar.velocitynetwork.foundation"
 

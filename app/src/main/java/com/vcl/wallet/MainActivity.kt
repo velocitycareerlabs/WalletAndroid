@@ -207,8 +207,8 @@ class MainActivity : AppCompatActivity() {
         val credentialManifestDescriptorByDeepLink =
             VCLCredentialManifestDescriptorByDeepLink(
                 deepLink = deepLink,
-//                issuingType = VCLIssuingType.Career
-                )
+//                issuingType = VCLIssuingType.Undefined
+            )
         vcl.getCredentialManifest(credentialManifestDescriptorByDeepLink,
             { credentialManifest ->
                 Log.d(TAG, "VCL Credential Manifest received: ${credentialManifest.jwt.payload}")
@@ -357,7 +357,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun logError(message: String = "", error: VCLError) {
-        Log.e(TAG, "${message}: ${error.toJsonObject()}")
+        Log.e(TAG, "$message: ${error.toJsonObject()}")
     }
 }
 

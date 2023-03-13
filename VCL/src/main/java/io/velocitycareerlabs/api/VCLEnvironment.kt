@@ -10,5 +10,6 @@ package io.velocitycareerlabs.api
 enum class VCLEnvironment(val value: String) {
     PROD("prod"),
     STAGING("staging"),
+    QA("qa"),
     DEV("dev")
 }

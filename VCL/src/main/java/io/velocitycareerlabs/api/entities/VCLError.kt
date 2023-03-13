@@ -51,7 +51,7 @@ class VCLError(
         .putOpt(CodingKeys.KeyError, error)
         .putOpt(CodingKeys.KeyErrorCode, errorCode)
         .putOpt(CodingKeys.KeyMessage, message)
-        .putOpt(CodingKeys.KeyErrorCode, errorCode)
+        .putOpt(CodingKeys.KeyStatusCode, statusCode)
 
     companion object CodingKeys {
         const val KeyPayload = "payload"
