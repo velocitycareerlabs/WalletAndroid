@@ -68,7 +68,7 @@ internal class PresentationRequestUseCaseImpl(
                 })
             }
         } catch (ex: Exception) {
-            onError(VCLError(ex.message), callingLooper, completionBlock)
+            onError(VCLError(ex), callingLooper, completionBlock)
         }
     }
 

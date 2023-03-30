@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
                 showControls()
             },
             errorHandler = { error ->
-                Log.e(TAG, "VCL initialization failed: $error")
+                logError("VCL initialization failed:", error)
 
                 showError()
             }
@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
                 submitPresentation(presentationRequest)
             },
             { error ->
-                Log.e(TAG, "VCL Presentation request failed: $error")
+                logError("VCL Presentation request failed:", error)
             })
     }
 
@@ -130,11 +130,11 @@ class MainActivity : AppCompatActivity() {
                         Log.d(TAG, "VCL Presentation exchange progress $exchange")
                     },
                     { error ->
-                        Log.e(TAG, "VCL Presentation exchange progress failed: $error")
+                        logError("VCL Presentation exchange progress failed:", error)
                     })
             },
             { error ->
-                Log.e(TAG, "VCL Presentation submission failed: $error")
+                logError("VCL Presentation submission failed:", error)
             })
     }
 
@@ -155,7 +155,7 @@ class MainActivity : AppCompatActivity() {
                 } ?: Log.e(TAG, "VCL Organizations error, issuing service not found")
             },
             { error ->
-                Log.e(TAG, "VCL Organizations search failed: $error")
+                logError("VCL Organizations search failed:", error)
             }
         )
     }
@@ -175,7 +175,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "VCL Credentials refreshed, credential manifest: ${credentialManifest.jwt.payload}")
             },
             { error ->
-                Log.e(TAG, "VCL Refresh Credentials failed: $error")
+                logError("VCL Refresh Credentials failed:", error)
             })
     }
 
@@ -194,7 +194,7 @@ class MainActivity : AppCompatActivity() {
                 generateOffers(credentialManifest)
             },
             { error ->
-                Log.e(TAG, "VCL Credential Manifest failed: $error")
+                logError("VCL Credential Manifest failed:", error)
             })
     }
 
@@ -207,8 +207,8 @@ class MainActivity : AppCompatActivity() {
         val credentialManifestDescriptorByDeepLink =
             VCLCredentialManifestDescriptorByDeepLink(
                 deepLink = deepLink,
-//                issuingType = VCLIssuingType.Career
-                )
+//                issuingType = VCLIssuingType.Undefined
+            )
         vcl.getCredentialManifest(credentialManifestDescriptorByDeepLink,
             { credentialManifest ->
                 Log.d(TAG, "VCL Credential Manifest received: ${credentialManifest.jwt.payload}")
@@ -217,7 +217,7 @@ class MainActivity : AppCompatActivity() {
                 generateOffers(credentialManifest)
             },
             { error ->
-                Log.e(TAG, "VCL Credential Manifest failed: $error")
+                logError("VCL Credential Manifest failed:", error)
             })
     }
 
@@ -242,7 +242,7 @@ class MainActivity : AppCompatActivity() {
                 )
             },
             { error ->
-                Log.e(TAG, "VCL failed to Generate Offers: $error")
+                logError("VCL failed to Generate Offers:", error)
             }
         )
     }
@@ -267,7 +267,7 @@ class MainActivity : AppCompatActivity() {
                 }
             },
             { error ->
-                Log.e(TAG, "VCL failed to Check Offers: $error")
+                logError("VCL failed to Check Offers:", error)
             }
         )
     }
@@ -290,7 +290,7 @@ class MainActivity : AppCompatActivity() {
 //                Log.d(TAG, "VCL finalized Offers")
             },
             { error ->
-                Log.e(TAG, "VCL failed to finalize Offers: $error")
+                logError("VCL failed to finalize Offers:", error)
             }
         )
     }
@@ -306,7 +306,7 @@ class MainActivity : AppCompatActivity() {
 
             },
             { error ->
-                Log.e(TAG, "VCL failed to get Credential Types UI Form Schema: $error")
+                logError("VCL failed to get Credential Types UI Form Schema:", error)
             }
         )
     }
@@ -317,7 +317,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "VCL Verified Profile: $verifiedProfile")
             },
             { error ->
-                Log.e(TAG, "VCL Verified Profile failed: $error")
+                logError("VCL Verified Profile failed:", error)
             }
         )
     }
@@ -328,7 +328,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "VCL JWT verified: $isVerified")
             },
             { error ->
-                Log.e(TAG, "VCL JWT verification failed: $error")
+                logError("VCL JWT verification failed:", error)
             }
         )
     }
@@ -340,7 +340,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "VCL JWT generated: ${jwt.signedJwt.serialize()}")
             },
             { error ->
-                Log.e(TAG, "VCL JWT generation failed: $error")
+                logError("VCL JWT generation failed:", error)
             }
         )
     }
@@ -351,9 +351,13 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "VCL DID:JWK generated: ${didJwk.value}")
             },
             { error ->
-                Log.e(TAG, "VCL DID:JWK generation failed: $error")
+                logError("VCL DID:JWK generation failed:", error)
             }
         )
+    }
+
+    private fun logError(message: String = "", error: VCLError) {
+        Log.e(TAG, "$message: ${error.toJsonObject()}")
     }
 }
 

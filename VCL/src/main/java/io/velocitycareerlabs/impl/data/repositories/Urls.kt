@@ -17,6 +17,7 @@ internal class Urls {
         private val EnvironmentPrefix get(): String =
             when(GlobalConfig.CurrentEnvironment) {
                 VCLEnvironment.DEV -> VCLEnvironment.DEV.value
+                VCLEnvironment.QA -> VCLEnvironment.QA.value
                 VCLEnvironment.STAGING -> VCLEnvironment.STAGING.value
                 else -> "" // prod is a default, doesn't has a prefix
             }
@@ -53,6 +54,6 @@ object HeaderKeys {
     const val XVnfProtocolVersion = "x-vnf-protocol-version"
 }
 
-object HeaderKValues {
+object HeaderValues {
     const val XVnfProtocolVersion = "1.0"
 }

@@ -27,7 +27,7 @@ internal class FinalizeOffersRepositoryImpl(
             endpoint = finalizeOffersDescriptor.finalizeOffersUri,
             headers = listOf(
                 Pair(HeaderKeys.HeaderKeyAuthorization, "${HeaderKeys.HeaderValuePrefixBearer} ${token.value}"),
-                Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)
+                Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
             body = finalizeOffersDescriptor.payload.toString(),
             method = Request.HttpMethod.POST,
@@ -42,7 +42,7 @@ internal class FinalizeOffersRepositoryImpl(
                                     VCLError("Failed to parse: $finalizedOffersResponse.payload")
                                 )) }
                         } catch (ex: Exception) {
-                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                            completionBlock(VCLResult.Failure(VCLError(ex)))
                         }
                     },
                     { error ->

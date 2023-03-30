@@ -49,7 +49,7 @@ internal class CountriesRepositoryImpl(
         networkService.sendRequest(
             endpoint = endpoint,
             method = Request.HttpMethod.GET,
-            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)),
+            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)),
             useCaches = true,
             completionBlock = { result ->
                 result.handleResult(
@@ -60,7 +60,7 @@ internal class CountriesRepositoryImpl(
                                 jsonArrToCountries(JSONArray(countriesResponse.payload))
                             ))
                         } catch (ex: Exception) {
-                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                            completionBlock(VCLResult.Failure(VCLError(ex)))
                         }
                     },
                     { error ->

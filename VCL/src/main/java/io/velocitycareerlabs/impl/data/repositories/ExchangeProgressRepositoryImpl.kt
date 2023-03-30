@@ -26,7 +26,7 @@ internal class ExchangeProgressRepositoryImpl(
                     "?${VCLExchangeDescriptor.KeyExchangeId}=${exchangeDescriptor.exchangeId.encode()}",
             headers = listOf(
                 Pair(HeaderKeys.HeaderKeyAuthorization, "${HeaderKeys.HeaderValuePrefixBearer} ${exchangeDescriptor.token.value}"),
-                Pair(HeaderKeys.XVnfProtocolVersion, HeaderKValues.XVnfProtocolVersion)
+                Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
                 ),
             method = Request.HttpMethod.GET,
             contentType = Request.ContentTypeApplicationJson,
@@ -38,7 +38,7 @@ internal class ExchangeProgressRepositoryImpl(
                                 parseExchange(JSONObject(exchangeProgressResponse.payload))
                             ))
                         } catch (ex: Exception) {
-                            completionBlock(VCLResult.Failure(VCLError(ex.message)))
+                            completionBlock(VCLResult.Failure(VCLError(ex)))
                         }
                     },
                     {

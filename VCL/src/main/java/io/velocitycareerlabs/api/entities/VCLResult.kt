@@ -7,20 +7,6 @@
 
 package io.velocitycareerlabs.api.entities
 
-data class VCLError(
-        val description: String? = null,
-        val code: Int? = null
-): Error(description) {
-        constructor(
-                description: String? = null,
-                code: VCLErrorCode? = null
-        ): this(description, code?.value)
-
-        constructor(
-                description: String? = null,
-        ): this(description, 0)
-}
-
 sealed class VCLResult<out R> {
         data class Success<out T>(val data: T) : VCLResult<T>()
         data class Failure(val error: VCLError) : VCLResult<Nothing>()

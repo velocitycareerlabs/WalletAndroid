@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl.extensions
 
 import android.util.Base64
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URI
 import java.net.URLDecoder
@@ -72,6 +73,14 @@ internal fun String.toDate(): Date? {
 internal fun String.toJsonObject(): JSONObject? {
     return try {
         JSONObject(this)
+    } catch (e: Exception) {
+        null
+    }
+}
+
+internal fun String.toJsonArray(): JSONArray? {
+    return try {
+        JSONArray(this)
     } catch (e: Exception) {
         null
     }
