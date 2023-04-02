@@ -12,5 +12,6 @@ class VCLCredentialManifestDescriptorByDeepLink(
     issuingType: VCLIssuingType = VCLIssuingType.Career,
     ): VCLCredentialManifestDescriptor(
     uri = deepLink.requestUri,
-    issuingType = issuingType
+    issuingType = issuingType,
+    vendorOriginContext = deepLink.vendorOriginContext
 )
