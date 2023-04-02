@@ -13,7 +13,8 @@ open class VCLCredentialManifestDescriptor(
     val uri: String? = null,
     val issuingType: VCLIssuingType = VCLIssuingType.Career,
     val credentialTypes: List<String>? = null,
-    val pushDelegate: VCLPushDelegate? = null
+    val pushDelegate: VCLPushDelegate? = null,
+    val vendorOriginContext: String? = null
 ) {
     val did = uri?.getUrlSubPath(KeyDidPrefix)
 
