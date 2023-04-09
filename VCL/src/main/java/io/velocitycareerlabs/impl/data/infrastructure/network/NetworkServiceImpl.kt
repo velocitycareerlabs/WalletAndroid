@@ -26,7 +26,7 @@ internal class NetworkServiceImpl: NetworkService {
     override fun sendRequest(
             endpoint: String,
             body: String?,
-            contentType: String?,
+            contentType: String,
             method: Request.HttpMethod,
             headers: List<Pair<String, String>>?,
             useCaches: Boolean,
@@ -122,7 +122,7 @@ internal class NetworkServiceImpl: NetworkService {
         connection.doInput = request.doInput
         connection.useCaches = request.useCaches
 
-        request.contentType?.let { connection.addRequestProperty("Content-Type", it) }
+        connection.addRequestProperty("Content-Type", request.contentType)
 
         request.headers?.let { headers -> setHeaders(connection, headers) }
 

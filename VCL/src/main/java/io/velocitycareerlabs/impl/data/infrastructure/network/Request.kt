@@ -18,7 +18,7 @@ internal class Request(
         val connectTimeOut: Int,
         val readTimeOut: Int,
         val encoding: String,
-        val contentType: String?
+        val contentType: String
 ) {
     companion object {
 
@@ -59,7 +59,7 @@ internal class Request(
         var connectTimeOut: Int = DefaultConnectTimeoutMillis
         var readTimeOut: Int = DefaultReadTimeoutMillis
         var encoding: String = DefaultEncoding
-        var contentType: String? = null
+        var contentType: String = ContentTypeApplicationJson
 
         fun setBody(body: String?): Builder {
             this.body = body
@@ -101,7 +101,7 @@ internal class Request(
             return this
         }
 
-        fun setContentType(contentType: String?): Builder {
+        fun setContentType(contentType: String): Builder {
             this.contentType = contentType
             return this
         }
