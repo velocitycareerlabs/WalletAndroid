@@ -13,11 +13,13 @@ import io.velocitycareerlabs.impl.data.infrastructure.network.Response
 import java.util.*
 
 internal interface NetworkService {
-    fun sendRequest(endpoint: String,
-                    body: String? = null,
-                    contentType: String? = null,
-                    method: Request.HttpMethod,
-                    headers: List<Pair<String, String>>? = null,
-                    useCaches: Boolean = false,
-                    completionBlock: (VCLResult<Response>) -> Unit)
+    fun sendRequest(
+        endpoint: String,
+        body: String? = null,
+        contentType: String = Request.ContentTypeApplicationJson,
+        method: Request.HttpMethod,
+        headers: List<Pair<String, String>>? = null,
+        useCaches: Boolean = false,
+        completionBlock: (VCLResult<Response>) -> Unit
+    )
 }
