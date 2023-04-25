@@ -20,6 +20,7 @@ internal interface JwtServiceUseCase {
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     )
     fun generateDidJwk(
+        didJwkDescriptor: VCLDidJwkDescriptor? = null,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     )
 }

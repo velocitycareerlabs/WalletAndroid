@@ -9,7 +9,7 @@ package io.velocitycareerlabs.api.entities
 
 class VCLIdentificationSubmission(
     credentialManifest: VCLCredentialManifest,
-    verifiableCredentials: List<VCLVerifiableCredential>
+    verifiableCredentials: List<VCLVerifiableCredential>? = null
 ) : VCLSubmission(
     submitUri = credentialManifest.submitPresentationUri,
     iss = credentialManifest.iss,

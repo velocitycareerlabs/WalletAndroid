@@ -7,6 +7,7 @@
 
 package io.velocitycareerlabs.api.entities
 
+import io.velocitycareerlabs.impl.extensions.toJsonArray
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
@@ -16,7 +17,7 @@ abstract class VCLSubmission(
     val iss: String,
     val exchangeId: String,
     val presentationDefinitionId: String,
-    val verifiableCredentials: List<VCLVerifiableCredential>,
+    val verifiableCredentials: List<VCLVerifiableCredential>? = null,
     val pushDelegate: VCLPushDelegate? = null,
     val vendorOriginContext: String? = null
 ) {
@@ -37,21 +38,22 @@ abstract class VCLSubmission(
             .putOpt(VCLSubmission.KeyPresentationSubmission, JSONObject()
                 .putOpt(VCLSubmission.KeyId, submissionId)
                 .putOpt(VCLSubmission.KeyDefinitionId, presentationDefinitionId)
-                .putOpt(VCLSubmission.KeyDescriptorMap, JSONArray(verifiableCredentials.mapIndexed { index, credential ->
+                .putOpt(VCLSubmission.KeyDescriptorMap, JSONArray(verifiableCredentials?.mapIndexed { index, credential ->
                     JSONObject()
                         .putOpt(VCLSubmission.KeyId, credential.inputDescriptor)
                         .putOpt(VCLSubmission.KeyPath, "$.verifiableCredential[$index]")
                         .putOpt(VCLSubmission.KeyFormat, VCLSubmission.ValueJwtVc) })))
-        vp.putOpt(VCLSubmission.KeyVerifiableCredential, JSONArray(verifiableCredentials.map { credential -> credential.jwtVc }))
+        vp.putOpt(VCLSubmission.KeyVerifiableCredential, JSONArray(verifiableCredentials?.map { credential -> credential.jwtVc }))
         vendorOriginContext?.let { vp.putOpt(VCLSubmission.KeyVendorOriginContext, vendorOriginContext) }
         retVal.putOpt(VCLSubmission.KeyVp, vp)
         return retVal
     }
 
     fun generateRequestBody(jwt: VCLJwt) = JSONObject()
-            .putOpt(VCLSubmission.KeyExchangeId, exchangeId)
-            .putOpt(VCLSubmission.KeyJwtVp, jwt.signedJwt.serialize())
-            .putOpt(VCLSubmission.KeyPushDelegate, pushDelegate?.toJsonObject())
+        .putOpt(VCLSubmission.KeyExchangeId, exchangeId)
+        .putOpt(VCLSubmission.KeyJwtVp, jwt.signedJwt.serialize())
+        .putOpt(VCLSubmission.KeyPushDelegate, pushDelegate?.toJsonObject())
+        .putOpt(VCLSubmission.KeyContext, VCLSubmission.ValueContextList.toJsonArray())
 
     companion object CodingKeys {
         const val KeyJti = "jti"
@@ -75,6 +77,9 @@ abstract class VCLSubmission(
 
         const val ValueJwtVc = "jwt_vc"
         const val ValueVerifiablePresentation = "VerifiablePresentation"
+
+        const val KeyContext = "@context"
+        val ValueContextList = listOf("https://www.w3.org/2018/credentials/v1")
     }
 }
 

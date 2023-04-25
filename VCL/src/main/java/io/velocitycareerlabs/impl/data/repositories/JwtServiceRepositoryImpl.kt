@@ -53,10 +53,11 @@ internal class JwtServiceRepositoryImpl(
     }
 
     override fun generateDidJwk(
+        didJwkDescriptor: VCLDidJwkDescriptor?,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     ) {
         try {
-            completionBlock(VCLResult.Success(jwtService.generateDidJwk()))
+            completionBlock(VCLResult.Success(jwtService.generateDidJwk(didJwkDescriptor)))
         } catch (ex: Exception) {
             completionBlock(VCLResult.Failure(VCLError(ex)))
         }

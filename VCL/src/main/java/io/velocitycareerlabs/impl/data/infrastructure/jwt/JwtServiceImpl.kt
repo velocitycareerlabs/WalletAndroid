@@ -40,7 +40,7 @@ internal class JwtServiceImpl: JwtService {
 
     override fun sign(jwtDescriptor: VCLJwtDescriptor): SignedJWT? {
         try {
-            val jwk: ECKey = generateJwkSECP256K1()
+            val jwk: ECKey = generateJwkSECP256K1(jwtDescriptor.kid)
 
             val header = JWSHeader.Builder(JWSAlgorithm.ES256K).jwk(jwk.toPublicJWK())
                 .type(JOSEObjectType("JWT")).build()
@@ -73,16 +73,18 @@ internal class JwtServiceImpl: JwtService {
         }
     }
 
-    override fun generateDidJwk() =
-        VCLDidJwk("${VCLDidJwk.DidJwkPrefix}${generateJwkPublic().valueStr.encodeToBase64()}")
+    override fun generateDidJwk(didJwkDescriptor: VCLDidJwkDescriptor?) =
+        VCLDidJwk(
+            "${VCLDidJwk.DidJwkPrefix}${generateJwkPublic(didJwkDescriptor?.kid ?: UUID.randomUUID().toString()).valueStr.encodeToBase64()}"
+        )
 
 //  https://connect2id.com/products/nimbus-jose-jwt/examples/jwk-generation
-    private fun generateJwkPublic() =
-        VCLJwkPublic(generateJwkSECP256K1().toPublicJWK().toJSONString().toString())
+    private fun generateJwkPublic(kid: String) =
+        VCLJwkPublic(generateJwkSECP256K1(kid).toPublicJWK().toJSONString().toString())
 
-    private fun generateJwkSECP256K1() =
+    private fun generateJwkSECP256K1(kid: String) =
         ECKeyGenerator(Curve.SECP256K1)
         .keyUse(KeyUse.SIGNATURE) // indicate the intended use of the key
-        .keyID(UUID.randomUUID().toString()) // give the key a unique ID
+        .keyID(kid) // give the key a unique ID
         .generate()
 }
