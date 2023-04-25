@@ -43,11 +43,12 @@ internal class JwtServiceUseCaseImpl(
     }
 
     override fun generateDidJwk(
+        didJwkDescriptor: VCLDidJwkDescriptor?,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     ) {
         val callingLooper = Looper.myLooper()
         executor.runOnBackgroundThread {
-            jwtServiceRepository.generateDidJwk {
+            jwtServiceRepository.generateDidJwk(didJwkDescriptor) {
                 executor.runOn(callingLooper) { completionBlock(it) }
             }
         }

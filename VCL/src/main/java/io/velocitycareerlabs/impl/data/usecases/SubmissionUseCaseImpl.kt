@@ -24,7 +24,11 @@ internal class SubmissionUseCaseImpl(
         val callingLooper = Looper.myLooper()
         executor.runOnBackgroundThread {
             jwtServiceRepository.generateSignedJwt(
-                VCLJwtDescriptor(submission.payload, submission.iss, submission.jti)
+                VCLJwtDescriptor(
+                    payload = submission.payload,
+                    iss = submission.iss,
+                    jti = submission.jti
+                )
             ) { signedJwtResult ->
                 signedJwtResult.handleResult(
                     { jwt ->

@@ -19,7 +19,7 @@ internal class NetworkServiceFailure(private val errorMessage: String): NetworkS
     override fun sendRequest(
         endpoint: String,
         body: String?,
-        contentType: String?,
+        contentType: String,
         method: Request.HttpMethod,
         headers: List<Pair<String, String>>?,
         useCaches: Boolean,

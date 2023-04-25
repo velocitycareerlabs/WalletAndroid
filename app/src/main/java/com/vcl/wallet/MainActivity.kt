@@ -335,7 +335,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun generateSignedJwt() {
         vcl.generateSignedJwt(
-            VCLJwtDescriptor(Constants.SomeJson, "iss123", "jti123"),
+            VCLJwtDescriptor(payload = Constants.SomeJson, iss = "iss123", jti = "jti123"),
             { jwt ->
                 Log.d(TAG, "VCL JWT generated: ${jwt.signedJwt.serialize()}")
             },

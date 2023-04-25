@@ -8,9 +8,28 @@
 package io.velocitycareerlabs.api.entities
 
 import org.json.JSONObject
+import java.util.UUID
 
 data class VCLJwtDescriptor(
+    val didJwk: VCLDidJwk? = null,
+    /**
+     * The kid of the owner, UUID by default
+     */
+    val kid: String = UUID.randomUUID().toString(),
+    /**
+     * Json formatted payload
+     */
     val payload: JSONObject,
+    /**
+     * JWT ID
+     */
+     val jti:String,
+    /**
+     * The did of the wallet owner
+     */
     val iss: String,
-    val jti:String
+    /**
+     * The issuer DID
+     */
+    val aud: String? = null,
 )
