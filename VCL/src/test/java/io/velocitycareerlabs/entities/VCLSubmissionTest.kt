@@ -7,6 +7,7 @@ package io.velocitycareerlabs.entities
 import io.velocitycareerlabs.api.entities.VCLPresentationSubmission
 import io.velocitycareerlabs.api.entities.VCLPushDelegate
 import io.velocitycareerlabs.api.entities.VCLSubmission
+import io.velocitycareerlabs.impl.extensions.toList
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationSubmissionMocks
 import org.junit.Before
@@ -39,6 +40,7 @@ class VCLSubmissionTest {
     fun testRequestBody() {
         val requestBodyJsonObj = subject.generateRequestBody(JwtServiceMocks.JWT)
         assert(requestBodyJsonObj.optString(VCLSubmission.KeyExchangeId) == subject.exchangeId)
+        assert(requestBodyJsonObj.optJSONArray(VCLSubmission.KeyContext)!!.toList() == VCLSubmission.ValueContextList)
 
         val pushDelegateBodyJsonObj = requestBodyJsonObj.optJSONObject(VCLSubmission.KeyPushDelegate)!!
 

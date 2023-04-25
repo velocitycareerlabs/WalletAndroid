@@ -24,6 +24,7 @@ internal interface JwtServiceRepository {
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     )
     fun generateDidJwk(
+        jwkDescriptor: VCLDidJwkDescriptor? = null,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     )
 }

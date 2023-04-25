@@ -14,7 +14,7 @@ data class VCLGenerateOffersDescriptor(
     val credentialManifest: VCLCredentialManifest,
     val types: List<String>? = null,
     val offerHashes: List<String>? = null,
-    val identificationVerifiableCredentials: List<VCLVerifiableCredential>
+    val identificationVerifiableCredentials: List<VCLVerifiableCredential>? = null
     ) {
     val payload: JSONObject =
         JSONObject()

@@ -23,5 +23,5 @@ internal interface JwtService {
 
     fun sign(jwtDescriptor: VCLJwtDescriptor): SignedJWT?
 
-    fun generateDidJwk(): VCLDidJwk
+    fun generateDidJwk(didJwkDescriptor: VCLDidJwkDescriptor? = null): VCLDidJwk
 }

@@ -11,12 +11,12 @@ import org.json.JSONObject
 
 data class VCLCredentialType (
     val payload: JSONObject,
-        val id: String?,
-        val schema: String?,
-        val createdAt: String?,
-        val schemaName: String?,
-        val credentialType: String?,
-        val recommended: Boolean
+    val id: String?,
+    val schema: String?,
+    val createdAt: String?,
+    val schemaName: String?,
+    val credentialType: String?,
+    val recommended: Boolean
     ) {
 
     companion object CodingKeys {
