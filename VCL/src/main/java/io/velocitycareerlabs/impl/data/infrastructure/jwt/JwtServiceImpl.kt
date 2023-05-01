@@ -56,7 +56,8 @@ internal class JwtServiceImpl: JwtService {
                 .issuer(jwtDescriptor.iss)
                 .jwtID(jwtDescriptor.jti) // jti
                 .issueTime(Date()) // iat
-                .expirationTime(Date().addDaysToNow(7)) // nbf
+                .notBeforeTime(Date()) // nbf
+                .expirationTime(Date().addDaysToNow(7)) // exp
                 .subject(randomString(10))
 
             claimsSetBuilder.addClaims(jwtDescriptor.payload)
