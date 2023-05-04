@@ -286,8 +286,9 @@ class MainActivity : AppCompatActivity() {
             finalizeOffersDescriptor = finalizeOffersDescriptor,
             token = offers.token,
             { verifiableCredentials ->
-                Log.d(TAG, "VCL finalized Offers: ${verifiableCredentials.all.map { it.payload }}")
-//                Log.d(TAG, "VCL finalized Offers")
+                Log.d(TAG, "VCL finalized Offers")
+                Log.d(TAG, "VCL Passed Credentials: ${verifiableCredentials.passedCredentials.map { it.payload }}")
+                Log.d(TAG, "VCL Failed Credentials: ${verifiableCredentials.failedCredentials.map { it.payload }}")
             },
             { error ->
                 logError("VCL failed to finalize Offers:", error)

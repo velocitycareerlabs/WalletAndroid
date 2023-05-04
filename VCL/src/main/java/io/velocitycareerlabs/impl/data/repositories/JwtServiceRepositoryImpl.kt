@@ -21,8 +21,9 @@ internal class JwtServiceRepositoryImpl(
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
         try {
-            jwtService.parse(encodedJwt)?.let { completionBlock(VCLResult.Success(VCLJwt(it))) }
-                    ?: throw Exception("Failed to parse $encodedJwt")
+            jwtService.parse(encodedJwt)?.let {
+                completionBlock(VCLResult.Success(VCLJwt(it)))
+            } ?: throw Exception("Failed to parse $encodedJwt")
         } catch (ex: Exception) {
             completionBlock(VCLResult.Failure(VCLError(ex)))
         }
