@@ -20,13 +20,18 @@ internal class FinalizeOffersRepositoryImpl(
 ): FinalizeOffersRepository {
     private val TAG = FinalizeOffersRepositoryImpl::class.simpleName
 
-    override fun finalizeOffers(token: VCLToken,
-                                finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
-                                completionBlock: (VCLResult<List<String>>) -> Unit) {
+    override fun finalizeOffers(
+        token: VCLToken,
+        finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
+        completionBlock: (VCLResult<List<String>>) -> Unit
+    ) {
         networkService.sendRequest(
             endpoint = finalizeOffersDescriptor.finalizeOffersUri,
             headers = listOf(
-                Pair(HeaderKeys.HeaderKeyAuthorization, "${HeaderKeys.HeaderValuePrefixBearer} ${token.value}"),
+                Pair(
+                    HeaderKeys.HeaderKeyAuthorization,
+                    "${HeaderKeys.HeaderValuePrefixBearer} ${token.value}"
+                ),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
             body = finalizeOffersDescriptor.payload.toString(),
@@ -36,11 +41,17 @@ internal class FinalizeOffersRepositoryImpl(
                 result.handleResult(
                     { finalizedOffersResponse ->
                         try {
-                            val encodedJwts = JSONArray(finalizedOffersResponse.payload).toList() as? List<String>
-                            encodedJwts?.let { completionBlock(VCLResult.Success(it)) }
-                                ?: run { completionBlock(VCLResult.Failure(
-                                    VCLError("Failed to parse: $finalizedOffersResponse.payload")
-                                )) }
+                            val encodedJwts =
+                                JSONArray(finalizedOffersResponse.payload).toList() as? List<String>
+                            encodedJwts?.let {
+                                completionBlock(VCLResult.Success(it))
+                            } ?: run {
+                                completionBlock(
+                                    VCLResult.Failure(
+                                        VCLError("Failed to parse: $finalizedOffersResponse.payload")
+                                    )
+                                )
+                            }
                         } catch (ex: Exception) {
                             completionBlock(VCLResult.Failure(VCLError(ex)))
                         }
