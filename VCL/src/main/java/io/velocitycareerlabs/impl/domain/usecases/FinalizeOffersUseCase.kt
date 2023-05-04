@@ -13,7 +13,9 @@ import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
 
 internal interface FinalizeOffersUseCase {
-    fun finalizeOffers(token: VCLToken,
-                       finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
-                       completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit)
+    fun finalizeOffers(
+        token: VCLToken,
+        finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
+        completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit
+    )
 }
