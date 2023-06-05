@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
                 environment = environment
             ),
             successHandler = {
-                Log.d(TAG, "VCL initialization succeed!")
+                Log.d(TAG, "VCL Initialization succeed!")
 
                 vcl.generateDidJwk(
                     successHandler = { didJwk ->
@@ -76,13 +76,13 @@ class MainActivity : AppCompatActivity() {
                         showControls()
                     },
                     errorHandler = { error ->
-                        logError("VCL initialization failed:", error)
+                        logError("VCL Failed to generate did:jwk with error:", error)
                         showError()
                     }
                 )
             },
             errorHandler = { error ->
-                logError("VCL initialization failed:", error)
+                logError("VCL Initialization failed with error:", error)
                 showError()
             }
         )
