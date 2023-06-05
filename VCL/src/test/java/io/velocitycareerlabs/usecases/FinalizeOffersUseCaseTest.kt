@@ -134,6 +134,7 @@ internal class FinalizeOffersUseCaseTest {
         assert(finalizeOffers.passedCredentials.isEmpty())
     }
 
+    @Test
     fun testPassedCredentials() {
         // Arrange
         subject = FinalizeOffersUseCaseImpl(
@@ -172,6 +173,36 @@ internal class FinalizeOffersUseCaseTest {
         )
 
         assert(finalizeOffers.failedCredentials.isEmpty())
+    }
+
+    @Test
+    fun testEmptyCredentials() {
+        // Arrange
+        subject = FinalizeOffersUseCaseImpl(
+            FinalizeOffersRepositoryImpl(
+                NetworkServiceSuccess(validResponse = FinalizeOffersMocks.EmptyVerifiableCredentials)
+            ),
+            JwtServiceRepositoryImpl(
+                JwtServiceImpl(keyService)
+            ),
+            EmptyExecutor()
+        )
+        var result: VCLResult<VCLJwtVerifiableCredentials>? = null
+
+        // Action
+        subject.finalizeOffers(
+            finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
+            didJwk = didJwk,
+            token = VCLToken(value = "")
+        ) {
+            result = it
+        }
+
+        // Assert
+        val finalizeOffers = result?.data
+
+        assert(finalizeOffers!!.failedCredentials.isEmpty())
+        assert(finalizeOffers.passedCredentials.isEmpty())
     }
 
     @After
