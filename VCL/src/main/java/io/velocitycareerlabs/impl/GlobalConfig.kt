@@ -24,6 +24,5 @@ internal object GlobalConfig {
     // TODO: Will be remotely configurable
     val IsLoggerOn get() = CurrentEnvironment != VCLEnvironment.PROD
 
-    // TODO: Will be remotely configurable
-    var IsToLoadFromCacheInitialization = false
+    const val TypeJwt = "JWT"
 }

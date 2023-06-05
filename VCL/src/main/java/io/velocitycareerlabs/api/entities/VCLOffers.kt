@@ -8,9 +8,17 @@
 package io.velocitycareerlabs.api.entities
 
 import org.json.JSONArray
+import org.json.JSONObject
 
-data class VCLOffers(
+data class VCLOffers (
+    val payload: JSONObject,
     val all: JSONArray,
     val responseCode: Int,
-    val token: VCLToken
-    )
+    val token: VCLToken,
+    val challenge: String,
+) {
+    companion object CodingKeys {
+        const val KeyOffers = "offers"
+        const val KeyChallenge = "challenge"
+    }
+}

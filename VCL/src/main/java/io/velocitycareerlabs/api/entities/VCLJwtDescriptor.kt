@@ -11,19 +11,18 @@ import org.json.JSONObject
 import java.util.UUID
 
 data class VCLJwtDescriptor(
-    val didJwk: VCLDidJwk? = null,
     /**
-     * The kid of the owner, UUID by default
+     * The Id of the existing private key to sign with
      */
-    val kid: String = UUID.randomUUID().toString(),
+    val keyId: String? = null,
     /**
      * Json formatted payload
      */
-    val payload: JSONObject,
+    val payload: JSONObject? = null,
     /**
      * JWT ID
      */
-     val jti:String,
+    val jti: String = UUID.randomUUID().toString(),
     /**
      * The did of the wallet owner
      */
@@ -31,5 +30,5 @@ data class VCLJwtDescriptor(
     /**
      * The issuer DID
      */
-    val aud: String? = null,
+    val aud: String? = null
 )

@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.VCLCountries
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
@@ -22,10 +21,9 @@ internal class CountriesUseCaseImpl(
         cacheSequence: Int,
         completionBlock: (VCLResult<VCLCountries>) -> Unit
     ) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread {
+        executor.runOnBackground {
             countriesRepository.getCountries(cacheSequence) {
-                executor.runOn(callingLooper) {
+                executor.runOnMain {
                     completionBlock(it)
                 }
             }

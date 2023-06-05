@@ -21,9 +21,9 @@ internal class JwtServiceRepositoryImpl(
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
         try {
-            jwtService.parse(encodedJwt)?.let {
-                completionBlock(VCLResult.Success(VCLJwt(it)))
-            } ?: throw Exception("Failed to parse $encodedJwt")
+            completionBlock(
+                VCLResult.Success(jwtService.decode(encodedJwt))
+            )
         } catch (ex: Exception) {
             completionBlock(VCLResult.Failure(VCLError(ex)))
         }
@@ -35,30 +35,28 @@ internal class JwtServiceRepositoryImpl(
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
         try {
-            completionBlock(VCLResult.Success(jwtService.verify(jwt, jwkPublic.valueStr)))
+            completionBlock(VCLResult.Success(jwtService.verify(jwt, jwkPublic)))
         } catch (ex: Exception) {
             completionBlock(VCLResult.Failure(VCLError(ex)))
         }
     }
 
     override fun generateSignedJwt(
+        kid: String?, // did:jwk in case of person binding
+        nonce: String?, // nonce == challenge
         jwtDescriptor: VCLJwtDescriptor,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
         try {
-            jwtService.sign(jwtDescriptor)?.let { completionBlock(VCLResult.Success(VCLJwt(it))) }
-                    ?: throw Exception("Failed to sign ${jwtDescriptor.payload}")
-        } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex)))
-        }
-    }
-
-    override fun generateDidJwk(
-        didJwkDescriptor: VCLDidJwkDescriptor?,
-        completionBlock: (VCLResult<VCLDidJwk>) -> Unit
-    ) {
-        try {
-            completionBlock(VCLResult.Success(jwtService.generateDidJwk(didJwkDescriptor)))
+            completionBlock(
+                VCLResult.Success(
+                    jwtService.sign(
+                        kid = kid,
+                        nonce = nonce,
+                        jwtDescriptor = jwtDescriptor
+                    )
+                )
+            )
         } catch (ex: Exception) {
             completionBlock(VCLResult.Failure(VCLError(ex)))
         }

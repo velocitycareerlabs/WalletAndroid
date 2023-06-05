@@ -7,6 +7,8 @@
 
 package io.velocitycareerlabs.impl.domain.infrastructure.db
 
+import com.nimbusds.jose.jwk.ECKey
+
 internal interface CacheService {
     fun getCountries(key: String): String?
     fun setCountries(key: String, value: String, cacheSequence: Int)
@@ -19,5 +21,4 @@ internal interface CacheService {
     fun getCredentialTypeSchema(key: String): String?
     fun setCredentialTypeSchema(key: String, value: String, cacheSequence: Int)
     fun isResetCacheCredentialTypeSchema(cacheSequence: Int): Boolean
-
 }

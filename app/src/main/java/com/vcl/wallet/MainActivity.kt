@@ -1,4 +1,6 @@
 /**
+ * Created by Michael Avoyan on 18/07/2021.
+ *
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -9,6 +11,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.core.view.isVisible
 import com.vcl.wallet.databinding.ActivityMainBinding
+import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCLProvider
 import io.velocitycareerlabs.api.entities.*
@@ -21,10 +24,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private val environment = VCLEnvironment.DEV
-    private val vcl = VCLProvider.vclInstance()
+    private lateinit var vcl: VCL
+    private lateinit var didJwk: VCLDidJwk
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        vcl = VCLProvider.vclInstance(applicationContext = this.applicationContext)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -58,17 +64,25 @@ class MainActivity : AppCompatActivity() {
         }
         vcl.initialize(
             initializationDescriptor = VCLInitializationDescriptor(
-                context = this.applicationContext,
                 environment = environment
             ),
             successHandler = {
                 Log.d(TAG, "VCL initialization succeed!")
 
-                showControls()
+                vcl.generateDidJwk(
+                    successHandler = { didJwk ->
+                        this.didJwk = didJwk
+                        Log.d(TAG, "VCL did:jwk is ${this.didJwk.value}")
+                        showControls()
+                    },
+                    errorHandler = { error ->
+                        logError("VCL initialization failed:", error)
+                        showError()
+                    }
+                )
             },
             errorHandler = { error ->
                 logError("VCL initialization failed:", error)
-
                 showError()
             }
         )
@@ -118,7 +132,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun submitPresentation(presentationSubmission: VCLPresentationSubmission) {
-        vcl.submitPresentation(presentationSubmission,
+        vcl.submitPresentation(
+            presentationSubmission = presentationSubmission,
+            didJwk = didJwk,
             { presentationSubmissionResult ->
                 Log.d(TAG, "VCL Presentation submission result: $presentationSubmissionResult")
                 vcl.getExchangeProgress(
@@ -168,7 +184,7 @@ class MainActivity : AppCompatActivity() {
         val credentialManifestDescriptorRefresh =
             VCLCredentialManifestDescriptorRefresh(
                 service = service,
-                credentialIds = Constants.CredentialIds
+                credentialIds = Constants.CredentialIdsToRefresh
             )
         vcl.getCredentialManifest(credentialManifestDescriptorRefresh,
             { credentialManifest ->
@@ -229,6 +245,7 @@ class MainActivity : AppCompatActivity() {
         )
         vcl.generateOffers(
             generateOffersDescriptor = generateOffersDescriptor,
+            didJwk = didJwk,
             { offers ->
                 Log.d(TAG, "VCL Generated Offers: ${offers.all}")
                 Log.d(TAG, "VCL Generated Offers Response Code: ${offers.responseCode}")
@@ -279,11 +296,13 @@ class MainActivity : AppCompatActivity() {
         val approvedRejectedOfferIds = Utils.getApprovedRejectedOfferIdsMock(offers)
         val finalizeOffersDescriptor = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifest,
+            offers = offers,
             approvedOfferIds = approvedRejectedOfferIds.first,
             rejectedOfferIds = approvedRejectedOfferIds.second
         )
         vcl.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptor,
+            didJwk = didJwk,
             token = offers.token,
             { verifiableCredentials ->
                 Log.d(TAG, "VCL finalized Offers")
@@ -336,7 +355,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun generateSignedJwt() {
         vcl.generateSignedJwt(
-            VCLJwtDescriptor(payload = Constants.SomeJson, iss = "iss123", jti = "jti123"),
+            VCLJwtDescriptor(payload = Constants.SomePayload, iss = "iss123", jti = "jti123"),
             { jwt ->
                 Log.d(TAG, "VCL JWT generated: ${jwt.signedJwt.serialize()}")
             },

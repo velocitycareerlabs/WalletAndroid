@@ -81,7 +81,7 @@ internal class UrlsTest {
 
     @Test
     fun testXVnfProtocolVersion() {
-        assert(HeaderValues.XVnfProtocolVersion == "1.0")
+        assert(HeaderValues.XVnfProtocolVersion == "2.0")
     }
 
     @After

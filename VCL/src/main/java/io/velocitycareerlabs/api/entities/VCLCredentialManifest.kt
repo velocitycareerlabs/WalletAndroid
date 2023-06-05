@@ -7,12 +7,16 @@
 
 package io.velocitycareerlabs.api.entities
 
+import io.velocitycareerlabs.impl.extensions.getUrlSubPath
+import kotlin.io.path.ExperimentalPathApi
+
 data class VCLCredentialManifest(
     val jwt: VCLJwt,
     val vendorOriginContext: String? = null
 ) {
     val iss: String get() = jwt.payload.toJSONObject()?.get(KeyIss) as? String ?: ""
     val did: String get() = iss
+    val issuerId: String get() = retrieveIssuerId()
     val exchangeId: String get() = jwt.payload.toJSONObject()?.get(KeyExchangeId) as? String ?: ""
     val presentationDefinitionId: String get() = (jwt.payload.toJSONObject()?.get(KeyPresentationDefinitionId) as? Map<*, *>)?.get(
         KeyId) as? String ?: ""
@@ -32,10 +36,15 @@ data class VCLCredentialManifest(
             VCLCredentialManifest.KeySubmitIdentificationUri
         )?.toString() ?: ""
 
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun retrieveIssuerId() =
+        ((jwt.payload.toJSONObject().getOrDefault(CodingKeys.KeyMetadata, HashMap<String, Any>()) as? Map<String, Any> )?.getOrDefault(CodingKeys.KeyFinalizeOffersUri, "") as? String ?: "").substringBefore("/issue/")
+
     companion object CodingKeys {
         const val KeyIssuingRequest = "issuing_request"
 
         const val KeyId = "id"
+        const val KeyDid = "did"
         const val KeyIss = "iss"
         const val KeyIssuer = "issuer"
         const val KeyExchangeId = "exchange_id"

@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.VCLCountries
 import io.velocitycareerlabs.api.entities.VCLCredentialTypesUIFormSchema
 import io.velocitycareerlabs.api.entities.VCLCredentialTypesUIFormSchemaDescriptor
@@ -25,13 +24,12 @@ internal class CredentialTypesUIFormSchemaUseCaseImpl(
         countries: VCLCountries,
         completionBlock: (VCLResult<VCLCredentialTypesUIFormSchema>) -> Unit
     ) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread {
+        executor.runOnBackground {
             credentialTypesUIFormSchemaRepository.getCredentialTypesUIFormSchema(
                 credentialTypesUIFormSchemaDescriptor,
                 countries
             ) {
-                executor.runOn(callingLooper) {
+                executor.runOnMain {
                     completionBlock(it)
                 }
             }

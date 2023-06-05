@@ -30,14 +30,6 @@ internal class Urls {
         val ResolveKid get() = "$BaseUrlServices/api/v0.6/resolve-kid/"
         val CredentialTypesFormSchema get() = "$BaseUrlServices/api/v0.6/form-schemas?credentialType=$CredentialType"
         val VerifiedProfile get() = "$BaseUrlServices/api/v0.6/organizations/$Did/verified-profile"
-
-//        private const val BaseUrlAgent get() = "https://${EnvironmentPrefix}agent.velocitycareerlabs.io"
-//        val PresentationSubmission get() = "$BaseUrlAgent/api/holder/v0.6/org/$Did/inspect/submit-presentation"
-//        val ExchangeProgress get() = "$BaseUrlAgent/api/holder/v0.6/org/$Did/get-exchange-progress"
-//        val CredentialManifest get() = "$BaseUrlAgent/api/holder/v0.6/org/$Did/issue/get-credential-manifest"
-//        val IdentificationSubmission get() = "$BaseUrlAgent/api/holder/v0.6/org/$Did/issue/submit-identification"
-//        val GenerateOffers get() = "$BaseUrlAgent/api/holder/v0.6/org/$Did/issue/credential-offers"
-//        val FinalizeOffers get() = "$BaseUrlAgent/api/holder/v0.6/org/$Did/issue/finalize-offers"
     }
 }
 
@@ -55,5 +47,5 @@ object HeaderKeys {
 }
 
 object HeaderValues {
-    const val XVnfProtocolVersion = "1.0"
+    const val XVnfProtocolVersion = "2.0"
 }

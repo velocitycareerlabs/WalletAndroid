@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.VCLExchange
 import io.velocitycareerlabs.api.entities.VCLExchangeDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
@@ -20,12 +19,15 @@ internal class ExchangeProgressUseCaseImpl(
     private val executor: Executor
 ): ExchangeProgressUseCase {
 
-    override fun getExchangeProgress(exchangeDescriptor: VCLExchangeDescriptor,
-                                     completionBlock: (VCLResult<VCLExchange>) -> Unit) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread() {
+    override fun getExchangeProgress(
+        exchangeDescriptor: VCLExchangeDescriptor,
+        completionBlock: (VCLResult<VCLExchange>) -> Unit
+    ) {
+        executor.runOnBackground {
             exchangeProgressRepository.getExchangeProgress(exchangeDescriptor) {
-                executor.runOn(callingLooper) { completionBlock(it) }
+                executor.runOnMain {
+                    completionBlock(it)
+                }
             }
         }
     }

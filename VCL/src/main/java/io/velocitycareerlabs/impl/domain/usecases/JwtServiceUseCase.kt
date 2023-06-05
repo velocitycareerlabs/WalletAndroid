@@ -16,11 +16,9 @@ internal interface JwtServiceUseCase {
         completionBlock: (VCLResult<Boolean>) -> Unit
     )
     fun generateSignedJwt(
+        kid: String? = null,
+        nonce: String? = null,
         jwtDescriptor: VCLJwtDescriptor,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
-    )
-    fun generateDidJwk(
-        didJwkDescriptor: VCLDidJwkDescriptor? = null,
-        completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     )
 }

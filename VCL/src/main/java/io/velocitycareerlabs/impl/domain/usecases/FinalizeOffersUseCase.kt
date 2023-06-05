@@ -7,6 +7,7 @@
 
 package io.velocitycareerlabs.impl.domain.usecases
 
+import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLJwtVerifiableCredentials
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLToken
@@ -14,8 +15,9 @@ import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
 
 internal interface FinalizeOffersUseCase {
     fun finalizeOffers(
-        token: VCLToken,
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
+        didJwk: VCLDidJwk,
+        token: VCLToken,
         completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit
     )
 }
