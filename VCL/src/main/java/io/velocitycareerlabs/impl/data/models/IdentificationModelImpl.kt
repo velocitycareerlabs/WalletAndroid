@@ -16,10 +16,14 @@ internal class IdentificationModelImpl(
 ): IdentificationModel {
     override var data: VCLToken? = null
 
-    override fun submit(identificationSubmission: VCLIdentificationSubmission,
-                        completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit){
+    override fun submit(
+        identificationSubmission: VCLIdentificationSubmission,
+        didJwk: VCLDidJwk,
+        completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
+    ) {
         identificationSubmissionUseCase.submit(
-            identificationSubmission,
+            submission = identificationSubmission,
+            didJwk = didJwk
         ) { result ->
             result.handleResult({ data = result.data?.token }, { })
             completionBlock(result)

@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.api.entities.VCLVerifiedProfileDescriptor
@@ -23,10 +22,11 @@ internal class VerifiedProfileUseCaseImpl(
         verifiedProfileDescriptor: VCLVerifiedProfileDescriptor,
         completionBlock: (VCLResult<VCLVerifiedProfile>) -> Unit
     ) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread(){
+        executor.runOnBackground {
             verifiedProfileRepository.getVerifiedProfile(verifiedProfileDescriptor) {
-                executor.runOn(callingLooper) { completionBlock(it) }
+                executor.runOnMain {
+                    completionBlock(it)
+                }
             }
         }
     }

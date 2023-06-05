@@ -14,14 +14,19 @@ import java.text.ParseException
 
 internal interface JwtService {
     @Throws(ParseException::class)
-    fun parse(jwt: String): SignedJWT?
+    fun decode(jwt: String): VCLJwt
 
     fun encode(str: String): String
 
     @Throws(JOSEException::class)
-    fun verify(jwt: VCLJwt, jwk: String): Boolean
+    fun verify(
+        jwt: VCLJwt,
+        jwk: VCLJwkPublic
+    ): Boolean
 
-    fun sign(jwtDescriptor: VCLJwtDescriptor): SignedJWT?
-
-    fun generateDidJwk(didJwkDescriptor: VCLDidJwkDescriptor? = null): VCLDidJwk
+    fun sign(
+        kid: String? = null,
+        nonce: String? = null,
+        jwtDescriptor: VCLJwtDescriptor
+    ): VCLJwt
 }

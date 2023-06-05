@@ -50,4 +50,10 @@ class VCLSubmissionTest {
         assert(pushDelegateBodyJsonObj.optString(VCLPushDelegate.KeyPushUrl) == subject.pushDelegate!!.pushUrl)
         assert(pushDelegateBodyJsonObj.optString(VCLPushDelegate.KeyPushToken) == subject.pushDelegate!!.pushToken)
     }
+
+    @Test
+    fun testContext() {
+        assert(VCLSubmission.KeyContext == "@context")
+        assert(VCLSubmission.ValueContextList == listOf("https://www.w3.org/2018/credentials/v1"))
+    }
 }

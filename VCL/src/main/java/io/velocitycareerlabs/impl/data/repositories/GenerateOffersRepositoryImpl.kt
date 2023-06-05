@@ -12,7 +12,9 @@ import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.infrastructure.network.Response
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.repositories.GenerateOffersRepository
+import io.velocitycareerlabs.impl.extensions.toJsonObject
 import org.json.JSONArray
+import org.json.JSONObject
 import java.lang.Exception
 
 internal class GenerateOffersRepositoryImpl(
@@ -52,17 +54,21 @@ internal class GenerateOffersRepositoryImpl(
     }
 
     private fun parse(offersResponse: Response, token: VCLToken): VCLOffers {
-        return try {
-            VCLOffers(
-                all = JSONArray(offersResponse.payload),
+        offersResponse.payload.toJsonObject()?.let { payload ->
+            return VCLOffers(
+                payload = payload,
+                all = payload.optJSONArray(VCLOffers.CodingKeys.KeyOffers) ?: JSONArray(),
                 responseCode = offersResponse.code,
-                token = token
+                token = token,
+                challenge = payload.optString(VCLOffers.CodingKeys.KeyChallenge) ?: ""
             )
-        } catch (ex: Exception) {
-            VCLOffers(
-                all = JSONArray("[]"),
+        } ?: run {
+            return VCLOffers(
+                payload = JSONObject(),
+                all = JSONArray(),
                 responseCode = offersResponse.code,
-                token = token
+                token = token,
+                challenge = ""
             )
         }
     }

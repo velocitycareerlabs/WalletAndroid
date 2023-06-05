@@ -7,11 +7,9 @@
 
 package io.velocitycareerlabs.api.entities
 
-import android.content.Context
 import io.velocitycareerlabs.api.VCLEnvironment
 
 data class VCLInitializationDescriptor(
-    val context: Context,
     val environment: VCLEnvironment = VCLEnvironment.PROD,
     val cacheSequence: Int = 0
 )

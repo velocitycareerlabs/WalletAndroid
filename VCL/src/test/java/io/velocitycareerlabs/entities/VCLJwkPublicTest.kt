@@ -8,8 +8,8 @@
 package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.VCLJwkPublic
-import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
-import org.json.JSONObject
+import io.velocitycareerlabs.impl.extensions.toJsonObject
+import io.velocitycareerlabs.infrastructure.resources.valid.KeyServiceMocks
 import org.junit.Test
 
 internal class VCLJwkPublicTest {
@@ -17,19 +17,18 @@ internal class VCLJwkPublicTest {
     lateinit var subject: VCLJwkPublic
 
     companion object {
-        val jwkJson = JSONObject(JwtServiceMocks.JWK)
+        val jwkJson = KeyServiceMocks.JWK.toJsonObject()
     }
 
     @Test
     fun testJwkPublicFromStr() {
-        subject = VCLJwkPublic(valueStr = JwtServiceMocks.JWK)
+        subject = VCLJwkPublic(valueStr = KeyServiceMocks.JWK)
 
-        assert(subject.valueStr == JwtServiceMocks.JWK)
+        assert(subject.valueStr == KeyServiceMocks.JWK)
     }
-
     @Test
     fun testJwkPublicFromJson() {
-        subject = VCLJwkPublic(valueJson = jwkJson)
+        subject = VCLJwkPublic(valueJson = jwkJson!!)
 
         assert(subject.valueJson == jwkJson)
     }

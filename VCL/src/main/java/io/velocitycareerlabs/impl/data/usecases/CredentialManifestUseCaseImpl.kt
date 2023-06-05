@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.CredentialManifestRepository
@@ -27,8 +26,7 @@ internal class CredentialManifestUseCaseImpl(
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread {
+        executor.runOnBackground {
             credentialManifestRepository.getCredentialManifest(
                 credentialManifestDescriptor
             ) { jwtStrResult ->
@@ -37,12 +35,11 @@ internal class CredentialManifestUseCaseImpl(
                         onGetJwtSuccess(
                             jwtStr,
                             credentialManifestDescriptor,
-                            callingLooper,
                             completionBlock
                         )
                     },
                     { error ->
-                        onError(error, callingLooper, completionBlock)
+                        onError(error, completionBlock)
                     }
                 )
             }
@@ -52,7 +49,6 @@ internal class CredentialManifestUseCaseImpl(
     private fun onGetJwtSuccess(
         jwtStr: String,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        callingLooper: Looper?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         jwtServiceRepository.decode(jwtStr) { jwtResult ->
@@ -61,12 +57,11 @@ internal class CredentialManifestUseCaseImpl(
                     onDecodeJwtSuccess(
                         jwt,
                         credentialManifestDescriptor,
-                        callingLooper,
                         completionBlock
                     )
                 },
                 { error ->
-                    onError(error, callingLooper, completionBlock)
+                    onError(error, completionBlock)
                 }
             )
         }
@@ -75,28 +70,26 @@ internal class CredentialManifestUseCaseImpl(
     private fun onDecodeJwtSuccess(
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        callingLooper: Looper?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        jwt.header.keyID?.replace("#", "#".encode())?.let { keyID ->
-            resolveKidRepository.getPublicKey(keyID) { publicKeyResult ->
+        jwt.kid?.replace("#", "#".encode())?.let { kid ->
+            resolveKidRepository.getPublicKey(kid) { publicKeyResult ->
                 publicKeyResult.handleResult(
                     { publicKey ->
                         onResolvePublicKeySuccess(
                             publicKey,
                             jwt,
                             credentialManifestDescriptor,
-                            callingLooper,
                             completionBlock
                         )
                     },
                     { error ->
-                        onError(error, callingLooper, completionBlock)
+                        onError(error, completionBlock)
                     }
                 )
             }
         } ?: run {
-            onError(VCLError("Empty KeyID"), callingLooper, completionBlock)
+            onError(VCLError("Empty KeyID"), completionBlock)
         }
     }
 
@@ -104,7 +97,6 @@ internal class CredentialManifestUseCaseImpl(
         jwkPublic: VCLJwkPublic,
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        callingLooper: Looper?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         jwtServiceRepository.verifyJwt(jwt, jwkPublic)
@@ -115,12 +107,11 @@ internal class CredentialManifestUseCaseImpl(
                         isVerified,
                         jwt,
                         credentialManifestDescriptor,
-                        callingLooper,
                         completionBlock
                     )
                 },
                 { error ->
-                    onError(error, callingLooper, completionBlock)
+                    onError(error, completionBlock)
                 }
             )
         }
@@ -130,27 +121,25 @@ internal class CredentialManifestUseCaseImpl(
         isVerified: Boolean,
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        callingLooper: Looper?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         if (isVerified) {
-            executor.runOn(callingLooper) {
+            executor.runOnMain {
                 completionBlock(VCLResult.Success(VCLCredentialManifest(
                     jwt,
                     credentialManifestDescriptor.vendorOriginContext
                 )))
             }
         } else {
-            onError(VCLError("Failed to verify: $jwt"), callingLooper, completionBlock)
+            onError(VCLError("Failed to verify: $jwt"), completionBlock)
         }
     }
 
     private fun onError(
         error: VCLError,
-        callingLooper: Looper?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        executor.runOn(callingLooper) {
+        executor.runOnMain {
             completionBlock(VCLResult.Failure(error))
         }
     }

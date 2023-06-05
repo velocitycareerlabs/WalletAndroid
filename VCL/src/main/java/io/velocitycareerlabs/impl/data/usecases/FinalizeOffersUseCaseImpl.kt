@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
@@ -21,65 +20,109 @@ internal class FinalizeOffersUseCaseImpl(
     private val executor: Executor
 ): FinalizeOffersUseCase {
     override fun finalizeOffers(
-        token: VCLToken,
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
+        didJwk: VCLDidJwk,
+        token: VCLToken,
         completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit
     ) {
-        val callingLooper = Looper.myLooper()
-        val passedCredentials = mutableListOf<VCLJwt>()
-        val failedCredentials = mutableListOf<VCLJwt>()
-        executor.runOnBackgroundThread {
-            finalizeOffersRepository.finalizeOffers(token, finalizeOffersDescriptor) { encodedJwtOffersListResult ->
-                encodedJwtOffersListResult.handleResult(
-                    { encodedJwtOffers ->
-                        encodedJwtOffers.forEach { encodedJwtOffer ->
-                            jwtServiceRepository.decode(encodedJwtOffer) { jwtResult ->
-                                jwtResult.handleResult(
-                                    { jwt ->
-                                        if (verifyJwtCredential(jwt, finalizeOffersDescriptor)) {
-                                            passedCredentials.add(jwt)
-                                        } else {
-                                            failedCredentials.add(jwt)
-                                        }
-                                        if(encodedJwtOffers.size == passedCredentials.size + failedCredentials.size) {
-                                            executor.runOn(callingLooper) {
-                                                completionBlock(VCLResult.Success(VCLJwtVerifiableCredentials(passedCredentials, failedCredentials)))
-                                            }
-                                        }
-                                    },
-                                    { error ->
-                                        onError(error, callingLooper, completionBlock)
-                                    })
-                            }
-                        }
-                        if(encodedJwtOffers.isEmpty()) {
-                            executor.runOn(callingLooper) {
-                                completionBlock(VCLResult.Success(VCLJwtVerifiableCredentials(passedCredentials, failedCredentials)))
-                            }
+        executor.runOnBackground {
+            this.jwtServiceRepository.generateSignedJwt(
+                kid = didJwk.kid,
+                nonce = finalizeOffersDescriptor.offers.challenge,
+                jwtDescriptor = VCLJwtDescriptor(
+                    iss = didJwk.value,
+                    aud = finalizeOffersDescriptor.issuerId
+                )
+            ) { proofJwtResult ->
+                proofJwtResult.handleResult(
+                    successHandler = { proof ->
+                        this.finalizeOffersRepository.finalizeOffers(
+                            token = token,
+                            proof = proof,
+                            finalizeOffersDescriptor = finalizeOffersDescriptor
+                        ) { encodedJwtOffersListResult ->
+                            encodedJwtOffersListResult.handleResult(
+                                successHandler = { encodedJwtOffersList ->
+                                    this.verifyCredentials(
+                                        encodedJwtOffersList,
+                                        finalizeOffersDescriptor,
+                                        completionBlock
+                                    )
+                                },
+                                errorHandler = { error ->
+                                    executor.runOnMain {
+                                        completionBlock(VCLResult.Failure(error))
+                                    }
+                                }
+                            )
                         }
                     },
-                    { error ->
-                        onError(error, callingLooper, completionBlock)
+                    errorHandler = { error ->
+                        executor.runOnMain {
+                            completionBlock(VCLResult.Failure(error))
+                        }
                     }
                 )
             }
         }
     }
 
-    private fun verifyJwtCredential(
+    private fun verifyCredentials(
+        encodedJwts: List<String>,
+        finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
+        completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit
+    ) {
+        val passedCredentials = mutableListOf<VCLJwt>()
+        val failedCredentials = mutableListOf<VCLJwt>()
+        encodedJwts.forEach { encodedJwtOffer ->
+            this.jwtServiceRepository.decode(encodedJwt = encodedJwtOffer) { jwtResult ->
+                jwtResult.handleResult(
+                    successHandler = { jwtCredential ->
+                        if (this.verifyJwtCredential(jwtCredential, finalizeOffersDescriptor)) {
+                            passedCredentials += jwtCredential
+                        } else {
+                            failedCredentials += jwtCredential
+                        }
+                        if (encodedJwts.size == passedCredentials.size + failedCredentials.size) {
+                            this.executor.runOnMain {
+                                completionBlock(
+                                    VCLResult.Success(
+                                        VCLJwtVerifiableCredentials(
+                                            passedCredentials = passedCredentials,
+                                            failedCredentials = failedCredentials
+                                        )
+                                    )
+                                )
+                            }
+                        }
+                    },
+                    errorHandler = { error ->
+                        this.onError(error, completionBlock)
+                    }
+                )
+            }
+        }
+        if (encodedJwts.isEmpty()) {
+            executor.runOnMain {
+                completionBlock(
+                    VCLResult.Success(VCLJwtVerifiableCredentials(
+                            passedCredentials = passedCredentials,
+                            failedCredentials = failedCredentials
+                        ))
+                )
+            }
+        }
+    }
+
+    private fun verifyJwtCredential (
         jwtCredential: VCLJwt,
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor
-    ): Boolean {
-        return jwtCredential.payload.toJSONObject()?.get("iss") == finalizeOffersDescriptor.did
-    }
+    ) = jwtCredential.payload.toJSONObject()["iss"] as? String == finalizeOffersDescriptor.did
 
     private fun onError(
         error: VCLError,
-        callingLooper: Looper?,
         completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit
-    ) {
-        executor.runOn(callingLooper) {
+    ) = executor.runOnMain {
             completionBlock(VCLResult.Failure(error))
         }
-    }
 }

@@ -7,12 +7,13 @@
 
 package io.velocitycareerlabs.api
 
+import android.content.Context
 import io.velocitycareerlabs.impl.VCLImpl
 
 class VCLProvider {
     companion object {
-        fun vclInstance(): VCL {
-            return VCLImpl()
+        fun vclInstance(applicationContext: Context): VCL {
+            return VCLImpl(applicationContext = applicationContext.applicationContext)
         }
     }
 }

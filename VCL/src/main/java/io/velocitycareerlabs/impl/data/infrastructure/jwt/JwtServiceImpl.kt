@@ -10,82 +10,90 @@ package io.velocitycareerlabs.impl.data.infrastructure.jwt
 import com.nimbusds.jose.*
 import com.nimbusds.jose.crypto.ECDSASigner
 import com.nimbusds.jose.crypto.ECDSAVerifier
-import com.nimbusds.jose.jwk.Curve
-import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.JWK
-import com.nimbusds.jose.jwk.KeyUse
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import com.nimbusds.jose.util.Base64URL.encode
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.domain.infrastructure.jwt.JwtService
+import io.velocitycareerlabs.impl.domain.infrastructure.keys.KeyService
 import io.velocitycareerlabs.impl.extensions.addClaims
-import io.velocitycareerlabs.impl.extensions.addDaysToNow
-import io.velocitycareerlabs.impl.extensions.encodeToBase64
+import io.velocitycareerlabs.impl.extensions.addDays
 import io.velocitycareerlabs.impl.extensions.randomString
 import java.text.ParseException
 import java.util.*
 
-internal class JwtServiceImpl: JwtService {
+internal class JwtServiceImpl(
+    private val keyService: KeyService
+): JwtService {
 
     @Throws(ParseException::class)
-    override fun parse(jwt: String): SignedJWT? = SignedJWT.parse(jwt)
+    override fun decode(jwt: String): VCLJwt = VCLJwt(SignedJWT.parse(jwt))
 
     override fun encode(str: String): String = encode(str.toByteArray()).toString()
 
     @Throws(JOSEException::class)
-    override fun verify(jwt: VCLJwt, jwk: String): Boolean =
-        jwt.signedJwt.verify(ECDSAVerifier(JWK.parse(jwk).toECKey()))
+    override fun verify(
+        jwt: VCLJwt,
+        jwk: VCLJwkPublic
+    ): Boolean =
+        jwt.signedJwt.verify(ECDSAVerifier(JWK.parse(jwk.valueStr).toECKey()))
 
-    override fun sign(jwtDescriptor: VCLJwtDescriptor): SignedJWT? {
-        try {
-            val jwk: ECKey = generateJwkSECP256K1(jwtDescriptor.kid)
-
-            val header = JWSHeader.Builder(JWSAlgorithm.ES256K).jwk(jwk.toPublicJWK())
-                .type(JOSEObjectType("JWT")).build()
-
-            val claimsSetBuilder = JWTClaimsSet.Builder()
-//            OPTIONS:    https://dev.azure.com/velocitycareerlabs/velocity/_wiki/wikis/velocity.wiki/100/SDK?anchor=jwt-options-(jwt-options)
-//            {
-//                "audience": "did:velocity:0xc257274276a4e539741ca11b590b9447b26a8051", // presentation_request.iss
-//                "issuer": "31903091301-12332-32111-000001",  // generate a uuid. will be the holder's DID in the future
-//                "expiresIn": "P1W" // 1 week encoded using https://en.wikipedia.org/wiki/ISO_8601#Durations
-//            }
-                .audience(jwtDescriptor.iss)
-                .issuer(jwtDescriptor.iss)
-                .jwtID(jwtDescriptor.jti) // jti
-                .issueTime(Date()) // iat
-                .notBeforeTime(Date()) // nbf
-                .expirationTime(Date().addDaysToNow(7)) // exp
-                .subject(randomString(10))
-
-            claimsSetBuilder.addClaims(jwtDescriptor.payload)
-
-            val signedJWT = SignedJWT(header, claimsSetBuilder.build())
-
-            val signer: JWSSigner = ECDSASigner(jwk)
-
-            signedJWT.sign(signer)
-
-            return signedJWT
-        } catch (e: Exception) {
-            return null
+    override fun sign(
+        kid: String?,
+        nonce: String?,
+        jwtDescriptor: VCLJwtDescriptor
+    ): VCLJwt {
+        val ecKey = jwtDescriptor.keyId?.let {
+                keyId -> keyService.retrieveKey(keyId)
+        } ?: run {
+            keyService.generateKey()
         }
+
+        val header = JWSHeader.Builder(JWSAlgorithm.ES256K)
+            .jwk(keyService.retrievePublicJwk(ecKey))
+            .type(JOSEObjectType(GlobalConfig.TypeJwt))
+        kid?.let { header.keyID(it) }
+        val jwtHeader = header.build()
+
+        val signedJWT = SignedJWT(
+            jwtHeader,
+            generateClaims(nonce, jwtDescriptor)
+        )
+        val signer: JWSSigner = ECDSASigner(ecKey)
+        signedJWT.sign(signer)
+
+        return VCLJwt(signedJWT)
     }
 
-    override fun generateDidJwk(didJwkDescriptor: VCLDidJwkDescriptor?) =
-        VCLDidJwk(
-            "${VCLDidJwk.DidJwkPrefix}${generateJwkPublic(didJwkDescriptor?.kid ?: UUID.randomUUID().toString()).valueStr.encodeToBase64()}"
-        )
+    private fun generateClaims(
+        nonce: String?,
+        jwtDescriptor: VCLJwtDescriptor
+    ): JWTClaimsSet {
+        val curDate = Date()
+        val claimsSetBuilder = JWTClaimsSet.Builder()
+            .audience(jwtDescriptor.aud)
+            .issuer(jwtDescriptor.iss)
+            .jwtID(jwtDescriptor.jti) // jti
+            .issueTime(curDate) // iat
+            .notBeforeTime(curDate) // nbf
+            .expirationTime(curDate.addDays(7)) // exp
+            .subject(randomString(10))
+        nonce?.let { claimsSetBuilder.claim("nonce", it) }
+        jwtDescriptor.payload?.let { claimsSetBuilder.addClaims(it) }
 
-//  https://connect2id.com/products/nimbus-jose-jwt/examples/jwk-generation
-    private fun generateJwkPublic(kid: String) =
-        VCLJwkPublic(generateJwkSECP256K1(kid).toPublicJWK().toJSONString().toString())
+        return claimsSetBuilder.build()
+    }
 
-    private fun generateJwkSECP256K1(kid: String) =
-        ECKeyGenerator(Curve.SECP256K1)
-        .keyUse(KeyUse.SIGNATURE) // indicate the intended use of the key
-        .keyID(kid) // give the key a unique ID
-        .generate()
+    companion object CodingKeys {
+        val KeyIss = "iss"
+        val KeyAud = "aud"
+        val KeySub = "sub"
+        val KeyJti = "jti"
+        val KeyIat = "iat"
+        val KeyNbf = "nbf"
+        val KeyExp = "exp"
+        val KeyNonce = "nonce"
+    }
 }

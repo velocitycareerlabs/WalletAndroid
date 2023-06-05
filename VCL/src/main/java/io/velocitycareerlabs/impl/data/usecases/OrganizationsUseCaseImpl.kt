@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.VCLOrganizations
 import io.velocitycareerlabs.api.entities.VCLOrganizationsSearchDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
@@ -20,12 +19,15 @@ internal class OrganizationsUseCaseImpl(
     private val executor: Executor
 ): OrganizationsUseCase {
 
-    override fun searchForOrganizations(organizationsSearchDescriptor: VCLOrganizationsSearchDescriptor,
-                                        completionBlock: (VCLResult<VCLOrganizations>) -> Unit) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread(){
+    override fun searchForOrganizations(
+        organizationsSearchDescriptor: VCLOrganizationsSearchDescriptor,
+        completionBlock: (VCLResult<VCLOrganizations>) -> Unit
+    ) {
+        executor.runOnBackground {
             organizationsRepository.searchForOrganizations(organizationsSearchDescriptor) {
-                executor.runOn(callingLooper) { completionBlock(it) }
+                executor.runOnMain {
+                    completionBlock(it)
+                }
             }
         }
     }

@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.GenerateOffersRepository
@@ -22,10 +21,11 @@ internal class GenerateOffersUseCaseImpl(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
         completionBlock: (VCLResult<VCLOffers>) -> Unit
     ) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread {
+        executor.runOnBackground {
             generateOffersRepository.generateOffers(token, generateOffersDescriptor) {
-                executor.runOn(callingLooper) { completionBlock(it) }
+                executor.runOnMain {
+                    completionBlock(it)
+                }
             }
         }
     }

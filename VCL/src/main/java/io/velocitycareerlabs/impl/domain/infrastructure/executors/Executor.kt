@@ -7,11 +7,8 @@
 
 package io.velocitycareerlabs.impl.domain.infrastructure.executors
 
-import android.os.Looper
-
 internal interface Executor {
-    fun runOn(looper: Looper?, runnable: Runnable)
-    fun runOnMainThread(runnable: Runnable)
-    fun runOnBackgroundThread(runnable: Runnable)
-    fun waitForTermination()
+    fun runOnMain(block: () -> Unit)
+    fun runOnBackground(block: () -> Unit)
+    fun shutdown()
 }

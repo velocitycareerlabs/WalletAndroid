@@ -22,6 +22,7 @@ internal class FinalizeOffersRepositoryImpl(
 
     override fun finalizeOffers(
         token: VCLToken,
+        proof: VCLJwt,
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         completionBlock: (VCLResult<List<String>>) -> Unit
     ) {
@@ -34,7 +35,7 @@ internal class FinalizeOffersRepositoryImpl(
                 ),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
-            body = finalizeOffersDescriptor.payload.toString(),
+            body = finalizeOffersDescriptor.generateRequestBody(jwt = proof).toString(),
             method = Request.HttpMethod.POST,
             contentType = Request.ContentTypeApplicationJson,
             completionBlock = { result ->

@@ -11,10 +11,10 @@ android {
     namespace 'io.velocitycareerlabs'
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 33
-        versionName "1.12.0"
-        versionCode 80
+        versionName "1.13.0"
+        versionCode 89
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -164,6 +164,8 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.9.0'
 
     implementation "com.nimbusds:nimbus-jose-jwt:9.31"
+    //noinspection GradleDependency
+    implementation "androidx.security:security-crypto:1.0.0-rc03"
 
     // Required -- JUnit 4 framework
     testImplementation 'junit:junit:4.13.2'
@@ -171,10 +173,13 @@ dependencies {
     testImplementation 'androidx.test:core:1.5.0'
     testImplementation 'org.robolectric:robolectric:4.10'
     // Optional -- Mockito framework
-    testImplementation 'org.mockito:mockito-core:4.0.0'
-    testImplementation 'org.mockito:mockito-inline:4.0.0'
+    def mockito_version = "4.0.0"
+    testImplementation "org.mockito:mockito-core:$mockito_version"
+    testImplementation "org.mockito:mockito-inline:$mockito_version"
     // Required -- JSON framework
     testImplementation 'org.json:json:20201115'
+    // jsonassert
+    testImplementation 'org.skyscreamer:jsonassert:1.5.1'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

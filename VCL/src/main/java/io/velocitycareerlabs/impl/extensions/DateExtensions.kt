@@ -9,10 +9,17 @@ package io.velocitycareerlabs.impl.extensions
 
 import java.util.*
 
-internal fun Date.addDaysToNow(days: Int): Date {
+internal fun Date.addDays(days: Int): Date {
     val calendar = Calendar.getInstance()
     calendar.time = this
     calendar.add(Calendar.DAY_OF_MONTH, days)
+    return calendar.time
+}
+
+internal fun Date.addSeconds(seconds: Int): Date {
+    val calendar = Calendar.getInstance()
+    calendar.time = this
+    calendar.add(Calendar.SECOND, seconds)
     return calendar.time
 }
 

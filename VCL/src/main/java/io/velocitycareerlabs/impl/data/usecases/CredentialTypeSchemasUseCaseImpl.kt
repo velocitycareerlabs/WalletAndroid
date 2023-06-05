@@ -34,7 +34,7 @@ internal class CredentialTypeSchemasUseCaseImpl (
 
         schemaNamesArr.forEach { schemaName ->
             schemaName?.let {
-                executor.runOnBackgroundThread {
+                executor.runOnBackground {
                     credentialTypeSchemaRepository.getCredentialTypeSchema(
                         schemaName,
                         cacheSequence
@@ -46,11 +46,13 @@ internal class CredentialTypeSchemasUseCaseImpl (
                 }
             }
         }
-        executor.waitForTermination()
+        executor.shutdown()
 
         if (credentialTypeSchemasMapIsEmpty) {
             VCLLog.e(TAG, "Credential type schemas were not fount.")
         }
-        completionBlock(VCLResult.Success(VCLCredentialTypeSchemas(credentialTypeSchemasMap)))
+        executor.runOnMain {
+            completionBlock(VCLResult.Success(VCLCredentialTypeSchemas(credentialTypeSchemasMap)))
+        }
     }
 }

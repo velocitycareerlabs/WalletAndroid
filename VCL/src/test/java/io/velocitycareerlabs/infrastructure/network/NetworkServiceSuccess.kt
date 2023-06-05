@@ -14,8 +14,7 @@ import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import java.util.*
 
 internal class NetworkServiceSuccess(
-    private val validResponse: String,
-    private val isCacheValid: Boolean = false
+    private val validResponse: String
 ): NetworkService {
 
     override fun sendRequest(
@@ -29,13 +28,4 @@ internal class NetworkServiceSuccess(
     ) {
         completionBlock(VCLResult.Success(Response(validResponse, 0)))
     }
-
-//    override fun isCacheValid(
-//        endpoint: String,
-//        method: Request.HttpMethod,
-//        cacheDate: Date,
-//        completionBlock: (VCLResult<Boolean>) -> Unit
-//    ) {
-//        completionBlock(VCLResult.Success(isCacheValid))
-//    }
 }

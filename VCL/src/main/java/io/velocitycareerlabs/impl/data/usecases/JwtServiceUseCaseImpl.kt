@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
@@ -22,34 +21,30 @@ internal class JwtServiceUseCaseImpl(
         jwkPublic: VCLJwkPublic,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread {
+        executor.runOnBackground {
             jwtServiceRepository.verifyJwt(jwt, jwkPublic) {
-                executor.runOn(callingLooper) { completionBlock(it) }
+                executor.runOnMain {
+                    completionBlock(it)
+                }
             }
         }
     }
 
     override fun generateSignedJwt(
+        kid: String?,
+        nonce: String?,
         jwtDescriptor: VCLJwtDescriptor,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread {
-            jwtServiceRepository.generateSignedJwt(jwtDescriptor) {
-                executor.runOn(callingLooper) { completionBlock(it) }
-            }
-        }
-    }
-
-    override fun generateDidJwk(
-        didJwkDescriptor: VCLDidJwkDescriptor?,
-        completionBlock: (VCLResult<VCLDidJwk>) -> Unit
-    ) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread {
-            jwtServiceRepository.generateDidJwk(didJwkDescriptor) {
-                executor.runOn(callingLooper) { completionBlock(it) }
+        executor.runOnBackground {
+            jwtServiceRepository.generateSignedJwt(
+                kid = kid,
+                nonce = nonce,
+                jwtDescriptor = jwtDescriptor
+            ) { jwtResult ->
+                executor.runOnMain {
+                    completionBlock(jwtResult)
+                }
             }
         }
     }

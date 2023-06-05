@@ -7,22 +7,32 @@
 
 package io.velocitycareerlabs.usecases
 
+import android.os.Build
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
+import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
 import io.velocitycareerlabs.impl.data.repositories.CredentialManifestRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.ResolveKidRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialManifestUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
+import io.velocitycareerlabs.impl.extensions.toMap
+import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
-import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.skyscreamer.jsonassert.JSONAssert
+import org.skyscreamer.jsonassert.JSONCompareMode
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.O_MR1])
 internal class CredentialManifestUseCaseTest {
 
     lateinit var subject: CredentialManifestUseCase
@@ -36,13 +46,13 @@ internal class CredentialManifestUseCaseTest {
         // Arrange
         subject = CredentialManifestUseCaseImpl(
             CredentialManifestRepositoryImpl(
-                NetworkServiceSuccess(CredentialManifestMocks.CredentialManifestEncodedJwt)
+                NetworkServiceSuccess(CredentialManifestMocks.CredentialManifest1)
             ),
             ResolveKidRepositoryImpl(
                 NetworkServiceSuccess(CredentialManifestMocks.JWK)
             ),
             JwtServiceRepositoryImpl(
-                JwtServiceImpl()
+                JwtServiceImpl(KeyServiceImpl(SecretStoreServiceMock.Instance))
             ),
             EmptyExecutor()
         )
@@ -50,8 +60,8 @@ internal class CredentialManifestUseCaseTest {
 
         // Action
         subject.getCredentialManifest(
-            VCLCredentialManifestDescriptorByDeepLink(
-                DeepLinkMocks.CredentialManifestDeepLinkDevNet,
+            credentialManifestDescriptor = VCLCredentialManifestDescriptorByDeepLink(
+                deepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet,
                 issuingType = VCLIssuingType.Career
             )
         ) {
@@ -59,10 +69,24 @@ internal class CredentialManifestUseCaseTest {
         }
 
         // Assert
-        assert(
-            result!!.data!!.jwt.signedJwt.serialize() ==
-                    JSONObject(CredentialManifestMocks.CredentialManifestEncodedJwt).optString("issuing_request")
+        val credentialManifest = result!!.data
+        assert(credentialManifest?.jwt?.signedJwt?.serialize() == CredentialManifestMocks.CredentialManifestJwt1)
+        JSONAssert.assertEquals(
+            credentialManifest?.jwt?.header.toString(),
+            CredentialManifestMocks.Header,
+            JSONCompareMode.LENIENT
         )
+        assert(
+            credentialManifest?.jwt?.payload.toString()
+                .replace("$", "")
+                .toCharArray()
+                .sort().toString() ==
+                    CredentialManifestMocks.Payload.toString()
+                        .replace("$", "")
+                        .toCharArray()
+                        .sort().toString()
+        ) //removed $ to compare
+        assert(credentialManifest?.jwt?.signature.toString() == CredentialManifestMocks.Signature)
     }
 
     @After
