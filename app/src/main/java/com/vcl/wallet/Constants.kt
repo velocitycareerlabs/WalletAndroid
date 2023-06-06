@@ -45,27 +45,15 @@ object Constants {
         "{\"id\":\"did:velocity:0x571cf9ef33b111b7060942eb43133c0b347c7ca3#credential-agent-issuer-1\",\"type\":\"VelocityCredentialAgentIssuer_v1.0\",\"credentialTypes\":[\"Course\",\"EducationDegree\",\"Badge\"],\"serviceEndpoint\":\"$IssuingServiceEndPoint\"}"
 
     val PresentationSelectionsList = listOf(
-        VCLVerifiableCredential(
-            inputDescriptor = "PhoneV1.0",
-            jwtVc = AdamSmithPhoneJwt
-        ),
-        VCLVerifiableCredential(
-            inputDescriptor = "EmailV1.0",
-            jwtVc = AdamSmithEmailJwt
-        ),
-        VCLVerifiableCredential(
-            inputDescriptor = "DriversLicenseV1.0",
-            jwtVc = AdamSmithDriversLicenseJwt
-        )
+        VCLVerifiableCredential(inputDescriptor = "PhoneV1.0", jwtVc = AdamSmithPhoneJwt),
+        VCLVerifiableCredential(inputDescriptor = "EmailV1.0", jwtVc = AdamSmithEmailJwt),
+        VCLVerifiableCredential(inputDescriptor = "DriversLicenseV1.0", jwtVc = AdamSmithDriversLicenseJwt)
     )
 
     val IdentificationList = listOf(
         VCLVerifiableCredential(inputDescriptor = "PhoneV1.0", jwtVc = AdamSmithPhoneJwt),
         VCLVerifiableCredential(inputDescriptor = "EmailV1.0", jwtVc = AdamSmithEmailJwt),
-        VCLVerifiableCredential(
-            inputDescriptor = "DriversLicenseV1.0",
-            jwtVc = AdamSmithDriversLicenseJwt
-        )
+        VCLVerifiableCredential(inputDescriptor = "DriversLicenseV1.0", jwtVc = AdamSmithDriversLicenseJwt)
     )
 
     val OrganizationsSearchDescriptor = VCLOrganizationsSearchDescriptor(
