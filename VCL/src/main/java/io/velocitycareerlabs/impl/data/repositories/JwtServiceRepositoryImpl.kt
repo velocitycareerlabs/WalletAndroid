@@ -22,7 +22,7 @@ internal class JwtServiceRepositoryImpl(
     ) {
         try {
             completionBlock(
-                VCLResult.Success(jwtService.decode(encodedJwt))
+                VCLResult.Success(VCLJwt(encodedJwt))
             )
         } catch (ex: Exception) {
             completionBlock(VCLResult.Failure(VCLError(ex)))
@@ -34,10 +34,8 @@ internal class JwtServiceRepositoryImpl(
         jwkPublic: VCLJwkPublic,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        try {
-            completionBlock(VCLResult.Success(jwtService.verify(jwt, jwkPublic)))
-        } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex)))
+        jwtService.verify(jwt, jwkPublic) {
+            completionBlock(it)
         }
     }
 
@@ -47,18 +45,12 @@ internal class JwtServiceRepositoryImpl(
         jwtDescriptor: VCLJwtDescriptor,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
-        try {
-            completionBlock(
-                VCLResult.Success(
-                    jwtService.sign(
-                        kid = kid,
-                        nonce = nonce,
-                        jwtDescriptor = jwtDescriptor
-                    )
-                )
-            )
-        } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex)))
+        jwtService.sign(
+            kid = kid,
+            nonce = nonce,
+            jwtDescriptor = jwtDescriptor
+        ) {
+            completionBlock(it)
         }
     }
 }

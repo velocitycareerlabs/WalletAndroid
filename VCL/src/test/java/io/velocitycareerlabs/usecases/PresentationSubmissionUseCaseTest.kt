@@ -40,7 +40,13 @@ internal class PresentationSubmissionUseCaseTest {
 
     @Before
     fun setUp() {
-        didJwk = keyService.generateDidJwk()
+        keyService.generateDidJwk{ didJwkResult ->
+            didJwkResult.handleResult({
+                    didJwk = it
+                }, {
+                    assert(false) { "Failed to generate did:jwk $it" }
+            })
+        }
     }
 
     @Test

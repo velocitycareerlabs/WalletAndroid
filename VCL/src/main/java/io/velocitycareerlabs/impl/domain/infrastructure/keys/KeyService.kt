@@ -9,10 +9,21 @@ package io.velocitycareerlabs.impl.domain.infrastructure.keys
 
 import com.nimbusds.jose.jwk.ECKey
 import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.VCLResult
 
 internal interface KeyService {
-    fun generateDidJwk(): VCLDidJwk
-    fun generateKey(): ECKey
-    fun retrieveKey(keyId: String): ECKey
-    fun retrievePublicJwk(ecKey: ECKey): ECKey
+    fun generateDidJwk(
+        completionBlock: (VCLResult<VCLDidJwk>) -> Unit
+    )
+    fun generateSecret(
+        completionBlock: (VCLResult<ECKey>) -> Unit
+    )
+    fun retrieveSecretReference(
+        keyId: String,
+        completionBlock: (VCLResult<ECKey>) -> Unit
+    )
+    fun retrievePublicJwk(
+        ecKey: ECKey,
+        completionBlock: (VCLResult<ECKey>) -> Unit
+    )
 }

@@ -10,8 +10,8 @@ package io.velocitycareerlabs.impl.data.infrastructure.jwt
 import com.nimbusds.jose.*
 import com.nimbusds.jose.crypto.ECDSASigner
 import com.nimbusds.jose.crypto.ECDSAVerifier
+import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.JWK
-import com.nimbusds.jose.util.Base64URL.encode
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import io.velocitycareerlabs.api.entities.*
@@ -21,50 +21,71 @@ import io.velocitycareerlabs.impl.domain.infrastructure.keys.KeyService
 import io.velocitycareerlabs.impl.extensions.addClaims
 import io.velocitycareerlabs.impl.extensions.addDays
 import io.velocitycareerlabs.impl.extensions.randomString
-import java.text.ParseException
+import java.lang.Exception
 import java.util.*
 
 internal class JwtServiceImpl(
     private val keyService: KeyService
 ): JwtService {
-
-    @Throws(ParseException::class)
-    override fun decode(jwt: String): VCLJwt = VCLJwt(SignedJWT.parse(jwt))
-
-    override fun encode(str: String): String = encode(str.toByteArray()).toString()
-
-    @Throws(JOSEException::class)
     override fun verify(
         jwt: VCLJwt,
-        jwk: VCLJwkPublic
-    ): Boolean =
-        jwt.signedJwt.verify(ECDSAVerifier(JWK.parse(jwk.valueStr).toECKey()))
-
+        jwkPublic: VCLJwkPublic,
+        completionBlock: (VCLResult<Boolean>) -> Unit
+    ) {
+        try {
+            completionBlock(
+                VCLResult.Success(
+                    jwt.signedJwt.verify(ECDSAVerifier(JWK.parse(jwkPublic.valueStr).toECKey()))
+                )
+            )
+        } catch (ex: Exception) {
+            completionBlock(VCLResult.Failure(VCLError(ex)))
+        }
+    }
     override fun sign(
         kid: String?,
         nonce: String?,
-        jwtDescriptor: VCLJwtDescriptor
-    ): VCLJwt {
-        val ecKey = jwtDescriptor.keyId?.let {
-                keyId -> keyService.retrieveKey(keyId)
-        } ?: run {
-            keyService.generateKey()
+        jwtDescriptor: VCLJwtDescriptor,
+        completionBlock: (VCLResult<VCLJwt>) -> Unit
+    ) {
+        getSecretReference(jwtDescriptor.keyId) { ecKeyResult ->
+            ecKeyResult.handleResult(
+                successHandler = { ecKey ->
+                    try {
+                        val header = JWSHeader.Builder(JWSAlgorithm.ES256K)
+                            .jwk(ecKey.toPublicJWK())
+                            .type(JOSEObjectType(GlobalConfig.TypeJwt))
+//                        kid?.let { header.keyID(it) } ?: run { header.jwk(ecKey.toPublicJWK()) }
+                        kid?.let { header.keyID(it) }
+                        val jwtHeader = header.build()
+
+                        val signedJWT = SignedJWT(
+                            jwtHeader,
+                            generateClaims(nonce, jwtDescriptor)
+                        )
+                        signedJWT.sign(ECDSASigner(ecKey))
+
+                        completionBlock(VCLResult.Success(VCLJwt(signedJWT)))
+                    } catch (ex: Exception) {
+                        completionBlock(VCLResult.Failure(VCLError(ex)))
+                    }
+                },
+                errorHandler = { error ->
+                    completionBlock(VCLResult.Failure(error))
+                }
+            )
         }
+    }
 
-        val header = JWSHeader.Builder(JWSAlgorithm.ES256K)
-            .jwk(keyService.retrievePublicJwk(ecKey))
-            .type(JOSEObjectType(GlobalConfig.TypeJwt))
-        kid?.let { header.keyID(it) }
-        val jwtHeader = header.build()
-
-        val signedJWT = SignedJWT(
-            jwtHeader,
-            generateClaims(nonce, jwtDescriptor)
-        )
-        val signer: JWSSigner = ECDSASigner(ecKey)
-        signedJWT.sign(signer)
-
-        return VCLJwt(signedJWT)
+    private fun getSecretReference(
+        keyId: String?,
+        completionBlock: (VCLResult<ECKey>) -> Unit
+    ) {
+        keyId?.let {
+            keyService.retrieveSecretReference(keyId = it, completionBlock = completionBlock)
+        } ?: run {
+            keyService.generateSecret(completionBlock = completionBlock)
+        }
     }
 
     private fun generateClaims(

@@ -13,6 +13,7 @@ import androidx.core.view.isVisible
 import com.vcl.wallet.databinding.ActivityMainBinding
 import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.VCLEnvironment
+import io.velocitycareerlabs.api.VCLKeyServiceType
 import io.velocitycareerlabs.api.VCLProvider
 import io.velocitycareerlabs.api.entities.*
 import org.json.JSONObject
@@ -30,7 +31,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        vcl = VCLProvider.vclInstance(applicationContext = this.applicationContext)
+        vcl = VCLProvider.vclInstance()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -63,8 +64,10 @@ class MainActivity : AppCompatActivity() {
             generateDidJwk()
         }
         vcl.initialize(
+            context = this.applicationContext,
             initializationDescriptor = VCLInitializationDescriptor(
-                environment = environment
+                environment = environment,
+                keyServiceType = VCLKeyServiceType.LOCAL
             ),
             successHandler = {
                 Log.d(TAG, "VCL Initialization succeed!")

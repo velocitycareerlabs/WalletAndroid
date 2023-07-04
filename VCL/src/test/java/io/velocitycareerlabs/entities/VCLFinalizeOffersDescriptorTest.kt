@@ -14,6 +14,7 @@ import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.VCLOffers
 import io.velocitycareerlabs.api.entities.VCLToken
+import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
 import io.velocitycareerlabs.impl.extensions.toJsonArray
@@ -66,7 +67,7 @@ class VCLFinalizeOffersDescriptorTest {
     @Test
     fun testGenerateRequestBody() {
         val payload = "{\"key1\": \"value1\"}".toJsonObject()
-        val jwt = JwtServiceImpl(KeyServiceImpl(SecretStoreServiceMock.Instance)).sign(
+        JwtServiceImpl(KeyServiceImpl(SecretStoreServiceMock.Instance)).sign(
             nonce = nonceMock,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payload,
@@ -74,17 +75,21 @@ class VCLFinalizeOffersDescriptorTest {
                 iss = issMock,
                 aud = audMock
             )
-        )
+        ) { jwtResult ->
+            jwtResult.handleResult({ jwt ->
+                val requestBody = subject.generateRequestBody(jwt = jwt)
 
-        val requestBody = subject.generateRequestBody(jwt = jwt)
-
-        assert((requestBody["exchangeId"] as? String) == "645e315309237c760ac022b1")
-        assert(requestBody["approvedOfferIds"] as? JSONArray == approvedOfferIds.toJsonArray())
-        assert(requestBody["rejectedOfferIds"] as? JSONArray == rejectedOfferIds.toJsonArray())
-        val proof = requestBody["proof"] as? JSONObject
-        assert(proof?.optString("proof_type") == "jwt")
-        assert(proof?.optString("jwt") == jwt.signedJwt.serialize())
+                assert((requestBody["exchangeId"] as? String) == "645e315309237c760ac022b1")
+                assert(requestBody["approvedOfferIds"] as? JSONArray == approvedOfferIds.toJsonArray())
+                assert(requestBody["rejectedOfferIds"] as? JSONArray == rejectedOfferIds.toJsonArray())
+                val proof = requestBody["proof"] as? JSONObject
+                assert(proof?.optString("proof_type") == "jwt")
+                assert(proof?.optString("jwt") == jwt.signedJwt.serialize())
 //        equivalent to checking nonce in proof jwt
-        assert(jwt.payload.toJSONObject()?.get( "nonce") as? String == nonceMock)
+                assert(jwt.payload.toJSONObject()?.get( "nonce") as? String == nonceMock)
+            }, {
+                assert(false) { "failed to generate jwt: $it" }
+            })
+        }
     }
 }

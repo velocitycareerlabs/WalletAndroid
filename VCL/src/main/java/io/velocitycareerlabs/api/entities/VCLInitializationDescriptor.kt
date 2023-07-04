@@ -8,8 +8,10 @@
 package io.velocitycareerlabs.api.entities
 
 import io.velocitycareerlabs.api.VCLEnvironment
+import io.velocitycareerlabs.api.VCLKeyServiceType
 
 data class VCLInitializationDescriptor(
     val environment: VCLEnvironment = VCLEnvironment.PROD,
+    val keyServiceType: VCLKeyServiceType = VCLKeyServiceType.LOCAL,
     val cacheSequence: Int = 0
 )

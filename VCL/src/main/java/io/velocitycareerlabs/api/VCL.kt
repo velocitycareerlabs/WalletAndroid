@@ -7,12 +7,14 @@
 
 package io.velocitycareerlabs.api
 
+import android.content.Context
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.utils.VCLLog
 
 interface VCL {
     fun initialize(
+        context: Context,
         initializationDescriptor: VCLInitializationDescriptor,
         successHandler: () -> Unit,
         errorHandler: (VCLError) -> Unit

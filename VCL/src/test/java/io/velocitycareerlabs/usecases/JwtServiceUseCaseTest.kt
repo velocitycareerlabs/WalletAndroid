@@ -92,32 +92,36 @@ internal class JwtServiceUseCaseTest {
 
     @Test
     fun testSignByExistingKey() {
-        val didJwk = keyService.generateDidJwk()
+        keyService.generateDidJwk { didJwkResult ->
+            didJwkResult.handleResult({ didJwk ->
+                var resultJwt: VCLResult<VCLJwt>? = null
+                var resultVerified: VCLResult<Boolean>? = null
 
-        var resultJwt: VCLResult<VCLJwt>? = null
-        var resultVerified: VCLResult<Boolean>? = null
-
-        subject.generateSignedJwt(
-            kid = didJwk.kid,
-            nonce = "some nonce",
-            jwtDescriptor = VCLJwtDescriptor(
-                keyId = didJwk.keyId,
-                payload = JwtServiceMocks.Json.toJsonObject()!!,
-                jti = "some jti",
-                iss = "some iss"
-            )
-        ) {
-            resultJwt = it
+                subject.generateSignedJwt(
+                    kid = didJwk.kid,
+                    nonce = "some nonce",
+                    jwtDescriptor = VCLJwtDescriptor(
+                        keyId = didJwk.keyId,
+                        payload = JwtServiceMocks.Json.toJsonObject()!!,
+                        jti = "some jti",
+                        iss = "some iss"
+                    )
+                ) {
+                    resultJwt = it
+                }
+                val jwt = resultJwt?.data
+                subject.verifyJwt(
+                    jwt = jwt!!,
+                    jwkPublic = VCLJwkPublic(valueStr = jwt.header.jwk.toString())
+                ) {
+                    resultVerified = it
+                }
+                val isVerified = resultVerified?.data as Boolean
+                assert(isVerified)
+            }, {
+                assert(false) { "Failed to generate did:jwk $it" }
+            })
         }
-        val jwt = resultJwt?.data
-        subject.verifyJwt(
-            jwt = jwt!!,
-            jwkPublic = VCLJwkPublic(valueStr = jwt.header.jwk.toString())
-        ) {
-            resultVerified = it
-        }
-        val isVerified = resultVerified?.data as Boolean
-        assert(isVerified)
     }
 
     @After

@@ -6,6 +6,7 @@ package io.velocitycareerlabs.infrastructure.keys
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
 import io.velocitycareerlabs.impl.extensions.decodeBase64
 import io.velocitycareerlabs.impl.extensions.toJsonObject
@@ -29,21 +30,25 @@ class KeyServiceTest {
 
     @Test
     fun testGenerateDidJwk() {
-        val didJwk = subject.generateDidJwk()
+        subject.generateDidJwk() { didJwkResult ->
+            didJwkResult.handleResult({ didJwk ->
+                val jwkJson =
+                    didJwk.value.removePrefix(VCLDidJwk.DidJwkPrefix).decodeBase64().toJsonObject()
 
-        val jwkJson =
-            didJwk.value.removePrefix(VCLDidJwk.DidJwkPrefix).decodeBase64().toJsonObject()
+                assert(didJwk.value.startsWith(VCLDidJwk.DidJwkPrefix))
+                assert(didJwk.kid.startsWith(VCLDidJwk.DidJwkPrefix))
+                assert(didJwk.kid.endsWith(VCLDidJwk.DidJwkSuffix))
 
-        assert(didJwk.value.startsWith(VCLDidJwk.DidJwkPrefix))
-        assert(didJwk.kid.startsWith(VCLDidJwk.DidJwkPrefix))
-        assert(didJwk.kid.endsWith(VCLDidJwk.DidJwkSuffix))
-
-        assert(jwkJson?.optString("kty") == "EC")
-        assert(jwkJson?.optString("use") == "sig")
-        assert(jwkJson?.optString("crv") == "secp256k1")
+                assert(jwkJson?.optString("kty") == "EC")
+                assert(jwkJson?.optString("use") == "sig")
+                assert(jwkJson?.optString("crv") == "secp256k1")
 //        assert(jwkJson?.optString("alg") == "ES256K")
-        assert(jwkJson?.optString("use") == "sig")
-        assert(jwkJson?.optString("x") != null)
-        assert(jwkJson?.optString("y") != null)
+                assert(jwkJson?.optString("use") == "sig")
+                assert(jwkJson?.optString("x") != null)
+                assert(jwkJson?.optString("y") != null)
+            }, {
+                assert(false) { "Failed to generate did:jwk $it" }
+            })
+        }
     }
 }

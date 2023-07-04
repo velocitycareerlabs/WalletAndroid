@@ -8,20 +8,45 @@
 package io.velocitycareerlabs.impl
 
 import android.content.Context
+import io.velocitycareerlabs.api.VCLKeyServiceType
 import io.velocitycareerlabs.api.entities.VCLCredentialTypes
 import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.db.SecretStoreServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.network.NetworkServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
+import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceRemoteImpl
 import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
+import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceRemoteImpl
 import io.velocitycareerlabs.impl.data.models.*
 import io.velocitycareerlabs.impl.data.repositories.*
 import io.velocitycareerlabs.impl.data.usecases.*
+import io.velocitycareerlabs.impl.domain.infrastructure.jwt.JwtService
+import io.velocitycareerlabs.impl.domain.infrastructure.keys.KeyService
 import io.velocitycareerlabs.impl.domain.models.*
 import io.velocitycareerlabs.impl.domain.usecases.*
 
 internal object VclBlocksProvider {
+        private fun chooseJwtService(
+                context: Context,
+                keyServiceType: VCLKeyServiceType
+        ): JwtService {
+                if (keyServiceType == VCLKeyServiceType.REMOTE) {
+                        return JwtServiceRemoteImpl(NetworkServiceImpl())
+                }
+                return JwtServiceImpl(KeyServiceImpl(SecretStoreServiceImpl(context.applicationContext)))
+        }
+
+        private fun chooseKeyService(
+                context: Context,
+                keyServiceType: VCLKeyServiceType
+        ): KeyService {
+                if (keyServiceType == VCLKeyServiceType.REMOTE) {
+                        return KeyServiceRemoteImpl(NetworkServiceImpl())
+                }
+                return KeyServiceImpl(SecretStoreServiceImpl(context.applicationContext))
+        }
+
         fun provideCredentialTypeSchemasModel(
                 context: Context,
                 credentialTypes: VCLCredentialTypes
@@ -59,7 +84,10 @@ internal object VclBlocksProvider {
                         )
                 )
 
-        fun providePresentationRequestUseCase(context: Context): PresentationRequestUseCase =
+        fun providePresentationRequestUseCase(
+                context: Context,
+                keyServiceType: VCLKeyServiceType
+        ): PresentationRequestUseCase =
                 PresentationRequestUseCaseImpl(
                         PresentationRequestRepositoryImpl(
                                 NetworkServiceImpl()
@@ -68,22 +96,21 @@ internal object VclBlocksProvider {
                                 NetworkServiceImpl()
                         ),
                         JwtServiceRepositoryImpl(
-                                JwtServiceImpl(KeyServiceImpl(
-                                        SecretStoreServiceImpl(context)
-                                ))
+                                chooseJwtService(context, keyServiceType)
                         ),
                         ExecutorImpl()
                 )
 
-        fun providePresentationSubmissionUseCase(context: Context): PresentationSubmissionUseCase =
+        fun providePresentationSubmissionUseCase(
+                context: Context,
+                keyServiceType: VCLKeyServiceType
+        ): PresentationSubmissionUseCase =
                 PresentationSubmissionUseCaseImpl(
                         PresentationSubmissionRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
                         JwtServiceRepositoryImpl(
-                                JwtServiceImpl(KeyServiceImpl(
-                                        SecretStoreServiceImpl(context)
-                                ))
+                                chooseJwtService(context, keyServiceType)
                         ),
                         ExecutorImpl()
                 )
@@ -96,7 +123,10 @@ internal object VclBlocksProvider {
                         ExecutorImpl()
                 )
 
-        fun provideCredentialManifestUseCase(context: Context): CredentialManifestUseCase =
+        fun provideCredentialManifestUseCase(
+                context: Context,
+                keyServiceType: VCLKeyServiceType
+        ): CredentialManifestUseCase =
                 CredentialManifestUseCaseImpl(
                         CredentialManifestRepositoryImpl(
                                 NetworkServiceImpl()
@@ -105,22 +135,21 @@ internal object VclBlocksProvider {
                                 NetworkServiceImpl()
                         ),
                         JwtServiceRepositoryImpl(
-                                JwtServiceImpl(KeyServiceImpl(
-                                        SecretStoreServiceImpl(context)
-                                ))
+                                chooseJwtService(context, keyServiceType)
                         ),
                         ExecutorImpl()
                 )
 
-        fun provideIdentificationUseCase(context: Context): IdentificationSubmissionUseCase =
+        fun provideIdentificationSubmissionUseCase(
+                context: Context,
+                keyServiceType: VCLKeyServiceType
+        ): IdentificationSubmissionUseCase =
                 IdentificationSubmissionUseCaseImpl(
                         IdentificationSubmissionRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
                         JwtServiceRepositoryImpl(
-                                JwtServiceImpl(KeyServiceImpl(
-                                        SecretStoreServiceImpl(context)
-                                ))
+                                chooseJwtService(context, keyServiceType)
                         ),
                         ExecutorImpl()
                 )
@@ -141,15 +170,16 @@ internal object VclBlocksProvider {
                         ExecutorImpl()
                 )
 
-        fun provideFinalizeOffersUseCase(context: Context): FinalizeOffersUseCase =
+        fun provideFinalizeOffersUseCase(
+                context: Context,
+                keyServiceType: VCLKeyServiceType
+        ): FinalizeOffersUseCase =
                 FinalizeOffersUseCaseImpl(
                         FinalizeOffersRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
                         JwtServiceRepositoryImpl(
-                                JwtServiceImpl(KeyServiceImpl(
-                                        SecretStoreServiceImpl(context)
-                                ))
+                                chooseJwtService(context, keyServiceType)
                         ),
                         ExecutorImpl()
                 )
@@ -170,22 +200,24 @@ internal object VclBlocksProvider {
                         ExecutorImpl()
                 )
 
-        fun provideJwtServiceUseCase(context: Context): JwtServiceUseCase =
+        fun provideJwtServiceUseCase(
+                context: Context,
+                keyServiceType: VCLKeyServiceType
+        ): JwtServiceUseCase =
                 JwtServiceUseCaseImpl(
                         JwtServiceRepositoryImpl(
-                                JwtServiceImpl(KeyServiceImpl(
-                                        SecretStoreServiceImpl(context)
-                                ))
+                                chooseJwtService(context, keyServiceType)
                         ),
                         ExecutorImpl()
                 )
 
-        fun provideKeyServiceUseCase(context: Context): KeyServiceUseCase =
+        fun provideKeyServiceUseCase(
+                context: Context,
+                keyServiceType: VCLKeyServiceType
+        ): KeyServiceUseCase =
                 KeyServiceUseCaseImpl(
                         KeyServiceRepositoryImpl(
-                                KeyServiceImpl(
-                                        SecretStoreServiceImpl(context)
-                                )
+                                chooseKeyService(context, keyServiceType)
                         ),
                         ExecutorImpl()
                 )

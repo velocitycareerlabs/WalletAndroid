@@ -8,7 +8,6 @@
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.VCLDidJwk
-import io.velocitycareerlabs.api.entities.VCLError
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.impl.domain.infrastructure.keys.KeyService
 import io.velocitycareerlabs.impl.domain.repositories.KeyServiceRepository
@@ -17,10 +16,8 @@ internal class KeyServiceRepositoryImpl(
     private val keyService: KeyService
 ): KeyServiceRepository {
     override fun generateDidJwk(completionBlock: (VCLResult<VCLDidJwk>) -> Unit) {
-        try {
-            completionBlock(VCLResult.Success(keyService.generateDidJwk()))
-        } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(exception = ex)))
+        keyService.generateDidJwk() {
+            completionBlock(it)
         }
     }
 }

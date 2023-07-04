@@ -12,8 +12,8 @@ import io.velocitycareerlabs.impl.VCLImpl
 
 class VCLProvider {
     companion object {
-        fun vclInstance(applicationContext: Context): VCL {
-            return VCLImpl(applicationContext = applicationContext.applicationContext)
+        fun vclInstance(): VCL {
+            return VCLImpl()
         }
     }
 }

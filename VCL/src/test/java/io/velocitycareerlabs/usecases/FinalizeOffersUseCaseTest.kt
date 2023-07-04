@@ -51,7 +51,13 @@ internal class FinalizeOffersUseCaseTest {
 
     @Before
     fun setUp() {
-        didJwk = keyService.generateDidJwk()
+        keyService.generateDidJwk { didJwkResult ->
+            didJwkResult.handleResult({
+                didJwk = it
+            }, {
+                assert(false) { "Failed to generate did:jwk $it" }
+            })
+        }
 
         var result: VCLResult<VCLOffers>? = null
         val generateOffersDescriptor = VCLGenerateOffersDescriptor(

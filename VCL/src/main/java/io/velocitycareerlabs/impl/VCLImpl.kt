@@ -10,19 +10,30 @@ package io.velocitycareerlabs.impl
 import android.content.Context
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCL
+import io.velocitycareerlabs.api.VCLKeyServiceType
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.models.CredentialTypeSchemasModel
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.printVersion
 import io.velocitycareerlabs.impl.domain.models.CountriesModel
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
+import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
+import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUIFormSchemaUseCase
+import io.velocitycareerlabs.impl.domain.usecases.ExchangeProgressUseCase
+import io.velocitycareerlabs.impl.domain.usecases.FinalizeOffersUseCase
+import io.velocitycareerlabs.impl.domain.usecases.GenerateOffersUseCase
+import io.velocitycareerlabs.impl.domain.usecases.IdentificationSubmissionUseCase
+import io.velocitycareerlabs.impl.domain.usecases.JwtServiceUseCase
+import io.velocitycareerlabs.impl.domain.usecases.KeyServiceUseCase
+import io.velocitycareerlabs.impl.domain.usecases.OrganizationsUseCase
+import io.velocitycareerlabs.impl.domain.usecases.PresentationRequestUseCase
+import io.velocitycareerlabs.impl.domain.usecases.PresentationSubmissionUseCase
+import io.velocitycareerlabs.impl.domain.usecases.VerifiedProfileUseCase
 import io.velocitycareerlabs.impl.utils.InitializationWatcher
 import io.velocitycareerlabs.impl.utils.VCLLog
 import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
 
-internal class VCLImpl(
-    val applicationContext: Context
-): VCL {
+internal class VCLImpl: VCL {
     companion object {
         val TAG = VCLImpl::class.simpleName
 
@@ -33,46 +44,61 @@ internal class VCLImpl(
     private var credentialTypeSchemasModel: CredentialTypeSchemasModel? = null
     private var countriesModel: CountriesModel? = null
 
-    private val presentationRequestUseCase = VclBlocksProvider.providePresentationRequestUseCase(applicationContext)
-    private val presentationSubmissionUseCase =
-        VclBlocksProvider.providePresentationSubmissionUseCase(applicationContext)
-    private val exchangeProgressUseCase = VclBlocksProvider.provideExchangeProgressUseCase()
-    private val organizationsUseCase = VclBlocksProvider.provideOrganizationsUseCase()
-    private val credentialManifestUseCase = VclBlocksProvider.provideCredentialManifestUseCase(applicationContext)
-
-    //    private val identificationModel = VclBlocksProvider.provideIdentificationModel()
-    private val identificationUseCase = VclBlocksProvider.provideIdentificationUseCase(applicationContext)
-    private val generateOffersUseCase = VclBlocksProvider.provideGenerateOffersUseCase()
-    private val finalizeOffersUseCase = VclBlocksProvider.provideFinalizeOffersUseCase(applicationContext)
-    private val credentialTypesUIFormSchemaUseCase =
-        VclBlocksProvider.provideCredentialTypesUIFormSchemaUseCase()
-    private val verifiedProfileUseCase = VclBlocksProvider.provideVerifiedProfileUseCase()
-    private val jwtServiceUseCase = VclBlocksProvider.provideJwtServiceUseCase(applicationContext)
-    private val keyServiceUseCase = VclBlocksProvider.provideKeyServiceUseCase(applicationContext)
+    private lateinit var presentationRequestUseCase: PresentationRequestUseCase
+    private lateinit var presentationSubmissionUseCase: PresentationSubmissionUseCase
+    private lateinit var exchangeProgressUseCase: ExchangeProgressUseCase
+    private lateinit var organizationsUseCase: OrganizationsUseCase
+    private lateinit var credentialManifestUseCase: CredentialManifestUseCase
+    private lateinit var identificationSubmissionUseCase: IdentificationSubmissionUseCase
+    private lateinit var generateOffersUseCase: GenerateOffersUseCase
+    private lateinit var finalizeOffersUseCase: FinalizeOffersUseCase
+    private lateinit var credentialTypesUIFormSchemaUseCase: CredentialTypesUIFormSchemaUseCase
+    private lateinit var verifiedProfileUseCase: VerifiedProfileUseCase
+    private lateinit var jwtServiceUseCase: JwtServiceUseCase
+    private lateinit var keyServiceUseCase: KeyServiceUseCase
 
     private var initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
-    private val profileServiceTypeVerifier = ProfileServiceTypeVerifier(verifiedProfileUseCase)
+    private lateinit var profileServiceTypeVerifier: ProfileServiceTypeVerifier
 
     override fun initialize(
+        context: Context,
         initializationDescriptor: VCLInitializationDescriptor,
         successHandler: () -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
+        initGlobalConfigurations(initializationDescriptor.environment)
+
         initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
 
-        initGlobalConfigurations(initializationDescriptor.environment)
+        initializeUsecases(context, initializationDescriptor.keyServiceType)
+
+        profileServiceTypeVerifier = ProfileServiceTypeVerifier(verifiedProfileUseCase)
 
         printVersion()
 
+        cacheRemoteData(
+            context = context,
+            cacheSequence = initializationDescriptor.cacheSequence,
+            successHandler = successHandler,
+            errorHandler = errorHandler
+        )
+    }
+
+    private fun cacheRemoteData(
+        context: Context,
+        cacheSequence: Int,
+        successHandler: () -> Unit,
+        errorHandler: (VCLError) -> Unit
+    ) {
         credentialTypesModel =
-            VclBlocksProvider.provideCredentialTypesModel(applicationContext)
+            VclBlocksProvider.provideCredentialTypesModel(context.applicationContext)
         countriesModel =
-            VclBlocksProvider.provideCountryCodesModel(applicationContext)
+            VclBlocksProvider.provideCountryCodesModel(context.applicationContext)
         val completionHandler = {
             initializationWatcher.firstError()?.let { errorHandler(it) }
                 ?: successHandler()
         }
-        countriesModel?.initialize(initializationDescriptor.cacheSequence) { result ->
+        countriesModel?.initialize(cacheSequence) { result ->
             result.handleResult(
                 {
                     if (initializationWatcher.onInitializedModel(null))
@@ -83,35 +109,33 @@ internal class VCLImpl(
                         completionHandler()
                 })
         }
-        credentialTypesModel?.initialize(initializationDescriptor.cacheSequence) { result ->
+        credentialTypesModel?.initialize(cacheSequence) { result ->
             result.handleResult(
                 {
                     if (initializationWatcher.onInitializedModel(null)) {
                         completionHandler()
                     } else {
-                        if (credentialTypesModel?.data != null) {
-                            credentialTypesModel?.data?.let { credentialTypes ->
-                                credentialTypeSchemasModel =
-                                    VclBlocksProvider.provideCredentialTypeSchemasModel(
-                                        applicationContext,
-                                        credentialTypes
-                                    )
-                                credentialTypeSchemasModel?.initialize(initializationDescriptor.cacheSequence) { result ->
-                                    result.handleResult(
-                                        {
-                                            if (initializationWatcher.onInitializedModel(null)) {
-                                                completionHandler()
-                                            }
-                                        },
-                                        { error ->
-                                            if (initializationWatcher.onInitializedModel(error)) {
-                                                completionHandler()
-                                            }
+                        credentialTypesModel?.data?.let { credentialTypes ->
+                            credentialTypeSchemasModel =
+                                VclBlocksProvider.provideCredentialTypeSchemasModel(
+                                    context.applicationContext,
+                                    credentialTypes
+                                )
+                            credentialTypeSchemasModel?.initialize(cacheSequence) { result ->
+                                result.handleResult(
+                                    {
+                                        if (initializationWatcher.onInitializedModel(null)) {
+                                            completionHandler()
                                         }
-                                    )
-                                }
+                                    },
+                                    { error ->
+                                        if (initializationWatcher.onInitializedModel(error)) {
+                                            completionHandler()
+                                        }
+                                    }
+                                )
                             }
-                        } else {
+                        } ?: run {
                             errorHandler(VCLError("Failed to get credential type schemas"))
                         }
                     }
@@ -122,6 +146,33 @@ internal class VCLImpl(
                     }
                 })
         }
+    }
+
+    private fun initializeUsecases(context: Context, keyServiceType: VCLKeyServiceType) {
+        presentationRequestUseCase =
+            VclBlocksProvider.providePresentationRequestUseCase(context.applicationContext, keyServiceType)
+        presentationSubmissionUseCase = VclBlocksProvider.providePresentationSubmissionUseCase(
+            context.applicationContext,
+            keyServiceType
+        )
+        exchangeProgressUseCase = VclBlocksProvider.provideExchangeProgressUseCase()
+        organizationsUseCase = VclBlocksProvider.provideOrganizationsUseCase()
+        credentialManifestUseCase =
+            VclBlocksProvider.provideCredentialManifestUseCase(context.applicationContext, keyServiceType)
+        identificationSubmissionUseCase = VclBlocksProvider.provideIdentificationSubmissionUseCase(
+            context.applicationContext,
+            keyServiceType
+        )
+        generateOffersUseCase = VclBlocksProvider.provideGenerateOffersUseCase()
+        finalizeOffersUseCase =
+            VclBlocksProvider.provideFinalizeOffersUseCase(context.applicationContext, keyServiceType)
+        credentialTypesUIFormSchemaUseCase =
+            VclBlocksProvider.provideCredentialTypesUIFormSchemaUseCase()
+        verifiedProfileUseCase = VclBlocksProvider.provideVerifiedProfileUseCase()
+        jwtServiceUseCase =
+            VclBlocksProvider.provideJwtServiceUseCase(context.applicationContext, keyServiceType)
+        keyServiceUseCase =
+            VclBlocksProvider.provideKeyServiceUseCase(context.applicationContext, keyServiceType)
     }
 
     private fun initGlobalConfigurations(environment: VCLEnvironment) {
@@ -274,7 +325,7 @@ internal class VCLImpl(
             credentialManifest = generateOffersDescriptor.credentialManifest,
             verifiableCredentials = generateOffersDescriptor.identificationVerifiableCredentials
         )
-        identificationUseCase.submit(
+        identificationSubmissionUseCase.submit(
             submission = identificationSubmission,
             didJwk = didJwk
         ) { identificationSubmissionResult ->
@@ -387,8 +438,7 @@ internal class VCLImpl(
         successHandler: (VCLVerifiedProfile) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        verifiedProfileUseCase.getVerifiedProfile(verifiedProfileDescriptor) {
-            verifiedProfileResult ->
+        verifiedProfileUseCase.getVerifiedProfile(verifiedProfileDescriptor) { verifiedProfileResult ->
             verifiedProfileResult.handleResult(
                 {
                     successHandler(it)

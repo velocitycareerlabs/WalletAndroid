@@ -13,20 +13,17 @@ import io.velocitycareerlabs.api.entities.*
 import java.text.ParseException
 
 internal interface JwtService {
-    @Throws(ParseException::class)
-    fun decode(jwt: String): VCLJwt
-
-    fun encode(str: String): String
-
     @Throws(JOSEException::class)
     fun verify(
         jwt: VCLJwt,
-        jwk: VCLJwkPublic
-    ): Boolean
+        jwkPublic: VCLJwkPublic,
+        completionBlock: (VCLResult<Boolean>) -> Unit
+    )
 
     fun sign(
         kid: String? = null,
         nonce: String? = null,
-        jwtDescriptor: VCLJwtDescriptor
-    ): VCLJwt
+        jwtDescriptor: VCLJwtDescriptor,
+        completionBlock: (VCLResult<VCLJwt>) -> Unit
+    )
 }
