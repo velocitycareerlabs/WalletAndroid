@@ -14,6 +14,7 @@ import com.vcl.wallet.databinding.ActivityMainBinding
 import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCLProvider
+import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 import io.velocitycareerlabs.api.entities.*
 import org.json.JSONObject
 
@@ -65,23 +66,24 @@ class MainActivity : AppCompatActivity() {
         vcl.initialize(
             context = this.applicationContext,
             initializationDescriptor = VCLInitializationDescriptor(
-                environment = environment
+                environment = environment,
+                xVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2
             ),
             successHandler = {
                 Log.d(TAG, "VCL Initialization succeed!")
                 showControls()
 
-//                vcl.generateDidJwk(
-//                    successHandler = { didJwk ->
-//                        this.didJwk = didJwk
-//                        Log.d(TAG, "VCL did:jwk is ${this.didJwk}")
-//                        showControls()
-//                    },
-//                    errorHandler = { error ->
-//                        logError("VCL Failed to generate did:jwk with error:", error)
-//                        showError()
-//                    }
-//                )
+                vcl.generateDidJwk(
+                    successHandler = { didJwk ->
+                        this.didJwk = didJwk
+                        Log.d(TAG, "VCL did:jwk is ${this.didJwk}")
+                        showControls()
+                    },
+                    errorHandler = { error ->
+                        logError("VCL Failed to generate did:jwk with error:", error)
+                        showError()
+                    }
+                )
             },
             errorHandler = { error ->
                 logError("VCL Initialization failed with error:", error)

@@ -40,38 +40,48 @@ internal class CredentialIssuerVerifierImpl(
     ) {
         if (jwtEncodedCredentials.isEmpty()) /* nothing to verify */ {
             completionBlock(VCLResult.Success(true))
-        }
-        else if (finalizeOffersDescriptor.serviceTypes.all.isEmpty()) {
+        } else if (finalizeOffersDescriptor.serviceTypes.all.isEmpty()) {
             completionBlock(VCLResult.Failure(VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value)))
         } else {
-            jwtEncodedCredentials.forEach { encodedJwtCredential ->
-                val jwtCredential = VCLJwt(encodedJwt = encodedJwtCredential)
-                Utils.getCredentialType(jwtCredential)?.let { credentialTypeName ->
-                    credentialTypesModel.credentialTypeByTypeName(credentialTypeName)
-                        ?.let { credentialType ->
-                            verifyCredential(
-                                jwtCredential,
-                                credentialType,
-                                finalizeOffersDescriptor.serviceTypes,
-                                completionBlock
-                            )
-                        } ?: run {
-                        onError(
-                            VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value),
-                            completionBlock
-                        )
+            var globalError: VCLError? = null
+            val completableFutures = jwtEncodedCredentials.map { encodedJwtCredential ->
+                CompletableFuture.supplyAsync {
+                    val jwtCredential = VCLJwt(encodedJwt = encodedJwtCredential)
+                    Utils.getCredentialType(jwtCredential)?.let { credentialTypeName ->
+                        credentialTypesModel.credentialTypeByTypeName(credentialTypeName)
+                            ?.let { credentialType ->
+                                verifyCredential(
+                                    jwtCredential,
+                                    credentialType,
+                                    finalizeOffersDescriptor.serviceTypes
+                                ) {
+                                    it.handleResult({ verified ->
+//                                        do nothing
+                                    }, { error ->
+                                        globalError = error
+                                    })
+                                }
+                            } ?: run {
+                            globalError =
+                                VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value)
+                        }
+                    } ?: run {
+                        globalError =
+                            VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value)
                     }
-                } ?: run {
-                    onError(
-                        VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value),
-                        completionBlock
-                    )
                 }
+            }
+            val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
+            allFutures.join()
+            globalError?.let {
+                completionBlock(VCLResult.Failure(it))
+            } ?: run {
+                completionBlock(VCLResult.Success(true))
             }
         }
     }
 
-    internal fun verifyCredential(
+    private fun verifyCredential(
         jwtCredential: VCLJwt,
         credentialType: VCLCredentialType,
         serviceTypes: VCLServiceTypes,
@@ -91,7 +101,7 @@ internal class CredentialIssuerVerifierImpl(
         }
     }
 
-    internal fun verifyIdentityIssuer(
+    private fun verifyIdentityIssuer(
         credentialType: VCLCredentialType,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
@@ -105,7 +115,7 @@ internal class CredentialIssuerVerifierImpl(
         }
     }
 
-    internal fun verifyRegularIssuer(
+    private fun verifyRegularIssuer(
         jwtCredential: VCLJwt,
         permittedServiceCategory: VCLServiceTypes,
         completionBlock: (VCLResult<Boolean>) -> Unit
@@ -186,7 +196,7 @@ internal class CredentialIssuerVerifierImpl(
         val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
         allFutures.join()
 
-        if(completeContexts.isEmpty()) {
+        if (completeContexts.isEmpty()) {
             onError(
                 VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectContext.value),
                 completionBlock = completionBlock
@@ -203,39 +213,41 @@ internal class CredentialIssuerVerifierImpl(
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
         (credentialSubject[KeyType] as? String)?.let { credentialSubjectType ->
-            completeContexts.forEach { completeContext ->
-                (((completeContext[KeyContext] as? Map<*, *>)
-                    ?.get(credentialSubjectType) as? Map<*, *>)
-                    ?.get(KeyContext) as? Map<*, *>)
-                    ?.let { context ->
-                        findKeyForPrimaryOrganizationValue(context)?.let { K ->
-                            ((credentialSubject[K] as? Map<*, *>)?.get(KeyIdentifier) as? String)?.let { did ->
-                                if (jwtCredential.iss == did) {
-                                    completionBlock(VCLResult.Success(true))
-                                } else {
-                                    onError(
-                                        VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission.value),
-                                        completionBlock = completionBlock
-                                    )
+            var globalError: VCLError? = null
+            val completableFutures = completeContexts.map { completeContext ->
+                CompletableFuture.supplyAsync {
+                    (((completeContext[KeyContext] as? Map<*, *>)
+                        ?.get(credentialSubjectType) as? Map<*, *>)
+                        ?.get(KeyContext) as? Map<*, *>)
+                        ?.let { context ->
+                            findKeyForPrimaryOrganizationValue(context)?.let { K ->
+                                ((credentialSubject[K] as? Map<*, *>)?.get(KeyIdentifier) as? String)?.let { did ->
+                                    if (jwtCredential.iss == did) {
+//                                        do nothing
+                                    } else {
+                                        globalError =
+                                            VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission.value)
+                                    }
+                                } ?: run {
+                                    globalError =
+                                        VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission.value)
                                 }
                             } ?: run {
-                                onError(
-                                    VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission.value),
-                                    completionBlock = completionBlock
-                                )
+                                globalError =
+                                    VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectType.value)
                             }
                         } ?: run {
-                            onError(
-                                VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectType.value),
-                                completionBlock = completionBlock
-                            )
-                        }
-                    } ?: run {
-                    onError(
-                        VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectContext.value),
-                        completionBlock = completionBlock
-                    )
+                        globalError =
+                            VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectContext.value)
+                    }
                 }
+            }
+            val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
+            allFutures.join()
+            globalError?.let {
+                completionBlock(VCLResult.Failure(it))
+            } ?: run {
+                completionBlock(VCLResult.Success(true))
             }
         } ?: run {
             onError(

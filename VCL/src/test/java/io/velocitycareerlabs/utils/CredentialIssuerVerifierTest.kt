@@ -172,6 +172,31 @@ internal class CredentialIssuerVerifierTest {
     }
 
     @Test
+    fun testVerifyRegularIssuerWrongDidFailed() {
+        subject = CredentialIssuerVerifierImpl(
+            CredentialTypesModelMock(
+                issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
+            ),
+            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+        )
+
+        subject.verifyCredentials(
+            jwtEncodedCredentials = CredentialMocks.JwtCredentialsFromNotaryIssuer.toJsonArray()
+            !!.toListOfStrings(),
+            finalizeOffersDescriptor = finalizeOffersDescriptorOfRegularIssuer,
+        ) { verificationResult ->
+            verificationResult.handleResult(
+                successHandler = {
+                    assert(false) { "${VCLErrorCode.IssuerRequiresNotaryPermission.value} error code is expected" }
+                },
+                errorHandler = { error ->
+                    assert(error.errorCode == VCLErrorCode.IssuerRequiresNotaryPermission.value)
+                }
+            )
+        }
+    }
+
+    @Test
     fun testVerifyIssuerWithoutServicesFailed() {
         subject = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
