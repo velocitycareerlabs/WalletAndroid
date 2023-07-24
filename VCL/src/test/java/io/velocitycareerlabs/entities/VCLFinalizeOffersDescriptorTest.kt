@@ -14,14 +14,15 @@ import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.VCLOffers
 import io.velocitycareerlabs.api.entities.VCLToken
+import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
 import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
-import io.velocitycareerlabs.impl.extensions.toList
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Before
@@ -54,7 +55,10 @@ class VCLFinalizeOffersDescriptorTest {
     @Before
     fun setUp() {
         val credentialManifest =
-            VCLCredentialManifest(jwt = VCLJwt(encodedJwt = CredentialManifestMocks.CredentialManifestJwt1))
+            VCLCredentialManifest(
+                jwt = VCLJwt(encodedJwt = CredentialManifestMocks.JwtCredentialManifest1),
+                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
+            )
 
         subject = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifest,
@@ -84,9 +88,9 @@ class VCLFinalizeOffersDescriptorTest {
                 assert(requestBody["rejectedOfferIds"] as? JSONArray == rejectedOfferIds.toJsonArray())
                 val proof = requestBody["proof"] as? JSONObject
                 assert(proof?.optString("proof_type") == "jwt")
-                assert(proof?.optString("jwt") == jwt.signedJwt.serialize())
+                assert(proof?.optString("jwt") == jwt.encodedJwt)
 //        equivalent to checking nonce in proof jwt
-                assert(jwt.payload.toJSONObject()?.get( "nonce") as? String == nonceMock)
+                assert(jwt.payload?.toJSONObject()?.get( "nonce") as? String == nonceMock)
             }, {
                 assert(false) { "failed to generate jwt: $it" }
             })

@@ -16,6 +16,7 @@ import io.velocitycareerlabs.impl.data.usecases.JwtServiceUseCaseImpl
 import io.velocitycareerlabs.impl.domain.infrastructure.keys.KeyService
 import io.velocitycareerlabs.impl.domain.usecases.JwtServiceUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonObject
+import io.velocitycareerlabs.impl.extensions.toPublicJwk
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
@@ -59,9 +60,9 @@ internal class JwtServiceUseCaseTest {
         }
 
         val jwt = resultJwt?.data
-        assert(jwt!!.header.toJSONObject()["alg"] as? String == "ES256K")
-        assert(((jwt.header.toJSONObject()["jwk"] as? Map<String, Any>)!!["crv"] as? String) == "secp256k1")
-        assert(jwt.header.toJSONObject()["typ"] as? String == "JWT")
+        assert(jwt!!.header?.toJSONObject()?.get("alg") as? String == "ES256K")
+        assert(((jwt.header?.toJSONObject()?.get("jwk") as? Map<String, Any>)!!["crv"] as? String) == "secp256k1")
+        assert(jwt.header?.toJSONObject()?.get("typ") as? String == "JWT")
     }
 
     @Test
@@ -82,7 +83,7 @@ internal class JwtServiceUseCaseTest {
         val jwt = resultJwt?.data
         subject.verifyJwt(
             jwt = jwt!!,
-            jwkPublic = VCLJwkPublic(valueStr = jwt.header.jwk.toString())
+            jwkPublic = VCLJwkPublic(valueStr = jwt.header?.jwk.toString())
         ) {
             resultVerified = it
         }
@@ -112,7 +113,9 @@ internal class JwtServiceUseCaseTest {
                 val jwt = resultJwt?.data
                 subject.verifyJwt(
                     jwt = jwt!!,
-                    jwkPublic = VCLJwkPublic(valueStr = jwt.header.jwk.toString())
+//                    jwkPublic = VCLJwkPublic(valueStr = jwt.header.jwk.toString())
+                    // Person binding provided did:jwk only:
+                    jwkPublic = jwt.header?.toJSONObject()?.get("kid").toString().toPublicJwk()
                 ) {
                     resultVerified = it
                 }

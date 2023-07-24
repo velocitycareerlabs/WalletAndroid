@@ -10,6 +10,7 @@ package io.velocitycareerlabs.usecases
 import io.velocitycareerlabs.api.entities.VCLCountries
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.data
+import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.data.repositories.CountriesRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CountriesUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CountriesUseCase
@@ -33,7 +34,6 @@ class CountriesUseCaseTest {
 
     @Test
     fun testGetCountriesSuccess() {
-//        Arrange
         subject = CountriesUseCaseImpl(
             CountriesRepositoryImpl(
                 NetworkServiceSuccess(
@@ -43,28 +43,28 @@ class CountriesUseCaseTest {
             ),
             EmptyExecutor()
         )
-        var result: VCLResult<VCLCountries>? = null
 
-//        Action
         subject.getCountries(0) {
-            result = it
+            it.handleResult(
+                successHandler = { countries ->
+                    val afghanistanCountry = countries.countryByCode(VCLCountries.AF)!!
+                    val afghanistanRegions = afghanistanCountry.regions!!
+
+                    assert(afghanistanCountry.code == CountriesMocks.AfghanistanCode)
+                    assert(afghanistanCountry.name == CountriesMocks.AfghanistanName)
+
+                    assert(afghanistanRegions.all[0].name == CountriesMocks.AfghanistanRegion1Name)
+                    assert(afghanistanRegions.all[0].code == CountriesMocks.AfghanistanRegion1Code)
+                    assert(afghanistanRegions.all[1].name == CountriesMocks.AfghanistanRegion2Name)
+                    assert(afghanistanRegions.all[1].code == CountriesMocks.AfghanistanRegion2Code)
+                    assert(afghanistanRegions.all[2].name == CountriesMocks.AfghanistanRegion3Name)
+                    assert(afghanistanRegions.all[2].code == CountriesMocks.AfghanistanRegion3Code)
+                },
+                errorHandler = {
+                    assert(false) { "$it" }
+                }
+            )
         }
-
-        val countries = result!!.data!!
-        val afghanistanCountry = countries.countryByCode(VCLCountries.AF)!!
-        val afghanistanRegions = afghanistanCountry.regions!!
-
-//        Assert
-        assert(afghanistanCountry.code == CountriesMocks.AfghanistanCode)
-        assert(afghanistanCountry.name == CountriesMocks.AfghanistanName)
-
-        assert(afghanistanRegions.all[0].name == CountriesMocks.AfghanistanRegion1Name)
-        assert(afghanistanRegions.all[0].code == CountriesMocks.AfghanistanRegion1Code)
-        assert(afghanistanRegions.all[1].name == CountriesMocks.AfghanistanRegion2Name)
-        assert(afghanistanRegions.all[1].code == CountriesMocks.AfghanistanRegion2Code)
-        assert(afghanistanRegions.all[2].name == CountriesMocks.AfghanistanRegion3Name)
-        assert(afghanistanRegions.all[2].code == CountriesMocks.AfghanistanRegion3Code)
-
     }
 
     @After

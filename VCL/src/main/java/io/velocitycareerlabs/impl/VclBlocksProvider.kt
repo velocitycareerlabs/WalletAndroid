@@ -10,6 +10,7 @@ package io.velocitycareerlabs.impl
 import android.content.Context
 import io.velocitycareerlabs.api.VCLKeyServiceType
 import io.velocitycareerlabs.api.entities.VCLCredentialTypes
+import io.velocitycareerlabs.impl.data.utils.CredentialDidVerifierImpl
 import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.db.SecretStoreServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
@@ -21,6 +22,7 @@ import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceRemoteImpl
 import io.velocitycareerlabs.impl.data.models.*
 import io.velocitycareerlabs.impl.data.repositories.*
 import io.velocitycareerlabs.impl.data.usecases.*
+import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierImpl
 import io.velocitycareerlabs.impl.domain.infrastructure.jwt.JwtService
 import io.velocitycareerlabs.impl.domain.infrastructure.keys.KeyService
 import io.velocitycareerlabs.impl.domain.models.*
@@ -73,7 +75,7 @@ internal object VclBlocksProvider {
                         )
                 )
 
-        fun provideCountryCodesModel(context: Context): CountriesModel =
+        fun provideCountriesModel(context: Context): CountriesModel =
                 CountriesModelImpl(
                         CountriesUseCaseImpl(
                                 CountriesRepositoryImpl(
@@ -172,7 +174,8 @@ internal object VclBlocksProvider {
 
         fun provideFinalizeOffersUseCase(
                 context: Context,
-                keyServiceType: VCLKeyServiceType
+                keyServiceType: VCLKeyServiceType,
+                credentialTypesModel: CredentialTypesModel
         ): FinalizeOffersUseCase =
                 FinalizeOffersUseCaseImpl(
                         FinalizeOffersRepositoryImpl(
@@ -181,6 +184,11 @@ internal object VclBlocksProvider {
                         JwtServiceRepositoryImpl(
                                 chooseJwtService(context, keyServiceType)
                         ),
+                        CredentialIssuerVerifierImpl(
+                                credentialTypesModel,
+                                NetworkServiceImpl()
+                        ),
+                        CredentialDidVerifierImpl(),
                         ExecutorImpl()
                 )
 

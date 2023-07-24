@@ -9,9 +9,11 @@ package io.velocitycareerlabs.api.entities
 
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCLKeyServiceType
+import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 
 data class VCLInitializationDescriptor(
     val environment: VCLEnvironment = VCLEnvironment.PROD,
     val keyServiceType: VCLKeyServiceType = VCLKeyServiceType.LOCAL,
+    val xVnfProtocolVersion: VCLXVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1,
     val cacheSequence: Int = 0
 )

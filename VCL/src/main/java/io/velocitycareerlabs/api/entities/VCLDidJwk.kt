@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.api.entities
 
 import com.nimbusds.jose.jwk.ECKey
+import io.velocitycareerlabs.impl.extensions.decodeBase64
 import io.velocitycareerlabs.impl.extensions.encodeToBase64URL
 
 data class VCLDidJwk(
@@ -24,13 +25,20 @@ data class VCLDidJwk(
      */
     val kid: String
 ) {
-    companion object {
+    internal fun toPublicJwkStr() = value.removePrefix(DidJwkPrefix).decodeBase64()
+
+    companion object Utils {
         const val DidJwkPrefix = "did:jwk:"
         const val DidJwkSuffix = "#0"
 
         fun generateDidJwk(ecKey: ECKey) =
-            "${DidJwkPrefix}${ecKey.toString().encodeToBase64URL()}"
+            "${DidJwkPrefix}${ecKey.toPublicJWK().toString().encodeToBase64URL()}"
+
         fun generateKidFromDidJwk(ecKey: ECKey) =
             "${generateDidJwk(ecKey = ecKey)}${DidJwkSuffix}"
+
+        const val KeyKeyId = "keyId"
+        const val KeyValue = "value"
+        const val KeyKid = "kid"
     }
 }

@@ -15,7 +15,7 @@ import io.velocitycareerlabs.api.entities.VCLSubmissionResult
 internal interface SubmissionUseCase {
     fun submit(
         submission: VCLSubmission,
-        didJwk: VCLDidJwk,
+        didJwk: VCLDidJwk? = null,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     )
 }

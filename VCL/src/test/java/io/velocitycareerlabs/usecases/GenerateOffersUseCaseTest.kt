@@ -13,10 +13,12 @@ import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.GenerateOffersUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.GenerateOffersUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonArray
+import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CommonMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.GenerateOffersMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,9 +41,11 @@ internal class GenerateOffersUseCaseTest {
         )
         var result: VCLResult<VCLOffers>? = null
         val generateOffersDescriptor = VCLGenerateOffersDescriptor(
-            credentialManifest = VCLCredentialManifest(jwt = CommonMocks.JWT)
+            credentialManifest = VCLCredentialManifest(
+                jwt = CommonMocks.JWT,
+                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
+            )
         )
-
         subject.generateOffers(
             token = VCLToken(value = ""),
             generateOffersDescriptor = generateOffersDescriptor
@@ -68,7 +72,10 @@ internal class GenerateOffersUseCaseTest {
         )
         var result: VCLResult<VCLOffers>? = null
         val generateOffersDescriptor = VCLGenerateOffersDescriptor(
-            credentialManifest = VCLCredentialManifest(jwt = CommonMocks.JWT)
+            credentialManifest = VCLCredentialManifest(
+                jwt = CommonMocks.JWT,
+                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
+            )
         )
 
         // Action
@@ -95,7 +102,10 @@ internal class GenerateOffersUseCaseTest {
         )
         var result: VCLResult<VCLOffers>? = null
         val generateOffersDescriptor = VCLGenerateOffersDescriptor(
-            credentialManifest = VCLCredentialManifest(jwt = CommonMocks.JWT)
+            credentialManifest = VCLCredentialManifest(
+                jwt = CommonMocks.JWT,
+                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
+            )
         )
 
         // Action

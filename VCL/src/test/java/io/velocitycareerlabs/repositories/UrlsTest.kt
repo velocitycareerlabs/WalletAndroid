@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.repositories
 
 import io.velocitycareerlabs.api.VCLEnvironment
+import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.data.repositories.HeaderValues
 import io.velocitycareerlabs.impl.data.repositories.Urls
@@ -81,6 +82,10 @@ internal class UrlsTest {
 
     @Test
     fun testXVnfProtocolVersion() {
+        GlobalConfig.XVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1
+        assert(HeaderValues.XVnfProtocolVersion == "1.0")
+
+        GlobalConfig.XVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2
         assert(HeaderValues.XVnfProtocolVersion == "2.0")
     }
 

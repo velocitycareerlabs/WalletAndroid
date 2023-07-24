@@ -15,12 +15,12 @@ import java.lang.Exception
 
 internal class ProfileServiceTypeVerifier(
     private val verifiedProfileUseCase: VerifiedProfileUseCase
-    ) {
+) {
 
     fun verifyServiceTypeOfVerifiedProfile(
         verifiedProfileDescriptor: VCLVerifiedProfileDescriptor,
         expectedServiceTypes: VCLServiceTypes,
-        successHandler: () -> Unit,
+        successHandler: (VCLVerifiedProfile) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         verifiedProfileUseCase.getVerifiedProfile(verifiedProfileDescriptor) { verifiedProfileResult ->
@@ -30,7 +30,7 @@ internal class ProfileServiceTypeVerifier(
                         verifiedProfile = verifiedProfile,
                         expectedServiceTypes = expectedServiceTypes,
                         successHandler = {
-                            successHandler()
+                            successHandler(verifiedProfile)
                         },
                         errorHandler = {
                             errorHandler(it)

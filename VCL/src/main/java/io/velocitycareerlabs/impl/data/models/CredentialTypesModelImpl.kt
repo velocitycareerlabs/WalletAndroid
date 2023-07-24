@@ -7,6 +7,7 @@
 
 package io.velocitycareerlabs.impl.data.models
 
+import io.velocitycareerlabs.api.entities.VCLCredentialType
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUseCase
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
 import io.velocitycareerlabs.api.entities.VCLCredentialTypes
@@ -28,5 +29,9 @@ internal class CredentialTypesModelImpl(
             result.handleResult({ data = result.data }, { })
             completionBlock(result)
         }
+    }
+
+    override fun credentialTypeByTypeName(type: String): VCLCredentialType? {
+        return data?.credentialTypeByTypeName(type)
     }
 }

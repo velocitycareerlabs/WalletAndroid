@@ -47,5 +47,5 @@ object HeaderKeys {
 }
 
 object HeaderValues {
-    const val XVnfProtocolVersion = "2.0"
+    val XVnfProtocolVersion get() = GlobalConfig.XVnfProtocolVersion.value
 }

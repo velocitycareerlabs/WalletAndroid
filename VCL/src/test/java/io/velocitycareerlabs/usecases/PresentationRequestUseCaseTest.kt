@@ -76,7 +76,7 @@ internal class PresentationRequestUseCaseTest {
             presentationRequest.jwkPublic.valueJson.toString().toCharArray().sort() ==
                     VCLJwkPublic(PresentationRequestMocks.JWK.toJsonObject()!!).valueJson.toString().toCharArray().sort()
         )
-        assert(presentationRequest.jwt.signedJwt.serialize() == PresentationRequestMocks.PresentationRequestJwt.signedJwt.serialize())
+        assert(presentationRequest.jwt.encodedJwt == PresentationRequestMocks.PresentationRequestJwt.encodedJwt)
         assert(
             presentationRequest.jwt.header.toString() ==
                     PresentationRequestMocks.PresentationRequestJwt.header.toString()

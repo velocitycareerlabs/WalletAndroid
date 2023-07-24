@@ -12,33 +12,34 @@ import kotlin.io.path.ExperimentalPathApi
 
 data class VCLCredentialManifest(
     val jwt: VCLJwt,
-    val vendorOriginContext: String? = null
+    val vendorOriginContext: String? = null,
+    val verifiedProfile: VCLVerifiedProfile
 ) {
-    val iss: String get() = jwt.payload.toJSONObject()?.get(KeyIss) as? String ?: ""
+    val iss: String get() = jwt.payload?.toJSONObject()?.get(KeyIss) as? String ?: ""
     val did: String get() = iss
     val issuerId: String get() = retrieveIssuerId()
-    val exchangeId: String get() = jwt.payload.toJSONObject()?.get(KeyExchangeId) as? String ?: ""
-    val presentationDefinitionId: String get() = (jwt.payload.toJSONObject()?.get(KeyPresentationDefinitionId) as? Map<*, *>)?.get(
+    val exchangeId: String get() = jwt.payload?.toJSONObject()?.get(KeyExchangeId) as? String ?: ""
+    val presentationDefinitionId: String get() = (jwt.payload?.toJSONObject()?.get(KeyPresentationDefinitionId) as? Map<*, *>)?.get(
         KeyId) as? String ?: ""
 
     val finalizeOffersUri: String get() =
-        (jwt.payload.toJSONObject()?.get(VCLCredentialManifest.KeyMetadata) as? Map<*, *>)?.get(
+        (jwt.payload?.toJSONObject()?.get(VCLCredentialManifest.KeyMetadata) as? Map<*, *>)?.get(
             VCLCredentialManifest.KeyFinalizeOffersUri
         )?.toString() ?: ""
 
     val checkOffersUri: String get() =
-        (jwt.payload.toJSONObject()?.get(VCLCredentialManifest.KeyMetadata) as? Map<*, *>)?.get(
+        (jwt.payload?.toJSONObject()?.get(VCLCredentialManifest.KeyMetadata) as? Map<*, *>)?.get(
             VCLCredentialManifest.KeyCheckOffersUri
         )?.toString() ?: ""
 
     val submitPresentationUri: String get() =
-        (jwt.payload.toJSONObject()?.get(VCLCredentialManifest.KeyMetadata) as? Map<*, *>)?.get(
+        (jwt.payload?.toJSONObject()?.get(VCLCredentialManifest.KeyMetadata) as? Map<*, *>)?.get(
             VCLCredentialManifest.KeySubmitIdentificationUri
         )?.toString() ?: ""
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun retrieveIssuerId() =
-        ((jwt.payload.toJSONObject().getOrDefault(CodingKeys.KeyMetadata, HashMap<String, Any>()) as? Map<String, Any> )?.getOrDefault(CodingKeys.KeyFinalizeOffersUri, "") as? String ?: "").substringBefore("/issue/")
+        ((jwt.payload?.toJSONObject()?.getOrDefault(CodingKeys.KeyMetadata, HashMap<String, Any>()) as? Map<String, Any> )?.getOrDefault(CodingKeys.KeyFinalizeOffersUri, "") as? String ?: "").substringBefore("/issue/")
 
     companion object CodingKeys {
         const val KeyIssuingRequest = "issuing_request"

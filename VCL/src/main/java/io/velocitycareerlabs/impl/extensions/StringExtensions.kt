@@ -8,6 +8,9 @@
 package io.velocitycareerlabs.impl.extensions
 
 import android.util.Base64
+import com.nimbusds.jose.util.Base64URL
+import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.VCLJwkPublic
 import io.velocitycareerlabs.impl.utils.VCLLog
 import org.json.JSONArray
 import org.json.JSONObject
@@ -87,7 +90,7 @@ internal fun String.toDate(): Date? {
     return try {
         format.parse(this)
     } catch (e: ParseException) {
-        VCLLog.e("", "", e)
+//        VCLLog.e("", "", e)
         null
     }
 }
@@ -96,7 +99,7 @@ internal fun String.toJsonObject(): JSONObject? {
     return try {
         JSONObject(this)
     } catch (e: Exception) {
-        VCLLog.e("", "", e)
+//        VCLLog.e("", "", e)
         null
     }
 }
@@ -105,10 +108,13 @@ internal fun String.toJsonArray(): JSONArray? {
     return try {
         JSONArray(this)
     } catch (e: Exception) {
-        VCLLog.e("", "", e)
+//        VCLLog.e("", "", e)
         null
     }
 }
+
+internal fun String.toPublicJwk() =
+    VCLJwkPublic(this.removePrefix(VCLDidJwk.DidJwkPrefix).decodeBase64())
 
 internal fun randomString(length: Int): String =
     List(length) {

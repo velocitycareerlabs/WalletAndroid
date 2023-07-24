@@ -13,7 +13,6 @@ import androidx.core.view.isVisible
 import com.vcl.wallet.databinding.ActivityMainBinding
 import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.VCLEnvironment
-import io.velocitycareerlabs.api.VCLKeyServiceType
 import io.velocitycareerlabs.api.VCLProvider
 import io.velocitycareerlabs.api.entities.*
 import org.json.JSONObject
@@ -26,7 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     private val environment = VCLEnvironment.DEV
     private lateinit var vcl: VCL
-    private lateinit var didJwk: VCLDidJwk
+    private var didJwk: VCLDidJwk? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,23 +65,23 @@ class MainActivity : AppCompatActivity() {
         vcl.initialize(
             context = this.applicationContext,
             initializationDescriptor = VCLInitializationDescriptor(
-                environment = environment,
-                keyServiceType = VCLKeyServiceType.LOCAL
+                environment = environment
             ),
             successHandler = {
                 Log.d(TAG, "VCL Initialization succeed!")
+                showControls()
 
-                vcl.generateDidJwk(
-                    successHandler = { didJwk ->
-                        this.didJwk = didJwk
-                        Log.d(TAG, "VCL did:jwk is ${this.didJwk.value}")
-                        showControls()
-                    },
-                    errorHandler = { error ->
-                        logError("VCL Failed to generate did:jwk with error:", error)
-                        showError()
-                    }
-                )
+//                vcl.generateDidJwk(
+//                    successHandler = { didJwk ->
+//                        this.didJwk = didJwk
+//                        Log.d(TAG, "VCL did:jwk is ${this.didJwk}")
+//                        showControls()
+//                    },
+//                    errorHandler = { error ->
+//                        logError("VCL Failed to generate did:jwk with error:", error)
+//                        showError()
+//                    }
+//                )
             },
             errorHandler = { error ->
                 logError("VCL Initialization failed with error:", error)
@@ -359,13 +358,13 @@ class MainActivity : AppCompatActivity() {
     private fun generateSignedJwt() {
         vcl.generateSignedJwt(
             VCLJwtDescriptor(
-                keyId = didJwk.keyId,
+                keyId = didJwk?.keyId,
                 payload = Constants.SomePayload,
                 iss = "iss123",
                 jti = "jti123"
             ),
             { jwt ->
-                Log.d(TAG, "VCL JWT generated: ${jwt.signedJwt.serialize()}")
+                Log.d(TAG, "VCL JWT generated: ${jwt.encodedJwt}")
             },
             { error ->
                 logError("VCL JWT generation failed:", error)
