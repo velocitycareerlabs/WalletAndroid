@@ -12,8 +12,8 @@ import io.velocitycareerlabs.api.VCLKeyServiceType
 import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 
 data class VCLInitializationDescriptor(
-    val environment: VCLEnvironment = VCLEnvironment.PROD,
-    val keyServiceType: VCLKeyServiceType = VCLKeyServiceType.LOCAL,
+    val environment: VCLEnvironment = VCLEnvironment.Prod,
+    val keyServiceType: VCLKeyServiceType = VCLKeyServiceType.Local,
     val xVnfProtocolVersion: VCLXVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1,
     val cacheSequence: Int = 0
 )

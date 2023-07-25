@@ -8,6 +8,6 @@
 package io.velocitycareerlabs.api
 
 enum class VCLKeyServiceType(val value: String) {
-    LOCAL("local"),
-    REMOTE("remote")
+    Local("local"),
+    Remote("remote")
 }

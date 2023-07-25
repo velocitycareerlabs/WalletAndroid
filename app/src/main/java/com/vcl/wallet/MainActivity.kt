@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val environment = VCLEnvironment.DEV
+    private val environment = VCLEnvironment.Dev
     private lateinit var vcl: VCL
     private var didJwk: VCLDidJwk? = null
 
@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getPresentationRequest() {
         val deepLink =
-            if (environment == VCLEnvironment.DEV)
+            if (environment == VCLEnvironment.Dev)
                 VCLDeepLink(Constants.PresentationRequestDeepLinkStrDev)
             else
                 VCLDeepLink(Constants.PresentationRequestDeepLinkStrStaging)
@@ -160,7 +160,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getOrganizationsThenCredentialManifestByService() {
         val organizationDescriptor =
-            if (environment == VCLEnvironment.DEV)
+            if (environment == VCLEnvironment.Dev)
                 Constants.OrganizationsSearchDescriptorByDidDev
             else
                 Constants.OrganizationsSearchDescriptorByDidStaging
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getCredentialManifestByDeepLink() {
         val deepLink =
-            if (environment == VCLEnvironment.DEV)
+            if (environment == VCLEnvironment.Dev)
                 VCLDeepLink(Constants.CredentialManifestDeepLinkStrDev)
             else
                 VCLDeepLink(Constants.CredentialManifestDeepLinkStrStaging)

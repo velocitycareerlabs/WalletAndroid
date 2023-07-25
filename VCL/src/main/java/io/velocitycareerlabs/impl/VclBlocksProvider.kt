@@ -33,7 +33,7 @@ internal object VclBlocksProvider {
                 context: Context,
                 keyServiceType: VCLKeyServiceType
         ): JwtService {
-                if (keyServiceType == VCLKeyServiceType.REMOTE) {
+                if (keyServiceType == VCLKeyServiceType.Remote) {
                         return JwtServiceRemoteImpl(NetworkServiceImpl())
                 }
                 return JwtServiceImpl(KeyServiceImpl(SecretStoreServiceImpl(context.applicationContext)))
@@ -43,7 +43,7 @@ internal object VclBlocksProvider {
                 context: Context,
                 keyServiceType: VCLKeyServiceType
         ): KeyService {
-                if (keyServiceType == VCLKeyServiceType.REMOTE) {
+                if (keyServiceType == VCLKeyServiceType.Remote) {
                         return KeyServiceRemoteImpl(NetworkServiceImpl())
                 }
                 return KeyServiceImpl(SecretStoreServiceImpl(context.applicationContext))

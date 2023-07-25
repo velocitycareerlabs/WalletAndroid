@@ -14,7 +14,7 @@ import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 internal object GlobalConfig {
     const val VclPackage = BuildConfig.LIBRARY_PACKAGE_NAME
 
-    var CurrentEnvironment = VCLEnvironment.PROD
+    var CurrentEnvironment = VCLEnvironment.Prod
     var XVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1
 
     val IsDebug = BuildConfig.DEBUG
@@ -24,7 +24,7 @@ internal object GlobalConfig {
 
     const val LogTagPrefix = "VCL "
     // TODO: Will be remotely configurable
-    val IsLoggerOn get() = CurrentEnvironment != VCLEnvironment.PROD
+    val IsLoggerOn get() = CurrentEnvironment != VCLEnvironment.Prod
 
     const val TypeJwt = "JWT"
 }
