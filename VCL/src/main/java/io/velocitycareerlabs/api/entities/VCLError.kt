@@ -1,5 +1,6 @@
 /**
  * Created by Michael Avoyan on 07/03/2023.
+ *
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -29,11 +30,11 @@ class VCLError(
         this.statusCode = statusCode
     }
 
-    constructor(payload: String): this() {
-        val payloadJson = payload.toJsonObject()
+    constructor(payload: String?, errorCode: String? = null): this() {
+        val payloadJson = payload?.toJsonObject()
         this.payload = payload
         this.error = payloadJson?.optString(CodingKeys.KeyError)
-        this.errorCode = payloadJson?.optString(CodingKeys.KeyErrorCode)
+        this.errorCode = errorCode ?: payloadJson?.optString(CodingKeys.KeyErrorCode)
         this.message = payloadJson?.optString(CodingKeys.KeyMessage)
         this.statusCode = payloadJson?.optInt(CodingKeys.KeyStatusCode)
     }

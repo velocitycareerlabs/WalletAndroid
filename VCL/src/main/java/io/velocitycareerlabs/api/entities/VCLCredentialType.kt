@@ -7,16 +7,19 @@
 
 package io.velocitycareerlabs.api.entities
 
+import org.json.JSONArray
 import org.json.JSONObject
 
 data class VCLCredentialType (
     val payload: JSONObject,
-    val id: String?,
-    val schema: String?,
-    val createdAt: String?,
-    val schemaName: String?,
-    val credentialType: String?,
-    val recommended: Boolean
+    val id: String? = null,
+    val schema: String? = null,
+    val createdAt: String? = null,
+    val schemaName: String? = null,
+    val credentialType: String? = null,
+    val recommended: Boolean = false,
+    val jsonldContext: JSONArray? = null,
+    val issuerCategory: String? = null
     ) {
 
     companion object CodingKeys {
@@ -26,5 +29,7 @@ data class VCLCredentialType (
         const val KeySchemaName = "schemaName"
         const val KeyCredentialType = "credentialType"
         const val KeyRecommended = "recommended"
+        const val KeyJsonldContext = "jsonldContext"
+        const val KeyIssuerCategory = "issuerCategory"
     }
 }

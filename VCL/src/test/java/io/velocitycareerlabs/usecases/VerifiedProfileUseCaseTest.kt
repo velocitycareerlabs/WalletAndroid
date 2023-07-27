@@ -29,7 +29,7 @@ internal class VerifiedProfileUseCaseTest {
     fun testGetVerifiedProfileIssuerSuccess() {
         subject = VerifiedProfileUseCaseImpl(
             VerifiedProfileRepositoryImpl(
-                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr)
+                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1)
             ),
             EmptyExecutor()
         )

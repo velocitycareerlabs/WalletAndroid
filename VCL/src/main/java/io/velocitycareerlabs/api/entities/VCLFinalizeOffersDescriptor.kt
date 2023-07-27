@@ -26,12 +26,13 @@ data class VCLFinalizeOffersDescriptor(
     val issuerId: String get() = credentialManifest.issuerId
     val exchangeId: String get() = credentialManifest.exchangeId
     val finalizeOffersUri: String get() = credentialManifest.finalizeOffersUri
+    val serviceTypes: VCLServiceTypes get() = credentialManifest.verifiedProfile.serviceTypes
 
     fun generateRequestBody(jwt: VCLJwt): JSONObject {
         val retVal = JSONObject(this.payload.toString())
         val proof = JSONObject()
         proof.put(CodingKeys.KeyProofType, CodingKeys.KeyJwt)
-        proof.put(CodingKeys.KeyJwt, jwt.signedJwt.serialize())
+        proof.put(CodingKeys.KeyJwt, jwt.encodedJwt)
         retVal.put(CodingKeys.KeyProof, proof)
         return retVal
     }

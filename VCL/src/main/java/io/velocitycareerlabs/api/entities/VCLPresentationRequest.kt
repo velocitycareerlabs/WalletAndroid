@@ -25,15 +25,15 @@ data class VCLPresentationRequest(
         const val KeySubmitPresentationUri = "submit_presentation_uri"
     }
 
-    val iss: String get() = jwt.payload.toJSONObject()?.get(KeyIss)?.toString() ?: ""
-    val exchangeId: String get() = jwt.payload.toJSONObject()?.get(KeyExchangeId)?.toString() ?: ""
+    val iss: String get() = jwt.payload?.toJSONObject()?.get(KeyIss)?.toString() ?: ""
+    val exchangeId: String get() = jwt.payload?.toJSONObject()?.get(KeyExchangeId)?.toString() ?: ""
     val presentationDefinitionId get() =
-        (jwt.payload.toJSONObject()?.get(KeyPresentationDefinition) as? Map<*, *>)?.get(KeyId) as? String ?: ""
-    val keyID get() = jwt.header.keyID ?: ""
+        (jwt.payload?.toJSONObject()?.get(KeyPresentationDefinition) as? Map<*, *>)?.get(KeyId) as? String ?: ""
+    val keyID get() = jwt.header?.keyID ?: ""
     val vendorOriginContext get() = deepLink.vendorOriginContext
 
     val progressUri: String get() =
-        (jwt.payload.toJSONObject()?.get(KeyMetadata) as? Map<*, *>)?.get(KeyProgressUri)?.toString() ?: ""
+        (jwt.payload?.toJSONObject()?.get(KeyMetadata) as? Map<*, *>)?.get(KeyProgressUri)?.toString() ?: ""
     val submitPresentationUri: String get() =
-        (jwt.payload.toJSONObject()?.get(KeyMetadata) as? Map<*, *>)?.get(KeySubmitPresentationUri)?.toString() ?: ""
+        (jwt.payload?.toJSONObject()?.get(KeyMetadata) as? Map<*, *>)?.get(KeySubmitPresentationUri)?.toString() ?: ""
 }

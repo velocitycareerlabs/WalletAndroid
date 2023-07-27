@@ -21,6 +21,7 @@ class SecretStoreServiceMock private constructor(): SecretStoreService {
         map[keyId] = key
     }
 
+    @Throws(Exception::class)
     override fun retrieveKey(keyId: String): JWK {
         if (containsKey(keyId)) {
             return map[keyId] as JWK

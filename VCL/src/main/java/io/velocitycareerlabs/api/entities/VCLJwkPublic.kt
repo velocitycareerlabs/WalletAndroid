@@ -24,7 +24,7 @@ class VCLJwkPublic {
         this.valueStr = this.valueJson.toString()
     }
 
-    enum class Format(val value: String) {
+    internal enum class Format(val value: String) {
         jwk("jwk"),
         hex("hex"),
         pem("pem"),

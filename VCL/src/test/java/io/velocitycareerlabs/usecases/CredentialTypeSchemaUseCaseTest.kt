@@ -14,6 +14,7 @@ import io.velocitycareerlabs.impl.domain.usecases.CredentialTypeSchemasUseCase
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.EmptyCacheService
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
+import io.velocitycareerlabs.infrastructure.resources.valid.CountriesMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypeSchemaMocks
 import org.json.JSONObject
 import org.junit.After
@@ -30,7 +31,6 @@ internal class CredentialTypeSchemaUseCaseTest {
 
     @Test
     fun testGetCredentialTypeSchemas() {
-//        Arrange
         subject = CredentialTypeSchemasUseCaseImpl(
                 CredentialTypeSchemaRepositoryImpl(
                     NetworkServiceSuccess(CredentialTypeSchemaMocks.CredentialTypeSchemaJson),
@@ -39,18 +39,20 @@ internal class CredentialTypeSchemaUseCaseTest {
             CredentialTypeSchemaMocks.CredentialTypes,
                 EmptyExecutor()
         )
-        var result: VCLResult<VCLCredentialTypeSchemas>? = null
 
-//        Action
         subject.getCredentialTypeSchemas(0) {
-            result = it
+            it.handleResult(
+                successHandler = { credTypeSchemas ->
+                    assert(
+                        credTypeSchemas.all[CredentialTypeSchemaMocks.CredentialType.schemaName!!]!!.payload.toString() ==
+                                JSONObject(CredentialTypeSchemaMocks.CredentialTypeSchemaJson).toString()
+                    )
+                },
+                errorHandler = {
+                    assert(false) { "$it" }
+                }
+            )
         }
-
-//        Assert
-        assert(
-            result?.data!!.all[CredentialTypeSchemaMocks.CredentialType.schemaName!!]!!.payload.toString() ==
-                    JSONObject(CredentialTypeSchemaMocks.CredentialTypeSchemaJson).toString()
-        )
     }
 
     @After

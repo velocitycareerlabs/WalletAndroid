@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.repositories
 
 import io.velocitycareerlabs.api.VCLEnvironment
+import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.data.repositories.HeaderValues
 import io.velocitycareerlabs.impl.data.repositories.Urls
@@ -27,7 +28,7 @@ internal class UrlsTest {
     fun testProdEnvironment() {
         val expectedUrlPrefix = "https://registrar.velocitynetwork.foundation"
 
-        GlobalConfig.CurrentEnvironment = VCLEnvironment.PROD
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.Prod
 
         assert(Urls.CredentialTypes.startsWith(expectedUrlPrefix))
         assert(Urls.CredentialTypeSchemas.startsWith(expectedUrlPrefix))
@@ -41,7 +42,7 @@ internal class UrlsTest {
     fun testStagingEnvironment() {
         val expectedUrlPrefix = "https://stagingregistrar.velocitynetwork.foundation"
 
-        GlobalConfig.CurrentEnvironment = VCLEnvironment.STAGING
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.Staging
 
         assert(Urls.CredentialTypes.startsWith(expectedUrlPrefix))
         assert(Urls.CredentialTypeSchemas.startsWith(expectedUrlPrefix))
@@ -55,7 +56,7 @@ internal class UrlsTest {
     fun testQaEnvironment() {
         val expectedUrlPrefix = "https://qaregistrar.velocitynetwork.foundation"
 
-        GlobalConfig.CurrentEnvironment = VCLEnvironment.QA
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.Qa
 
         assert(Urls.CredentialTypes.startsWith(expectedUrlPrefix))
         assert(Urls.CredentialTypeSchemas.startsWith(expectedUrlPrefix))
@@ -69,7 +70,7 @@ internal class UrlsTest {
     fun testDevEnvironment() {
         val expectedUrlPrefix = "https://devregistrar.velocitynetwork.foundation"
 
-        GlobalConfig.CurrentEnvironment = VCLEnvironment.DEV
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.Dev
 
         assert(Urls.CredentialTypes.startsWith(expectedUrlPrefix))
         assert(Urls.CredentialTypeSchemas.startsWith(expectedUrlPrefix))
@@ -81,6 +82,10 @@ internal class UrlsTest {
 
     @Test
     fun testXVnfProtocolVersion() {
+        GlobalConfig.XVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1
+        assert(HeaderValues.XVnfProtocolVersion == "1.0")
+
+        GlobalConfig.XVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2
         assert(HeaderValues.XVnfProtocolVersion == "2.0")
     }
 

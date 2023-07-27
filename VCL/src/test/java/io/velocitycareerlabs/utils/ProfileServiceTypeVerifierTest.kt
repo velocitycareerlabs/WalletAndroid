@@ -119,7 +119,7 @@ class ProfileServiceTypeVerifierTest {
         subject = ProfileServiceTypeVerifier(
             VerifiedProfileUseCaseImpl(
                 VerifiedProfileRepositoryImpl(
-                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr)
+                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1)
                 ),
                 EmptyExecutor()
             )

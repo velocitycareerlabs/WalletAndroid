@@ -9,4 +9,6 @@ package io.velocitycareerlabs.api.entities
 
 data class VCLCredentialTypes(val all: List<VCLCredentialType>?) {
     val recommendedTypes:List<VCLCredentialType>? get() = all?.filter { it.recommended }
+
+    fun credentialTypeByTypeName(type: String) = all?.first { type == it.credentialType }
 }

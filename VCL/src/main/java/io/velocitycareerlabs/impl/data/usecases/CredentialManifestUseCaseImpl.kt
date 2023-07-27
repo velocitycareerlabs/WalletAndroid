@@ -24,6 +24,7 @@ internal class CredentialManifestUseCaseImpl(
 
     override fun getCredentialManifest(
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
+        verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         executor.runOnBackground {
@@ -32,11 +33,16 @@ internal class CredentialManifestUseCaseImpl(
             ) { jwtStrResult ->
                 jwtStrResult.handleResult(
                     { jwtStr ->
-                        onGetJwtSuccess(
-                            jwtStr,
-                            credentialManifestDescriptor,
-                            completionBlock
-                        )
+                        try {
+                            onGetCredentialManifestSuccess(
+                                VCLJwt(jwtStr),
+                                credentialManifestDescriptor,
+                                verifiedProfile,
+                                completionBlock
+                            )
+                        } catch (ex: Exception) {
+                            this.onError(VCLError(ex), completionBlock)
+                        }
                     },
                     { error ->
                         onError(error, completionBlock)
@@ -46,30 +52,10 @@ internal class CredentialManifestUseCaseImpl(
         }
     }
 
-    private fun onGetJwtSuccess(
-        jwtStr: String,
-        credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
-    ) {
-        jwtServiceRepository.decode(jwtStr) { jwtResult ->
-            jwtResult.handleResult(
-                { jwt ->
-                    onDecodeJwtSuccess(
-                        jwt,
-                        credentialManifestDescriptor,
-                        completionBlock
-                    )
-                },
-                { error ->
-                    onError(error, completionBlock)
-                }
-            )
-        }
-    }
-
-    private fun onDecodeJwtSuccess(
+    private fun onGetCredentialManifestSuccess(
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
+        verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         jwt.kid?.replace("#", "#".encode())?.let { kid ->
@@ -80,6 +66,7 @@ internal class CredentialManifestUseCaseImpl(
                             publicKey,
                             jwt,
                             credentialManifestDescriptor,
+                            verifiedProfile,
                             completionBlock
                         )
                     },
@@ -97,6 +84,7 @@ internal class CredentialManifestUseCaseImpl(
         jwkPublic: VCLJwkPublic,
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
+        verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         jwtServiceRepository.verifyJwt(jwt, jwkPublic)
@@ -107,6 +95,7 @@ internal class CredentialManifestUseCaseImpl(
                         isVerified,
                         jwt,
                         credentialManifestDescriptor,
+                        verifiedProfile,
                         completionBlock
                     )
                 },
@@ -121,13 +110,15 @@ internal class CredentialManifestUseCaseImpl(
         isVerified: Boolean,
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
+        verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         if (isVerified) {
             executor.runOnMain {
                 completionBlock(VCLResult.Success(VCLCredentialManifest(
                     jwt,
-                    credentialManifestDescriptor.vendorOriginContext
+                    credentialManifestDescriptor.vendorOriginContext,
+                    verifiedProfile
                 )))
             }
         } else {

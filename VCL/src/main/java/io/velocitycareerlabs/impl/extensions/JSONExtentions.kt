@@ -11,7 +11,6 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-@Throws(JSONException::class)
 internal fun JSONObject.toMap(): Map<String, Any> {
     val map = mutableMapOf<String, Any>()
     val keysItr: Iterator<String> = this.keys()
@@ -27,7 +26,6 @@ internal fun JSONObject.toMap(): Map<String, Any> {
     return map
 }
 
-@Throws(JSONException::class)
 internal fun JSONArray.toList(): List<Any> {
     val list = mutableListOf<Any>()
     for (i in 0 until this.length()) {
@@ -37,6 +35,14 @@ internal fun JSONArray.toList(): List<Any> {
             is JSONObject -> value = value.toMap()
         }
         list.add(value)
+    }
+    return list
+}
+
+internal fun JSONArray.toListOfStrings(): List<String> {
+    val list = mutableListOf<String>()
+    for (i in 0 until this.length()) {
+        (this[i] as? String)?.let { list.add(it) }
     }
     return list
 }

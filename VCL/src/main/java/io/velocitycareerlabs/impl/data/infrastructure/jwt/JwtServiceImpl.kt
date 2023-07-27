@@ -35,7 +35,7 @@ internal class JwtServiceImpl(
         try {
             completionBlock(
                 VCLResult.Success(
-                    jwt.signedJwt.verify(ECDSAVerifier(JWK.parse(jwkPublic.valueStr).toECKey()))
+                    jwt.signedJwt?.verify(ECDSAVerifier(JWK.parse(jwkPublic.valueStr).toECKey())) == true
                 )
             )
         } catch (ex: Exception) {
@@ -53,10 +53,8 @@ internal class JwtServiceImpl(
                 successHandler = { ecKey ->
                     try {
                         val header = JWSHeader.Builder(JWSAlgorithm.ES256K)
-                            .jwk(ecKey.toPublicJWK())
                             .type(JOSEObjectType(GlobalConfig.TypeJwt))
-//                        kid?.let { header.keyID(it) } ?: run { header.jwk(ecKey.toPublicJWK()) }
-                        kid?.let { header.keyID(it) }
+                        kid?.let { header.keyID(it) } ?: run { header.jwk(ecKey.toPublicJWK()) }
                         val jwtHeader = header.build()
 
                         val signedJWT = SignedJWT(
@@ -105,16 +103,5 @@ internal class JwtServiceImpl(
         jwtDescriptor.payload?.let { claimsSetBuilder.addClaims(it) }
 
         return claimsSetBuilder.build()
-    }
-
-    companion object CodingKeys {
-        val KeyIss = "iss"
-        val KeyAud = "aud"
-        val KeySub = "sub"
-        val KeyJti = "jti"
-        val KeyIat = "iat"
-        val KeyNbf = "nbf"
-        val KeyExp = "exp"
-        val KeyNonce = "nonce"
     }
 }

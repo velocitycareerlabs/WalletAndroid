@@ -16,12 +16,13 @@ import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.ResolveKidRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialManifestUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
-import io.velocitycareerlabs.impl.extensions.toMap
+import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -63,14 +64,15 @@ internal class CredentialManifestUseCaseTest {
             credentialManifestDescriptor = VCLCredentialManifestDescriptorByDeepLink(
                 deepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet,
                 issuingType = VCLIssuingType.Career
-            )
+            ),
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
         ) {
             result = it
         }
 
         // Assert
         val credentialManifest = result!!.data
-        assert(credentialManifest?.jwt?.signedJwt?.serialize() == CredentialManifestMocks.CredentialManifestJwt1)
+        assert(credentialManifest?.jwt?.encodedJwt == CredentialManifestMocks.JwtCredentialManifest1)
         JSONAssert.assertEquals(
             credentialManifest?.jwt?.header.toString(),
             CredentialManifestMocks.Header,
