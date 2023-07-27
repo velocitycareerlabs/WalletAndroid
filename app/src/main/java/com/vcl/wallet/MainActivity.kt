@@ -66,24 +66,24 @@ class MainActivity : AppCompatActivity() {
         vcl.initialize(
             context = this.applicationContext,
             initializationDescriptor = VCLInitializationDescriptor(
-                environment = environment,
-                xVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2
+                environment = environment//,
+//                xVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2
             ),
             successHandler = {
                 Log.d(TAG, "VCL Initialization succeed!")
                 showControls()
 
-                vcl.generateDidJwk(
-                    successHandler = { didJwk ->
-                        this.didJwk = didJwk
-                        Log.d(TAG, "VCL did:jwk is ${this.didJwk}")
-                        showControls()
-                    },
-                    errorHandler = { error ->
-                        logError("VCL Failed to generate did:jwk with error:", error)
-                        showError()
-                    }
-                )
+//                vcl.generateDidJwk(
+//                    successHandler = { didJwk ->
+//                        this.didJwk = didJwk
+//                        Log.d(TAG, "VCL did:jwk is ${this.didJwk}")
+//                        showControls()
+//                    },
+//                    errorHandler = { error ->
+//                        logError("VCL Failed to generate did:jwk with error:", error)
+//                        showError()
+//                    }
+//                )
             },
             errorHandler = { error ->
                 logError("VCL Initialization failed with error:", error)
