@@ -12,6 +12,7 @@ import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.infrastructure.network.Response
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.repositories.GenerateOffersRepository
+import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import org.json.JSONArray
 import org.json.JSONObject
@@ -54,6 +55,7 @@ internal class GenerateOffersRepositoryImpl(
     }
 
     private fun parse(offersResponse: Response, token: VCLToken): VCLOffers {
+//        VCLXVnfProtocolVersion.XVnfProtocolVersion2
         offersResponse.payload.toJsonObject()?.let { payload ->
             return VCLOffers(
                 payload = payload,
@@ -63,13 +65,25 @@ internal class GenerateOffersRepositoryImpl(
                 challenge = payload.optString(VCLOffers.CodingKeys.KeyChallenge) ?: ""
             )
         } ?: run {
-            return VCLOffers(
-                payload = JSONObject(),
-                all = JSONArray(),
-                responseCode = offersResponse.code,
-                token = token,
-                challenge = ""
-            )
+//            VCLXVnfProtocolVersion.XVnfProtocolVersion1
+            offersResponse.payload.toJsonArray()?.let { allOffers ->
+                return VCLOffers(
+                    payload = JSONObject(),
+                    all = allOffers,
+                    responseCode = offersResponse.code,
+                    token = token,
+                    challenge = ""
+                )
+            } ?: run {
+//                No offers
+                return VCLOffers(
+                    payload = JSONObject(),
+                    all = JSONArray(),
+                    responseCode = offersResponse.code,
+                    token = token,
+                    challenge = ""
+                )
+            }
         }
     }
 }
