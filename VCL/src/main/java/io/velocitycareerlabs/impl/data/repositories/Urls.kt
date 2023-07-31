@@ -21,15 +21,15 @@ internal class Urls {
                 VCLEnvironment.Staging -> VCLEnvironment.Staging.value
                 else -> "" // prod is a default, doesn't has a prefix
             }
-
-        private val BaseUrlServices get() = "https://${EnvironmentPrefix}registrar.velocitynetwork.foundation"
-        val CredentialTypes get() = "$BaseUrlServices/api/v0.6/credential-types"
-        val CredentialTypeSchemas get() = "$BaseUrlServices/schemas/"
-        val Countries get() = "$BaseUrlServices/reference/countries"
-        val Organizations get() = "$BaseUrlServices/api/v0.6/organizations/search-profiles"
-        val ResolveKid get() = "$BaseUrlServices/api/v0.6/resolve-kid/"
-        val CredentialTypesFormSchema get() = "$BaseUrlServices/api/v0.6/form-schemas?credentialType=$CredentialType"
-        val VerifiedProfile get() = "$BaseUrlServices/api/v0.6/organizations/$Did/verified-profile"
+        private val BaseUrlRegistrar get() = "https://${EnvironmentPrefix}registrar.velocitynetwork.foundation"
+        private val BaseUrlWalletApi get() = "https://${EnvironmentPrefix}walletapi.velocitycareerlabs.io"
+        val CredentialTypes get() = "$BaseUrlRegistrar/api/v0.6/credential-types"
+        val CredentialTypeSchemas get() = "$BaseUrlRegistrar/schemas/"
+        val Countries get() = "$BaseUrlWalletApi/reference/countries"
+        val Organizations get() = "$BaseUrlRegistrar/api/v0.6/organizations/search-profiles"
+        val ResolveKid get() = "$BaseUrlRegistrar/api/v0.6/resolve-kid/"
+        val CredentialTypesFormSchema get() = "$BaseUrlRegistrar/api/v0.6/form-schemas?credentialType=$CredentialType"
+        val VerifiedProfile get() = "$BaseUrlRegistrar/api/v0.6/organizations/$Did/verified-profile"
     }
 }
 
