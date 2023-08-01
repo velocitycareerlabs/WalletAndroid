@@ -22,10 +22,10 @@ internal class Urls {
                 else -> "" // prod is a default, doesn't has a prefix
             }
         private val BaseUrlRegistrar get() = "https://${EnvironmentPrefix}registrar.velocitynetwork.foundation"
-        private val BaseUrlWalletApi get() = "https://${EnvironmentPrefix}walletapi.velocitycareerlabs.io"
+//        private val BaseUrlWalletApi get() = "https://${EnvironmentPrefix}walletapi.velocitycareerlabs.io"
         val CredentialTypes get() = "$BaseUrlRegistrar/api/v0.6/credential-types"
         val CredentialTypeSchemas get() = "$BaseUrlRegistrar/schemas/"
-        val Countries get() = "$BaseUrlWalletApi/reference/countries"
+        val Countries get() = "$BaseUrlRegistrar/reference/countries"
         val Organizations get() = "$BaseUrlRegistrar/api/v0.6/organizations/search-profiles"
         val ResolveKid get() = "$BaseUrlRegistrar/api/v0.6/resolve-kid/"
         val CredentialTypesFormSchema get() = "$BaseUrlRegistrar/api/v0.6/form-schemas?credentialType=$CredentialType"

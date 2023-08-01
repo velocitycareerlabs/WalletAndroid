@@ -27,47 +27,43 @@ internal class UrlsTest {
     @Test
     fun testProdEnvironment() {
         val registrarPrefix = "https://registrar.velocitynetwork.foundation"
-        val walletApiPrefix = "https://walletapi.velocitycareerlabs.io"
 
         GlobalConfig.CurrentEnvironment = VCLEnvironment.Prod
 
-        verifyUrlsPrefix(registrarPrefix, walletApiPrefix)
+        verifyUrlsPrefix(registrarPrefix)
     }
 
     @Test
     fun testStagingEnvironment() {
         val registrarPrefix = "https://stagingregistrar.velocitynetwork.foundation"
-        val walletApiPrefix = "https://stagingwalletapi.velocitycareerlabs.io"
 
         GlobalConfig.CurrentEnvironment = VCLEnvironment.Staging
 
-        verifyUrlsPrefix(registrarPrefix, walletApiPrefix)
+        verifyUrlsPrefix(registrarPrefix)
     }
 
     @Test
     fun testQaEnvironment() {
         val registrarPrefix = "https://qaregistrar.velocitynetwork.foundation"
-        val walletApiPrefix = "https://qawalletapi.velocitycareerlabs.io"
 
         GlobalConfig.CurrentEnvironment = VCLEnvironment.Qa
 
-        verifyUrlsPrefix(registrarPrefix, walletApiPrefix)
+        verifyUrlsPrefix(registrarPrefix)
     }
 
     @Test
     fun testDevEnvironment() {
         val registrarPrefix = "https://devregistrar.velocitynetwork.foundation"
-        val walletApiPrefix = "https://devwalletapi.velocitycareerlabs.io"
 
         GlobalConfig.CurrentEnvironment = VCLEnvironment.Dev
 
-        verifyUrlsPrefix(registrarPrefix, walletApiPrefix)
+        verifyUrlsPrefix(registrarPrefix)
     }
 
-    private fun verifyUrlsPrefix(registrarPrefix: String, walletApiPrefix: String) {
+    private fun verifyUrlsPrefix(registrarPrefix: String) {
         assert(Urls.CredentialTypes.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.CredentialTypes}"}
         assert(Urls.CredentialTypeSchemas.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.CredentialTypeSchemas}"}
-        assert(Urls.Countries.startsWith(walletApiPrefix)) {"expected: $walletApiPrefix, actual: ${Urls.Countries}"}
+        assert(Urls.Countries.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.Countries}"}
         assert(Urls.Organizations.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.Organizations}"}
         assert(Urls.ResolveKid.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.ResolveKid}"}
         assert(Urls.CredentialTypesFormSchema.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.CredentialTypesFormSchema}"}
