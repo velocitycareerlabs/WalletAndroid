@@ -15,7 +15,7 @@ import io.velocitycareerlabs.impl.extensions.getUrlQueryParams
 import java.net.URI
 
 data class VCLDeepLink(val value: String) {
-    val issuer: String? = generateUri(uriKey = KeyIssuer, asSubParams = true)
+    val issuer: String? = generateUri(uriKey = KeyIssuer)
     val requestUri: String? = generateUri(uriKey = KeyRequestUri)
     val vendorOriginContext: String? = retrieveVendorOriginContext()
     val did: String? = requestUri?.getUrlSubPath(KeyDidPrefix) ?: issuer?.getUrlSubPath(KeyDidPrefix)
