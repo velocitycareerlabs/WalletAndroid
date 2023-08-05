@@ -73,7 +73,7 @@ internal class CredentialIssuerVerifierImpl(
             }
             val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
             allFutures.join()
-            globalError?.let {
+            globalError?.let { // if at least one credential verification failed => the whole process fails
                 completionBlock(VCLResult.Failure(it))
             } ?: run {
                 completionBlock(VCLResult.Success(true))
@@ -214,6 +214,7 @@ internal class CredentialIssuerVerifierImpl(
     ) {
         (credentialSubject[KeyType] as? String)?.let { credentialSubjectType ->
             var globalError: VCLError? = null
+            var isCredentialVerified = false
             val completableFutures = completeContexts.map { completeContext ->
                 CompletableFuture.supplyAsync {
                     (((completeContext[KeyContext] as? Map<*, *>)
@@ -223,7 +224,7 @@ internal class CredentialIssuerVerifierImpl(
                             findKeyForPrimaryOrganizationValue(context)?.let { K ->
                                 ((credentialSubject[K] as? Map<*, *>)?.get(KeyIdentifier) as? String)?.let { did ->
                                     if (jwtCredential.iss == did) {
-//                                        do nothing
+                                        isCredentialVerified = true
                                     } else {
                                         globalError =
                                             VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission.value)
@@ -244,11 +245,13 @@ internal class CredentialIssuerVerifierImpl(
             }
             val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
             allFutures.join()
-            globalError?.let {
-                completionBlock(VCLResult.Failure(it))
-            } ?: run {
+
+            if(isCredentialVerified)
                 completionBlock(VCLResult.Success(true))
-            }
+            else
+                completionBlock(VCLResult.Failure(
+                    globalError ?: VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure.value))
+                )
         } ?: run {
             onError(
                 VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectType.value),
