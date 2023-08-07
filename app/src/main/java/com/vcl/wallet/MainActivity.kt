@@ -227,7 +227,7 @@ class MainActivity : AppCompatActivity() {
         val credentialManifestDescriptorByDeepLink =
             VCLCredentialManifestDescriptorByDeepLink(
                 deepLink = deepLink,
-//                issuingType = VCLIssuingType.Undefined
+//                issuingType = VCLIssuingType.Identity
             )
         vcl.getCredentialManifest(credentialManifestDescriptorByDeepLink,
             { credentialManifest ->

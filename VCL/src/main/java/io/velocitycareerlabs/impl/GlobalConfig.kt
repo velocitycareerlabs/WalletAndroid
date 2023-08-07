@@ -17,14 +17,14 @@ internal object GlobalConfig {
     var CurrentEnvironment = VCLEnvironment.Prod
     var XVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1
 
-    val IsDebug = BuildConfig.DEBUG
+    var IsDebugOn = false //BuildConfig.DEBUG
 
     val VersionName = BuildConfig.VERSION_NAME
     val VersionCode = BuildConfig.VERSION_CODE
 
     const val LogTagPrefix = "VCL "
     // TODO: Will be remotely configurable
-    val IsLoggerOn get() = CurrentEnvironment != VCLEnvironment.Prod
+    val IsLoggerOn get() = CurrentEnvironment != VCLEnvironment.Prod || IsDebugOn
 
     const val TypeJwt = "JWT"
 }

@@ -13,8 +13,8 @@ android {
     defaultConfig {
         minSdkVersion 24
         targetSdkVersion 33
-        versionName "1.14.5"
-        versionCode 95
+        versionName "1.14.6"
+        versionCode 96
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -166,6 +166,9 @@ dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:9.31"
     //noinspection GradleDependency
     implementation "androidx.security:security-crypto:1.0.0-rc03"
+
+    // Reflection
+//    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     // Required -- JUnit 4 framework
     testImplementation 'junit:junit:4.13.2'

@@ -8,10 +8,8 @@
 package io.velocitycareerlabs.impl
 
 import android.content.Context
-import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.VCLKeyServiceType
-import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.models.CredentialTypeSchemasModel
 import io.velocitycareerlabs.api.entities.handleResult
@@ -72,10 +70,7 @@ internal class VCLImpl: VCL {
 
         this.initializationDescriptor = initializationDescriptor
 
-        initGlobalConfigurations(
-            initializationDescriptor.environment,
-            initializationDescriptor.xVnfProtocolVersion
-        )
+        initGlobalConfigurations(initializationDescriptor)
 
         this.initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
 
@@ -203,11 +198,11 @@ internal class VCLImpl: VCL {
     }
 
     private fun initGlobalConfigurations(
-        environment: VCLEnvironment,
-        xVnfProtocolVersion: VCLXVnfProtocolVersion
+        initializationDescriptor: VCLInitializationDescriptor
     ) {
-        GlobalConfig.CurrentEnvironment = environment
-        GlobalConfig.XVnfProtocolVersion = xVnfProtocolVersion
+        GlobalConfig.CurrentEnvironment = initializationDescriptor.environment
+        GlobalConfig.XVnfProtocolVersion = initializationDescriptor.xVnfProtocolVersion
+        GlobalConfig.IsDebugOn = initializationDescriptor.isDebugOn
     }
 
     override val countries: VCLCountries? get() = countriesModel.data
@@ -314,6 +309,7 @@ internal class VCLImpl: VCL {
         successHandler: (VCLCredentialManifest) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
+        VCLLog.d(TAG, "credentialManifestDescriptor: ${credentialManifestDescriptor.toPropsString()}")
         credentialManifestDescriptor.did?.let { did ->
             profileServiceTypeVerifier.verifyServiceTypeOfVerifiedProfile(
                 verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = did),

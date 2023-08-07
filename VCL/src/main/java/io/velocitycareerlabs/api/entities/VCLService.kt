@@ -14,6 +14,14 @@ open class VCLService(val payload: JSONObject) {
     val type: String = payload.optString(VCLService.KeyType)
     val serviceEndpoint: String = payload.optString(VCLService.KeyServiceEndpoint)
 
+    open fun toPropsString() =
+        StringBuilder()
+            .append("\npayload: $payload")
+            .append("\nid: $id")
+            .append("\ntype: $type")
+            .append("\nserviceEndpoint: $serviceEndpoint")
+            .toString()
+
     companion object CodingKeys {
         const val KeyId = "id"
         const val KeyType = "type"

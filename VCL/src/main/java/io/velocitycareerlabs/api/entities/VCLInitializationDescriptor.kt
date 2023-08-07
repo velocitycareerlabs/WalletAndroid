@@ -15,5 +15,6 @@ data class VCLInitializationDescriptor(
     val environment: VCLEnvironment = VCLEnvironment.Prod,
     val keyServiceType: VCLKeyServiceType = VCLKeyServiceType.Local,
     val xVnfProtocolVersion: VCLXVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1,
-    val cacheSequence: Int = 0
+    val cacheSequence: Int = 0,
+    val isDebugOn: Boolean = false
 )

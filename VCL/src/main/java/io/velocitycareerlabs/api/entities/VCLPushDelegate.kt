@@ -19,6 +19,12 @@ data class VCLPushDelegate(
      */
     val pushToken: String,
 ) {
+    fun toPropsString() =
+        StringBuilder()
+            .append("\npushUrl: , $pushUrl")
+            .append("\npushToken: , $pushToken")
+            .toString()
+
     companion object CodingKeys {
         const val KeyPushUrl = "pushUrl"
         const val KeyPushToken = "pushToken"
