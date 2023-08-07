@@ -11,7 +11,7 @@ import io.velocitycareerlabs.impl.extensions.appendQueryParams
 import io.velocitycareerlabs.impl.extensions.encode
 
 class VCLCredentialManifestDescriptorByService(
-    service: VCLService,
+    val service: VCLService, // for log
     issuingType: VCLIssuingType = VCLIssuingType.Career,
     credentialTypes: List<String>? = null,
     pushDelegate: VCLPushDelegate? = null
@@ -21,7 +21,11 @@ class VCLCredentialManifestDescriptorByService(
     credentialTypes = credentialTypes,
     pushDelegate = pushDelegate
 ) {
-//    TODO: validate credentialTypes by services.credentialTypes
+
+    override fun toPropsString() =
+        StringBuilder(super.toPropsString())
+            .append("\nservice: ${service.toPropsString()}")
+            .toString()
 
     override val endpoint =  generateQueryParams()?.let { queryParams ->
         uri?.appendQueryParams(queryParams)

@@ -15,14 +15,14 @@ internal object GlobalConfig {
 
     var CurrentEnvironment = VCLEnvironment.PROD
 
-    val IsDebug = BuildConfig.DEBUG
+    var IsDebugOn = false//BuildConfig.DEBUG
 
     val VersionName = BuildConfig.VERSION_NAME
     val VersionCode = BuildConfig.VERSION_CODE
 
     const val LogTagPrefix = "VCL "
     // TODO: Will be remotely configurable
-    val IsLoggerOn get() = CurrentEnvironment != VCLEnvironment.PROD
+    val IsLoggerOn get() = CurrentEnvironment != VCLEnvironment.PROD || IsDebugOn
 
     // TODO: Will be remotely configurable
     var IsToLoadFromCacheInitialization = false

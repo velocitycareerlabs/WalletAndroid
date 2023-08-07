@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl.extensions
 
 import android.util.Base64
+import io.velocitycareerlabs.impl.utils.VCLLog
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URI
@@ -53,10 +54,19 @@ internal fun String.getUrlQueryParams(): Map<String, String>? {
     return map
 }
 
-internal fun String.getUrlSubPath(subPathPrefix: String) =
-    URI(this)
-    .path.split("/")
-    .find { it.startsWith(subPathPrefix) }
+//internal fun String.getUrlSubPath(subPathPrefix: String) =
+//    URI(this)
+//    .path.split("/")
+//    .find { it.startsWith(subPathPrefix) }
+
+internal fun String.getUrlSubPath(subPathPrefix: String): String? {
+    VCLLog.d("getUrlSubPath", "VCL start search for $subPathPrefix in $this")
+    val splitted = URI(this).path.split("/")
+    VCLLog.d("getUrlSubPath", "VCL splitted URI $splitted")
+    val retVal = splitted.find { it.startsWith(subPathPrefix) }
+    VCLLog.d("getUrlSubPath", "VCL found $retVal")
+    return retVal
+}
 
 internal fun String.decodeBase64() = Base64.decode(this, Base64.DEFAULT).toString(Charsets.UTF_8)
 internal fun String.encodeToBase64() = Base64.encodeToString(this.toByteArray(), Base64.DEFAULT)

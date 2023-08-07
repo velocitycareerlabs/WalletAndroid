@@ -57,7 +57,7 @@ internal class VCLImpl: VCL {
     ) {
         initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
 
-        initGlobalConfigurations(initializationDescriptor.environment)
+        initGlobalConfigurations(initializationDescriptor)
 
         printVersion()
 
@@ -121,8 +121,9 @@ internal class VCLImpl: VCL {
         }
     }
 
-    private fun initGlobalConfigurations(environment: VCLEnvironment) {
-        GlobalConfig.CurrentEnvironment = environment
+    private fun initGlobalConfigurations(initializationDescriptor: VCLInitializationDescriptor) {
+        GlobalConfig.CurrentEnvironment = initializationDescriptor.environment
+        GlobalConfig.IsDebugOn = initializationDescriptor.isDebugOn
     }
 
     override val countries: VCLCountries? get() = countriesModel?.data
@@ -225,6 +226,7 @@ internal class VCLImpl: VCL {
         successHandler: (VCLCredentialManifest) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
+        VCLLog.d(TAG, "credentialManifestDescriptor: ${credentialManifestDescriptor.toPropsString()}")
         credentialManifestDescriptor.did?.let { did ->
             profileServiceTypeVerifier.verifyServiceTypeOfVerifiedProfile(
                 verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = did),

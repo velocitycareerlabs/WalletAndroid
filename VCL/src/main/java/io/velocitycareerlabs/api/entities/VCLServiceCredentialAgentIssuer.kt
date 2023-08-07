@@ -13,4 +13,9 @@ import org.json.JSONObject
 class VCLServiceCredentialAgentIssuer(payload: JSONObject): VCLService(payload) {
     val credentialTypes: List<String>? =
         payload.optJSONArray(VCLService.KeyCredentialTypes)?.toList() as? List<String>
+
+    override fun toPropsString() =
+        StringBuilder(super.toPropsString())
+            .append("\ncredentialTypes: $credentialTypes")
+            .toString()
 }
