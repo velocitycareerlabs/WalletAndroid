@@ -38,11 +38,8 @@ object Constants {
         "did:velocity:v2:0x2bef092530ccc122f5fe439b78eddf6010685e88:248532930732481:1963"
     val CredentialIdsToRefresh = listOf(CredentialId1, CredentialId2)
 
-    const val IssuingServiceEndPoint =
-        "https://devagent.velocitycareerlabs.io/api/holder/v0.6/org/did:velocity:0x571cf9ef33b111b7060942eb43133c0b347c7ca3/issue/get-credential-manifest"
-
     const val IssuingServiceJsonStr =
-        "{\"id\":\"did:velocity:0x571cf9ef33b111b7060942eb43133c0b347c7ca3#credential-agent-issuer-1\",\"type\":\"VelocityCredentialAgentIssuer_v1.0\",\"credentialTypes\":[\"Course\",\"EducationDegree\",\"Badge\"],\"serviceEndpoint\":\"$IssuingServiceEndPoint\"}"
+        "{ \"type\": \"VlcCareerIssuer_v1\", \"id\": \"#velocity-issuer-1\", \"serviceEndpoint\": \"https://devagent.velocitycareerlabs.io/api/holder/v0.6/org/did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA/issue/get-credential-manifest\", \"credentialTypes\": [ \"EducationDegree\", \"EducationDegreeRegistrationV1.0\", \"EducationDegreeStudyV1.0\", \"EducationDegreeGraduationV1.0\", \"EducationDegreeRegistrationV1.1\", \"EducationDegreeStudyV1.1\", \"EducationDegreeGraduationV1.1\", \"PastEmploymentPosition\", \"CurrentEmploymentPosition\", \"EmploymentCurrentV1.0\", \"EmploymentPastV1.0\", \"EmploymentCurrentV1.1\", \"EmploymentPastV1.1\", \"Certification\", \"CertificationV1.0\", \"LicenseV1.0\", \"CertificationV1.1\", \"LicenseV1.1\", \"Course\", \"CourseRegistrationV1.0\", \"CourseCompletionV1.0\", \"CourseAttendanceV1.0\", \"CourseRegistrationV1.1\", \"CourseCompletionV1.1\", \"CourseAttendanceV1.1\", \"AssessmentDec2020\", \"AssessmentV1.0\", \"AssessmentV1.1\", \"Badge\", \"OpenBadgeV1.0\" ] }, { \"type\": \"VlcInspector_v1\", \"id\": \"#velocity-inspector-1\", \"serviceEndpoint\": \"https://devagent.velocitycareerlabs.io\" }"
 
     val PresentationSelectionsList = listOf(
         VCLVerifiableCredential(inputDescriptor = "PhoneV1.0", jwtVc = AdamSmithPhoneJwt),
