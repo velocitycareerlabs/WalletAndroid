@@ -67,8 +67,9 @@ object Constants {
         query = "Bank"
     )
 
-    const val DidDev = "did:ion:EiAbP9xvCYnUOiLwqgbkV4auH_26Pv7BT2pYYT3masvvhw"
-    const val DidStaging = "did:ion:EiDaeg3OofbDCdaQi5-zOLGfhZ9-boS0-w5URDfVwrI7BQ"
+    // University of Massachusetts Amherst
+    const val DidDev = "did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA"
+    const val DidStaging = "did:ion:EiC8GZpBYJXt5UhqxZJbixJyMjrGw0yw8yFN6HjaM1ogSw"
 
     val OrganizationsSearchDescriptorByDidDev = VCLOrganizationsSearchDescriptor(
         filter = VCLFilter(
