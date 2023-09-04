@@ -23,8 +23,8 @@ internal object GlobalConfig {
     val VersionCode = BuildConfig.VERSION_CODE
 
     const val LogTagPrefix = "VCL "
-    // TODO: Will be remotely configurable
-    val IsLoggerOn get() = CurrentEnvironment != VCLEnvironment.Prod || IsDebugOn
+
+    val IsLoggerOn get() = (CurrentEnvironment != VCLEnvironment.Staging && CurrentEnvironment != VCLEnvironment.Prod) || IsDebugOn
 
     const val TypeJwt = "JWT"
 }

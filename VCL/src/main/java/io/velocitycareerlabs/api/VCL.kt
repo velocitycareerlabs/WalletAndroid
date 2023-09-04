@@ -107,8 +107,3 @@ interface VCL {
         errorHandler: (VCLError) -> Unit
     )
 }
-
-fun VCL.printVersion() {
-    VCLLog.d("VCL", "Version: ${GlobalConfig.VersionName}")
-    VCLLog.d("VCL", "Build: ${GlobalConfig.VersionCode}")
-}

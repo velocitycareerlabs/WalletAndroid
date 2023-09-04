@@ -13,7 +13,6 @@ import io.velocitycareerlabs.api.VCLKeyServiceType
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.models.CredentialTypeSchemasModel
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.api.printVersion
 import io.velocitycareerlabs.impl.domain.models.CountriesModel
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
 import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
@@ -66,11 +65,11 @@ internal class VCLImpl: VCL {
         successHandler: () -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        printVersion()
-
         this.initializationDescriptor = initializationDescriptor
 
-        initGlobalConfigurations(initializationDescriptor)
+        initGlobalConfigurations()
+
+        printVersion()
 
         this.initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
 
@@ -197,9 +196,7 @@ internal class VCLImpl: VCL {
             VclBlocksProvider.provideKeyServiceUseCase(context, keyServiceType)
     }
 
-    private fun initGlobalConfigurations(
-        initializationDescriptor: VCLInitializationDescriptor
-    ) {
+    private fun initGlobalConfigurations() {
         GlobalConfig.CurrentEnvironment = initializationDescriptor.environment
         GlobalConfig.XVnfProtocolVersion = initializationDescriptor.xVnfProtocolVersion
         GlobalConfig.IsDebugOn = initializationDescriptor.isDebugOn
@@ -534,7 +531,12 @@ internal class VCLImpl: VCL {
     }
 }
 
-internal fun logError(message: String = "", error: VCLError) {
+internal fun VCLImpl.logError(message: String = "", error: VCLError) {
 //    VCLLog.e(VCLImpl.TAG, "error.payload: ${error.payload}, error.message: ${error.message}, error.error: ${error.error}, error.errorCode: ${error.errorCode}, error.statusCode: ${error.statusCode}")
     VCLLog.e(VCLImpl.TAG, "$message: ${error.toJsonObject()}")
+}
+
+internal fun VCLImpl.printVersion() {
+    VCLLog.d("VCL", "Version: ${GlobalConfig.VersionName}")
+    VCLLog.d("VCL", "Build: ${GlobalConfig.VersionCode}")
 }
