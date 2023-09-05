@@ -58,19 +58,19 @@ internal fun String.getUrlQueryParams(): Map<String, String>? {
     return map
 }
 
-//internal fun String.getUrlSubPath(subPathPrefix: String) =
-//    URI(this)
-//    .path.split("/")
-//    .find { it.startsWith(subPathPrefix) }
+internal fun String.getUrlSubPath(subPathPrefix: String) =
+    URI(this)
+    .path.split("/")
+    .find { it.startsWith(subPathPrefix) }
 
-internal fun String.getUrlSubPath(subPathPrefix: String): String? {
-    VCLLog.d("getUrlSubPath", "VCL start search for $subPathPrefix in $this")
-    val splitted = URI(this).path.split("/")
-    VCLLog.d("getUrlSubPath", "VCL splitted URI $splitted")
-    val retVal = splitted.find { it.startsWith(subPathPrefix) }
-    VCLLog.d("getUrlSubPath", "VCL found $retVal")
-    return retVal
-}
+//internal fun String.getUrlSubPath(subPathPrefix: String): String? {
+//    VCLLog.d("getUrlSubPath", "VCL start search for $subPathPrefix in $this")
+//    val splitted = URI(this).path.split("/")
+//    VCLLog.d("getUrlSubPath", "VCL splitted URI $splitted")
+//    val retVal = splitted.find { it.startsWith(subPathPrefix) }
+//    VCLLog.d("getUrlSubPath", "VCL found $retVal")
+//    return retVal
+//}
 
 /**
  * Decode the Base64-encoded data in input and return the data in a new byte array.

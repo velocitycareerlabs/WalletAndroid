@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl.data.infrastructure.network
 
 import android.accounts.NetworkErrorException
+import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.entities.VCLError
 import io.velocitycareerlabs.api.entities.VCLStatusCode
 import io.velocitycareerlabs.api.entities.VCLResult
@@ -67,6 +68,7 @@ internal class NetworkServiceImpl: NetworkService {
                     payload = connection.inputStream.convertToString(),
                     code = connection.responseCode
                 )
+                logResponse(response)
                 completionBlock(VCLResult.Success(response))
             } else {
                 val errorMessageStream = connection.errorStream ?: connection.inputStream
@@ -135,5 +137,10 @@ internal class NetworkServiceImpl: NetworkService {
         val bodyLog = request.body?.let { " Request Body: $it" }
             ?: "\n"
         VCLLog.d(TAG, "$methodLog$endpointLog$bodyLog")
+    }
+
+    private fun logResponse(response: Response) {
+        VCLLog.d(TAG, "Response:\nstatus code: "+response.code)
+        VCLLog.d(TAG, response.payload)
     }
 }

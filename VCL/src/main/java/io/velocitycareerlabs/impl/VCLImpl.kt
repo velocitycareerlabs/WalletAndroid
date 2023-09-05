@@ -543,7 +543,12 @@ internal class VCLImpl: VCL {
     }
 }
 
-internal fun logError(message: String = "", error: VCLError) {
+internal fun VCLImpl.logError(message: String = "", error: VCLError) {
 //    VCLLog.e(VCLImpl.TAG, "error.payload: ${error.payload}, error.message: ${error.message}, error.error: ${error.error}, error.errorCode: ${error.errorCode}, error.statusCode: ${error.statusCode}")
     VCLLog.e(VCLImpl.TAG, "$message: ${error.toJsonObject()}")
+}
+
+internal fun VCLImpl.printVersion() {
+    VCLLog.d("VCL", "Version: ${GlobalConfig.VersionName}")
+    VCLLog.d("VCL", "Build: ${GlobalConfig.VersionCode}")
 }
