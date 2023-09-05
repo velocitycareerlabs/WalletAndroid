@@ -5,13 +5,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.impl.domain.infrastructure.keys
+package io.velocitycareerlabs.api.keys
 
 import com.nimbusds.jose.jwk.ECKey
 import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLResult
 
-internal interface KeyService {
+interface VCLKeyService {
     fun generateDidJwk(
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     )

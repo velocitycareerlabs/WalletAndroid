@@ -9,6 +9,7 @@ package io.velocitycareerlabs.api
 
 import android.content.Context
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.utils.VCLLog
 

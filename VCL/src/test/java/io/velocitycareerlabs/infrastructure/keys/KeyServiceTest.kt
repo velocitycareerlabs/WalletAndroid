@@ -7,7 +7,7 @@ package io.velocitycareerlabs.infrastructure.keys
 import android.os.Build
 import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceImpl
 import io.velocitycareerlabs.impl.extensions.decodeBase64
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
@@ -21,11 +21,11 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 class KeyServiceTest {
 
-    internal lateinit var subject: KeyServiceImpl
+    internal lateinit var subject: VCLKeyServiceImpl
 
     @Before
     fun setUp() {
-        subject = KeyServiceImpl(SecretStoreServiceMock.Instance)
+        subject = VCLKeyServiceImpl(SecretStoreServiceMock.Instance)
     }
 
     @Test

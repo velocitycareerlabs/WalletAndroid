@@ -9,9 +9,9 @@ import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLJwkPublic
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
-import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
-import io.velocitycareerlabs.impl.domain.infrastructure.jwt.JwtService
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceImpl
+import io.velocitycareerlabs.api.jwt.VCLJwtService
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import org.junit.Before
@@ -25,10 +25,10 @@ import java.util.concurrent.TimeUnit
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 class JwtServiceTest {
 
-    private lateinit var subject: JwtServiceImpl
+    private lateinit var subject: VCLJwtServiceImpl
 
     private lateinit var didJwk: VCLDidJwk
-    private val keyService = KeyServiceImpl(SecretStoreServiceMock.Instance)
+    private val keyService = VCLKeyServiceImpl(SecretStoreServiceMock.Instance)
 
     private val payloadMock = "{\"key1\":\"value1\",\"key2\":\"value2\"}".toJsonObject()
     private val jtiMock = "some jti"
@@ -47,7 +47,7 @@ class JwtServiceTest {
                 assert(false) { "Failed to generate did jwk" }
             })
         }
-        subject = JwtServiceImpl(keyService)
+        subject = VCLJwtServiceImpl(keyService)
     }
 
     @Test
@@ -96,15 +96,15 @@ class JwtServiceTest {
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid == didJwk.kid)
 
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyIss) == issMock)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyAud) == audMock)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyJti) == jtiMock)
-                val iat = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyIat) as Long
-                val nbf = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyNbf) as Long
-                val exp = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyExp) as Long
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyIss) == issMock)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyAud) == audMock)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyJti) == jtiMock)
+                val iat = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyIat) as Long
+                val nbf = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyNbf) as Long
+                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyExp) as Long
                 assert(iat == nbf)
 //        assert(exp - iat == sevenDaysInSeconds)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyNonce) == nonceMock)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyNonce) == nonceMock)
             }, {
                 assert(false) { "failed to generate jwt: $it" }
             })
@@ -126,15 +126,15 @@ class JwtServiceTest {
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid?.isBlank() == false)
 
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyIss) == issMock)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyAud) == audMock)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyJti) == jtiMock)
-                val iat = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyIat) as Long
-                val nbf = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyNbf) as Long
-                val exp = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyExp) as Long
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyIss) == issMock)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyAud) == audMock)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyJti) == jtiMock)
+                val iat = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyIat) as Long
+                val nbf = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyNbf) as Long
+                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyExp) as Long
                 assert(iat == nbf)
 //        assert(exp - iat == sevenDaysInSeconds)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyNonce) == nonceMock)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyNonce) == nonceMock)
             }, {
                 assert(false) { "failed to generate jwt: $it" }
             })
@@ -155,15 +155,15 @@ class JwtServiceTest {
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid?.isBlank() == false)
 
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyIss) == issMock)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyAud) == audMock)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyJti) == jtiMock)
-                val iat = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyIat) as Long
-                val nbf = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyNbf) as Long
-                val exp = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyExp) as Long
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyIss) == issMock)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyAud) == audMock)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyJti) == jtiMock)
+                val iat = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyIat) as Long
+                val nbf = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyNbf) as Long
+                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyExp) as Long
                 assert(iat == nbf)
 //        assert(exp - iat == sevenDaysInSeconds)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyNonce) == null)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyNonce) == null)
             }, {
                 assert(false) { "failed to generate jwt: $it" }
             })
@@ -182,15 +182,15 @@ class JwtServiceTest {
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid?.isBlank() == false)
 
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyIss) == issMock)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyAud) == audMock)
-                assert((jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyJti) as? String)?.isBlank() == false)
-                val iat = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyIat) as Long
-                val nbf = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyNbf) as Long
-                val exp = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyExp) as Long
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyIss) == issMock)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyAud) == audMock)
+                assert((jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyJti) as? String)?.isBlank() == false)
+                val iat = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyIat) as Long
+                val nbf = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyNbf) as Long
+                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyExp) as Long
                 assert(iat == nbf)
 //        assert(exp - iat == sevenDaysInSeconds)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyNonce) == null)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyNonce) == null)
             }, {
                 assert(false) { "failed to generate jwt: $it" }
             })
@@ -208,15 +208,15 @@ class JwtServiceTest {
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid?.isBlank() == false)
 
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyIss) == issMock)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyAud) == null)
-                assert((jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyJti) as? String)?.isBlank() == false)
-                val iat = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyIat) as Long
-                val nbf = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyNbf) as Long
-                val exp = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyExp) as Long
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyIss) == issMock)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyAud) == null)
+                assert((jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyJti) as? String)?.isBlank() == false)
+                val iat = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyIat) as Long
+                val nbf = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyNbf) as Long
+                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyExp) as Long
                 assert(iat == nbf)
 //        assert(exp - iat == sevenDaysInSeconds)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyNonce) == null)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyNonce) == null)
             }, {
                 assert(false) { "failed to generate jwt: $it" }
             })
@@ -233,15 +233,15 @@ class JwtServiceTest {
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid?.isBlank() == false)
 
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyIss) == issMock)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyAud) == null)
-                assert((jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyJti) as? String)?.isBlank() == false)
-                val iat = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyIat) as Long
-                val nbf = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyNbf) as Long
-                val exp = jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyExp) as Long
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyIss) == issMock)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyAud) == null)
+                assert((jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyJti) as? String)?.isBlank() == false)
+                val iat = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyIat) as Long
+                val nbf = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyNbf) as Long
+                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyExp) as Long
                 assert(iat == nbf)
 //        assert(exp - iat == sevenDaysInSeconds)
-                assert(jwt.payload?.toJSONObject()?.get(JwtService.CodingKeys.KeyNonce) == null)
+                assert(jwt.payload?.toJSONObject()?.get(VCLJwtService.CodingKeys.KeyNonce) == null)
             }, {
                 assert(false) { "failed to generate jwt: $it" }
             })

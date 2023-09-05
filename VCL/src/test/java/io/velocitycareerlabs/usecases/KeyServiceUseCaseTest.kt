@@ -12,7 +12,7 @@ import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.data
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceImpl
 import io.velocitycareerlabs.impl.data.repositories.KeyServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.KeyServiceUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.KeyServiceUseCase
@@ -20,8 +20,6 @@ import io.velocitycareerlabs.impl.extensions.decodeBase64
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
-import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypeSchemaMocks
-import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,7 +37,7 @@ class KeyServiceUseCaseTest {
     fun setUp() {
         subject = KeyServiceUseCaseImpl(
             KeyServiceRepositoryImpl(
-                KeyServiceImpl(SecretStoreServiceMock.Instance)
+                VCLKeyServiceImpl(SecretStoreServiceMock.Instance)
             ),
             EmptyExecutor()
         )

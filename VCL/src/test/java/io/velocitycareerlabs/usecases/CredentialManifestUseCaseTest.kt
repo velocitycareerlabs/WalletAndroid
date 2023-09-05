@@ -9,8 +9,8 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
-import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceImpl
 import io.velocitycareerlabs.impl.data.repositories.CredentialManifestRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.ResolveKidRepositoryImpl
@@ -53,7 +53,7 @@ internal class CredentialManifestUseCaseTest {
                 NetworkServiceSuccess(CredentialManifestMocks.JWK)
             ),
             JwtServiceRepositoryImpl(
-                JwtServiceImpl(KeyServiceImpl(SecretStoreServiceMock.Instance))
+                VCLJwtServiceImpl(VCLKeyServiceImpl(SecretStoreServiceMock.Instance))
             ),
             EmptyExecutor()
         )

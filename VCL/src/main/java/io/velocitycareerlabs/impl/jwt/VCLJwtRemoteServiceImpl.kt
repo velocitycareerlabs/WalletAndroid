@@ -1,22 +1,24 @@
 /**
- * Created by Michael Avoyan on 02/07/2023.
+ * Created by Michael Avoyan on 04/09/2023.
  *
- * Copyright 2022 Velocity Career Labs inc.
- * SPDX-License-Identifier: Apache-2.0
+ *  Copyright 2022 Velocity Career Labs inc.
+ *  SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.impl.data.infrastructure.jwt
+package io.velocitycareerlabs.impl.jwt
 
 import io.velocitycareerlabs.api.entities.VCLJwkPublic
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
-import io.velocitycareerlabs.impl.domain.infrastructure.jwt.JwtService
+import io.velocitycareerlabs.api.entities.initialization.VCLJwtServiceUrls
+import io.velocitycareerlabs.api.jwt.VCLJwtService
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 
-internal class JwtServiceRemoteImpl(
-        private val networkService: NetworkService
-) : JwtService {
+internal class VCLJwtRemoteServiceImpl(
+    private val networkService: NetworkService,
+    private val jwtServiceUrls: VCLJwtServiceUrls
+) : VCLJwtService {
     override fun verify(
         jwt: VCLJwt,
         jwkPublic: VCLJwkPublic,

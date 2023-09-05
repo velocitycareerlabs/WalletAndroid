@@ -2,7 +2,7 @@
  * Created by Michael Avoyan on 15/05/2023.
  */
 
-package io.velocitycareerlabs.impl.data.infrastructure.keys
+package io.velocitycareerlabs.impl.keys
 
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
@@ -13,12 +13,12 @@ import io.velocitycareerlabs.api.entities.VCLError
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.domain.infrastructure.db.SecretStoreService
-import io.velocitycareerlabs.impl.domain.infrastructure.keys.KeyService
+import io.velocitycareerlabs.api.keys.VCLKeyService
 import java.util.UUID
 
-internal class KeyServiceImpl(
+internal class VCLKeyServiceImpl(
     private val secretStoreService: SecretStoreService,
-): KeyService {
+): VCLKeyService {
     override fun generateDidJwk(
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     ) {

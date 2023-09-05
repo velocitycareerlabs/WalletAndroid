@@ -10,45 +10,81 @@ package io.velocitycareerlabs.impl
 import android.content.Context
 import io.velocitycareerlabs.api.VCLKeyServiceType
 import io.velocitycareerlabs.api.entities.VCLCredentialTypes
+import io.velocitycareerlabs.api.entities.VCLError
+import io.velocitycareerlabs.api.entities.VCLErrorCode
+import io.velocitycareerlabs.api.entities.initialization.VCLKeyServicesDescriptor
 import io.velocitycareerlabs.impl.data.utils.CredentialDidVerifierImpl
 import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.db.SecretStoreServiceImpl
-import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.network.NetworkServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
-import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceRemoteImpl
-import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
-import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceRemoteImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceImpl
 import io.velocitycareerlabs.impl.data.models.*
 import io.velocitycareerlabs.impl.data.repositories.*
 import io.velocitycareerlabs.impl.data.usecases.*
 import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierImpl
-import io.velocitycareerlabs.impl.domain.infrastructure.jwt.JwtService
-import io.velocitycareerlabs.impl.domain.infrastructure.keys.KeyService
+import io.velocitycareerlabs.api.jwt.VCLJwtService
+import io.velocitycareerlabs.api.keys.VCLKeyService
 import io.velocitycareerlabs.impl.domain.models.*
 import io.velocitycareerlabs.impl.domain.usecases.*
+import io.velocitycareerlabs.impl.jwt.VCLJwtRemoteServiceImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceRemoteImpl
 
 internal object VclBlocksProvider {
-        private fun chooseJwtService(
+        @Throws(VCLError::class)
+        internal fun chooseKeyService(
                 context: Context,
-                keyServiceType: VCLKeyServiceType
-        ): JwtService {
-                if (keyServiceType == VCLKeyServiceType.Remote) {
-                        return JwtServiceRemoteImpl(NetworkServiceImpl())
+                keyServicesDescriptor: VCLKeyServicesDescriptor
+        ): VCLKeyService {
+                when (keyServicesDescriptor.keyServiceType) {
+                        VCLKeyServiceType.Local -> return VCLKeyServiceImpl(
+                                SecretStoreServiceImpl(
+                                        context
+                                )
+                        )
+
+                        VCLKeyServiceType.Remote -> {
+                                keyServicesDescriptor.remoteServicesUrlsDescriptor?.keyServiceUrls?.let { keyServiceUrls ->
+                                        return VCLKeyServiceRemoteImpl(
+                                                NetworkServiceImpl(),
+                                                keyServiceUrls
+                                        )
+                                } ?: throw VCLError(errorCode = VCLErrorCode.RemoteServicesUrlsNotFount.value)
+                        }
+
+                        VCLKeyServiceType.Injected -> keyServicesDescriptor.injectedServicesDescriptor?.keyService?.let { keyService ->
+                                return keyService
+                        } ?: throw VCLError(errorCode = VCLErrorCode.InjectedServicesNotFount.value)
                 }
-                return JwtServiceImpl(KeyServiceImpl(SecretStoreServiceImpl(context.applicationContext)))
+        }
+        @Throws(VCLError::class)
+        internal fun chooseJwtService(
+                context: Context,
+                keyServicesDescriptor: VCLKeyServicesDescriptor
+        ): VCLJwtService {
+                when (keyServicesDescriptor.keyServiceType) {
+                        VCLKeyServiceType.Local -> return VCLJwtServiceImpl(
+                                chooseKeyService(
+                                        context,
+                                        keyServicesDescriptor
+                                )
+                        )
+
+                        VCLKeyServiceType.Remote -> keyServicesDescriptor.remoteServicesUrlsDescriptor?.jwtServiceUrls?.let { jwtServiceUrls ->
+                                return VCLJwtRemoteServiceImpl(
+                                        NetworkServiceImpl(),
+                                        jwtServiceUrls
+                                )
+                        } ?: throw VCLError(errorCode = VCLErrorCode.RemoteServicesUrlsNotFount.value)
+
+                        VCLKeyServiceType.Injected -> keyServicesDescriptor.injectedServicesDescriptor?.jwtService?.let { jwtService ->
+                                return jwtService
+                        } ?: throw VCLError(errorCode = VCLErrorCode.InjectedServicesNotFount.value)
+                }
         }
 
-        private fun chooseKeyService(
-                context: Context,
-                keyServiceType: VCLKeyServiceType
-        ): KeyService {
-                if (keyServiceType == VCLKeyServiceType.Remote) {
-                        return KeyServiceRemoteImpl(NetworkServiceImpl())
-                }
-                return KeyServiceImpl(SecretStoreServiceImpl(context.applicationContext))
-        }
-
+        @Throws(VCLError::class)
         fun provideCredentialTypeSchemasModel(
                 context: Context,
                 credentialTypes: VCLCredentialTypes
@@ -64,6 +100,7 @@ internal object VclBlocksProvider {
                         )
                 )
 
+        @Throws(VCLError::class)
         fun provideCredentialTypesModel(context: Context): CredentialTypesModel =
                 CredentialTypesModelImpl(
                         CredentialTypesUseCaseImpl(
@@ -75,6 +112,7 @@ internal object VclBlocksProvider {
                         )
                 )
 
+        @Throws(VCLError::class)
         fun provideCountriesModel(context: Context): CountriesModel =
                 CountriesModelImpl(
                         CountriesUseCaseImpl(
@@ -86,9 +124,10 @@ internal object VclBlocksProvider {
                         )
                 )
 
+        @Throws(VCLError::class)
         fun providePresentationRequestUseCase(
                 context: Context,
-                keyServiceType: VCLKeyServiceType
+                keyServicesDescriptor: VCLKeyServicesDescriptor
         ): PresentationRequestUseCase =
                 PresentationRequestUseCaseImpl(
                         PresentationRequestRepositoryImpl(
@@ -98,21 +137,22 @@ internal object VclBlocksProvider {
                                 NetworkServiceImpl()
                         ),
                         JwtServiceRepositoryImpl(
-                                chooseJwtService(context, keyServiceType)
+                                chooseJwtService(context, keyServicesDescriptor)
                         ),
                         ExecutorImpl()
                 )
 
+        @Throws(VCLError::class)
         fun providePresentationSubmissionUseCase(
                 context: Context,
-                keyServiceType: VCLKeyServiceType
+                keyServicesDescriptor: VCLKeyServicesDescriptor
         ): PresentationSubmissionUseCase =
                 PresentationSubmissionUseCaseImpl(
                         PresentationSubmissionRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
                         JwtServiceRepositoryImpl(
-                                chooseJwtService(context, keyServiceType)
+                                chooseJwtService(context, keyServicesDescriptor)
                         ),
                         ExecutorImpl()
                 )
@@ -125,9 +165,10 @@ internal object VclBlocksProvider {
                         ExecutorImpl()
                 )
 
+        @Throws(VCLError::class)
         fun provideCredentialManifestUseCase(
                 context: Context,
-                keyServiceType: VCLKeyServiceType
+                keyServicesDescriptor: VCLKeyServicesDescriptor
         ): CredentialManifestUseCase =
                 CredentialManifestUseCaseImpl(
                         CredentialManifestRepositoryImpl(
@@ -137,21 +178,22 @@ internal object VclBlocksProvider {
                                 NetworkServiceImpl()
                         ),
                         JwtServiceRepositoryImpl(
-                                chooseJwtService(context, keyServiceType)
+                                chooseJwtService(context, keyServicesDescriptor)
                         ),
                         ExecutorImpl()
                 )
 
+        @Throws(VCLError::class)
         fun provideIdentificationSubmissionUseCase(
                 context: Context,
-                keyServiceType: VCLKeyServiceType
+                keyServicesDescriptor: VCLKeyServicesDescriptor
         ): IdentificationSubmissionUseCase =
                 IdentificationSubmissionUseCaseImpl(
                         IdentificationSubmissionRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
                         JwtServiceRepositoryImpl(
-                                chooseJwtService(context, keyServiceType)
+                                chooseJwtService(context, keyServicesDescriptor)
                         ),
                         ExecutorImpl()
                 )
@@ -172,17 +214,18 @@ internal object VclBlocksProvider {
                         ExecutorImpl()
                 )
 
+        @Throws(VCLError::class)
         fun provideFinalizeOffersUseCase(
                 context: Context,
-                keyServiceType: VCLKeyServiceType,
-                credentialTypesModel: CredentialTypesModel
+                credentialTypesModel: CredentialTypesModel,
+                keyServicesDescriptor: VCLKeyServicesDescriptor
         ): FinalizeOffersUseCase =
                 FinalizeOffersUseCaseImpl(
                         FinalizeOffersRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
                         JwtServiceRepositoryImpl(
-                                chooseJwtService(context, keyServiceType)
+                                chooseJwtService(context, keyServicesDescriptor)
                         ),
                         CredentialIssuerVerifierImpl(
                                 credentialTypesModel,
@@ -208,24 +251,26 @@ internal object VclBlocksProvider {
                         ExecutorImpl()
                 )
 
+        @Throws(VCLError::class)
         fun provideJwtServiceUseCase(
                 context: Context,
-                keyServiceType: VCLKeyServiceType
+                keyServicesDescriptor: VCLKeyServicesDescriptor
         ): JwtServiceUseCase =
                 JwtServiceUseCaseImpl(
                         JwtServiceRepositoryImpl(
-                                chooseJwtService(context, keyServiceType)
+                                chooseJwtService(context, keyServicesDescriptor)
                         ),
                         ExecutorImpl()
                 )
 
+        @Throws(VCLError::class)
         fun provideKeyServiceUseCase(
                 context: Context,
-                keyServiceType: VCLKeyServiceType
+                keyServicesDescriptor: VCLKeyServicesDescriptor
         ): KeyServiceUseCase =
                 KeyServiceUseCaseImpl(
                         KeyServiceRepositoryImpl(
-                                chooseKeyService(context, keyServiceType)
+                                chooseKeyService(context, keyServicesDescriptor)
                         ),
                         ExecutorImpl()
                 )

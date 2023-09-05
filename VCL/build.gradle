@@ -6,15 +6,15 @@ plugins {
 }
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion "30.0.3"
+    compileSdk 33
+//    buildToolsVersion "30.0.3"
     namespace 'io.velocitycareerlabs'
 
     defaultConfig {
-        minSdkVersion 24
-        targetSdkVersion 33
-        versionName "1.14.6"
-        versionCode 96
+        minSdk 24
+        targetSdk 33
+        versionName "1.15.0"
+        versionCode 97
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -76,7 +76,7 @@ def getGroupId = { ->
     return 'io.velocitycareerlabs'
 }
 
-task androidSourcesJar(type: Jar) {
+tasks.register('androidSourcesJar', Jar) {
     archiveClassifier.set('sources')
     if (project.plugins.findPlugin("com.android.library")) {
         // For Android libraries

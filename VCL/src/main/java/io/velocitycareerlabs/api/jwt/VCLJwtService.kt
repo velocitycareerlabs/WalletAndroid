@@ -5,14 +5,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.impl.domain.infrastructure.jwt
+package io.velocitycareerlabs.api.jwt
 
 import com.nimbusds.jose.*
-import com.nimbusds.jwt.SignedJWT
 import io.velocitycareerlabs.api.entities.*
-import java.text.ParseException
 
-internal interface JwtService {
+interface VCLJwtService {
     @Throws(JOSEException::class)
     fun verify(
         jwt: VCLJwt,

@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.impl.data.infrastructure.jwt
+package io.velocitycareerlabs.impl.jwt
 
 import com.nimbusds.jose.*
 import com.nimbusds.jose.crypto.ECDSASigner
@@ -16,17 +16,17 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.GlobalConfig
-import io.velocitycareerlabs.impl.domain.infrastructure.jwt.JwtService
-import io.velocitycareerlabs.impl.domain.infrastructure.keys.KeyService
+import io.velocitycareerlabs.api.jwt.VCLJwtService
+import io.velocitycareerlabs.api.keys.VCLKeyService
 import io.velocitycareerlabs.impl.extensions.addClaims
 import io.velocitycareerlabs.impl.extensions.addDays
 import io.velocitycareerlabs.impl.extensions.randomString
 import java.lang.Exception
 import java.util.*
 
-internal class JwtServiceImpl(
-    private val keyService: KeyService
-): JwtService {
+internal class VCLJwtServiceImpl(
+    private val keyService: VCLKeyService
+): VCLJwtService {
     override fun verify(
         jwt: VCLJwt,
         jwkPublic: VCLJwkPublic,

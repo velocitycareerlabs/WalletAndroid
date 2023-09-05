@@ -8,6 +8,9 @@
 package io.velocitycareerlabs.api.entities
 
 internal enum class VCLErrorCode(val value: String) {
+    // Initialization
+    RemoteServicesUrlsNotFount("remote_services_urls_not_found"),
+    InjectedServicesNotFount("injected_services_not_found"),
     // Credential issuer verification error codes:
     CredentialTypeNotRegistered("credential_type_not_registered"),
     IssuerRequiresIdentityPermission("issuer_requires_identity_permission"),

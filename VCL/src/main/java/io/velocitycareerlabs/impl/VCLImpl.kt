@@ -9,10 +9,10 @@ package io.velocitycareerlabs.impl
 
 import android.content.Context
 import io.velocitycareerlabs.api.VCL
-import io.velocitycareerlabs.api.VCLKeyServiceType
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.models.CredentialTypeSchemasModel
 import io.velocitycareerlabs.api.entities.handleResult
+import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
 import io.velocitycareerlabs.api.printVersion
 import io.velocitycareerlabs.impl.domain.models.CountriesModel
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
@@ -66,11 +66,11 @@ internal class VCLImpl: VCL {
         successHandler: () -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        printVersion()
-
         this.initializationDescriptor = initializationDescriptor
 
-        initGlobalConfigurations(initializationDescriptor)
+        initGlobalConfigurations()
+
+        printVersion()
 
         this.initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
 
@@ -89,13 +89,18 @@ internal class VCLImpl: VCL {
     ) {
         initializationWatcher.firstError()?.let { errorHandler(it) }
             ?: run {
-                initializeUsecases(
-                    context,
-                    initializationDescriptor.keyServiceType
-                )
-                profileServiceTypeVerifier = ProfileServiceTypeVerifier(verifiedProfileUseCase)
+                try {
+                    initializeUsecases(context)
 
-                successHandler()
+                    profileServiceTypeVerifier = ProfileServiceTypeVerifier(verifiedProfileUseCase)
+
+                    successHandler()
+
+                } catch (error: VCLError) {
+                    errorHandler(error)
+                } catch (ex: Exception) {
+                    errorHandler(VCLError(exception = ex))
+                }
             }
     }
 
@@ -160,46 +165,50 @@ internal class VCLImpl: VCL {
         }
     }
 
-    private fun initializeUsecases(context: Context, keyServiceType: VCLKeyServiceType) {
+    private fun initializeUsecases(context: Context) {
         presentationRequestUseCase =
             VclBlocksProvider.providePresentationRequestUseCase(
                 context,
-                keyServiceType
+                initializationDescriptor.keyServicesDescriptor
             )
         presentationSubmissionUseCase = VclBlocksProvider.providePresentationSubmissionUseCase(
             context,
-            keyServiceType
+            initializationDescriptor.keyServicesDescriptor
         )
         exchangeProgressUseCase = VclBlocksProvider.provideExchangeProgressUseCase()
         organizationsUseCase = VclBlocksProvider.provideOrganizationsUseCase()
         credentialManifestUseCase =
             VclBlocksProvider.provideCredentialManifestUseCase(
                 context,
-                keyServiceType
+                initializationDescriptor.keyServicesDescriptor
             )
         identificationSubmissionUseCase = VclBlocksProvider.provideIdentificationSubmissionUseCase(
             context,
-            keyServiceType
+            initializationDescriptor.keyServicesDescriptor
         )
         generateOffersUseCase = VclBlocksProvider.provideGenerateOffersUseCase()
         finalizeOffersUseCase =
             VclBlocksProvider.provideFinalizeOffersUseCase(
                 context,
-                keyServiceType,
-                credentialTypesModel
+                credentialTypesModel,
+                initializationDescriptor.keyServicesDescriptor
             )
         credentialTypesUIFormSchemaUseCase =
             VclBlocksProvider.provideCredentialTypesUIFormSchemaUseCase()
         verifiedProfileUseCase = VclBlocksProvider.provideVerifiedProfileUseCase()
         jwtServiceUseCase =
-            VclBlocksProvider.provideJwtServiceUseCase(context, keyServiceType)
+            VclBlocksProvider.provideJwtServiceUseCase(
+                context,
+                initializationDescriptor.keyServicesDescriptor
+            )
         keyServiceUseCase =
-            VclBlocksProvider.provideKeyServiceUseCase(context, keyServiceType)
+            VclBlocksProvider.provideKeyServiceUseCase(
+                context,
+                initializationDescriptor.keyServicesDescriptor
+            )
     }
 
-    private fun initGlobalConfigurations(
-        initializationDescriptor: VCLInitializationDescriptor
-    ) {
+    private fun initGlobalConfigurations() {
         GlobalConfig.CurrentEnvironment = initializationDescriptor.environment
         GlobalConfig.XVnfProtocolVersion = initializationDescriptor.xVnfProtocolVersion
         GlobalConfig.IsDebugOn = initializationDescriptor.isDebugOn
