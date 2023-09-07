@@ -15,5 +15,5 @@ data class VCLInitializationDescriptor(
     val xVnfProtocolVersion: VCLXVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1,
     val cacheSequence: Int = 0,
     val isDebugOn: Boolean = false,
-    val keyServicesDescriptor: VCLKeyServicesDescriptor = VCLKeyServicesDescriptor()
+    val keyServicesDescriptor: VCLCryptoServicesDescriptor = VCLCryptoServicesDescriptor()
 )

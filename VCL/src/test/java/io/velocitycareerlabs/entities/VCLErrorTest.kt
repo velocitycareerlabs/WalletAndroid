@@ -7,7 +7,7 @@
 
 package io.velocitycareerlabs.entities
 
-import io.velocitycareerlabs.api.entities.VCLError
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.infrastructure.resources.valid.ErrorMocks
 import org.junit.Test
 

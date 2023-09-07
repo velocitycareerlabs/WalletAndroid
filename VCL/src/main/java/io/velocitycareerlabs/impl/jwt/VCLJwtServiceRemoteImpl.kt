@@ -15,7 +15,7 @@ import io.velocitycareerlabs.api.entities.initialization.VCLJwtServiceUrls
 import io.velocitycareerlabs.api.jwt.VCLJwtService
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 
-internal class VCLJwtRemoteServiceImpl(
+internal class VCLJwtServiceRemoteImpl(
     private val networkService: NetworkService,
     private val jwtServiceUrls: VCLJwtServiceUrls
 ) : VCLJwtService {

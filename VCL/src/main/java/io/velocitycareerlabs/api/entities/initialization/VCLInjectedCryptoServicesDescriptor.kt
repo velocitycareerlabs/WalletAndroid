@@ -10,7 +10,7 @@ package io.velocitycareerlabs.api.entities.initialization
 import io.velocitycareerlabs.api.jwt.VCLJwtService
 import io.velocitycareerlabs.api.keys.VCLKeyService
 
-data class VCLInjectedServicesDescriptor(
+data class VCLInjectedCryptoServicesDescriptor(
     val keyService: VCLKeyService,
     val jwtService: VCLJwtService
 )

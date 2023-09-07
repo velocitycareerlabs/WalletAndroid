@@ -8,16 +8,16 @@
 package io.velocitycareerlabs
 
 import android.content.Context
-import io.velocitycareerlabs.api.VCLKeyServiceType
-import io.velocitycareerlabs.api.entities.VCLError
-import io.velocitycareerlabs.api.entities.VCLErrorCode
-import io.velocitycareerlabs.api.entities.initialization.VCLInjectedServicesDescriptor
+import io.velocitycareerlabs.api.VCLCryptoServiceType
+import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
+import io.velocitycareerlabs.api.entities.initialization.VCLInjectedCryptoServicesDescriptor
 import io.velocitycareerlabs.api.entities.initialization.VCLJwtServiceUrls
 import io.velocitycareerlabs.api.entities.initialization.VCLKeyServiceUrls
-import io.velocitycareerlabs.api.entities.initialization.VCLKeyServicesDescriptor
-import io.velocitycareerlabs.api.entities.initialization.VCLRemoteServicesUrlsDescriptor
+import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescriptor
+import io.velocitycareerlabs.api.entities.initialization.VCLRemoteCryptoServicesUrlsDescriptor
 import io.velocitycareerlabs.impl.VclBlocksProvider
-import io.velocitycareerlabs.impl.jwt.VCLJwtRemoteServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceRemoteImpl
 import io.velocitycareerlabs.impl.jwt.VCLJwtServiceImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceRemoteImpl
@@ -42,13 +42,13 @@ internal class VclBlocksProviderTest {
     fun testChooseServiceByDefault() {
         val keyService = subject.chooseKeyService(
             context,
-            VCLKeyServicesDescriptor()
+            VCLCryptoServicesDescriptor()
         )
         assert(keyService is VCLKeyServiceImpl)
 
         val jwtService = subject.chooseJwtService(
             context,
-            VCLKeyServicesDescriptor()
+            VCLCryptoServicesDescriptor()
         )
         assert(keyService is VCLKeyServiceImpl)
         assert(jwtService is VCLJwtServiceImpl)
@@ -58,9 +58,9 @@ internal class VclBlocksProviderTest {
     fun testChooseRemoteService() {
         val keyService = subject.chooseKeyService(
             context,
-            VCLKeyServicesDescriptor(
-                keyServiceType = VCLKeyServiceType.Remote,
-                remoteServicesUrlsDescriptor = VCLRemoteServicesUrlsDescriptor(
+            VCLCryptoServicesDescriptor(
+                cryptoServiceType = VCLCryptoServiceType.Remote,
+                remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
                     VCLKeyServiceUrls(""),
                     VCLJwtServiceUrls("", "")
                 )
@@ -70,24 +70,24 @@ internal class VclBlocksProviderTest {
 
         val jwtService = subject.chooseJwtService(
             context,
-            VCLKeyServicesDescriptor(
-                keyServiceType = VCLKeyServiceType.Remote,
-                remoteServicesUrlsDescriptor = VCLRemoteServicesUrlsDescriptor(
+            VCLCryptoServicesDescriptor(
+                cryptoServiceType = VCLCryptoServiceType.Remote,
+                remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
                     VCLKeyServiceUrls(""),
                     VCLJwtServiceUrls("", "")
                 )
             )
         )
-        assert(jwtService is VCLJwtRemoteServiceImpl)
+        assert(jwtService is VCLJwtServiceRemoteImpl)
     }
 
     @Test
     fun testChooseInjectedKeyService() {
         val keyService = subject.chooseKeyService(
             context,
-            VCLKeyServicesDescriptor(
-                keyServiceType = VCLKeyServiceType.Injected,
-                injectedServicesDescriptor = VCLInjectedServicesDescriptor(
+            VCLCryptoServicesDescriptor(
+                cryptoServiceType = VCLCryptoServiceType.Injected,
+                injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
                     VCLKeyServiceMock(),
                     VCLJwtServiceMock()
                 )
@@ -97,9 +97,9 @@ internal class VclBlocksProviderTest {
 
         val jwtService = subject.chooseJwtService(
             context,
-            VCLKeyServicesDescriptor(
-                keyServiceType = VCLKeyServiceType.Injected,
-                injectedServicesDescriptor = VCLInjectedServicesDescriptor(
+            VCLCryptoServicesDescriptor(
+                cryptoServiceType = VCLCryptoServiceType.Injected,
+                injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
                     VCLKeyServiceMock(),
                     VCLJwtServiceMock()
                 )
@@ -113,7 +113,7 @@ internal class VclBlocksProviderTest {
         try {
             subject.chooseKeyService(
                 context,
-                VCLKeyServicesDescriptor(VCLKeyServiceType.Remote)
+                VCLCryptoServicesDescriptor(VCLCryptoServiceType.Remote)
             )
         } catch (error: VCLError){
             assert(error.errorCode == VCLErrorCode.RemoteServicesUrlsNotFount.value)
@@ -122,7 +122,7 @@ internal class VclBlocksProviderTest {
         try {
             subject.chooseJwtService(
                 context,
-                VCLKeyServicesDescriptor(VCLKeyServiceType.Remote)
+                VCLCryptoServicesDescriptor(VCLCryptoServiceType.Remote)
             )
         } catch (error: VCLError){
             assert(error.errorCode == VCLErrorCode.RemoteServicesUrlsNotFount.value)
@@ -134,7 +134,7 @@ internal class VclBlocksProviderTest {
         try {
             subject.chooseKeyService(
                 context,
-                VCLKeyServicesDescriptor(VCLKeyServiceType.Injected)
+                VCLCryptoServicesDescriptor(VCLCryptoServiceType.Injected)
             )
         } catch (error: VCLError){
             assert(error.errorCode == VCLErrorCode.InjectedServicesNotFount.value)
@@ -143,7 +143,7 @@ internal class VclBlocksProviderTest {
         try {
             subject.chooseJwtService(
                 context,
-                VCLKeyServicesDescriptor(VCLKeyServiceType.Injected)
+                VCLCryptoServicesDescriptor(VCLCryptoServiceType.Injected)
             )
         } catch (error: VCLError){
             assert(error.errorCode == VCLErrorCode.InjectedServicesNotFount.value)
@@ -155,9 +155,9 @@ internal class VclBlocksProviderTest {
         try {
             subject.chooseKeyService(
                 context,
-                VCLKeyServicesDescriptor(
-                    VCLKeyServiceType.Remote,
-                    injectedServicesDescriptor = VCLInjectedServicesDescriptor(
+                VCLCryptoServicesDescriptor(
+                    VCLCryptoServiceType.Remote,
+                    injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
                         VCLKeyServiceMock(),
                         VCLJwtServiceMock()
                     )
@@ -170,9 +170,9 @@ internal class VclBlocksProviderTest {
         try {
             subject.chooseJwtService(
                 context,
-                VCLKeyServicesDescriptor(
-                    VCLKeyServiceType.Remote,
-                    injectedServicesDescriptor = VCLInjectedServicesDescriptor(
+                VCLCryptoServicesDescriptor(
+                    VCLCryptoServiceType.Remote,
+                    injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
                         VCLKeyServiceMock(),
                         VCLJwtServiceMock()
                     )
@@ -188,9 +188,9 @@ internal class VclBlocksProviderTest {
         try {
             subject.chooseKeyService(
                 context,
-                VCLKeyServicesDescriptor(
-                    VCLKeyServiceType.Injected,
-                    remoteServicesUrlsDescriptor = VCLRemoteServicesUrlsDescriptor(
+                VCLCryptoServicesDescriptor(
+                    VCLCryptoServiceType.Injected,
+                    remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
                         VCLKeyServiceUrls(""),
                         VCLJwtServiceUrls("", "")
                     )
@@ -203,9 +203,9 @@ internal class VclBlocksProviderTest {
         try {
             subject.chooseJwtService(
                 context,
-                VCLKeyServicesDescriptor(
-                    VCLKeyServiceType.Injected,
-                    remoteServicesUrlsDescriptor = VCLRemoteServicesUrlsDescriptor(
+                VCLCryptoServicesDescriptor(
+                    VCLCryptoServiceType.Injected,
+                    remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
                         VCLKeyServiceUrls(""),
                         VCLJwtServiceUrls("", "")
                     )

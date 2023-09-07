@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.jwt.VCLJwtService
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
 import java.lang.Exception

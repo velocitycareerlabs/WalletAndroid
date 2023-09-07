@@ -15,6 +15,7 @@ import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.api.jwt.VCLJwtService
 import io.velocitycareerlabs.api.keys.VCLKeyService

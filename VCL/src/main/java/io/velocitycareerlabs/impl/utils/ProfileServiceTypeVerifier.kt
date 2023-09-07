@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl.utils
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.VCLImpl
 import io.velocitycareerlabs.impl.domain.usecases.VerifiedProfileUseCase
 import org.json.JSONObject

@@ -7,7 +7,7 @@
 
 package io.velocitycareerlabs.api.entities.initialization
 
-class VCLRemoteServicesUrlsDescriptor(
+data class VCLRemoteCryptoServicesUrlsDescriptor(
     val keyServiceUrls: VCLKeyServiceUrls,
     val jwtServiceUrls: VCLJwtServiceUrls
 )

@@ -8,7 +8,7 @@
 package io.velocitycareerlabs.utils
 
 import io.velocitycareerlabs.api.entities.VCLCredentialManifest
-import io.velocitycareerlabs.api.entities.VCLErrorCode
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLOffers

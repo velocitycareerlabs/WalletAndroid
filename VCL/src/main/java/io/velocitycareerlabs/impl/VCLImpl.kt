@@ -10,6 +10,7 @@ package io.velocitycareerlabs.impl
 import android.content.Context
 import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.domain.models.CredentialTypeSchemasModel
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
@@ -79,6 +80,49 @@ internal class VCLImpl: VCL {
             successHandler = successHandler,
             errorHandler = errorHandler
         )
+    }
+
+    private fun initializeUsecases(context: Context) {
+        presentationRequestUseCase =
+            VclBlocksProvider.providePresentationRequestUseCase(
+                context,
+                initializationDescriptor.keyServicesDescriptor
+            )
+        presentationSubmissionUseCase = VclBlocksProvider.providePresentationSubmissionUseCase(
+            context,
+            initializationDescriptor.keyServicesDescriptor
+        )
+        exchangeProgressUseCase = VclBlocksProvider.provideExchangeProgressUseCase()
+        organizationsUseCase = VclBlocksProvider.provideOrganizationsUseCase()
+        credentialManifestUseCase =
+            VclBlocksProvider.provideCredentialManifestUseCase(
+                context,
+                initializationDescriptor.keyServicesDescriptor
+            )
+        identificationSubmissionUseCase = VclBlocksProvider.provideIdentificationSubmissionUseCase(
+            context,
+            initializationDescriptor.keyServicesDescriptor
+        )
+        generateOffersUseCase = VclBlocksProvider.provideGenerateOffersUseCase()
+        finalizeOffersUseCase =
+            VclBlocksProvider.provideFinalizeOffersUseCase(
+                context,
+                credentialTypesModel,
+                initializationDescriptor.keyServicesDescriptor
+            )
+        credentialTypesUIFormSchemaUseCase =
+            VclBlocksProvider.provideCredentialTypesUIFormSchemaUseCase()
+        verifiedProfileUseCase = VclBlocksProvider.provideVerifiedProfileUseCase()
+        jwtServiceUseCase =
+            VclBlocksProvider.provideJwtServiceUseCase(
+                context,
+                initializationDescriptor.keyServicesDescriptor
+            )
+        keyServiceUseCase =
+            VclBlocksProvider.provideKeyServiceUseCase(
+                context,
+                initializationDescriptor.keyServicesDescriptor
+            )
     }
 
     private fun completionHandler(
@@ -162,49 +206,6 @@ internal class VCLImpl: VCL {
                     }
                 })
         }
-    }
-
-    private fun initializeUsecases(context: Context) {
-        presentationRequestUseCase =
-            VclBlocksProvider.providePresentationRequestUseCase(
-                context,
-                initializationDescriptor.keyServicesDescriptor
-            )
-        presentationSubmissionUseCase = VclBlocksProvider.providePresentationSubmissionUseCase(
-            context,
-            initializationDescriptor.keyServicesDescriptor
-        )
-        exchangeProgressUseCase = VclBlocksProvider.provideExchangeProgressUseCase()
-        organizationsUseCase = VclBlocksProvider.provideOrganizationsUseCase()
-        credentialManifestUseCase =
-            VclBlocksProvider.provideCredentialManifestUseCase(
-                context,
-                initializationDescriptor.keyServicesDescriptor
-            )
-        identificationSubmissionUseCase = VclBlocksProvider.provideIdentificationSubmissionUseCase(
-            context,
-            initializationDescriptor.keyServicesDescriptor
-        )
-        generateOffersUseCase = VclBlocksProvider.provideGenerateOffersUseCase()
-        finalizeOffersUseCase =
-            VclBlocksProvider.provideFinalizeOffersUseCase(
-                context,
-                credentialTypesModel,
-                initializationDescriptor.keyServicesDescriptor
-            )
-        credentialTypesUIFormSchemaUseCase =
-            VclBlocksProvider.provideCredentialTypesUIFormSchemaUseCase()
-        verifiedProfileUseCase = VclBlocksProvider.provideVerifiedProfileUseCase()
-        jwtServiceUseCase =
-            VclBlocksProvider.provideJwtServiceUseCase(
-                context,
-                initializationDescriptor.keyServicesDescriptor
-            )
-        keyServiceUseCase =
-            VclBlocksProvider.provideKeyServiceUseCase(
-                context,
-                initializationDescriptor.keyServicesDescriptor
-            )
     }
 
     private fun initGlobalConfigurations() {

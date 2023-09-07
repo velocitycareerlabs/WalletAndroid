@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.api.entities
+package io.velocitycareerlabs.api.entities.error
 
 internal enum class VCLErrorCode(val value: String) {
     // Initialization

@@ -6,6 +6,6 @@
 
 package io.velocitycareerlabs.api.entities.initialization
 
-class VCLKeyServiceUrls(
+data class VCLKeyServiceUrls(
     val keyServiceUrl: String
 )
