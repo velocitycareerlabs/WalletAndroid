@@ -30,6 +30,7 @@ import org.mockito.MockitoAnnotations
 
 internal class VclBlocksProviderTest {
     val subject = VclBlocksProvider
+
     @Mock
     lateinit var context: Context
 
@@ -40,72 +41,84 @@ internal class VclBlocksProviderTest {
 
     @Test
     fun testChooseServiceByDefault() {
-        val keyService = subject.chooseKeyService(
-            context,
-            VCLCryptoServicesDescriptor()
-        )
-        assert(keyService is VCLKeyServiceImpl)
+        try {
+            val keyService = subject.chooseKeyService(
+                context,
+                VCLCryptoServicesDescriptor()
+            )
+            assert(keyService is VCLKeyServiceImpl)
 
-        val jwtService = subject.chooseJwtService(
-            context,
-            VCLCryptoServicesDescriptor()
-        )
-        assert(keyService is VCLKeyServiceImpl)
-        assert(jwtService is VCLJwtServiceImpl)
+            val jwtService = subject.chooseJwtService(
+                context,
+                VCLCryptoServicesDescriptor()
+            )
+            assert(keyService is VCLKeyServiceImpl)
+            assert(jwtService is VCLJwtServiceImpl)
+        } catch (ex: Exception) {
+            assert(false) { "$ex" }
+        }
     }
 
     @Test
     fun testChooseRemoteService() {
-        val keyService = subject.chooseKeyService(
-            context,
-            VCLCryptoServicesDescriptor(
-                cryptoServiceType = VCLCryptoServiceType.Remote,
-                remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
-                    VCLKeyServiceUrls(""),
-                    VCLJwtServiceUrls("", "")
+        try {
+            val keyService = subject.chooseKeyService(
+                context,
+                VCLCryptoServicesDescriptor(
+                    cryptoServiceType = VCLCryptoServiceType.Remote,
+                    remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
+                        VCLKeyServiceUrls(""),
+                        VCLJwtServiceUrls("", "")
+                    )
                 )
             )
-        )
-        assert(keyService is VCLKeyServiceRemoteImpl)
+            assert(keyService is VCLKeyServiceRemoteImpl)
 
-        val jwtService = subject.chooseJwtService(
-            context,
-            VCLCryptoServicesDescriptor(
-                cryptoServiceType = VCLCryptoServiceType.Remote,
-                remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
-                    VCLKeyServiceUrls(""),
-                    VCLJwtServiceUrls("", "")
+            val jwtService = subject.chooseJwtService(
+                context,
+                VCLCryptoServicesDescriptor(
+                    cryptoServiceType = VCLCryptoServiceType.Remote,
+                    remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
+                        VCLKeyServiceUrls(""),
+                        VCLJwtServiceUrls("", "")
+                    )
                 )
             )
-        )
-        assert(jwtService is VCLJwtServiceRemoteImpl)
+            assert(jwtService is VCLJwtServiceRemoteImpl)
+        } catch (ex: Exception) {
+            assert(false) { "$ex" }
+        }
     }
 
     @Test
     fun testChooseInjectedKeyService() {
-        val keyService = subject.chooseKeyService(
-            context,
-            VCLCryptoServicesDescriptor(
-                cryptoServiceType = VCLCryptoServiceType.Injected,
-                injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
-                    VCLKeyServiceMock(),
-                    VCLJwtServiceMock()
+        try {
+            val keyService = subject.chooseKeyService(
+                context,
+                VCLCryptoServicesDescriptor(
+                    cryptoServiceType = VCLCryptoServiceType.Injected,
+                    injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
+                        VCLKeyServiceMock(),
+                        VCLJwtServiceMock()
+                    )
                 )
             )
-        )
-        assert(keyService is VCLKeyServiceMock)
+            assert(keyService is VCLKeyServiceMock)
 
-        val jwtService = subject.chooseJwtService(
-            context,
-            VCLCryptoServicesDescriptor(
-                cryptoServiceType = VCLCryptoServiceType.Injected,
-                injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
-                    VCLKeyServiceMock(),
-                    VCLJwtServiceMock()
+            val jwtService = subject.chooseJwtService(
+                context,
+                VCLCryptoServicesDescriptor(
+                    cryptoServiceType = VCLCryptoServiceType.Injected,
+                    injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
+                        VCLKeyServiceMock(),
+                        VCLJwtServiceMock()
+                    )
                 )
             )
-        )
-        assert(jwtService is VCLJwtServiceMock)
+            assert(jwtService is VCLJwtServiceMock)
+        } catch (ex: Exception) {
+            assert(false) { "$ex" }
+        }
     }
 
     @Test
@@ -115,7 +128,7 @@ internal class VclBlocksProviderTest {
                 context,
                 VCLCryptoServicesDescriptor(VCLCryptoServiceType.Remote)
             )
-        } catch (error: VCLError){
+        } catch (error: VCLError) {
             assert(error.errorCode == VCLErrorCode.RemoteServicesUrlsNotFount.value)
         }
 
@@ -124,7 +137,7 @@ internal class VclBlocksProviderTest {
                 context,
                 VCLCryptoServicesDescriptor(VCLCryptoServiceType.Remote)
             )
-        } catch (error: VCLError){
+        } catch (error: VCLError) {
             assert(error.errorCode == VCLErrorCode.RemoteServicesUrlsNotFount.value)
         }
     }
@@ -136,7 +149,7 @@ internal class VclBlocksProviderTest {
                 context,
                 VCLCryptoServicesDescriptor(VCLCryptoServiceType.Injected)
             )
-        } catch (error: VCLError){
+        } catch (error: VCLError) {
             assert(error.errorCode == VCLErrorCode.InjectedServicesNotFount.value)
         }
 
@@ -145,7 +158,7 @@ internal class VclBlocksProviderTest {
                 context,
                 VCLCryptoServicesDescriptor(VCLCryptoServiceType.Injected)
             )
-        } catch (error: VCLError){
+        } catch (error: VCLError) {
             assert(error.errorCode == VCLErrorCode.InjectedServicesNotFount.value)
         }
     }
@@ -163,7 +176,7 @@ internal class VclBlocksProviderTest {
                     )
                 )
             )
-        } catch (error: VCLError){
+        } catch (error: VCLError) {
             assert(error.errorCode == VCLErrorCode.RemoteServicesUrlsNotFount.value)
         }
 
@@ -178,7 +191,7 @@ internal class VclBlocksProviderTest {
                     )
                 )
             )
-        } catch (error: VCLError){
+        } catch (error: VCLError) {
             assert(error.errorCode == VCLErrorCode.RemoteServicesUrlsNotFount.value)
         }
     }
@@ -196,7 +209,7 @@ internal class VclBlocksProviderTest {
                     )
                 )
             )
-        } catch (error: VCLError){
+        } catch (error: VCLError) {
             assert(error.errorCode == VCLErrorCode.InjectedServicesNotFount.value)
         }
 
@@ -211,7 +224,7 @@ internal class VclBlocksProviderTest {
                     )
                 )
             )
-        } catch (error: VCLError){
+        } catch (error: VCLError) {
             assert(error.errorCode == VCLErrorCode.InjectedServicesNotFount.value)
         }
     }

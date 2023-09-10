@@ -31,6 +31,7 @@ import io.velocitycareerlabs.impl.domain.usecases.VerifiedProfileUseCase
 import io.velocitycareerlabs.impl.utils.InitializationWatcher
 import io.velocitycareerlabs.impl.utils.VCLLog
 import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
+import kotlin.jvm.Throws
 
 internal class VCLImpl: VCL {
     companion object {
@@ -82,7 +83,8 @@ internal class VCLImpl: VCL {
         )
     }
 
-    private fun initializeUsecases(context: Context) {
+    @Throws
+    private fun initializeUseCases(context: Context) {
         presentationRequestUseCase =
             VclBlocksProvider.providePresentationRequestUseCase(
                 context,
@@ -133,7 +135,7 @@ internal class VCLImpl: VCL {
         initializationWatcher.firstError()?.let { errorHandler(it) }
             ?: run {
                 try {
-                    initializeUsecases(context)
+                    initializeUseCases(context)
 
                     profileServiceTypeVerifier = ProfileServiceTypeVerifier(verifiedProfileUseCase)
 
