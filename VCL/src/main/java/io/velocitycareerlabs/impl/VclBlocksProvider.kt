@@ -16,10 +16,10 @@ import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescri
 import io.velocitycareerlabs.impl.data.utils.CredentialDidVerifierImpl
 import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.db.SecretStoreServiceImpl
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
 import io.velocitycareerlabs.impl.data.infrastructure.network.NetworkServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
-import io.velocitycareerlabs.impl.keys.VCLKeyServiceImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.models.*
 import io.velocitycareerlabs.impl.data.repositories.*
 import io.velocitycareerlabs.impl.data.usecases.*
@@ -38,7 +38,7 @@ internal object VclBlocksProvider {
                 cryptoServicesDescriptor: VCLCryptoServicesDescriptor
         ): VCLKeyService {
                 when (cryptoServicesDescriptor.cryptoServiceType) {
-                        VCLCryptoServiceType.Local -> return VCLKeyServiceImpl(
+                        VCLCryptoServiceType.Local -> return VCLKeyServiceLocalImpl(
                                 SecretStoreServiceImpl(
                                         context
                                 )
@@ -64,7 +64,7 @@ internal object VclBlocksProvider {
                 cryptoServicesDescriptor: VCLCryptoServicesDescriptor
         ): VCLJwtService {
                 when (cryptoServicesDescriptor.cryptoServiceType) {
-                        VCLCryptoServiceType.Local -> return VCLJwtServiceImpl(
+                        VCLCryptoServiceType.Local -> return VCLJwtServiceLocalImpl(
                                 chooseKeyService(
                                         context,
                                         cryptoServicesDescriptor

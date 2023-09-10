@@ -9,8 +9,8 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceImpl
-import io.velocitycareerlabs.impl.keys.VCLKeyServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.FinalizeOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
@@ -44,7 +44,7 @@ internal class FinalizeOffersUseCaseTest {
     lateinit var subject: FinalizeOffersUseCase
 
     lateinit var didJwk: VCLDidJwk
-    private val keyService = VCLKeyServiceImpl(SecretStoreServiceMock.Instance)
+    private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
     lateinit var credentialManifestFailed: VCLCredentialManifest
     lateinit var credentialManifestPassed: VCLCredentialManifest
     lateinit var finalizeOffersDescriptorFailed: VCLFinalizeOffersDescriptor
@@ -124,7 +124,7 @@ internal class FinalizeOffersUseCaseTest {
                 NetworkServiceSuccess(validResponse = CredentialMocks.JwtCredentialsFromRegularIssuer)
             ),
             JwtServiceRepositoryImpl(
-                VCLJwtServiceImpl(keyService)
+                VCLJwtServiceLocalImpl(keyService)
             ),
             CredentialIssuerVerifierImpl(
                 CredentialTypesModelMock(
@@ -170,7 +170,7 @@ internal class FinalizeOffersUseCaseTest {
                 NetworkServiceSuccess(validResponse = CredentialMocks.JwtCredentialsFromRegularIssuer)
             ),
             JwtServiceRepositoryImpl(
-                VCLJwtServiceImpl(keyService)
+                VCLJwtServiceLocalImpl(keyService)
             ),
             CredentialIssuerVerifierImpl(
                 CredentialTypesModelMock(
@@ -217,7 +217,7 @@ internal class FinalizeOffersUseCaseTest {
                 NetworkServiceSuccess(validResponse = CredentialMocks.JwtEmptyCredentials)
             ),
             JwtServiceRepositoryImpl(
-                VCLJwtServiceImpl(keyService)
+                VCLJwtServiceLocalImpl(keyService)
             ),
             CredentialIssuerVerifierImpl(
                 CredentialTypesModelMock(

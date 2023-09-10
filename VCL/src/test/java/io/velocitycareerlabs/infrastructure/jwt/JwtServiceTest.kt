@@ -9,8 +9,8 @@ import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLJwkPublic
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceImpl
-import io.velocitycareerlabs.impl.keys.VCLKeyServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.api.jwt.VCLJwtService
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
@@ -25,10 +25,10 @@ import java.util.concurrent.TimeUnit
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 class JwtServiceTest {
 
-    private lateinit var subject: VCLJwtServiceImpl
+    private lateinit var subject: VCLJwtServiceLocalImpl
 
     private lateinit var didJwk: VCLDidJwk
-    private val keyService = VCLKeyServiceImpl(SecretStoreServiceMock.Instance)
+    private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
 
     private val payloadMock = "{\"key1\":\"value1\",\"key2\":\"value2\"}".toJsonObject()
     private val jtiMock = "some jti"
@@ -47,7 +47,7 @@ class JwtServiceTest {
                 assert(false) { "Failed to generate did jwk" }
             })
         }
-        subject = VCLJwtServiceImpl(keyService)
+        subject = VCLJwtServiceLocalImpl(keyService)
     }
 
     @Test

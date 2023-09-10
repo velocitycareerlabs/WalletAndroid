@@ -18,8 +18,8 @@ import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescri
 import io.velocitycareerlabs.api.entities.initialization.VCLRemoteCryptoServicesUrlsDescriptor
 import io.velocitycareerlabs.impl.VclBlocksProvider
 import io.velocitycareerlabs.impl.jwt.VCLJwtServiceRemoteImpl
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceImpl
-import io.velocitycareerlabs.impl.keys.VCLKeyServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceRemoteImpl
 import io.velocitycareerlabs.infrastructure.resources.valid.VCLJwtServiceMock
 import io.velocitycareerlabs.infrastructure.resources.valid.VCLKeyServiceMock
@@ -46,14 +46,14 @@ internal class VclBlocksProviderTest {
                 context,
                 VCLCryptoServicesDescriptor()
             )
-            assert(keyService is VCLKeyServiceImpl)
+            assert(keyService is VCLKeyServiceLocalImpl)
 
             val jwtService = subject.chooseJwtService(
                 context,
                 VCLCryptoServicesDescriptor()
             )
-            assert(keyService is VCLKeyServiceImpl)
-            assert(jwtService is VCLJwtServiceImpl)
+            assert(keyService is VCLKeyServiceLocalImpl)
+            assert(jwtService is VCLJwtServiceLocalImpl)
         } catch (ex: Exception) {
             assert(false) { "$ex" }
         }

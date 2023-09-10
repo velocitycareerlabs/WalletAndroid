@@ -9,8 +9,8 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceImpl
-import io.velocitycareerlabs.impl.keys.VCLKeyServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.JwtServiceUseCaseImpl
 import io.velocitycareerlabs.api.keys.VCLKeyService
@@ -38,11 +38,11 @@ internal class JwtServiceUseCaseTest {
     fun setUp() {
         subject = JwtServiceUseCaseImpl(
             JwtServiceRepositoryImpl(
-                VCLJwtServiceImpl(VCLKeyServiceImpl(SecretStoreServiceMock.Instance))
+                VCLJwtServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance))
             ),
             EmptyExecutor()
         )
-        keyService = VCLKeyServiceImpl(SecretStoreServiceMock.Instance)
+        keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
     }
 
     @Test

@@ -9,8 +9,8 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceImpl
-import io.velocitycareerlabs.impl.keys.VCLKeyServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.PresentationRequestRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.ResolveKidRepositoryImpl
@@ -46,7 +46,7 @@ internal class PresentationRequestUseCaseTest {
                 NetworkServiceSuccess(validResponse = PresentationRequestMocks.JWK)
             ),
             JwtServiceRepositoryImpl(
-                VCLJwtServiceImpl(VCLKeyServiceImpl(SecretStoreServiceMock.Instance))
+                VCLJwtServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance))
             ),
             EmptyExecutor()
         )
