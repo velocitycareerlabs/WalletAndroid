@@ -16,7 +16,7 @@ import io.velocitycareerlabs.impl.domain.infrastructure.db.SecretStoreService
 import io.velocitycareerlabs.api.keys.VCLKeyService
 import java.util.UUID
 
-internal class VCLKeyServiceImpl(
+internal class VCLKeyServiceLocalImpl(
     private val secretStoreService: SecretStoreService,
 ): VCLKeyService {
     override fun generateDidJwk(

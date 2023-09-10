@@ -25,7 +25,7 @@ import io.velocitycareerlabs.impl.extensions.randomString
 import java.lang.Exception
 import java.util.*
 
-internal class VCLJwtServiceImpl(
+internal class VCLJwtServiceLocalImpl(
     private val keyService: VCLKeyService
 ): VCLJwtService {
     override fun verify(
