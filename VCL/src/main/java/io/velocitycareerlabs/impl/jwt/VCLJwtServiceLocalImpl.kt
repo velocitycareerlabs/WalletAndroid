@@ -105,4 +105,19 @@ internal class VCLJwtServiceLocalImpl(
 
         return claimsSetBuilder.build()
     }
+
+    companion object CodingKeys {
+        val KeyIss = "iss"
+        val KeyAud = "aud"
+        val KeySub = "sub"
+        val KeyJti = "jti"
+        val KeyIat = "iat"
+        val KeyNbf = "nbf"
+        val KeyExp = "exp"
+        val KeyNonce = "nonce"
+
+        val KeyPayload = "payload"
+        val KeyJwt = "jwt"
+        val KeyPublicKey = "publicKey"
+    }
 }

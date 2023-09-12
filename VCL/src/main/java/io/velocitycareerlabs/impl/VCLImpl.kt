@@ -88,29 +88,29 @@ internal class VCLImpl: VCL {
         presentationRequestUseCase =
             VclBlocksProvider.providePresentationRequestUseCase(
                 context,
-                initializationDescriptor.keyServicesDescriptor
+                initializationDescriptor.cryptoServicesDescriptor
             )
         presentationSubmissionUseCase = VclBlocksProvider.providePresentationSubmissionUseCase(
             context,
-            initializationDescriptor.keyServicesDescriptor
+            initializationDescriptor.cryptoServicesDescriptor
         )
         exchangeProgressUseCase = VclBlocksProvider.provideExchangeProgressUseCase()
         organizationsUseCase = VclBlocksProvider.provideOrganizationsUseCase()
         credentialManifestUseCase =
             VclBlocksProvider.provideCredentialManifestUseCase(
                 context,
-                initializationDescriptor.keyServicesDescriptor
+                initializationDescriptor.cryptoServicesDescriptor
             )
         identificationSubmissionUseCase = VclBlocksProvider.provideIdentificationSubmissionUseCase(
             context,
-            initializationDescriptor.keyServicesDescriptor
+            initializationDescriptor.cryptoServicesDescriptor
         )
         generateOffersUseCase = VclBlocksProvider.provideGenerateOffersUseCase()
         finalizeOffersUseCase =
             VclBlocksProvider.provideFinalizeOffersUseCase(
                 context,
                 credentialTypesModel,
-                initializationDescriptor.keyServicesDescriptor
+                initializationDescriptor.cryptoServicesDescriptor
             )
         credentialTypesUIFormSchemaUseCase =
             VclBlocksProvider.provideCredentialTypesUIFormSchemaUseCase()
@@ -118,12 +118,12 @@ internal class VCLImpl: VCL {
         jwtServiceUseCase =
             VclBlocksProvider.provideJwtServiceUseCase(
                 context,
-                initializationDescriptor.keyServicesDescriptor
+                initializationDescriptor.cryptoServicesDescriptor
             )
         keyServiceUseCase =
             VclBlocksProvider.provideKeyServiceUseCase(
                 context,
-                initializationDescriptor.keyServicesDescriptor
+                initializationDescriptor.cryptoServicesDescriptor
             )
     }
 

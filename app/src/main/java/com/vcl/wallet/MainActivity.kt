@@ -12,11 +12,16 @@ import android.util.Log
 import androidx.core.view.isVisible
 import com.vcl.wallet.databinding.ActivityMainBinding
 import io.velocitycareerlabs.api.VCL
+import io.velocitycareerlabs.api.VCLCryptoServiceType
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCLProvider
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescriptor
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
+import io.velocitycareerlabs.api.entities.initialization.VCLJwtServiceUrls
+import io.velocitycareerlabs.api.entities.initialization.VCLKeyServiceUrls
+import io.velocitycareerlabs.api.entities.initialization.VCLRemoteCryptoServicesUrlsDescriptor
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
@@ -67,8 +72,20 @@ class MainActivity : AppCompatActivity() {
         vcl.initialize(
             context = this.applicationContext,
             initializationDescriptor = VCLInitializationDescriptor(
-                environment = environment//,
-//                xVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2
+                environment = environment,
+//                xVnfProtocolVersion: .XVnfProtocolVersion2,
+                cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
+                    cryptoServiceType = VCLCryptoServiceType.Remote,
+                    remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
+                        keyServiceUrls = VCLKeyServiceUrls(
+                            createDidKeyServiceUrl = Constants.getCreateDidKeyServiceUrl(environment = environment)
+                        ),
+                        jwtServiceUrls = VCLJwtServiceUrls(
+                            jwtSignServiceUrl = Constants.getJwtSignServiceUrl(environment = environment),
+                            jwtVerifyServiceUrl = Constants.getJwtVerifyServiceUrl(environment = environment)
+                        )
+                    )
+                )
             ),
             successHandler = {
                 Log.d(TAG, "VCL Initialization succeed!")
@@ -171,9 +188,10 @@ class MainActivity : AppCompatActivity() {
 //                Log.d(TAG, "VCL Organizations received")
 
                 // choosing services[0] for testing purposes
-                organizations.all.getOrNull(0)?.serviceCredentialAgentIssuers?.getOrNull(0)?.let { service ->
-                    getCredentialManifestByService(service)
-                } ?: Log.e(TAG, "VCL Organizations error, issuing service not found")
+                organizations.all.getOrNull(0)?.serviceCredentialAgentIssuers?.getOrNull(0)
+                    ?.let { service ->
+                        getCredentialManifestByService(service)
+                    } ?: Log.e(TAG, "VCL Organizations error, issuing service not found")
             },
             { error ->
                 logError("VCL Organizations search failed:", error)
@@ -184,7 +202,8 @@ class MainActivity : AppCompatActivity() {
     private fun refreshCredentials() {
         val service = VCLService(
             JSONObject(
-                Constants.IssuingServiceJsonStr)
+                Constants.IssuingServiceJsonStr
+            )
         )
         val credentialManifestDescriptorRefresh =
             VCLCredentialManifestDescriptorRefresh(
@@ -193,7 +212,10 @@ class MainActivity : AppCompatActivity() {
             )
         vcl.getCredentialManifest(credentialManifestDescriptorRefresh,
             { credentialManifest ->
-                Log.d(TAG, "VCL Credentials refreshed, credential manifest: ${credentialManifest.jwt.payload}")
+                Log.d(
+                    TAG,
+                    "VCL Credentials refreshed, credential manifest: ${credentialManifest.jwt.payload}"
+                )
             },
             { error ->
                 logError("VCL Refresh Credentials failed:", error)
@@ -311,8 +333,14 @@ class MainActivity : AppCompatActivity() {
             token = offers.token,
             { verifiableCredentials ->
                 Log.d(TAG, "VCL finalized Offers")
-                Log.d(TAG, "VCL Passed Credentials: ${verifiableCredentials.passedCredentials.map { it.payload }}")
-                Log.d(TAG, "VCL Failed Credentials: ${verifiableCredentials.failedCredentials.map { it.payload }}")
+                Log.d(
+                    TAG,
+                    "VCL Passed Credentials: ${verifiableCredentials.passedCredentials.map { it.payload }}"
+                )
+                Log.d(
+                    TAG,
+                    "VCL Failed Credentials: ${verifiableCredentials.failedCredentials.map { it.payload }}"
+                )
             },
             { error ->
                 logError("VCL failed to finalize Offers:", error)
@@ -327,7 +355,10 @@ class MainActivity : AppCompatActivity() {
                 VCLCountries.CA
             ),
             { credentialTypesUIFormSchema ->
-                Log.d(TAG, "VCL received Credential Types UI Form Schema: $credentialTypesUIFormSchema")
+                Log.d(
+                    TAG,
+                    "VCL received Credential Types UI Form Schema: $credentialTypesUIFormSchema"
+                )
 
             },
             { error ->
