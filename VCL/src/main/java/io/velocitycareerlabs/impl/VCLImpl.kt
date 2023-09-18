@@ -492,11 +492,11 @@ internal class VCLImpl: VCL {
 
     override fun verifyJwt(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         successHandler: (Boolean) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        jwtServiceUseCase.verifyJwt(jwt, jwkPublic) { isVerifiedResult ->
+        jwtServiceUseCase.verifyJwt(jwt, publicJwk) { isVerifiedResult ->
             isVerifiedResult.handleResult(
                 {
                     successHandler(it)

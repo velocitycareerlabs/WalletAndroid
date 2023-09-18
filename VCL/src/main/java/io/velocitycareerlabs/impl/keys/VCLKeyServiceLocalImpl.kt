@@ -9,6 +9,7 @@ import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.handleResult
@@ -28,10 +29,11 @@ internal class VCLKeyServiceLocalImpl(
                     completionBlock(
                     VCLResult.Success(
                         VCLDidJwk(
-                            keyId = ecKey.keyID,
-                            value = VCLDidJwk.generateDidJwk(ecKey),
-                            kid = VCLDidJwk.generateKidFromDidJwk(ecKey)
-                        )
+                            did = VCLDidJwk.generateDidJwk(ecKey),
+                            publicJwk = VCLPublicJwk(ecKey.toPublicJWK().toJSONString()),
+                            kid = VCLDidJwk.generateKidFromDidJwk(ecKey),
+                            keyId = ecKey.keyID
+                            )
                     ))
                 },
                 errorHandler = { error ->

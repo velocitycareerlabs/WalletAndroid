@@ -7,7 +7,7 @@
 
 package io.velocitycareerlabs.impl.jwt
 
-import io.velocitycareerlabs.api.entities.VCLJwkPublic
+import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
@@ -30,12 +30,12 @@ internal class VCLJwtServiceRemoteImpl(
 ) : VCLJwtService {
     override fun verify(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicPublic: VCLPublicJwk,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
         networkService.sendRequest(
             endpoint = jwtServiceUrls.jwtVerifyServiceUrl,
-            body = generatePayloadToVerify(jwt, jwkPublic).toString(),
+            body = generatePayloadToVerify(jwt, publicPublic).toString(),
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.POST,
             headers = listOf(
@@ -91,11 +91,11 @@ internal class VCLJwtServiceRemoteImpl(
 
     private fun generatePayloadToVerify(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic
+        publicJwk: VCLPublicJwk
     ): JSONObject {
         val retVal = JSONObject()
         retVal.putOpt(KeyJwt, jwt.encodedJwt)
-        retVal.putOpt(KeyPublicKey, jwkPublic.valueJson)
+        retVal.putOpt(KeyPublicKey, publicJwk.valueJson)
         return retVal
     }
 

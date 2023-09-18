@@ -8,7 +8,7 @@
 package io.velocitycareerlabs.infrastructure.resources.valid
 
 import io.velocitycareerlabs.api.entities.VCLJwt
-import io.velocitycareerlabs.api.entities.VCLJwkPublic
+import io.velocitycareerlabs.api.entities.VCLPublicJwk
 
 class JwtServiceMocks {
     companion object {
@@ -28,7 +28,7 @@ class JwtServiceMocks {
         const val Json =
             "{ \"name\": { \"ui.title\": \"Issued by\" }, \"identifer\": { \"ui.widget\": \"hidden\" }, \"place\": { \"name\": { \"ui.widget\": \"hidden\" }, \"addressCountry\": { \"ui.title\": \"Country\", \"ui:enum\": [ \"TARGET_COUNTRIES_ENUM\" ], \"ui:enumNames\": [ \"TARGET_COUNTRIES_ENUM_NAMES\" ], \"ui:widget\": \"select\" }, \"addressRegion\": { \"ui.title\": \"State or region\", \"ui:enum\": [\"TARGET_REGIONS_ENUM\"], \"ui:enumNames\": [\"TARGET_REGIONS_ENUM_NAMES\"], \"ui:widget\": \"select\" }, \"addressLocality\": { \"ui.widget\": \"hidden\" } }, \"ui:order\": [ \"name\", \"place\" ] }"
 
-        val JwkPublic = VCLJwkPublic(valueStr = KeyServiceMocks.JWK)
+        val PublicJwk = VCLPublicJwk(valueStr = KeyServiceMocks.JWK)
 
         val JWT = VCLJwt(encodedJwt = SignedJwt)
     }

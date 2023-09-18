@@ -380,7 +380,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun verifyJwt() {
         vcl.verifyJwt(
-            Constants.SomeJwt, Constants.SomeJwkPublic, { isVerified ->
+            Constants.SomeJwt, Constants.SomePublicJwk, { isVerified ->
                 Log.d(TAG, "VCL JWT verified: $isVerified")
             },
             { error ->
@@ -409,7 +409,7 @@ class MainActivity : AppCompatActivity() {
     private fun generateDidJwk() {
         vcl.generateDidJwk(
             { didJwk ->
-                Log.d(TAG, "VCL DID:JWK generated: ${didJwk.value}")
+                Log.d(TAG, "VCL DID:JWK generated: ${didJwk.did}")
             },
             { error ->
                 logError("VCL DID:JWK generation failed:", error)

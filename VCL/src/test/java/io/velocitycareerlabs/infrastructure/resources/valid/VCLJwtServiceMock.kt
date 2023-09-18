@@ -7,7 +7,7 @@
 
 package io.velocitycareerlabs.infrastructure.resources.valid
 
-import io.velocitycareerlabs.api.entities.VCLJwkPublic
+import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
@@ -24,7 +24,7 @@ class VCLJwtServiceMock: VCLJwtService {
 
     override fun verify(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicPublic: VCLPublicJwk,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
     }

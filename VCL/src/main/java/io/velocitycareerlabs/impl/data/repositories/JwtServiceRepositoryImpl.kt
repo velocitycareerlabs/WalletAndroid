@@ -32,10 +32,10 @@ internal class JwtServiceRepositoryImpl(
 
     override fun verifyJwt(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        jwtService.verify(jwt, jwkPublic) {
+        jwtService.verify(jwt, publicJwk) {
             completionBlock(it)
         }
     }

@@ -63,7 +63,7 @@ internal class PresentationSubmissionUseCaseTest {
         val presentationSubmission = VCLPresentationSubmission(
             presentationRequest = VCLPresentationRequest(
                 jwt = CommonMocks.JWT,
-                jwkPublic = VCLJwkPublic(valueStr = "{}"),
+                publicJwk = VCLPublicJwk(valueStr = "{}"),
                 deepLink = VCLDeepLink(value = "")
             ),
             verifiableCredentials = listOf()

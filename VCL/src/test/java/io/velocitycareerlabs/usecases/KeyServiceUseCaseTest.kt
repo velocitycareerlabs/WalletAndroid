@@ -50,17 +50,16 @@ class KeyServiceUseCaseTest {
         subject.generateDidJwk {
             it.handleResult(
                 successHandler = { didJwk ->
-                    val jwkJsonObj =
-                        didJwk.value.removePrefix(VCLDidJwk.DidJwkPrefix).decodeBase64().toJsonObject()
+                    val jwkJsonObj = didJwk.publicJwk.valueJson
 
-                    assert(didJwk.value.startsWith(VCLDidJwk.DidJwkPrefix))
+                    assert(didJwk.did.startsWith(VCLDidJwk.DidJwkPrefix))
 
-                    assert(jwkJsonObj?.optString("kty") == "EC")
-                    assert(jwkJsonObj?.optString("use") == "sig")
-                    assert(jwkJsonObj?.optString("crv") == "secp256k1")
-                    assert(jwkJsonObj?.optString("use") == "sig")
-                    assert(jwkJsonObj?.optString("x") != null)
-                    assert(jwkJsonObj?.optString("y") != null)
+                    assert(jwkJsonObj.optString("kty") == "EC")
+                    assert(jwkJsonObj.optString("use") == "sig")
+                    assert(jwkJsonObj.optString("crv") == "secp256k1")
+                    assert(jwkJsonObj.optString("use") == "sig")
+                    assert(jwkJsonObj.optString("x") != null)
+                    assert(jwkJsonObj.optString("y") != null)
                 },
                 errorHandler = {
                     assert(false) { "$it" }
@@ -83,7 +82,7 @@ class KeyServiceUseCaseTest {
         try {
             val didJwk1 = resultDidJwk1?.data
             val didJwk2 = resultDidJwk2?.data
-            assert(didJwk1!!.value != didJwk2!!.value)
+            assert(didJwk1!!.did != didJwk2!!.did)
             assert(didJwk1.keyId != didJwk2.keyId)
         } catch (ex: Exception) {
             assert(false) {"$ex"}

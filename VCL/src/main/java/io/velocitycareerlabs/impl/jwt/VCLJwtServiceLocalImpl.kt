@@ -30,13 +30,13 @@ internal class VCLJwtServiceLocalImpl(
 ): VCLJwtService {
     override fun verify(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicPublic: VCLPublicJwk,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
         try {
             completionBlock(
                 VCLResult.Success(
-                    jwt.signedJwt?.verify(ECDSAVerifier(JWK.parse(jwkPublic.valueStr).toECKey())) == true
+                    jwt.signedJwt?.verify(ECDSAVerifier(JWK.parse(publicPublic.valueStr).toECKey())) == true
                 )
             )
         } catch (ex: Exception) {

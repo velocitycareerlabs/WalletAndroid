@@ -8,9 +8,8 @@
 package io.velocitycareerlabs.impl.extensions
 
 import android.util.Base64
-import com.nimbusds.jose.util.Base64URL
 import io.velocitycareerlabs.api.entities.VCLDidJwk
-import io.velocitycareerlabs.api.entities.VCLJwkPublic
+import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.impl.utils.VCLLog
 import org.json.JSONArray
 import org.json.JSONObject
@@ -123,7 +122,7 @@ internal fun String.toJsonArray(): JSONArray? {
 }
 
 internal fun String.toPublicJwk() =
-    VCLJwkPublic(this.removePrefix(VCLDidJwk.DidJwkPrefix).decodeBase64())
+    VCLPublicJwk(this.removePrefix(VCLDidJwk.DidJwkPrefix).decodeBase64())
 
 internal fun randomString(length: Int): String =
     List(length) {

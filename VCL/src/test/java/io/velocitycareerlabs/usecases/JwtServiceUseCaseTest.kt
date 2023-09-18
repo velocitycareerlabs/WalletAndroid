@@ -83,7 +83,7 @@ internal class JwtServiceUseCaseTest {
         val jwt = resultJwt?.data
         subject.verifyJwt(
             jwt = jwt!!,
-            jwkPublic = VCLJwkPublic(valueStr = jwt.header?.jwk.toString())
+            publicJwk = VCLPublicJwk(valueStr = jwt.header?.jwk.toString())
         ) {
             resultVerified = it
         }
@@ -113,9 +113,9 @@ internal class JwtServiceUseCaseTest {
                 val jwt = resultJwt?.data
                 subject.verifyJwt(
                     jwt = jwt!!,
-//                    jwkPublic = VCLJwkPublic(valueStr = jwt.header.jwk.toString())
+//                    publicJwk = VCLPublicJwk(valueStr = jwt.header.jwk.toString())
                     // Person binding provided did:jwk only:
-                    jwkPublic = jwt.header?.toJSONObject()?.get("kid").toString().toPublicJwk()
+                    publicJwk = jwt.header?.toJSONObject()?.get("kid").toString().toPublicJwk()
                 ) {
                     resultVerified = it
                 }

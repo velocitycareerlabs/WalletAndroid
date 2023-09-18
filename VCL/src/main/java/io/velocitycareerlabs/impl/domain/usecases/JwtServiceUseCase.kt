@@ -12,7 +12,7 @@ import io.velocitycareerlabs.api.entities.*
 internal interface JwtServiceUseCase {
     fun verifyJwt(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         completionBlock: (VCLResult<Boolean>) -> Unit
     )
     fun generateSignedJwt(

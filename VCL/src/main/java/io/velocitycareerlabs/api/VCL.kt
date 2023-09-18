@@ -91,7 +91,7 @@ interface VCL {
 
     fun verifyJwt(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         successHandler: (Boolean) -> Unit,
         errorHandler: (VCLError) -> Unit
     )

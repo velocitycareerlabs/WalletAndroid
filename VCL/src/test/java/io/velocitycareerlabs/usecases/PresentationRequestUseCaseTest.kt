@@ -69,12 +69,12 @@ internal class PresentationRequestUseCaseTest {
         val presentationRequest = result?.data
 
         assert(
-            presentationRequest!!.jwkPublic.valueStr.toCharArray().sort() ==
-                    VCLJwkPublic(PresentationRequestMocks.JWK.toJsonObject()!!).valueStr.toCharArray().sort()
+            presentationRequest!!.publicJwk.valueStr.toCharArray().sort() ==
+                    VCLPublicJwk(PresentationRequestMocks.JWK.toJsonObject()!!).valueStr.toCharArray().sort()
         )
         assert(
-            presentationRequest.jwkPublic.valueJson.toString().toCharArray().sort() ==
-                    VCLJwkPublic(PresentationRequestMocks.JWK.toJsonObject()!!).valueJson.toString().toCharArray().sort()
+            presentationRequest.publicJwk.valueJson.toString().toCharArray().sort() ==
+                    VCLPublicJwk(PresentationRequestMocks.JWK.toJsonObject()!!).valueJson.toString().toCharArray().sort()
         )
         assert(presentationRequest.jwt.encodedJwt == PresentationRequestMocks.PresentationRequestJwt.encodedJwt)
         assert(

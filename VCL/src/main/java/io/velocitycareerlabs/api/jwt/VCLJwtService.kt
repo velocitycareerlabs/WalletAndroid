@@ -14,7 +14,7 @@ interface VCLJwtService {
     @Throws(JOSEException::class)
     fun verify(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicPublic: VCLPublicJwk,
         completionBlock: (VCLResult<Boolean>) -> Unit
     )
 

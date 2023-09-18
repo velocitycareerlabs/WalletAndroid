@@ -82,13 +82,13 @@ internal class CredentialManifestUseCaseImpl(
     }
 
     private fun onResolvePublicKeySuccess(
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
         verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        jwtServiceRepository.verifyJwt(jwt, jwkPublic)
+        jwtServiceRepository.verifyJwt(jwt, publicJwk)
         { verificationResult ->
             verificationResult.handleResult(
                 { isVerified ->

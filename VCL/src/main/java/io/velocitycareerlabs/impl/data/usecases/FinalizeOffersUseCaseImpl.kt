@@ -37,7 +37,7 @@ internal class FinalizeOffersUseCaseImpl(
                 nonce = finalizeOffersDescriptor.offers.challenge,
                 jwtDescriptor = VCLJwtDescriptor(
                     keyId = didJwk?.keyId,
-                    iss = didJwk?.value ?: UUID.randomUUID().toString(),
+                    iss = didJwk?.did ?: UUID.randomUUID().toString(),
                     aud = finalizeOffersDescriptor.issuerId
                 )
             ) { proofJwtResult ->
