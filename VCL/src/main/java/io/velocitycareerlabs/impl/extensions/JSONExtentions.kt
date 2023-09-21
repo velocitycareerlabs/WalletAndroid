@@ -46,3 +46,7 @@ internal fun JSONArray.toListOfStrings(): List<String> {
     }
     return list
 }
+
+internal fun JSONObject.copy() = JSONObject(this.toString())
+
+internal fun JSONArray.copy() = JSONArray(this.toString())

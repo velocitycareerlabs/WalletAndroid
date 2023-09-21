@@ -19,6 +19,8 @@ import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.repositories.HeaderKeys
 import io.velocitycareerlabs.impl.data.repositories.HeaderValues
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
+import io.velocitycareerlabs.impl.extensions.addDays
+import io.velocitycareerlabs.impl.extensions.copy
 import io.velocitycareerlabs.impl.extensions.randomString
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import org.json.JSONObject
@@ -70,10 +72,10 @@ internal class VCLJwtServiceRemoteImpl(
             headers = listOf(
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
-            completionBlock = { verifiedJwtResult ->
-                verifiedJwtResult.handleResult(
+            completionBlock = { signedJwtResult ->
+                signedJwtResult.handleResult(
                     successHandler = {
-                        it.payload.toJsonObject()?.getString(KeyJwt)?.let { jwtStr ->
+                        it.payload.toJsonObject()?.optString(CodingKeys.KeyCompactJwt)?.let { jwtStr ->
                             completionBlock(VCLResult.Success(VCLJwt(jwtStr)))
                         } ?: run {
                             completionBlock(VCLResult.Failure(
@@ -105,44 +107,36 @@ internal class VCLJwtServiceRemoteImpl(
     ): JSONObject {
         val retVal = JSONObject()
         val options = JSONObject()
+        val payload = jwtDescriptor.payload?.copy()
 
-        options.putOpt(CodingKeys.KeyAudience, jwtDescriptor.aud)
+        options.putOpt(CodingKeys.KeyKeyId, jwtDescriptor.keyId)
+        options.putOpt(CodingKeys.KeyAud, jwtDescriptor.aud)
         options.putOpt(CodingKeys.KeyJti, jwtDescriptor.jti)
-        val date = Date()
-//        options[JwtServiceCodingKeys.KeyIssuedAt] = date.toDouble()
-//        options[JwtServiceCodingKeys.KeyNotBefore] = date.toDouble()
-//        options[JwtServiceCodingKeys.KeyExpiresIn] = date.addDays(days: 7).toDouble()
-        options.putOpt(CodingKeys.KeyNonce, nonce)
+        options.putOpt(CodingKeys.KeyIss, jwtDescriptor.iss)
+        options.putOpt(CodingKeys.KeyIss, jwtDescriptor.iss)
 
-        options.putOpt(CodingKeys.KeyIssuer, jwtDescriptor.iss)
-        options.putOpt(CodingKeys.KeySubject, randomString(10))
+        payload?.putOpt(CodingKeys.KeyNonce, nonce)
 
-        retVal.putOpt(CodingKeys.KeyPayload, jwtDescriptor.payload)
         retVal.putOpt(CodingKeys.KeyOptions, options)
+        retVal.putOpt(CodingKeys.KeyPayload, payload)
 
         return retVal
     }
 
     companion object CodingKeys {
-        val KeyKid = "kid"
+        const val KeyKeyId = "keyId"
+        const val KeyIss = "iss"
+        const val KeyAud = "aud"
+        const val KeyJti = "jti"
+        const val KeyNonce = "nonce"
 
-        val KeyIssuer = "issuer"
-        val KeyAudience = "audience"
-        val KeySubject = "subject"
-        val KeyJti = "jti"
+        const val KeyOptions = "options"
+        const val KeyPayload = "payload"
 
-//        val KeyIssuedAt = "issuedAt"
-//        val KeyNotBefore = "notBefore"
-//        val KeyExpiresIn = "expiresIn"
-        val KeyNonce = "nonce"
+        const val KeyJwt = "jwt"
+        const val KeyCompactJwt = "compactJwt"
+        const val KeyVerified = "verified"
 
-        val KeyPayload = "payload"
-        val KeyJwt = "jwt"
-        val KeyPublicKey = "publicKey"
-
-        val KeyOptions = "options"
-        val KeyRequired = "required"
-
-        val KeyVerified = "verified"
+        const val KeyPublicKey = "publicKey"
     }
 }

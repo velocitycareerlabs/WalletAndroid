@@ -110,35 +110,32 @@ object Constants {
     )
     val SomePayload = JSONObject("{\"p1\":\"v1\", \"p2\":\"v12\"}")
 
+    private const val BaseUrl = "mockvendor.velocitycareerlabs.io"
     private fun getServiceBaseUrl(environment: VCLEnvironment): String {
         return when (environment) {
             VCLEnvironment.Dev ->
-                "https://${VCLEnvironment.Dev.value}walletapi.velocitycareerlabs.io"
+                "https://${VCLEnvironment.Dev.value}$BaseUrl"
 
-            VCLEnvironment.Qa ->
-                "https://${VCLEnvironment.Qa.value}walletapi.velocitycareerlabs.io"
+            VCLEnvironment.Qa -> // not available yet
+                "https://${VCLEnvironment.Qa.value}$BaseUrl"
 
-            VCLEnvironment.Staging ->
-                "https://${VCLEnvironment.Staging.value}walletapi.velocitycareerlabs.io"
+            VCLEnvironment.Staging -> // not available yet
+                "https://${VCLEnvironment.Staging.value}$BaseUrl"
 
-            else -> // prod
-                "https://walletapi.velocitycareerlabs.io"
+            else -> // prod not available yet
+                "https://$BaseUrl"
         }
     }
 
     fun getJwtSignServiceUrl(environment: VCLEnvironment): String {
-        return "${getServiceBaseUrl(environment = environment)}/jwt/sign"
+        return "${getServiceBaseUrl(environment = environment)}/api/jwt/sign"
     }
 
     fun getJwtVerifyServiceUrl(environment: VCLEnvironment): String {
-        return "${getServiceBaseUrl(environment = environment)}/jwt/verify"
-    }
-
-    fun getJwtDecodeServiceUrl(environment: VCLEnvironment): String {
-        return "${getServiceBaseUrl(environment = environment)}/jwt/decode"
+        return "${getServiceBaseUrl(environment = environment)}/api/jwt/verify"
     }
 
     fun getCreateDidKeyServiceUrl(environment: VCLEnvironment): String {
-        return "${getServiceBaseUrl(environment = environment)}/create_did_key"
+        return "${getServiceBaseUrl(environment = environment)}/api/create_did_key"
     }
 }

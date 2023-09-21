@@ -100,24 +100,20 @@ internal class VCLJwtServiceLocalImpl(
             .notBeforeTime(curDate) // nbf
             .expirationTime(curDate.addDays(7)) // exp
             .subject(randomString(10))
-        nonce?.let { claimsSetBuilder.claim("nonce", it) }
+        nonce?.let { claimsSetBuilder.claim(KeyNonce, it) }
         jwtDescriptor.payload?.let { claimsSetBuilder.addClaims(it) }
 
         return claimsSetBuilder.build()
     }
 
     companion object CodingKeys {
-        val KeyIss = "iss"
-        val KeyAud = "aud"
-        val KeySub = "sub"
-        val KeyJti = "jti"
-        val KeyIat = "iat"
-        val KeyNbf = "nbf"
-        val KeyExp = "exp"
-        val KeyNonce = "nonce"
-
-        val KeyPayload = "payload"
-        val KeyJwt = "jwt"
-        val KeyPublicKey = "publicKey"
+        const val KeyIss = "iss"
+        const val KeyAud = "aud"
+        const val KeySub = "sub"
+        const val KeyJti = "jti"
+        const val KeyIat = "iat"
+        const val KeyNbf = "nbf"
+        const val KeyExp = "exp"
+        const val KeyNonce = "nonce"
     }
 }

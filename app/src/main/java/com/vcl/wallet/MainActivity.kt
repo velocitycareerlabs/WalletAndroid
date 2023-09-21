@@ -89,19 +89,21 @@ class MainActivity : AppCompatActivity() {
             ),
             successHandler = {
                 Log.d(TAG, "VCL Initialization succeed!")
-                showControls()
 
-//                vcl.generateDidJwk(
-//                    successHandler = { didJwk ->
-//                        this.didJwk = didJwk
-//                        Log.d(TAG, "VCL did:jwk is ${this.didJwk}")
-//                        showControls()
-//                    },
-//                    errorHandler = { error ->
-//                        logError("VCL Failed to generate did:jwk with error:", error)
-//                        showError()
-//                    }
-//                )
+                vcl.generateDidJwk(
+                    successHandler = { didJwk ->
+                        this.didJwk = didJwk
+                        Log.d(
+                            TAG,
+                            "VCL DID:JWK generated: \ndid: ${didJwk.did}\nkid: ${didJwk.kid}\nkeyId: ${didJwk.keyId}\npublicJwk: ${didJwk.publicJwk.valueStr}"
+                        )
+                        showControls()
+                    },
+                    errorHandler = { error ->
+                        logError("VCL Failed to generate did:jwk with error:", error)
+                        showError()
+                    }
+                )
             },
             errorHandler = { error ->
                 logError("VCL Initialization failed with error:", error)
@@ -409,7 +411,11 @@ class MainActivity : AppCompatActivity() {
     private fun generateDidJwk() {
         vcl.generateDidJwk(
             { didJwk ->
-                Log.d(TAG, "VCL DID:JWK generated: ${didJwk.did}")
+                this.didJwk = didJwk
+                Log.d(
+                    TAG,
+                    "VCL DID:JWK generated: \ndid: ${didJwk.did}\nkid: ${didJwk.kid}\nkeyId: ${didJwk.keyId}\npublicJwk: ${didJwk.publicJwk.valueStr}"
+                )
             },
             { error ->
                 logError("VCL DID:JWK generation failed:", error)
