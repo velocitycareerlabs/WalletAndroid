@@ -107,7 +107,7 @@ internal class VCLJwtServiceRemoteImpl(
     ): JSONObject {
         val retVal = JSONObject()
         val options = JSONObject()
-        val payload = jwtDescriptor.payload?.copy()
+        val payload = jwtDescriptor.payload?.copy() ?: JSONObject()
 
         options.putOpt(CodingKeys.KeyKeyId, jwtDescriptor.keyId)
         options.putOpt(CodingKeys.KeyAud, jwtDescriptor.aud)
@@ -115,7 +115,7 @@ internal class VCLJwtServiceRemoteImpl(
         options.putOpt(CodingKeys.KeyIss, jwtDescriptor.iss)
         options.putOpt(CodingKeys.KeyIss, jwtDescriptor.iss)
 
-        payload?.putOpt(CodingKeys.KeyNonce, nonce)
+        payload.putOpt(CodingKeys.KeyNonce, nonce)
 
         retVal.putOpt(CodingKeys.KeyOptions, options)
         retVal.putOpt(CodingKeys.KeyPayload, payload)
