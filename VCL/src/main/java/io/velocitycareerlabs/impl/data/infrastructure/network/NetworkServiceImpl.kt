@@ -9,7 +9,7 @@ package io.velocitycareerlabs.impl.data.infrastructure.network
 
 import android.accounts.NetworkErrorException
 import io.velocitycareerlabs.api.entities.error.VCLError
-import io.velocitycareerlabs.api.entities.VCLStatusCode
+import io.velocitycareerlabs.api.entities.error.VCLStatusCode
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.extensions.convertToString
