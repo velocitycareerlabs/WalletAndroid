@@ -10,5 +10,15 @@ package io.velocitycareerlabs.api
 enum class VCLCryptoServiceType(val value: String) {
     Local("local"),
     Remote("remote"),
-    Injected("injected")
+    Injected("injected");
+
+    companion object {
+        fun fromString(value: String) =
+            when (value) {
+                Local.value -> Local
+                Remote.value -> Remote
+                Injected.value -> Injected
+                else -> Local
+            }
+    }
 }
