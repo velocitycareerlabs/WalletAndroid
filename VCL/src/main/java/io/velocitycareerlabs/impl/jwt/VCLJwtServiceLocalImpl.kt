@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.impl.data.infrastructure.jwt
+package io.velocitycareerlabs.impl.jwt
 
 import com.nimbusds.jose.*
 import com.nimbusds.jose.crypto.ECDSASigner
@@ -15,27 +15,28 @@ import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.GlobalConfig
-import io.velocitycareerlabs.impl.domain.infrastructure.jwt.JwtService
-import io.velocitycareerlabs.impl.domain.infrastructure.keys.KeyService
+import io.velocitycareerlabs.api.jwt.VCLJwtService
+import io.velocitycareerlabs.api.keys.VCLKeyService
 import io.velocitycareerlabs.impl.extensions.addClaims
 import io.velocitycareerlabs.impl.extensions.addDays
 import io.velocitycareerlabs.impl.extensions.randomString
 import java.lang.Exception
 import java.util.*
 
-internal class JwtServiceImpl(
-    private val keyService: KeyService
-): JwtService {
+internal class VCLJwtServiceLocalImpl(
+    private val keyService: VCLKeyService
+): VCLJwtService {
     override fun verify(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicPublic: VCLPublicJwk,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
         try {
             completionBlock(
                 VCLResult.Success(
-                    jwt.signedJwt?.verify(ECDSAVerifier(JWK.parse(jwkPublic.valueStr).toECKey())) == true
+                    jwt.signedJwt?.verify(ECDSAVerifier(JWK.parse(publicPublic.valueStr).toECKey())) == true
                 )
             )
         } catch (ex: Exception) {
@@ -99,9 +100,20 @@ internal class JwtServiceImpl(
             .notBeforeTime(curDate) // nbf
             .expirationTime(curDate.addDays(7)) // exp
             .subject(randomString(10))
-        nonce?.let { claimsSetBuilder.claim("nonce", it) }
+        nonce?.let { claimsSetBuilder.claim(KeyNonce, it) }
         jwtDescriptor.payload?.let { claimsSetBuilder.addClaims(it) }
 
         return claimsSetBuilder.build()
+    }
+
+    companion object CodingKeys {
+        const val KeyIss = "iss"
+        const val KeyAud = "aud"
+        const val KeySub = "sub"
+        const val KeyJti = "jti"
+        const val KeyIat = "iat"
+        const val KeyNbf = "nbf"
+        const val KeyExp = "exp"
+        const val KeyNonce = "nonce"
     }
 }

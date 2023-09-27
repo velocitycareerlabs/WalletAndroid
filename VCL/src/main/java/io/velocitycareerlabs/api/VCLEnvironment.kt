@@ -11,5 +11,16 @@ enum class VCLEnvironment(val value: String) {
     Prod("prod"),
     Staging("staging"),
     Qa("qa"),
-    Dev("dev")
+    Dev("dev");
+
+    companion object {
+        fun fromString(value: String) =
+            when (value) {
+                Prod.value -> Prod
+                Staging.value -> Staging
+                Qa.value -> Qa
+                Dev.value -> Dev
+                else -> Prod
+            }
+    }
 }

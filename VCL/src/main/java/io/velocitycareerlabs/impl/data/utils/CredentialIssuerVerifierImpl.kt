@@ -8,8 +8,8 @@
 package io.velocitycareerlabs.impl.data.utils
 
 import io.velocitycareerlabs.api.entities.VCLCredentialType
-import io.velocitycareerlabs.api.entities.VCLError
-import io.velocitycareerlabs.api.entities.VCLErrorCode
+import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLResult
@@ -250,7 +250,8 @@ internal class CredentialIssuerVerifierImpl(
                 completionBlock(VCLResult.Success(true))
             else
                 completionBlock(VCLResult.Failure(
-                    globalError ?: VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure.value))
+                    globalError ?: VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure.value)
+                )
                 )
         } ?: run {
             onError(

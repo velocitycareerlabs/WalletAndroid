@@ -16,7 +16,7 @@ internal interface JwtServiceRepository {
     )
     fun verifyJwt(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         completionBlock: (VCLResult<Boolean>) -> Unit
     )
     fun generateSignedJwt(

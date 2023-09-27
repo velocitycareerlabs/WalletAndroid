@@ -18,11 +18,11 @@ internal class JwtServiceUseCaseImpl(
 ): JwtServiceUseCase {
     override fun verifyJwt(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
         executor.runOnBackground {
-            jwtServiceRepository.verifyJwt(jwt, jwkPublic) {
+            jwtServiceRepository.verifyJwt(jwt, publicJwk) {
                 executor.runOnMain {
                     completionBlock(it)
                 }

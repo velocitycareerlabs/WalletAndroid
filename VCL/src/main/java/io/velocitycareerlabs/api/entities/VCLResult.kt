@@ -7,6 +7,8 @@
 
 package io.velocitycareerlabs.api.entities
 
+import io.velocitycareerlabs.api.entities.error.VCLError
+
 sealed class VCLResult<out R> {
         data class Success<out T>(val data: T) : VCLResult<T>()
         data class Failure(val error: VCLError) : VCLResult<Nothing>()

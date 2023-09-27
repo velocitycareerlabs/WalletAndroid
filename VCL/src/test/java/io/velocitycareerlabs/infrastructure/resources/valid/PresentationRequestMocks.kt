@@ -8,7 +8,7 @@
 package io.velocitycareerlabs.infrastructure.resources.valid
 
 import io.velocitycareerlabs.api.entities.VCLDeepLink
-import io.velocitycareerlabs.api.entities.VCLJwkPublic
+import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLPresentationRequest
 
@@ -37,11 +37,11 @@ class PresentationRequestMocks {
             "{\"alg\":\"ES256K\",\"use\":\"sig\",\"kid\":\"uemn6l5ro6hLNrgiPRl1Dy51V9whez4tu4hlwsNOTVk\",\"crv\":\"secp256k1\",\"x\":\"oLYCa-AlnVpW8Rq9iST_1eY_XoyvGRry7y1xS4vU4qo\",\"y\":\"PUMAsawZ24WaSnRIdDb_wNbShAvfsGF71ke1DcJGxlM\",\"kty\":\"EC\"}\n"
 
 
-        val jwkPublic = VCLJwkPublic(valueStr = JWK)
+        val PublicJwk = VCLPublicJwk(valueStr = JWK)
 
         val PresentationRequest = VCLPresentationRequest(
             jwt = PresentationRequestJwt,
-            jwkPublic = jwkPublic,
+            publicJwk = PublicJwk,
             deepLink = VCLDeepLink(value = "")
         )
     }

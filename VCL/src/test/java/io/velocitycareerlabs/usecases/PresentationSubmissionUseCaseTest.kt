@@ -9,8 +9,8 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
-import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.PresentationSubmissionRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.PresentationSubmissionUseCaseImpl
@@ -36,7 +36,7 @@ internal class PresentationSubmissionUseCaseTest {
     lateinit var subject: PresentationSubmissionUseCase
 
     lateinit var didJwk: VCLDidJwk
-    private val keyService = KeyServiceImpl(SecretStoreServiceMock.Instance)
+    private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
 
     @Before
     fun setUp() {
@@ -56,14 +56,14 @@ internal class PresentationSubmissionUseCaseTest {
                 NetworkServiceSuccess(validResponse = PresentationSubmissionMocks.PresentationSubmissionResultJson)
             ),
             JwtServiceRepositoryImpl(
-                JwtServiceImpl(keyService)
+                VCLJwtServiceLocalImpl(keyService)
             ),
             EmptyExecutor()
         )
         val presentationSubmission = VCLPresentationSubmission(
             presentationRequest = VCLPresentationRequest(
                 jwt = CommonMocks.JWT,
-                jwkPublic = VCLJwkPublic(valueStr = "{}"),
+                publicJwk = VCLPublicJwk(valueStr = "{}"),
                 deepLink = VCLDeepLink(value = "")
             ),
             verifiableCredentials = listOf()

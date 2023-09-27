@@ -7,14 +7,11 @@
 
 package io.velocitycareerlabs.impl.data.utils
 
-import io.velocitycareerlabs.api.entities.VCLError
 import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtVerifiableCredentials
 import io.velocitycareerlabs.api.entities.VCLResult
-import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.domain.utils.CredentialDidVerifier
-import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
 import java.util.concurrent.CompletableFuture
 
 internal class CredentialDidVerifierImpl: CredentialDidVerifier {

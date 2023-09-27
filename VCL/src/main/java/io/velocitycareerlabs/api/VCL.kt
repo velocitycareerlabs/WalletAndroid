@@ -9,8 +9,8 @@ package io.velocitycareerlabs.api
 
 import android.content.Context
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.GlobalConfig
-import io.velocitycareerlabs.impl.utils.VCLLog
+import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
 
 interface VCL {
     fun initialize(
@@ -91,7 +91,7 @@ interface VCL {
 
     fun verifyJwt(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         successHandler: (Boolean) -> Unit,
         errorHandler: (VCLError) -> Unit
     )

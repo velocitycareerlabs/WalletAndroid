@@ -8,11 +8,11 @@
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.repositories.OrganizationsRepository
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.extensions.toJsonObject
-import org.json.JSONObject
 import java.lang.Exception
 
 internal class OrganizationsRepositoryImpl(

@@ -10,7 +10,7 @@ package io.velocitycareerlabs.api.entities
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import org.json.JSONObject
 
-class VCLJwkPublic {
+class VCLPublicJwk {
     val valueStr: String
     val valueJson: JSONObject
 

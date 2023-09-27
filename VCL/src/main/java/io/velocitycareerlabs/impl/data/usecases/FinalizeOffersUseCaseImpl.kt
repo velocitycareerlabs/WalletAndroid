@@ -9,13 +9,13 @@ package io.velocitycareerlabs.impl.data.usecases
 
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.domain.utils.CredentialDidVerifier
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.FinalizeOffersRepository
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
 import io.velocitycareerlabs.impl.domain.usecases.FinalizeOffersUseCase
 import io.velocitycareerlabs.impl.domain.utils.CredentialIssuerVerifier
-import io.velocitycareerlabs.impl.utils.VCLLog
 import java.util.UUID
 
 internal class FinalizeOffersUseCaseImpl(
@@ -37,7 +37,7 @@ internal class FinalizeOffersUseCaseImpl(
                 nonce = finalizeOffersDescriptor.offers.challenge,
                 jwtDescriptor = VCLJwtDescriptor(
                     keyId = didJwk?.keyId,
-                    iss = didJwk?.value ?: UUID.randomUUID().toString(),
+                    iss = didJwk?.did ?: UUID.randomUUID().toString(),
                     aud = finalizeOffersDescriptor.issuerId
                 )
             ) { proofJwtResult ->

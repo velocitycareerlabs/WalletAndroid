@@ -8,12 +8,13 @@
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.domain.infrastructure.jwt.JwtService
+import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.jwt.VCLJwtService
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
 import java.lang.Exception
 
 internal class JwtServiceRepositoryImpl(
-        private val jwtService: JwtService
+        private val jwtService: VCLJwtService
 ): JwtServiceRepository {
 
     override fun decode(
@@ -31,10 +32,10 @@ internal class JwtServiceRepositoryImpl(
 
     override fun verifyJwt(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        jwtService.verify(jwt, jwkPublic) {
+        jwtService.verify(jwt, publicJwk) {
             completionBlock(it)
         }
     }

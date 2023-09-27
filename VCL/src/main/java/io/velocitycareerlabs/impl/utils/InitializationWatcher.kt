@@ -7,7 +7,7 @@
 
 package io.velocitycareerlabs.impl.utils
 
-import io.velocitycareerlabs.api.entities.VCLError
+import io.velocitycareerlabs.api.entities.error.VCLError
 
 internal class InitializationWatcher(private val initAmount: Int) {
     private var initCount = 0

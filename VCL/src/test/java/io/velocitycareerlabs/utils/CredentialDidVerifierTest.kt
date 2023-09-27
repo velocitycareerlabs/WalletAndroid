@@ -14,14 +14,10 @@ import io.velocitycareerlabs.api.entities.VCLOffers
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
-import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
-import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.utils.CredentialDidVerifierImpl
 import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.extensions.toList
-import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks

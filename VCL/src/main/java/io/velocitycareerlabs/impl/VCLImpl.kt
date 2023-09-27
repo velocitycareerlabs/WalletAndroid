@@ -9,10 +9,11 @@ package io.velocitycareerlabs.impl
 
 import android.content.Context
 import io.velocitycareerlabs.api.VCL
-import io.velocitycareerlabs.api.VCLKeyServiceType
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.domain.models.CredentialTypeSchemasModel
 import io.velocitycareerlabs.api.entities.handleResult
+import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
 import io.velocitycareerlabs.impl.domain.models.CountriesModel
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
 import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
@@ -30,6 +31,7 @@ import io.velocitycareerlabs.impl.domain.usecases.VerifiedProfileUseCase
 import io.velocitycareerlabs.impl.utils.InitializationWatcher
 import io.velocitycareerlabs.impl.utils.VCLLog
 import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
+import kotlin.jvm.Throws
 
 internal class VCLImpl: VCL {
     companion object {
@@ -81,6 +83,50 @@ internal class VCLImpl: VCL {
         )
     }
 
+    @Throws
+    private fun initializeUseCases(context: Context) {
+        presentationRequestUseCase =
+            VclBlocksProvider.providePresentationRequestUseCase(
+                context,
+                initializationDescriptor.cryptoServicesDescriptor
+            )
+        presentationSubmissionUseCase = VclBlocksProvider.providePresentationSubmissionUseCase(
+            context,
+            initializationDescriptor.cryptoServicesDescriptor
+        )
+        exchangeProgressUseCase = VclBlocksProvider.provideExchangeProgressUseCase()
+        organizationsUseCase = VclBlocksProvider.provideOrganizationsUseCase()
+        credentialManifestUseCase =
+            VclBlocksProvider.provideCredentialManifestUseCase(
+                context,
+                initializationDescriptor.cryptoServicesDescriptor
+            )
+        identificationSubmissionUseCase = VclBlocksProvider.provideIdentificationSubmissionUseCase(
+            context,
+            initializationDescriptor.cryptoServicesDescriptor
+        )
+        generateOffersUseCase = VclBlocksProvider.provideGenerateOffersUseCase()
+        finalizeOffersUseCase =
+            VclBlocksProvider.provideFinalizeOffersUseCase(
+                context,
+                credentialTypesModel,
+                initializationDescriptor.cryptoServicesDescriptor
+            )
+        credentialTypesUIFormSchemaUseCase =
+            VclBlocksProvider.provideCredentialTypesUIFormSchemaUseCase()
+        verifiedProfileUseCase = VclBlocksProvider.provideVerifiedProfileUseCase()
+        jwtServiceUseCase =
+            VclBlocksProvider.provideJwtServiceUseCase(
+                context,
+                initializationDescriptor.cryptoServicesDescriptor
+            )
+        keyServiceUseCase =
+            VclBlocksProvider.provideKeyServiceUseCase(
+                context,
+                initializationDescriptor.cryptoServicesDescriptor
+            )
+    }
+
     private fun completionHandler(
         context: Context,
         successHandler: () -> Unit,
@@ -88,13 +134,18 @@ internal class VCLImpl: VCL {
     ) {
         initializationWatcher.firstError()?.let { errorHandler(it) }
             ?: run {
-                initializeUsecases(
-                    context,
-                    initializationDescriptor.keyServiceType
-                )
-                profileServiceTypeVerifier = ProfileServiceTypeVerifier(verifiedProfileUseCase)
+                try {
+                    initializeUseCases(context)
 
-                successHandler()
+                    profileServiceTypeVerifier = ProfileServiceTypeVerifier(verifiedProfileUseCase)
+
+                    successHandler()
+
+                } catch (error: VCLError) {
+                    errorHandler(error)
+                } catch (ex: Exception) {
+                    errorHandler(VCLError(exception = ex))
+                }
             }
     }
 
@@ -157,43 +208,6 @@ internal class VCLImpl: VCL {
                     }
                 })
         }
-    }
-
-    private fun initializeUsecases(context: Context, keyServiceType: VCLKeyServiceType) {
-        presentationRequestUseCase =
-            VclBlocksProvider.providePresentationRequestUseCase(
-                context,
-                keyServiceType
-            )
-        presentationSubmissionUseCase = VclBlocksProvider.providePresentationSubmissionUseCase(
-            context,
-            keyServiceType
-        )
-        exchangeProgressUseCase = VclBlocksProvider.provideExchangeProgressUseCase()
-        organizationsUseCase = VclBlocksProvider.provideOrganizationsUseCase()
-        credentialManifestUseCase =
-            VclBlocksProvider.provideCredentialManifestUseCase(
-                context,
-                keyServiceType
-            )
-        identificationSubmissionUseCase = VclBlocksProvider.provideIdentificationSubmissionUseCase(
-            context,
-            keyServiceType
-        )
-        generateOffersUseCase = VclBlocksProvider.provideGenerateOffersUseCase()
-        finalizeOffersUseCase =
-            VclBlocksProvider.provideFinalizeOffersUseCase(
-                context,
-                keyServiceType,
-                credentialTypesModel
-            )
-        credentialTypesUIFormSchemaUseCase =
-            VclBlocksProvider.provideCredentialTypesUIFormSchemaUseCase()
-        verifiedProfileUseCase = VclBlocksProvider.provideVerifiedProfileUseCase()
-        jwtServiceUseCase =
-            VclBlocksProvider.provideJwtServiceUseCase(context, keyServiceType)
-        keyServiceUseCase =
-            VclBlocksProvider.provideKeyServiceUseCase(context, keyServiceType)
     }
 
     private fun initGlobalConfigurations() {
@@ -478,11 +492,11 @@ internal class VCLImpl: VCL {
 
     override fun verifyJwt(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         successHandler: (Boolean) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        jwtServiceUseCase.verifyJwt(jwt, jwkPublic) { isVerifiedResult ->
+        jwtServiceUseCase.verifyJwt(jwt, publicJwk) { isVerifiedResult ->
             isVerifiedResult.handleResult(
                 {
                     successHandler(it)

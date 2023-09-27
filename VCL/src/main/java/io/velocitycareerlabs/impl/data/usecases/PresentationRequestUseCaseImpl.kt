@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl.data.usecases
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.*
 import io.velocitycareerlabs.impl.domain.usecases.PresentationRequestUseCase
@@ -91,20 +92,20 @@ internal class PresentationRequestUseCaseImpl(
     }
 
     private fun onResolvePublicKeySuccess(
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         jwt: VCLJwt,
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
         val presentationRequest = VCLPresentationRequest(
             jwt = jwt,
-            jwkPublic = jwkPublic,
+            publicJwk = publicJwk,
             deepLink = presentationRequestDescriptor.deepLink,
             pushDelegate = presentationRequestDescriptor.pushDelegate
         )
         jwtServiceRepository.verifyJwt(
             presentationRequest.jwt,
-            presentationRequest.jwkPublic
+            presentationRequest.publicJwk
         ) { isVerifiedResult ->
             isVerifiedResult.handleResult({ isVerified ->
                 onVerificationSuccess(

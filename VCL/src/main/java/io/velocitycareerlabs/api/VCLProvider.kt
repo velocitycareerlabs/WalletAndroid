@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.api
 
-import android.content.Context
 import io.velocitycareerlabs.impl.VCLImpl
 
 class VCLProvider {

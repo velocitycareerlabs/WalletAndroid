@@ -16,8 +16,8 @@ import io.velocitycareerlabs.api.entities.VCLOffers
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
-import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
@@ -71,7 +71,7 @@ class VCLFinalizeOffersDescriptorTest {
     @Test
     fun testGenerateRequestBody() {
         val payload = "{\"key1\": \"value1\"}".toJsonObject()
-        JwtServiceImpl(KeyServiceImpl(SecretStoreServiceMock.Instance)).sign(
+        VCLJwtServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)).sign(
             nonce = nonceMock,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payload,

@@ -8,9 +8,8 @@
 package io.velocitycareerlabs.impl.data.infrastructure.network
 
 import android.accounts.NetworkErrorException
-import io.velocitycareerlabs.api.VCL
-import io.velocitycareerlabs.api.entities.VCLError
-import io.velocitycareerlabs.api.entities.VCLStatusCode
+import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.entities.error.VCLStatusCode
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.extensions.convertToString
@@ -72,9 +71,11 @@ internal class NetworkServiceImpl: NetworkService {
                 completionBlock(VCLResult.Success(response))
             } else {
                 val errorMessageStream = connection.errorStream ?: connection.inputStream
-                completionBlock(VCLResult.Failure(VCLError(
+                completionBlock(VCLResult.Failure(
+                    VCLError(
                     payload = errorMessageStream.convertToString()
-                )))
+                )
+                ))
             }
         } catch (ex: NetworkErrorException) {
             completionBlock(VCLResult.Failure(VCLError(exception = ex, statusCode = VCLStatusCode.NetworkError.value)))

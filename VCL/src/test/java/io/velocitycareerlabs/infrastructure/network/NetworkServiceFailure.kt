@@ -7,7 +7,7 @@
 
 package io.velocitycareerlabs.infrastructure.network
 
-import io.velocitycareerlabs.api.entities.VCLError
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.infrastructure.network.Response

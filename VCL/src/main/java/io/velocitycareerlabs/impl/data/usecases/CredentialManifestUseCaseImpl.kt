@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl.data.usecases
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.CredentialManifestRepository
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
@@ -81,13 +82,13 @@ internal class CredentialManifestUseCaseImpl(
     }
 
     private fun onResolvePublicKeySuccess(
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
         verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        jwtServiceRepository.verifyJwt(jwt, jwkPublic)
+        jwtServiceRepository.verifyJwt(jwt, publicJwk)
         { verificationResult ->
             verificationResult.handleResult(
                 { isVerified ->

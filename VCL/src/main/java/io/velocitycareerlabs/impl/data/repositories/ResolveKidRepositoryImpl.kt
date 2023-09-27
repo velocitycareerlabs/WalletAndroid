@@ -16,15 +16,15 @@ internal class ResolveKidRepositoryImpl(
         private val networkService: NetworkService
 ): ResolveKidRepository {
 
-    override fun getPublicKey(kid: String, completionBlock: (VCLResult<VCLJwkPublic>) -> Unit) {
+    override fun getPublicKey(kid: String, completionBlock: (VCLResult<VCLPublicJwk>) -> Unit) {
         networkService.sendRequest(
-            endpoint = Urls.ResolveKid + kid + "?format=${VCLJwkPublic.Format.jwk}",
+            endpoint = Urls.ResolveKid + kid + "?format=${VCLPublicJwk.Format.jwk}",
             method = Request.HttpMethod.GET,
             headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)),
             completionBlock = { result ->
                 result.handleResult(
                     { publicKeyResponse ->
-                        completionBlock(VCLResult.Success(VCLJwkPublic(publicKeyResponse.payload)))
+                        completionBlock(VCLResult.Success(VCLPublicJwk(publicKeyResponse.payload)))
                     },
                     { error ->
                         completionBlock(VCLResult.Failure(error))

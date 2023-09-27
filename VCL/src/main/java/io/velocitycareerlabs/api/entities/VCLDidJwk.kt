@@ -13,20 +13,22 @@ import io.velocitycareerlabs.impl.extensions.encodeToBase64URL
 
 data class VCLDidJwk(
     /**
-     * The id of private key save in secure enclave
-     */
-    val keyId: String,
-    /**
      * The did:jwk
      */
-    val value: String,
+    val did: String,
+    /**
+     * public JWK
+     */
+    val publicJwk: VCLPublicJwk,
     /**
      * kid of jwt - did:jwk suffixed with #0
      */
-    val kid: String
+    val kid: String,
+    /**
+     * The id of private key save in secure enclave
+     */
+    val keyId: String
 ) {
-    internal fun toPublicJwkStr() = value.removePrefix(DidJwkPrefix).decodeBase64()
-
     companion object Utils {
         const val DidJwkPrefix = "did:jwk:"
         const val DidJwkSuffix = "#0"
@@ -37,8 +39,8 @@ data class VCLDidJwk(
         fun generateKidFromDidJwk(ecKey: ECKey) =
             "${generateDidJwk(ecKey = ecKey)}${DidJwkSuffix}"
 
-        const val KeyKeyId = "keyId"
-        const val KeyValue = "value"
+        const val KeyDid = "did"
         const val KeyKid = "kid"
+        const val KeyKeyId = "keyId"
     }
 }

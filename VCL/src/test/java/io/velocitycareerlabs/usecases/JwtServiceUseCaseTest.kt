@@ -9,11 +9,11 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
-import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.JwtServiceUseCaseImpl
-import io.velocitycareerlabs.impl.domain.infrastructure.keys.KeyService
+import io.velocitycareerlabs.api.keys.VCLKeyService
 import io.velocitycareerlabs.impl.domain.usecases.JwtServiceUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.extensions.toPublicJwk
@@ -32,17 +32,17 @@ import org.robolectric.annotation.Config
 internal class JwtServiceUseCaseTest {
 
     lateinit var subject: JwtServiceUseCase
-    lateinit var keyService: KeyService
+    lateinit var keyService: VCLKeyService
 
     @Before
     fun setUp() {
         subject = JwtServiceUseCaseImpl(
             JwtServiceRepositoryImpl(
-                JwtServiceImpl(KeyServiceImpl(SecretStoreServiceMock.Instance))
+                VCLJwtServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance))
             ),
             EmptyExecutor()
         )
-        keyService = KeyServiceImpl(SecretStoreServiceMock.Instance)
+        keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
     }
 
     @Test
@@ -83,7 +83,7 @@ internal class JwtServiceUseCaseTest {
         val jwt = resultJwt?.data
         subject.verifyJwt(
             jwt = jwt!!,
-            jwkPublic = VCLJwkPublic(valueStr = jwt.header?.jwk.toString())
+            publicJwk = VCLPublicJwk(valueStr = jwt.header?.jwk.toString())
         ) {
             resultVerified = it
         }
@@ -113,9 +113,9 @@ internal class JwtServiceUseCaseTest {
                 val jwt = resultJwt?.data
                 subject.verifyJwt(
                     jwt = jwt!!,
-//                    jwkPublic = VCLJwkPublic(valueStr = jwt.header.jwk.toString())
+//                    publicJwk = VCLPublicJwk(valueStr = jwt.header.jwk.toString())
                     // Person binding provided did:jwk only:
-                    jwkPublic = jwt.header?.toJSONObject()?.get("kid").toString().toPublicJwk()
+                    publicJwk = jwt.header?.toJSONObject()?.get("kid").toString().toPublicJwk()
                 ) {
                     resultVerified = it
                 }

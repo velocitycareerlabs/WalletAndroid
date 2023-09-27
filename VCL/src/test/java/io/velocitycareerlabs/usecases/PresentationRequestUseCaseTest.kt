@@ -9,8 +9,8 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
-import io.velocitycareerlabs.impl.data.infrastructure.keys.KeyServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.PresentationRequestRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.ResolveKidRepositoryImpl
@@ -46,7 +46,7 @@ internal class PresentationRequestUseCaseTest {
                 NetworkServiceSuccess(validResponse = PresentationRequestMocks.JWK)
             ),
             JwtServiceRepositoryImpl(
-                JwtServiceImpl(KeyServiceImpl(SecretStoreServiceMock.Instance))
+                VCLJwtServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance))
             ),
             EmptyExecutor()
         )
@@ -69,12 +69,12 @@ internal class PresentationRequestUseCaseTest {
         val presentationRequest = result?.data
 
         assert(
-            presentationRequest!!.jwkPublic.valueStr.toCharArray().sort() ==
-                    VCLJwkPublic(PresentationRequestMocks.JWK.toJsonObject()!!).valueStr.toCharArray().sort()
+            presentationRequest!!.publicJwk.valueStr.toCharArray().sort() ==
+                    VCLPublicJwk(PresentationRequestMocks.JWK.toJsonObject()!!).valueStr.toCharArray().sort()
         )
         assert(
-            presentationRequest.jwkPublic.valueJson.toString().toCharArray().sort() ==
-                    VCLJwkPublic(PresentationRequestMocks.JWK.toJsonObject()!!).valueJson.toString().toCharArray().sort()
+            presentationRequest.publicJwk.valueJson.toString().toCharArray().sort() ==
+                    VCLPublicJwk(PresentationRequestMocks.JWK.toJsonObject()!!).valueJson.toString().toCharArray().sort()
         )
         assert(presentationRequest.jwt.encodedJwt == PresentationRequestMocks.PresentationRequestJwt.encodedJwt)
         assert(
