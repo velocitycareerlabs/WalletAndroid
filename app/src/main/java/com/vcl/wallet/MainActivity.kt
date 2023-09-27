@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
             context = this.applicationContext,
             initializationDescriptor = VCLInitializationDescriptor(
                 environment = environment,
-                xVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1
+                xVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2,
 //                cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
 //                    cryptoServiceType = VCLCryptoServiceType.Remote,
 //                    remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
