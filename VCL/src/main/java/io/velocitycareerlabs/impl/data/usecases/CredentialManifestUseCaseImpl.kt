@@ -7,8 +7,8 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.CredentialManifestRepository
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
@@ -25,89 +25,70 @@ internal class CredentialManifestUseCaseImpl(
 
     override fun getCredentialManifest(
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
+        verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread {
+        executor.runOnBackground {
             credentialManifestRepository.getCredentialManifest(
                 credentialManifestDescriptor
             ) { jwtStrResult ->
                 jwtStrResult.handleResult(
                     { jwtStr ->
-                        onGetJwtSuccess(
-                            jwtStr,
-                            credentialManifestDescriptor,
-                            callingLooper,
-                            completionBlock
-                        )
+                        try {
+                            onGetCredentialManifestSuccess(
+                                VCLJwt(jwtStr),
+                                credentialManifestDescriptor,
+                                verifiedProfile,
+                                completionBlock
+                            )
+                        } catch (ex: Exception) {
+                            this.onError(VCLError(ex), completionBlock)
+                        }
                     },
                     { error ->
-                        onError(error, callingLooper, completionBlock)
+                        onError(error, completionBlock)
                     }
                 )
             }
         }
     }
 
-    private fun onGetJwtSuccess(
-        jwtStr: String,
-        credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        callingLooper: Looper?,
-        completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
-    ) {
-        jwtServiceRepository.decode(jwtStr) { jwtResult ->
-            jwtResult.handleResult(
-                { jwt ->
-                    onDecodeJwtSuccess(
-                        jwt,
-                        credentialManifestDescriptor,
-                        callingLooper,
-                        completionBlock
-                    )
-                },
-                { error ->
-                    onError(error, callingLooper, completionBlock)
-                }
-            )
-        }
-    }
-
-    private fun onDecodeJwtSuccess(
+    private fun onGetCredentialManifestSuccess(
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        callingLooper: Looper?,
+        verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        jwt.header.keyID?.replace("#", "#".encode())?.let { keyID ->
-            resolveKidRepository.getPublicKey(keyID) { publicKeyResult ->
+        jwt.kid?.replace("#", "#".encode())?.let { kid ->
+            resolveKidRepository.getPublicKey(kid) { publicKeyResult ->
                 publicKeyResult.handleResult(
                     { publicKey ->
                         onResolvePublicKeySuccess(
                             publicKey,
                             jwt,
                             credentialManifestDescriptor,
-                            callingLooper,
+                            verifiedProfile,
                             completionBlock
                         )
                     },
                     { error ->
-                        onError(error, callingLooper, completionBlock)
+                        onError(error, completionBlock)
                     }
                 )
             }
         } ?: run {
-            onError(VCLError("Empty KeyID"), callingLooper, completionBlock)
+            onError(VCLError("Empty KeyID"), completionBlock)
         }
     }
 
     private fun onResolvePublicKeySuccess(
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        callingLooper: Looper?,
+        verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        jwtServiceRepository.verifyJwt(jwt, jwkPublic)
+        jwtServiceRepository.verifyJwt(jwt, publicJwk)
         { verificationResult ->
             verificationResult.handleResult(
                 { isVerified ->
@@ -115,12 +96,12 @@ internal class CredentialManifestUseCaseImpl(
                         isVerified,
                         jwt,
                         credentialManifestDescriptor,
-                        callingLooper,
+                        verifiedProfile,
                         completionBlock
                     )
                 },
                 { error ->
-                    onError(error, callingLooper, completionBlock)
+                    onError(error, completionBlock)
                 }
             )
         }
@@ -130,27 +111,27 @@ internal class CredentialManifestUseCaseImpl(
         isVerified: Boolean,
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        callingLooper: Looper?,
+        verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         if (isVerified) {
-            executor.runOn(callingLooper) {
+            executor.runOnMain {
                 completionBlock(VCLResult.Success(VCLCredentialManifest(
                     jwt,
-                    credentialManifestDescriptor.vendorOriginContext
+                    credentialManifestDescriptor.vendorOriginContext,
+                    verifiedProfile
                 )))
             }
         } else {
-            onError(VCLError("Failed to verify: $jwt"), callingLooper, completionBlock)
+            onError(VCLError("Failed to verify: $jwt"), completionBlock)
         }
     }
 
     private fun onError(
         error: VCLError,
-        callingLooper: Looper?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        executor.runOn(callingLooper) {
+        executor.runOnMain {
             completionBlock(VCLResult.Failure(error))
         }
     }

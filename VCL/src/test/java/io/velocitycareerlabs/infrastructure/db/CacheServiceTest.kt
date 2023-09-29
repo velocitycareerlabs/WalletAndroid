@@ -1,5 +1,8 @@
 /**
  * Created by Michael Avoyan on 19/10/2022.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.velocitycareerlabs.infrastructure.db
@@ -13,7 +16,7 @@ import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl.Compan
 import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl.Companion.KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA
 import io.velocitycareerlabs.impl.domain.infrastructure.db.CacheService
 import io.velocitycareerlabs.impl.extensions.encodeToBase64
-import junit.framework.Assert.*
+import org.junit.Assert.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

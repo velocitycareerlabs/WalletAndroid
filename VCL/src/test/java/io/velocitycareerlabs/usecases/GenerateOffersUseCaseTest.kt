@@ -7,57 +7,58 @@
 
 package io.velocitycareerlabs.usecases
 
+import android.os.Build
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.GenerateOffersUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.GenerateOffersUseCase
+import io.velocitycareerlabs.impl.extensions.toJsonArray
+import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
+import io.velocitycareerlabs.infrastructure.resources.CommonMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.GenerateOffersMocks
-import org.json.JSONArray
-import org.json.JSONObject
+import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.After
-import org.junit.Before
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.MockitoAnnotations
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.O_MR1])
 internal class GenerateOffersUseCaseTest {
 
     lateinit var subject: GenerateOffersUseCase
-    @Mock
-    lateinit var generateOffersDescriptor: VCLGenerateOffersDescriptor
-    @Mock
-    lateinit var token: VCLToken
-
-    @Before
-    fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        Mockito.`when`(generateOffersDescriptor.did).thenReturn("")
-        Mockito.`when`(generateOffersDescriptor.exchangeId).thenReturn("")
-        Mockito.`when`(generateOffersDescriptor.checkOffersUri).thenReturn("")
-        Mockito.`when`(generateOffersDescriptor.payload).thenReturn(JSONObject("{}"))
-    }
 
     @Test
     fun testGenerateOffers() {
-        // Arrange
         subject = GenerateOffersUseCaseImpl(
             GenerateOffersRepositoryImpl(
-                NetworkServiceSuccess(GenerateOffersMocks.GeneratedOffers)
+                NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffers)
             ),
             EmptyExecutor()
         )
         var result: VCLResult<VCLOffers>? = null
-
-        // Action
-        subject.generateOffers(token, generateOffersDescriptor) {
+        val generateOffersDescriptor = VCLGenerateOffersDescriptor(
+            credentialManifest = VCLCredentialManifest(
+                jwt = CommonMocks.JWT,
+                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
+            )
+        )
+        subject.generateOffers(
+            token = VCLToken(value = ""),
+            generateOffersDescriptor = generateOffersDescriptor
+        ) {
             result = it
         }
 
-        // Assert
-        assert(result!!.data!!.all.toString() == JSONArray(GenerateOffersMocks.GeneratedOffers).toString())
+        val offers = result?.data
+        assert(
+            offers!!.all.toString().toCharArray().sort() ==
+                    GenerateOffersMocks.Offers.toJsonArray().toString().toCharArray().sort()
+        )
+        assert(offers.challenge == GenerateOffersMocks.Challenge)
     }
 
     @Test
@@ -65,19 +66,29 @@ internal class GenerateOffersUseCaseTest {
         // Arrange
         subject = GenerateOffersUseCaseImpl(
             GenerateOffersRepositoryImpl(
-                NetworkServiceSuccess(GenerateOffersMocks.GeneratedOffersEmptyJsonObj)
+                NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffersEmptyJsonObj)
             ),
             EmptyExecutor()
         )
         var result: VCLResult<VCLOffers>? = null
+        val generateOffersDescriptor = VCLGenerateOffersDescriptor(
+            credentialManifest = VCLCredentialManifest(
+                jwt = CommonMocks.JWT,
+                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
+            )
+        )
 
         // Action
-        subject.generateOffers(token, generateOffersDescriptor) {
+        subject.generateOffers(
+            token = VCLToken(value = ""),
+            generateOffersDescriptor = generateOffersDescriptor
+        ) {
             result = it
         }
 
         // Assert
-        assert(result!!.data!!.all.toString() == JSONArray("[]").toString())
+        val offers = result?.data!!
+        assert(offers.all == "[]".toJsonArray())
     }
 
     @Test
@@ -85,19 +96,29 @@ internal class GenerateOffersUseCaseTest {
         // Arrange
         subject = GenerateOffersUseCaseImpl(
             GenerateOffersRepositoryImpl(
-                NetworkServiceSuccess(GenerateOffersMocks.GeneratedOffersEmptyJsonArr)
+                NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffersEmptyJsonArr)
             ),
             EmptyExecutor()
         )
         var result: VCLResult<VCLOffers>? = null
+        val generateOffersDescriptor = VCLGenerateOffersDescriptor(
+            credentialManifest = VCLCredentialManifest(
+                jwt = CommonMocks.JWT,
+                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
+            )
+        )
 
         // Action
-        subject.generateOffers(token, generateOffersDescriptor) {
+        subject.generateOffers(
+            token = VCLToken(value = ""),
+            generateOffersDescriptor = generateOffersDescriptor
+        ) {
             result = it
         }
 
         // Assert
-        assert(result!!.data!!.all.toString() == JSONArray(GenerateOffersMocks.GeneratedOffersEmptyJsonArr).toString())
+        val offers = result?.data
+        assert(offers!!.all == GenerateOffersMocks.GeneratedOffersEmptyJsonArr.toJsonArray())
     }
 
     @After

@@ -1,10 +1,11 @@
 /**
  * Created by Michael Avoyan on 07/03/2023.
+ *
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.api.entities
+package io.velocitycareerlabs.api.entities.error
 
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import org.json.JSONObject
@@ -29,13 +30,13 @@ class VCLError(
         this.statusCode = statusCode
     }
 
-    constructor(payload: String): this() {
-        val payloadJson = payload.toJsonObject()
+    constructor(payload: String?, errorCode: String? = null): this() {
+        val payloadJson = payload?.toJsonObject()
         this.payload = payload
-        this.error = payloadJson?.optString(CodingKeys.KeyError)
-        this.errorCode = payloadJson?.optString(CodingKeys.KeyErrorCode)
-        this.message = payloadJson?.optString(CodingKeys.KeyMessage)
-        this.statusCode = payloadJson?.optInt(CodingKeys.KeyStatusCode)
+        this.error = payloadJson?.optString(KeyError)
+        this.errorCode = errorCode ?: payloadJson?.optString(KeyErrorCode)
+        this.message = payloadJson?.optString(KeyMessage)
+        this.statusCode = payloadJson?.optInt(KeyStatusCode)
     }
 
     constructor(exception: Exception, statusCode: Int? = null): this() {
@@ -47,11 +48,11 @@ class VCLError(
     }
 
     fun toJsonObject() = JSONObject()
-        .putOpt(CodingKeys.KeyPayload, payload)
-        .putOpt(CodingKeys.KeyError, error)
-        .putOpt(CodingKeys.KeyErrorCode, errorCode)
-        .putOpt(CodingKeys.KeyMessage, message)
-        .putOpt(CodingKeys.KeyStatusCode, statusCode)
+        .putOpt(KeyPayload, payload)
+        .putOpt(KeyError, error)
+        .putOpt(KeyErrorCode, errorCode)
+        .putOpt(KeyMessage, message)
+        .putOpt(KeyStatusCode, statusCode)
 
     companion object CodingKeys {
         const val KeyPayload = "payload"

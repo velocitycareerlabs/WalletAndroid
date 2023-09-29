@@ -7,8 +7,8 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.*
 import io.velocitycareerlabs.impl.domain.usecases.PresentationRequestUseCase
@@ -26,8 +26,7 @@ internal class PresentationRequestUseCaseImpl(
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread {
+        executor.runOnBackground {
             presentationRequestRepository.getPresentationRequest(
                 presentationRequestDescriptor
             ) { encodedJwtStrResult ->
@@ -36,12 +35,11 @@ internal class PresentationRequestUseCaseImpl(
                         onGetJwtSuccess(
                             encodedJwtStr,
                             presentationRequestDescriptor,
-                            callingLooper,
                             completionBlock
                         )
                     },
                     { error ->
-                        onError(error, callingLooper, completionBlock)
+                        onError(error, completionBlock)
                     }
                 )
             }
@@ -51,7 +49,6 @@ internal class PresentationRequestUseCaseImpl(
     private fun onGetJwtSuccess(
         encodedJwtStr: String,
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
-        callingLooper: Looper?,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
         try {
@@ -60,70 +57,65 @@ internal class PresentationRequestUseCaseImpl(
                     onDecodeJwtSuccess(
                         jwt,
                         presentationRequestDescriptor,
-                        callingLooper,
                         completionBlock
                     )
                 }, { error ->
-                    onError(error, callingLooper, completionBlock)
+                    onError(error, completionBlock)
                 })
             }
         } catch (ex: Exception) {
-            onError(VCLError(ex), callingLooper, completionBlock)
+            onError(VCLError(ex), completionBlock)
         }
     }
 
     private fun onDecodeJwtSuccess(
         jwt: VCLJwt,
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
-        callingLooper: Looper?,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
-        jwt.header.keyID?.replace("#", "#".encode())?.let { keyID ->
+        jwt.kid?.replace("#", "#".encode())?.let { keyID ->
             resolveKidRepository.getPublicKey(keyID) { publicKeyResult ->
                 publicKeyResult.handleResult({ publicKey ->
                     onResolvePublicKeySuccess(
                         publicKey,
                         jwt,
                         presentationRequestDescriptor,
-                        callingLooper,
                         completionBlock
                     )
                 }, { error ->
-                    onError(error, callingLooper, completionBlock)
+                    onError(error, completionBlock)
                 })
             }
         } ?: run {
-            onError(VCLError("Empty KeyID"), callingLooper, completionBlock)
+            onError(VCLError("Empty KeyID"), completionBlock)
         }
     }
 
     private fun onResolvePublicKeySuccess(
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         jwt: VCLJwt,
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
-        callingLooper: Looper?,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
         val presentationRequest = VCLPresentationRequest(
             jwt = jwt,
-            jwkPublic = jwkPublic,
+            publicJwk = publicJwk,
             deepLink = presentationRequestDescriptor.deepLink,
             pushDelegate = presentationRequestDescriptor.pushDelegate
         )
         jwtServiceRepository.verifyJwt(
             presentationRequest.jwt,
-            presentationRequest.jwkPublic
+            presentationRequest.publicJwk
         ) { isVerifiedResult ->
             isVerifiedResult.handleResult({ isVerified ->
                 onVerificationSuccess(
                     isVerified,
                     presentationRequest,
-                    callingLooper,
                     completionBlock
                 )
             },
                 { error ->
-                    onError(error, callingLooper, completionBlock)
+                    onError(error, completionBlock)
                 })
         }
     }
@@ -131,27 +123,24 @@ internal class PresentationRequestUseCaseImpl(
     private fun onVerificationSuccess(
         isVerified: Boolean,
         presentationRequest: VCLPresentationRequest,
-        callingLooper: Looper?,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
         if (isVerified)
-            executor.runOn(callingLooper) {
+            executor.runOnMain {
                 completionBlock(VCLResult.Success(presentationRequest))
             }
         else
             onError(
                 VCLError("Failed  to verify: ${presentationRequest.jwt.payload}"),
-                callingLooper,
                 completionBlock
             )
     }
 
     private fun onError(
         error: VCLError,
-        callingLooper: Looper?,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
-        executor.runOn(callingLooper) {
+        executor.runOnMain {
             completionBlock(VCLResult.Failure(error))
         }
     }

@@ -9,6 +9,7 @@ package io.velocitycareerlabs.api.entities
 
 import io.velocitycareerlabs.impl.extensions.appendQueryParams
 import io.velocitycareerlabs.impl.extensions.encode
+import java.lang.StringBuilder
 
 class VCLCredentialManifestDescriptorByService(
     val service: VCLService, // for log
@@ -21,7 +22,6 @@ class VCLCredentialManifestDescriptorByService(
     credentialTypes = credentialTypes,
     pushDelegate = pushDelegate
 ) {
-
     override fun toPropsString() =
         StringBuilder(super.toPropsString())
             .append("\nservice: ${service.toPropsString()}")

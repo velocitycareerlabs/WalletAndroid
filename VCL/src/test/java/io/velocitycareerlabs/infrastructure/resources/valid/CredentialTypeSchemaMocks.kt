@@ -9,6 +9,7 @@ package io.velocitycareerlabs.infrastructure.resources.valid
 
 import io.velocitycareerlabs.api.entities.VCLCredentialType
 import io.velocitycareerlabs.api.entities.VCLCredentialTypes
+import org.json.JSONArray
 import org.json.JSONObject
 
 class CredentialTypeSchemaMocks {
@@ -71,8 +72,10 @@ class CredentialTypeSchemaMocks {
             createdAt = "2022-03-17T09:24:38.448Z",
             schemaName = "current-employment-position",
             credentialType = "CurrentEmploymentPosition",
-            recommended = true
-        )
+            recommended = true,
+            jsonldContext = JSONArray(),
+            issuerCategory = "RegularIssuer"
+            )
 
         val CredentialTypes = VCLCredentialTypes(
             all = listOf(CredentialType)

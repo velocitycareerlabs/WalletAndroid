@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.utils
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLStatusCode
 import io.velocitycareerlabs.impl.data.repositories.VerifiedProfileRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.VerifiedProfileUseCaseImpl
 import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
@@ -119,7 +120,7 @@ class ProfileServiceTypeVerifierTest {
         subject = ProfileServiceTypeVerifier(
             VerifiedProfileUseCaseImpl(
                 VerifiedProfileRepositoryImpl(
-                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr)
+                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1)
                 ),
                 EmptyExecutor()
             )

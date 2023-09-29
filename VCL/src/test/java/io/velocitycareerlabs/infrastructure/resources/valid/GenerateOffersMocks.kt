@@ -9,7 +9,9 @@ package io.velocitycareerlabs.infrastructure.resources.valid
 
 class GenerateOffersMocks {
     companion object {
-        const val GeneratedOffers = "[{\"offer1\":\"some offer 1\"},{\"offer2\":\"some offer 2\"}]"
+        const val Offers = "[{\"offer1\":\"some offer 1\"},{\"offer2\":\"some offer 2\"}]"
+        const val Challenge = "CSASLD10103aa_RW"
+        const val GeneratedOffers = "{\"offers\":$Offers,\"challenge\":\"$Challenge\"}"
         const val GeneratedOffersEmptyJsonObj = "{}"
         const val GeneratedOffersEmptyJsonArr = "[]"
     }

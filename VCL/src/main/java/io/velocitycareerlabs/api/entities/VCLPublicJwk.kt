@@ -10,7 +10,7 @@ package io.velocitycareerlabs.api.entities
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import org.json.JSONObject
 
-class VCLJwkPublic {
+class VCLPublicJwk {
     val valueStr: String
     val valueJson: JSONObject
 
@@ -24,7 +24,7 @@ class VCLJwkPublic {
         this.valueStr = this.valueJson.toString()
     }
 
-    enum class Format(val value: String) {
+    internal enum class Format(val value: String) {
         jwk("jwk"),
         hex("hex"),
         pem("pem"),

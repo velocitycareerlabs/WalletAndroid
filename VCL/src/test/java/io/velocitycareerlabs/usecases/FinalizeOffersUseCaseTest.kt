@@ -7,100 +7,242 @@
 
 package io.velocitycareerlabs.usecases
 
+import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.FinalizeOffersRepositoryImpl
+import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.FinalizeOffersUseCaseImpl
+import io.velocitycareerlabs.impl.data.usecases.GenerateOffersUseCaseImpl
+import io.velocitycareerlabs.impl.data.utils.CredentialDidVerifierImpl
+import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierImpl
 import io.velocitycareerlabs.impl.domain.usecases.FinalizeOffersUseCase
+import io.velocitycareerlabs.impl.extensions.toJsonArray
+import io.velocitycareerlabs.impl.extensions.toJsonObject
+import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
-import io.velocitycareerlabs.infrastructure.resources.valid.FinalizeOffersMocks
-import org.json.JSONObject
-import org.junit.After
+import io.velocitycareerlabs.infrastructure.resources.CommonMocks
+import io.velocitycareerlabs.infrastructure.resources.CredentialTypesModelMock
+import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.CredentialMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.GenerateOffersMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.JsonLdMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.MockitoAnnotations
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.O_MR1])
 internal class FinalizeOffersUseCaseTest {
 
     lateinit var subject: FinalizeOffersUseCase
-    @Mock
-    lateinit var token: VCLToken
-    @Mock
-    lateinit var finalizeOffersDescriptor: VCLFinalizeOffersDescriptor
+
+    lateinit var didJwk: VCLDidJwk
+    private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
+    lateinit var credentialManifestFailed: VCLCredentialManifest
+    lateinit var credentialManifestPassed: VCLCredentialManifest
+    lateinit var finalizeOffersDescriptorFailed: VCLFinalizeOffersDescriptor
+    lateinit var finalizeOffersDescriptorPassed: VCLFinalizeOffersDescriptor
+    private val vclJwtFailed = VCLJwt(encodedJwt = CredentialManifestMocks.JwtCredentialManifest1)
+    private val vclJwtPassed =
+        VCLJwt(encodedJwt = CredentialManifestMocks.JwtCredentialManifestFromRegularIssuer)
+
+    private val credentialsAmount =
+        CredentialMocks.JwtCredentialsFromRegularIssuer.toJsonArray()?.length()
 
     @Before
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        Mockito.`when`(finalizeOffersDescriptor.exchangeId).thenReturn("")
-        Mockito.`when`(finalizeOffersDescriptor.finalizeOffersUri).thenReturn("")
-        Mockito.`when`(finalizeOffersDescriptor.approvedOfferIds).thenReturn(listOf())
-        Mockito.`when`(finalizeOffersDescriptor.rejectedOfferIds).thenReturn(listOf())
-        Mockito.`when`(finalizeOffersDescriptor.payload).thenReturn(JSONObject("{}"))
+        keyService.generateDidJwk { didJwkResult ->
+            didJwkResult.handleResult({
+                didJwk = it
+            }, {
+                assert(false) { "Failed to generate did:jwk $it" }
+            })
+        }
+        val generateOffersDescriptor = VCLGenerateOffersDescriptor(
+            credentialManifest = VCLCredentialManifest(
+                jwt = CommonMocks.JWT,
+                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr2.toJsonObject()!!)
+            )
+        )
+        GenerateOffersUseCaseImpl(
+            GenerateOffersRepositoryImpl(
+                NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffers)
+            ),
+            EmptyExecutor()
+        ).generateOffers(
+            token = VCLToken(value = ""),
+            generateOffersDescriptor = generateOffersDescriptor
+        ) { result ->
+            result.handleResult(
+                successHandler = { offers ->
+                    assert(
+                        offers.all.toString().toCharArray().sort()
+                                == GenerateOffersMocks.Offers.toCharArray().sort()
+                    )
+                    assert(offers.challenge == GenerateOffersMocks.Challenge)
+
+                    credentialManifestFailed = VCLCredentialManifest(
+                        jwt = vclJwtFailed,
+                        verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr2.toJsonObject()!!)
+                    )
+                    credentialManifestPassed = VCLCredentialManifest(
+                        jwt = vclJwtPassed,
+                        verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr2.toJsonObject()!!)
+                    )
+
+                    finalizeOffersDescriptorFailed = VCLFinalizeOffersDescriptor(
+                        credentialManifest = credentialManifestFailed,
+                        offers = offers,
+                        approvedOfferIds = listOf(),
+                        rejectedOfferIds = listOf()
+                    )
+                    finalizeOffersDescriptorPassed = VCLFinalizeOffersDescriptor(
+                        credentialManifest = credentialManifestPassed,
+                        offers = offers,
+                        approvedOfferIds = listOf(),
+                        rejectedOfferIds = listOf()
+                    )
+                },
+                errorHandler = { error ->
+                    assert(false) { "${error.toJsonObject()}" }
+                })
+        }
     }
 
     @Test
     fun testFailedCredentials() {
         // Arrange
-        Mockito.`when`(finalizeOffersDescriptor.did).thenReturn("did:velocity:0xba7d87f9d5e473d7ajhshd87ey438hfn23de8fc0e")
-
         subject = FinalizeOffersUseCaseImpl(
             FinalizeOffersRepositoryImpl(
-                NetworkServiceSuccess(FinalizeOffersMocks.EncodedJwtVerifiableCredentials)
+                NetworkServiceSuccess(validResponse = CredentialMocks.JwtCredentialsFromRegularIssuer)
             ),
             JwtServiceRepositoryImpl(
-                JwtServiceImpl()
+                VCLJwtServiceLocalImpl(keyService)
             ),
+            CredentialIssuerVerifierImpl(
+                CredentialTypesModelMock(
+                    issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
+                ),
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            ),
+            CredentialDidVerifierImpl(),
             EmptyExecutor()
         )
-        var result: VCLResult<VCLJwtVerifiableCredentials>? = null
 
-        // Action
-        subject.finalizeOffers(token, finalizeOffersDescriptor) {
-            result = it
+        subject.finalizeOffers(
+            finalizeOffersDescriptor = finalizeOffersDescriptorFailed,
+            didJwk = didJwk,
+            token = VCLToken(value = "")
+        ) {
+            it.handleResult(
+                successHandler = { finalizeOffers ->
+                    assert(finalizeOffers.failedCredentials.size == credentialsAmount)
+                    assert(
+                        finalizeOffers.failedCredentials.find { cred ->
+                            cred.encodedJwt == CredentialMocks.JwtCredentialEducationDegreeRegistrationFromRegularIssuer
+                        } != null
+                    )
+                    assert(
+                        finalizeOffers.failedCredentials.find { cred ->
+                            cred.encodedJwt == CredentialMocks.JwtCredentialEmploymentPastFromRegularIssuer
+                        } != null
+                    )
+                    assert(finalizeOffers.passedCredentials.isEmpty())
+                },
+                errorHandler = { error ->
+                    assert(false) { "${error.toJsonObject()}" }
+                }
+            )
         }
-
-        // Assert
-        assert(result!!.data!!.failedCredentials[0].signedJwt.serialize() == FinalizeOffersMocks.AdamSmithEmailJwt)
-        assert(result!!.data!!.failedCredentials[1].signedJwt.serialize() == FinalizeOffersMocks.AdamSmithDriverLicenseJwt)
-        assert(result!!.data!!.failedCredentials[2].signedJwt.serialize() == FinalizeOffersMocks.AdamSmithPhoneJwt)
-
-        assert(result!!.data!!.passedCredentials.isEmpty())
     }
 
     @Test
     fun testPassedCredentials() {
-        // Arrange
-        Mockito.`when`(finalizeOffersDescriptor.did).thenReturn("did:velocity:0xba7d87f9d5e473d7d3a82d152923adb53de8fc0e")
-
         subject = FinalizeOffersUseCaseImpl(
             FinalizeOffersRepositoryImpl(
-                NetworkServiceSuccess(FinalizeOffersMocks.EncodedJwtVerifiableCredentials)
+                NetworkServiceSuccess(validResponse = CredentialMocks.JwtCredentialsFromRegularIssuer)
             ),
             JwtServiceRepositoryImpl(
-                JwtServiceImpl()
+                VCLJwtServiceLocalImpl(keyService)
             ),
+            CredentialIssuerVerifierImpl(
+                CredentialTypesModelMock(
+                    issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
+                ),
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            ),
+            CredentialDidVerifierImpl(),
             EmptyExecutor()
         )
-        var result: VCLResult<VCLJwtVerifiableCredentials>? = null
 
-        // Action
-        subject.finalizeOffers(token, finalizeOffersDescriptor) {
-            result = it
+        subject.finalizeOffers(
+            finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
+            didJwk = didJwk,
+            token = VCLToken(value = "")
+        ) {
+            it.handleResult(
+                successHandler = { finalizeOffers ->
+                    assert(finalizeOffers.passedCredentials.size == credentialsAmount)
+                    assert(
+                        finalizeOffers.passedCredentials.find { cred ->
+                            cred.encodedJwt == CredentialMocks.JwtCredentialEducationDegreeRegistrationFromRegularIssuer
+                        } != null
+                    )
+                    assert(
+                        finalizeOffers.passedCredentials.find { cred ->
+                            cred.encodedJwt == CredentialMocks.JwtCredentialEmploymentPastFromRegularIssuer
+                        } != null
+                    )
+                    assert(finalizeOffers.failedCredentials.isEmpty())
+                },
+                errorHandler = { error ->
+                    assert(false) { "${error.toJsonObject()}" }
+                }
+            )
         }
-
-        // Assert
-        assert(result!!.data!!.passedCredentials[0].signedJwt.serialize() == FinalizeOffersMocks.AdamSmithEmailJwt)
-        assert(result!!.data!!.passedCredentials[1].signedJwt.serialize() == FinalizeOffersMocks.AdamSmithDriverLicenseJwt)
-        assert(result!!.data!!.passedCredentials[2].signedJwt.serialize() == FinalizeOffersMocks.AdamSmithPhoneJwt)
-
-        assert(result!!.data!!.failedCredentials.isEmpty())
     }
 
-    @After
-    fun tearDown() {
+    @Test
+    fun testEmptyCredentials() {
+        // Arrange
+        subject = FinalizeOffersUseCaseImpl(
+            FinalizeOffersRepositoryImpl(
+                NetworkServiceSuccess(validResponse = CredentialMocks.JwtEmptyCredentials)
+            ),
+            JwtServiceRepositoryImpl(
+                VCLJwtServiceLocalImpl(keyService)
+            ),
+            CredentialIssuerVerifierImpl(
+                CredentialTypesModelMock(
+                    issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
+                ),
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            ),
+            CredentialDidVerifierImpl(),
+            EmptyExecutor()
+        )
+
+        subject.finalizeOffers(
+            finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
+            didJwk = didJwk,
+            token = VCLToken(value = "")
+        ) {
+            it.handleResult(
+                successHandler = { finalizeOffers ->
+                    assert(finalizeOffers.failedCredentials.isEmpty())
+                    assert(finalizeOffers.passedCredentials.isEmpty())
+                },
+                errorHandler = { error ->
+                    assert(false) { "${error.toJsonObject()}" }
+                }
+            )
+        }
     }
 }

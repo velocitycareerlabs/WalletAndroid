@@ -7,12 +7,14 @@
 
 package io.velocitycareerlabs.api
 
+import android.content.Context
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.GlobalConfig
-import io.velocitycareerlabs.impl.utils.VCLLog
+import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
 
 interface VCL {
     fun initialize(
+        context: Context,
         initializationDescriptor: VCLInitializationDescriptor,
         successHandler: () -> Unit,
         errorHandler: (VCLError) -> Unit
@@ -30,6 +32,7 @@ interface VCL {
 
     fun submitPresentation(
         presentationSubmission: VCLPresentationSubmission,
+        didJwk: VCLDidJwk? = null,
         successHandler: (VCLSubmissionResult) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -54,6 +57,7 @@ interface VCL {
 
     fun generateOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
+        didJwk: VCLDidJwk? = null,
         successHandler: (VCLOffers) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -67,6 +71,7 @@ interface VCL {
 
     fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
+        didJwk: VCLDidJwk? = null,
         token: VCLToken,
         successHandler: (VCLJwtVerifiableCredentials) -> Unit,
         errorHandler: (VCLError) -> Unit
@@ -86,7 +91,7 @@ interface VCL {
 
     fun verifyJwt(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         successHandler: (Boolean) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -101,9 +106,4 @@ interface VCL {
         successHandler: (VCLDidJwk) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
-}
-
-fun VCL.printVersion() {
-    VCLLog.d("VCL", "Version: ${GlobalConfig.VersionName}")
-    VCLLog.d("VCL", "Build: ${GlobalConfig.VersionCode}")
 }

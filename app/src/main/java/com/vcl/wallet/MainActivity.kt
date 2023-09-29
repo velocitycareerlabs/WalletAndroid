@@ -1,4 +1,6 @@
 /**
+ * Created by Michael Avoyan on 18/07/2021.
+ *
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -9,9 +11,18 @@ import android.os.Bundle
 import android.util.Log
 import androidx.core.view.isVisible
 import com.vcl.wallet.databinding.ActivityMainBinding
+import io.velocitycareerlabs.api.VCL
+import io.velocitycareerlabs.api.VCLCryptoServiceType
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCLProvider
+import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescriptor
+import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
+import io.velocitycareerlabs.api.entities.initialization.VCLJwtServiceUrls
+import io.velocitycareerlabs.api.entities.initialization.VCLKeyServiceUrls
+import io.velocitycareerlabs.api.entities.initialization.VCLRemoteCryptoServicesUrlsDescriptor
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
@@ -20,11 +31,14 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val environment = VCLEnvironment.DEV
-    private val vcl = VCLProvider.vclInstance()
+    private val environment = VCLEnvironment.Dev
+    private lateinit var vcl: VCL
+    private var didJwk: VCLDidJwk? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        vcl = VCLProvider.vclInstance()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -57,18 +71,43 @@ class MainActivity : AppCompatActivity() {
             generateDidJwk()
         }
         vcl.initialize(
+            context = this.applicationContext,
             initializationDescriptor = VCLInitializationDescriptor(
-                context = this.applicationContext,
-                environment = environment
+                environment = environment,
+                xVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2,
+//                cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
+//                    cryptoServiceType = VCLCryptoServiceType.Remote,
+//                    remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
+//                        keyServiceUrls = VCLKeyServiceUrls(
+//                            createDidKeyServiceUrl = Constants.getCreateDidKeyServiceUrl(environment = environment)
+//                        ),
+//                        jwtServiceUrls = VCLJwtServiceUrls(
+//                            jwtSignServiceUrl = Constants.getJwtSignServiceUrl(environment = environment),
+//                            jwtVerifyServiceUrl = Constants.getJwtVerifyServiceUrl(environment = environment)
+//                        )
+//                    )
+//                )
             ),
             successHandler = {
-                Log.d(TAG, "VCL initialization succeed!")
+                Log.d(TAG, "VCL Initialization succeed!")
 
-                showControls()
+                vcl.generateDidJwk(
+                    successHandler = { didJwk ->
+                        this.didJwk = didJwk
+                        Log.d(
+                            TAG,
+                            "VCL DID:JWK generated: \ndid: ${didJwk.did}\nkid: ${didJwk.kid}\nkeyId: ${didJwk.keyId}\npublicJwk: ${didJwk.publicJwk.valueStr}"
+                        )
+                        showControls()
+                    },
+                    errorHandler = { error ->
+                        logError("VCL Failed to generate did:jwk with error:", error)
+                        showError()
+                    }
+                )
             },
             errorHandler = { error ->
-                logError("VCL initialization failed:", error)
-
+                logError("VCL Initialization failed with error:", error)
                 showError()
             }
         )
@@ -86,7 +125,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getPresentationRequest() {
         val deepLink =
-            if (environment == VCLEnvironment.DEV)
+            if (environment == VCLEnvironment.Dev)
                 VCLDeepLink(Constants.PresentationRequestDeepLinkStrDev)
             else
                 VCLDeepLink(Constants.PresentationRequestDeepLinkStrStaging)
@@ -118,7 +157,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun submitPresentation(presentationSubmission: VCLPresentationSubmission) {
-        vcl.submitPresentation(presentationSubmission,
+        vcl.submitPresentation(
+            presentationSubmission = presentationSubmission,
+            didJwk = didJwk,
             { presentationSubmissionResult ->
                 Log.d(TAG, "VCL Presentation submission result: $presentationSubmissionResult")
                 vcl.getExchangeProgress(
@@ -140,7 +181,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getOrganizationsThenCredentialManifestByService() {
         val organizationDescriptor =
-            if (environment == VCLEnvironment.DEV)
+            if (environment == VCLEnvironment.Dev)
                 Constants.OrganizationsSearchDescriptorByDidDev
             else
                 Constants.OrganizationsSearchDescriptorByDidStaging
@@ -150,9 +191,10 @@ class MainActivity : AppCompatActivity() {
 //                Log.d(TAG, "VCL Organizations received")
 
                 // choosing services[0] for testing purposes
-                organizations.all.getOrNull(0)?.serviceCredentialAgentIssuers?.getOrNull(0)?.let { service ->
-                    getCredentialManifestByService(service)
-                } ?: Log.e(TAG, "VCL Organizations error, issuing service not found")
+                organizations.all.getOrNull(0)?.serviceCredentialAgentIssuers?.getOrNull(0)
+                    ?.let { service ->
+                        getCredentialManifestByService(service)
+                    } ?: Log.e(TAG, "VCL Organizations error, issuing service not found")
             },
             { error ->
                 logError("VCL Organizations search failed:", error)
@@ -163,16 +205,20 @@ class MainActivity : AppCompatActivity() {
     private fun refreshCredentials() {
         val service = VCLService(
             JSONObject(
-                Constants.IssuingServiceJsonStr)
+                Constants.IssuingServiceJsonStr
+            )
         )
         val credentialManifestDescriptorRefresh =
             VCLCredentialManifestDescriptorRefresh(
                 service = service,
-                credentialIds = Constants.CredentialIds
+                credentialIds = Constants.CredentialIdsToRefresh
             )
         vcl.getCredentialManifest(credentialManifestDescriptorRefresh,
             { credentialManifest ->
-                Log.d(TAG, "VCL Credentials refreshed, credential manifest: ${credentialManifest.jwt.payload}")
+                Log.d(
+                    TAG,
+                    "VCL Credentials refreshed, credential manifest: ${credentialManifest.jwt.payload}"
+                )
             },
             { error ->
                 logError("VCL Refresh Credentials failed:", error)
@@ -200,14 +246,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun getCredentialManifestByDeepLink() {
         val deepLink =
-            if (environment == VCLEnvironment.DEV)
+            if (environment == VCLEnvironment.Dev)
                 VCLDeepLink(Constants.CredentialManifestDeepLinkStrDev)
             else
                 VCLDeepLink(Constants.CredentialManifestDeepLinkStrStaging)
         val credentialManifestDescriptorByDeepLink =
             VCLCredentialManifestDescriptorByDeepLink(
                 deepLink = deepLink,
-//                issuingType = VCLIssuingType.Undefined
+//                issuingType = VCLIssuingType.Identity
             )
         vcl.getCredentialManifest(credentialManifestDescriptorByDeepLink,
             { credentialManifest ->
@@ -229,6 +275,7 @@ class MainActivity : AppCompatActivity() {
         )
         vcl.generateOffers(
             generateOffersDescriptor = generateOffersDescriptor,
+            didJwk = didJwk,
             { offers ->
                 Log.d(TAG, "VCL Generated Offers: ${offers.all}")
                 Log.d(TAG, "VCL Generated Offers Response Code: ${offers.responseCode}")
@@ -279,16 +326,24 @@ class MainActivity : AppCompatActivity() {
         val approvedRejectedOfferIds = Utils.getApprovedRejectedOfferIdsMock(offers)
         val finalizeOffersDescriptor = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifest,
+            offers = offers,
             approvedOfferIds = approvedRejectedOfferIds.first,
             rejectedOfferIds = approvedRejectedOfferIds.second
         )
         vcl.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptor,
+            didJwk = didJwk,
             token = offers.token,
             { verifiableCredentials ->
                 Log.d(TAG, "VCL finalized Offers")
-                Log.d(TAG, "VCL Passed Credentials: ${verifiableCredentials.passedCredentials.map { it.payload }}")
-                Log.d(TAG, "VCL Failed Credentials: ${verifiableCredentials.failedCredentials.map { it.payload }}")
+                Log.d(
+                    TAG,
+                    "VCL Passed Credentials: ${verifiableCredentials.passedCredentials.map { it.payload }}"
+                )
+                Log.d(
+                    TAG,
+                    "VCL Failed Credentials: ${verifiableCredentials.failedCredentials.map { it.payload }}"
+                )
             },
             { error ->
                 logError("VCL failed to finalize Offers:", error)
@@ -303,7 +358,10 @@ class MainActivity : AppCompatActivity() {
                 VCLCountries.CA
             ),
             { credentialTypesUIFormSchema ->
-                Log.d(TAG, "VCL received Credential Types UI Form Schema: $credentialTypesUIFormSchema")
+                Log.d(
+                    TAG,
+                    "VCL received Credential Types UI Form Schema: $credentialTypesUIFormSchema"
+                )
 
             },
             { error ->
@@ -325,7 +383,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun verifyJwt() {
         vcl.verifyJwt(
-            Constants.SomeJwt, Constants.SomeJwkPublic, { isVerified ->
+            Constants.SomeJwt, Constants.SomePublicJwk, { isVerified ->
                 Log.d(TAG, "VCL JWT verified: $isVerified")
             },
             { error ->
@@ -336,9 +394,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun generateSignedJwt() {
         vcl.generateSignedJwt(
-            VCLJwtDescriptor(payload = Constants.SomeJson, iss = "iss123", jti = "jti123"),
+            VCLJwtDescriptor(
+                keyId = didJwk?.keyId,
+                payload = Constants.SomePayload,
+                iss = "iss123",
+                jti = "jti123"
+            ),
             { jwt ->
-                Log.d(TAG, "VCL JWT generated: ${jwt.signedJwt.serialize()}")
+                Log.d(TAG, "VCL JWT generated: ${jwt.encodedJwt}")
             },
             { error ->
                 logError("VCL JWT generation failed:", error)
@@ -349,7 +412,11 @@ class MainActivity : AppCompatActivity() {
     private fun generateDidJwk() {
         vcl.generateDidJwk(
             { didJwk ->
-                Log.d(TAG, "VCL DID:JWK generated: ${didJwk.value}")
+                this.didJwk = didJwk
+                Log.d(
+                    TAG,
+                    "VCL DID:JWK generated: \ndid: ${didJwk.did}\nkid: ${didJwk.kid}\nkeyId: ${didJwk.keyId}\npublicJwk: ${didJwk.publicJwk.valueStr}"
+                )
             },
             { error ->
                 logError("VCL DID:JWK generation failed:", error)

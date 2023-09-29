@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.api.entities
+package io.velocitycareerlabs.api.entities.error
 
 enum class VCLStatusCode(val value: Int) {
     NetworkError(1),

@@ -8,8 +8,19 @@
 package io.velocitycareerlabs.api
 
 enum class VCLEnvironment(val value: String) {
-    PROD("prod"),
-    STAGING("staging"),
-    QA("qa"),
-    DEV("dev")
+    Prod("prod"),
+    Staging("staging"),
+    Qa("qa"),
+    Dev("dev");
+
+    companion object {
+        fun fromString(value: String) =
+            when (value) {
+                Prod.value -> Prod
+                Staging.value -> Staging
+                Qa.value -> Qa
+                Dev.value -> Dev
+                else -> Prod
+            }
+    }
 }

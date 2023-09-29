@@ -29,7 +29,7 @@ internal class Request(
         const val ContentTypeApplicationJson = "application/json"
     }
 
-    enum class HttpMethod(val value: String) {
+    internal enum class HttpMethod(val value: String) {
         POST("POST"),
         GET("GET");
     }

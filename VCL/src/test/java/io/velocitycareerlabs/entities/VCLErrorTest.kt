@@ -1,10 +1,13 @@
 /**
  * Created by Michael Avoyan on 08/03/2023.
+ *
+ * Copyright 2022 Velocity Career Labs inc.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package io.velocitycareerlabs.entities
 
-import io.velocitycareerlabs.api.entities.VCLError
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.infrastructure.resources.valid.ErrorMocks
 import org.junit.Test
 

@@ -16,28 +16,20 @@ internal class Urls {
     companion object {
         private val EnvironmentPrefix get(): String =
             when(GlobalConfig.CurrentEnvironment) {
-                VCLEnvironment.DEV -> VCLEnvironment.DEV.value
-                VCLEnvironment.QA -> VCLEnvironment.QA.value
-                VCLEnvironment.STAGING -> VCLEnvironment.STAGING.value
+                VCLEnvironment.Dev -> VCLEnvironment.Dev.value
+                VCLEnvironment.Qa -> VCLEnvironment.Qa.value
+                VCLEnvironment.Staging -> VCLEnvironment.Staging.value
                 else -> "" // prod is a default, doesn't has a prefix
             }
-
-        private val BaseUrlServices get() = "https://${EnvironmentPrefix}registrar.velocitynetwork.foundation"
-        val CredentialTypes get() = "$BaseUrlServices/api/v0.6/credential-types"
-        val CredentialTypeSchemas get() = "$BaseUrlServices/schemas/"
-        val Countries get() = "$BaseUrlServices/reference/countries"
-        val Organizations get() = "$BaseUrlServices/api/v0.6/organizations/search-profiles"
-        val ResolveKid get() = "$BaseUrlServices/api/v0.6/resolve-kid/"
-        val CredentialTypesFormSchema get() = "$BaseUrlServices/api/v0.6/form-schemas?credentialType=$CredentialType"
-        val VerifiedProfile get() = "$BaseUrlServices/api/v0.6/organizations/$Did/verified-profile"
-
-//        private const val BaseUrlAgent get() = "https://${EnvironmentPrefix}agent.velocitycareerlabs.io"
-//        val PresentationSubmission get() = "$BaseUrlAgent/api/holder/v0.6/org/$Did/inspect/submit-presentation"
-//        val ExchangeProgress get() = "$BaseUrlAgent/api/holder/v0.6/org/$Did/get-exchange-progress"
-//        val CredentialManifest get() = "$BaseUrlAgent/api/holder/v0.6/org/$Did/issue/get-credential-manifest"
-//        val IdentificationSubmission get() = "$BaseUrlAgent/api/holder/v0.6/org/$Did/issue/submit-identification"
-//        val GenerateOffers get() = "$BaseUrlAgent/api/holder/v0.6/org/$Did/issue/credential-offers"
-//        val FinalizeOffers get() = "$BaseUrlAgent/api/holder/v0.6/org/$Did/issue/finalize-offers"
+        private val BaseUrlRegistrar get() = "https://${EnvironmentPrefix}registrar.velocitynetwork.foundation"
+//        private val BaseUrlWalletApi get() = "https://${EnvironmentPrefix}walletapi.velocitycareerlabs.io"
+        val CredentialTypes get() = "$BaseUrlRegistrar/api/v0.6/credential-types"
+        val CredentialTypeSchemas get() = "$BaseUrlRegistrar/schemas/"
+        val Countries get() = "$BaseUrlRegistrar/reference/countries"
+        val Organizations get() = "$BaseUrlRegistrar/api/v0.6/organizations/search-profiles"
+        val ResolveKid get() = "$BaseUrlRegistrar/api/v0.6/resolve-kid/"
+        val CredentialTypesFormSchema get() = "$BaseUrlRegistrar/api/v0.6/form-schemas?credentialType=$CredentialType"
+        val VerifiedProfile get() = "$BaseUrlRegistrar/api/v0.6/organizations/$Did/verified-profile"
     }
 }
 
@@ -55,5 +47,5 @@ object HeaderKeys {
 }
 
 object HeaderValues {
-    const val XVnfProtocolVersion = "1.0"
+    val XVnfProtocolVersion get() = GlobalConfig.XVnfProtocolVersion.value
 }

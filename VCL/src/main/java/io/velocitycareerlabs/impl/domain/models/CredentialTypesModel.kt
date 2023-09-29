@@ -7,6 +7,9 @@
 
 package io.velocitycareerlabs.impl.domain.models
 
+import io.velocitycareerlabs.api.entities.VCLCredentialType
 import io.velocitycareerlabs.api.entities.VCLCredentialTypes
 
-internal interface CredentialTypesModel: Model<VCLCredentialTypes>, Initializable<VCLCredentialTypes>
+internal interface CredentialTypesModel: Model<VCLCredentialTypes>, Initializable<VCLCredentialTypes> {
+    fun credentialTypeByTypeName(type: String): VCLCredentialType?
+}

@@ -10,12 +10,16 @@ package io.velocitycareerlabs.impl.domain.usecases
 import io.velocitycareerlabs.api.entities.VCLCredentialManifest
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptor
+import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 
 /**
  * Retrieves the credential manifest for the issuing exchange.
  * Inside the manifest are issuer details, credential schemas and a presentation definition
  */
 internal interface CredentialManifestUseCase {
-    fun getCredentialManifest(credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-                              completionBlock:(VCLResult<VCLCredentialManifest>) -> Unit)
+    fun getCredentialManifest(
+        credentialManifestDescriptor: VCLCredentialManifestDescriptor,
+        verifiedProfile: VCLVerifiedProfile,
+        completionBlock:(VCLResult<VCLCredentialManifest>) -> Unit
+    )
 }

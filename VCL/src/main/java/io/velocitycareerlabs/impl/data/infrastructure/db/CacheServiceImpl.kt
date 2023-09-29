@@ -9,6 +9,7 @@ package io.velocitycareerlabs.impl.data.infrastructure.db
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.nimbusds.jose.jwk.ECKey
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.domain.infrastructure.db.CacheService
 import io.velocitycareerlabs.impl.extensions.decodeBase64

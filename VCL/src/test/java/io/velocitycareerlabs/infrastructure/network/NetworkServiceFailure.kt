@@ -7,14 +7,15 @@
 
 package io.velocitycareerlabs.infrastructure.network
 
-import io.velocitycareerlabs.api.entities.VCLError
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.infrastructure.network.Response
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
-import java.util.*
 
-internal class NetworkServiceFailure(private val errorMessage: String): NetworkService {
+internal class NetworkServiceFailure(
+    private val errorMessage: String
+): NetworkService {
 
     override fun sendRequest(
         endpoint: String,
@@ -27,13 +28,4 @@ internal class NetworkServiceFailure(private val errorMessage: String): NetworkS
     ) {
         completionBlock(VCLResult.Failure(VCLError(errorMessage)))
     }
-
-//    override fun isCacheValid(
-//        endpoint: String,
-//        method: Request.HttpMethod,
-//        cacheDate: Date,
-//        completionBlock: (VCLResult<Boolean>) -> Unit
-//    ) {
-//        completionBlock(VCLResult.Failure(VCLError(errorMessage)))
-//    }
 }

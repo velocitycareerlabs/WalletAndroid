@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.repositories.PresentationRequestRepository
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService

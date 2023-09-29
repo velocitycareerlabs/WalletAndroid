@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.VCLCredentialTypes
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUseCase
 import io.velocitycareerlabs.impl.domain.repositories.CredentialTypesRepository
@@ -23,10 +22,11 @@ internal class CredentialTypesUseCaseImpl(
         cacheSequence: Int,
         completionBlock: (VCLResult<VCLCredentialTypes>) -> Unit
     ) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread {
+        executor.runOnBackground {
             credentialTypes.getCredentialTypes(cacheSequence) {
-                executor.runOn(callingLooper) { completionBlock(it) }
+                executor.runOnMain {
+                    completionBlock(it)
+                }
             }
         }
     }

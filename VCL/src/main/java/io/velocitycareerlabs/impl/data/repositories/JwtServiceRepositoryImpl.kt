@@ -8,12 +8,13 @@
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.domain.infrastructure.jwt.JwtService
+import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.jwt.VCLJwtService
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
 import java.lang.Exception
 
 internal class JwtServiceRepositoryImpl(
-        private val jwtService: JwtService
+        private val jwtService: VCLJwtService
 ): JwtServiceRepository {
 
     override fun decode(
@@ -21,9 +22,9 @@ internal class JwtServiceRepositoryImpl(
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
         try {
-            jwtService.parse(encodedJwt)?.let {
-                completionBlock(VCLResult.Success(VCLJwt(it)))
-            } ?: throw Exception("Failed to parse $encodedJwt")
+            completionBlock(
+                VCLResult.Success(VCLJwt(encodedJwt))
+            )
         } catch (ex: Exception) {
             completionBlock(VCLResult.Failure(VCLError(ex)))
         }
@@ -31,36 +32,26 @@ internal class JwtServiceRepositoryImpl(
 
     override fun verifyJwt(
         jwt: VCLJwt,
-        jwkPublic: VCLJwkPublic,
+        publicJwk: VCLPublicJwk,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        try {
-            completionBlock(VCLResult.Success(jwtService.verify(jwt, jwkPublic.valueStr)))
-        } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex)))
+        jwtService.verify(jwt, publicJwk) {
+            completionBlock(it)
         }
     }
 
     override fun generateSignedJwt(
+        kid: String?, // did:jwk in case of person binding
+        nonce: String?, // nonce == challenge
         jwtDescriptor: VCLJwtDescriptor,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
-        try {
-            jwtService.sign(jwtDescriptor)?.let { completionBlock(VCLResult.Success(VCLJwt(it))) }
-                    ?: throw Exception("Failed to sign ${jwtDescriptor.payload}")
-        } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex)))
-        }
-    }
-
-    override fun generateDidJwk(
-        didJwkDescriptor: VCLDidJwkDescriptor?,
-        completionBlock: (VCLResult<VCLDidJwk>) -> Unit
-    ) {
-        try {
-            completionBlock(VCLResult.Success(jwtService.generateDidJwk(didJwkDescriptor)))
-        } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex)))
+        jwtService.sign(
+            kid = kid,
+            nonce = nonce,
+            jwtDescriptor = jwtDescriptor
+        ) {
+            completionBlock(it)
         }
     }
 }

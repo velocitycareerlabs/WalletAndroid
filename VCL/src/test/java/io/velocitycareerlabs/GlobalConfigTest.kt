@@ -20,29 +20,49 @@ class GlobalConfigTest {
 
     @Test
     fun testDevEnvironment() {
-        GlobalConfig.CurrentEnvironment = VCLEnvironment.DEV
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.Dev
+        assert(GlobalConfig.IsLoggerOn)
 
+        GlobalConfig.IsDebugOn = true
+        assert(GlobalConfig.IsLoggerOn)
+
+        GlobalConfig.IsDebugOn = false
         assert(GlobalConfig.IsLoggerOn)
     }
 
     @Test
     fun testQaEnvironment() {
-        GlobalConfig.CurrentEnvironment = VCLEnvironment.QA
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.Qa
+        assert(GlobalConfig.IsLoggerOn)
 
+        GlobalConfig.IsDebugOn = true
+        assert(GlobalConfig.IsLoggerOn)
+
+        GlobalConfig.IsDebugOn = false
         assert(GlobalConfig.IsLoggerOn)
     }
 
     @Test
     fun testStagingEnvironment() {
-        GlobalConfig.CurrentEnvironment = VCLEnvironment.STAGING
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.Staging
+        assert(!GlobalConfig.IsLoggerOn)
 
+        GlobalConfig.IsDebugOn = true
         assert(GlobalConfig.IsLoggerOn)
+
+        GlobalConfig.IsDebugOn = false
+        assert(!GlobalConfig.IsLoggerOn)
     }
 
     @Test
     fun testProdEnvironment() {
-        GlobalConfig.CurrentEnvironment = VCLEnvironment.PROD
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.Prod
+        assert(!GlobalConfig.IsLoggerOn)
 
+        GlobalConfig.IsDebugOn = true
+        assert(GlobalConfig.IsLoggerOn)
+
+        GlobalConfig.IsDebugOn = false
         assert(!GlobalConfig.IsLoggerOn)
     }
 

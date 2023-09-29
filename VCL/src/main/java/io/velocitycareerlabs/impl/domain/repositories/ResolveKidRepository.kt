@@ -7,9 +7,9 @@
 
 package io.velocitycareerlabs.impl.domain.repositories
 
-import io.velocitycareerlabs.api.entities.VCLJwkPublic
+import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLResult
 
 internal interface ResolveKidRepository {
-    fun getPublicKey(keyID: String, completionBlock: (VCLResult<VCLJwkPublic>) -> Unit)
+    fun getPublicKey(kid: String, completionBlock: (VCLResult<VCLPublicJwk>) -> Unit)
 }

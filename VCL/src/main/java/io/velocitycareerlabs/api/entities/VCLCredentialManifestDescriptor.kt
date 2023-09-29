@@ -18,17 +18,17 @@ open class VCLCredentialManifestDescriptor(
 ) {
     val did = uri?.getUrlSubPath(KeyDidPrefix)
 
-    open val endpoint: String? get() =  uri
-
     open fun toPropsString() =
         StringBuilder()
-            .append("\nuri: $uri")
-            .append("\ndid: $did")
-            .append("\nissuingType: $issuingType")
-            .append("\ncredentialTypes: $credentialTypes")
-            .append("\npushDelegate: ${pushDelegate?.toPropsString()}")
-            .append("\nvendorOriginContext: $vendorOriginContext")
+            .append("\nuri: , $uri")
+            .append("\ndid: , $did")
+            .append("\nissuingType: , $issuingType")
+            .append("\ncredentialTypes: , $credentialTypes")
+            .append("\npushDelegate: , ${pushDelegate?.toPropsString()}")
+            .append("\nvendorOriginContext: , $vendorOriginContext")
             .toString()
+
+    open val endpoint: String? get() =  uri
 
     companion object CodingKeys {
         const val KeyId = "id"

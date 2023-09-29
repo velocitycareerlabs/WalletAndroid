@@ -9,21 +9,22 @@ package io.velocitycareerlabs.impl
 
 import io.velocitycareerlabs.BuildConfig
 import io.velocitycareerlabs.api.VCLEnvironment
+import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 
 internal object GlobalConfig {
     const val VclPackage = BuildConfig.LIBRARY_PACKAGE_NAME
 
-    var CurrentEnvironment = VCLEnvironment.PROD
+    var CurrentEnvironment = VCLEnvironment.Prod
+    var XVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1
 
-    var IsDebugOn = false//BuildConfig.DEBUG
+    var IsDebugOn = false //BuildConfig.DEBUG
 
     val VersionName = BuildConfig.VERSION_NAME
     val VersionCode = BuildConfig.VERSION_CODE
 
     const val LogTagPrefix = "VCL "
-    // TODO: Will be remotely configurable
-    val IsLoggerOn get() = CurrentEnvironment != VCLEnvironment.PROD || IsDebugOn
 
-    // TODO: Will be remotely configurable
-    var IsToLoadFromCacheInitialization = false
+    val IsLoggerOn get() = (CurrentEnvironment != VCLEnvironment.Staging && CurrentEnvironment != VCLEnvironment.Prod) || IsDebugOn
+
+    const val TypeJwt = "JWT"
 }

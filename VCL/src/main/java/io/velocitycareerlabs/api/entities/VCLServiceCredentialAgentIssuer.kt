@@ -9,6 +9,7 @@ package io.velocitycareerlabs.api.entities
 
 import io.velocitycareerlabs.impl.extensions.toList
 import org.json.JSONObject
+import java.lang.StringBuilder
 
 class VCLServiceCredentialAgentIssuer(payload: JSONObject): VCLService(payload) {
     val credentialTypes: List<String>? =

@@ -19,27 +19,19 @@ internal class ExecutorImpl: Executor {
     private val mainThread: Handler = Handler(Looper.getMainLooper())
     private val backgroundThreadPool: ExecutorService = Executors.newFixedThreadPool(10)
 
-    override fun runOn(looper: Looper?, runnable: Runnable) {
-        looper?.let {
-            Handler(it).post {
-                runnable.run()
-            }
-        } ?: run{ runnable.run() }
-    }
-
-    override fun runOnMainThread(runnable: Runnable) {
+    override fun runOnMain(block: () -> Unit) {
         mainThread.post {
-            runnable.run()
+            block()
         }
     }
 
-    override fun runOnBackgroundThread(runnable: Runnable) {
+    override fun runOnBackground(block: () -> Unit) {
         backgroundThreadPool.submit {
-            runnable.run()
+            block()
         }
     }
 
-    override fun waitForTermination() {
+    override fun shutdown() {
         backgroundThreadPool.shutdown()
         backgroundThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS)
     }

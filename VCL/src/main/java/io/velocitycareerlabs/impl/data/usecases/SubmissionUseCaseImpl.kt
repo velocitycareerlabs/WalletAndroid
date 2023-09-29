@@ -7,7 +7,6 @@
 
 package io.velocitycareerlabs.impl.data.usecases
 
-import android.os.Looper
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
@@ -19,31 +18,36 @@ internal class SubmissionUseCaseImpl(
     private val jwtServiceRepository: JwtServiceRepository,
     private val executor: Executor
 ):  SubmissionUseCase {
-    override fun submit(submission: VCLSubmission,
-                        completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit) {
-        val callingLooper = Looper.myLooper()
-        executor.runOnBackgroundThread {
+    override fun submit(
+        submission: VCLSubmission,
+        didJwk: VCLDidJwk?,
+        completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
+    ) {
+        executor.runOnBackground {
             jwtServiceRepository.generateSignedJwt(
-                VCLJwtDescriptor(
+                kid = didJwk?.kid,
+                jwtDescriptor = VCLJwtDescriptor(
+                    keyId = didJwk?.keyId,
                     payload = submission.payload,
-                    iss = submission.iss,
-                    jti = submission.jti
-                )
-            ) { signedJwtResult ->
-                signedJwtResult.handleResult(
-                    { jwt ->
-                        submissionRepository.submit(
-                            submission,
-                            jwt
-                        ) { submissionResult ->
-                            executor.runOn(callingLooper) { completionBlock(submissionResult) }
+                    jti = submission.jti,
+                    iss = submission.iss
+                ),
+                completionBlock = { signedJwtResult ->
+                    signedJwtResult.handleResult(
+                        { jwt ->
+                            submissionRepository.submit(
+                                submission = submission,
+                                jwt = jwt
+                            ) { submissionResult ->
+                                executor.runOnMain { completionBlock(submissionResult) }
+                            }
+                        },
+                        { error ->
+                            executor.runOnMain { completionBlock(VCLResult.Failure(error)) }
                         }
-                    },
-                    { error ->
-                        executor.runOn(callingLooper) { completionBlock(VCLResult.Failure(error)) }
-                    }
-                )
-            }
+                    )
+                }
+            )
         }
     }
 }

@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.repositories
 
 import io.velocitycareerlabs.api.VCLEnvironment
+import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.data.repositories.HeaderValues
 import io.velocitycareerlabs.impl.data.repositories.Urls
@@ -25,63 +26,56 @@ internal class UrlsTest {
 
     @Test
     fun testProdEnvironment() {
-        val expectedUrlPrefix = "https://registrar.velocitynetwork.foundation"
+        val registrarPrefix = "https://registrar.velocitynetwork.foundation"
 
-        GlobalConfig.CurrentEnvironment = VCLEnvironment.PROD
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.Prod
 
-        assert(Urls.CredentialTypes.startsWith(expectedUrlPrefix))
-        assert(Urls.CredentialTypeSchemas.startsWith(expectedUrlPrefix))
-        assert(Urls.Countries.startsWith(expectedUrlPrefix))
-        assert(Urls.Organizations.startsWith(expectedUrlPrefix))
-        assert(Urls.ResolveKid.startsWith(expectedUrlPrefix))
-        assert(Urls.CredentialTypesFormSchema.startsWith(expectedUrlPrefix))
+        verifyUrlsPrefix(registrarPrefix)
     }
 
     @Test
     fun testStagingEnvironment() {
-        val expectedUrlPrefix = "https://stagingregistrar.velocitynetwork.foundation"
+        val registrarPrefix = "https://stagingregistrar.velocitynetwork.foundation"
 
-        GlobalConfig.CurrentEnvironment = VCLEnvironment.STAGING
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.Staging
 
-        assert(Urls.CredentialTypes.startsWith(expectedUrlPrefix))
-        assert(Urls.CredentialTypeSchemas.startsWith(expectedUrlPrefix))
-        assert(Urls.Countries.startsWith(expectedUrlPrefix))
-        assert(Urls.Organizations.startsWith(expectedUrlPrefix))
-        assert(Urls.ResolveKid.startsWith(expectedUrlPrefix))
-        assert(Urls.CredentialTypesFormSchema.startsWith(expectedUrlPrefix))
+        verifyUrlsPrefix(registrarPrefix)
     }
 
     @Test
     fun testQaEnvironment() {
-        val expectedUrlPrefix = "https://qaregistrar.velocitynetwork.foundation"
+        val registrarPrefix = "https://qaregistrar.velocitynetwork.foundation"
 
-        GlobalConfig.CurrentEnvironment = VCLEnvironment.QA
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.Qa
 
-        assert(Urls.CredentialTypes.startsWith(expectedUrlPrefix))
-        assert(Urls.CredentialTypeSchemas.startsWith(expectedUrlPrefix))
-        assert(Urls.Countries.startsWith(expectedUrlPrefix))
-        assert(Urls.Organizations.startsWith(expectedUrlPrefix))
-        assert(Urls.ResolveKid.startsWith(expectedUrlPrefix))
-        assert(Urls.CredentialTypesFormSchema.startsWith(expectedUrlPrefix))
+        verifyUrlsPrefix(registrarPrefix)
     }
 
     @Test
     fun testDevEnvironment() {
-        val expectedUrlPrefix = "https://devregistrar.velocitynetwork.foundation"
+        val registrarPrefix = "https://devregistrar.velocitynetwork.foundation"
 
-        GlobalConfig.CurrentEnvironment = VCLEnvironment.DEV
+        GlobalConfig.CurrentEnvironment = VCLEnvironment.Dev
 
-        assert(Urls.CredentialTypes.startsWith(expectedUrlPrefix))
-        assert(Urls.CredentialTypeSchemas.startsWith(expectedUrlPrefix))
-        assert(Urls.Countries.startsWith(expectedUrlPrefix))
-        assert(Urls.Organizations.startsWith(expectedUrlPrefix))
-        assert(Urls.ResolveKid.startsWith(expectedUrlPrefix))
-        assert(Urls.CredentialTypesFormSchema.startsWith(expectedUrlPrefix))
+        verifyUrlsPrefix(registrarPrefix)
+    }
+
+    private fun verifyUrlsPrefix(registrarPrefix: String) {
+        assert(Urls.CredentialTypes.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.CredentialTypes}"}
+        assert(Urls.CredentialTypeSchemas.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.CredentialTypeSchemas}"}
+        assert(Urls.Countries.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.Countries}"}
+        assert(Urls.Organizations.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.Organizations}"}
+        assert(Urls.ResolveKid.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.ResolveKid}"}
+        assert(Urls.CredentialTypesFormSchema.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.CredentialTypesFormSchema}"}
     }
 
     @Test
     fun testXVnfProtocolVersion() {
+        GlobalConfig.XVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1
         assert(HeaderValues.XVnfProtocolVersion == "1.0")
+
+        GlobalConfig.XVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2
+        assert(HeaderValues.XVnfProtocolVersion == "2.0")
     }
 
     @After

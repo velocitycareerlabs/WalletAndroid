@@ -5,13 +5,13 @@ plugins {
 }
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion "30.0.3"
+    compileSdk 33
+//    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.vcl.wallet"
-        minSdkVersion 21
-        targetSdkVersion 33
+        minSdk 24
+        targetSdk 33
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -45,13 +45,13 @@ android {
 dependencies {
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 //    Must: be added:
-    implementation "com.nimbusds:nimbus-jose-jwt:9.29"
+    implementation "com.nimbusds:nimbus-jose-jwt:9.31"
     implementation project(':VCL')
 
 //    implementation "io.velocitycareerlabs:vcl:x.y.z"

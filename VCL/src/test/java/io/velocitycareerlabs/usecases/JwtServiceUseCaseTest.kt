@@ -8,13 +8,16 @@
 package io.velocitycareerlabs.usecases
 
 import android.os.Build
-import com.nimbusds.jose.crypto.ECDSAVerifier
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.data.infrastructure.jwt.JwtServiceImpl
+import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.JwtServiceUseCaseImpl
+import io.velocitycareerlabs.api.keys.VCLKeyService
 import io.velocitycareerlabs.impl.domain.usecases.JwtServiceUseCase
-import io.velocitycareerlabs.impl.extensions.decodeBase64
+import io.velocitycareerlabs.impl.extensions.toJsonObject
+import io.velocitycareerlabs.impl.extensions.toPublicJwk
+import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
 import org.junit.After
@@ -29,30 +32,37 @@ import org.robolectric.annotation.Config
 internal class JwtServiceUseCaseTest {
 
     lateinit var subject: JwtServiceUseCase
+    lateinit var keyService: VCLKeyService
 
     @Before
     fun setUp() {
         subject = JwtServiceUseCaseImpl(
             JwtServiceRepositoryImpl(
-                JwtServiceImpl()
+                VCLJwtServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance))
             ),
             EmptyExecutor()
         )
+        keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
     }
 
     @Test
-    fun testGenerateSignedJwt() {
-        val iss = "some iss"
-        val jti = "some jti"
+    fun testSign() {
         var resultJwt: VCLResult<VCLJwt>? = null
 
-        subject.generateSignedJwt(VCLJwtDescriptor(payload = JwtServiceMocks.JsonObject, iss = iss, jti = jti)) {
+        subject.generateSignedJwt(
+            jwtDescriptor = VCLJwtDescriptor(
+                payload = JwtServiceMocks.Json.toJsonObject()!!,
+                jti = "some jti",
+                iss = "some iss"
+            )
+        ) {
             resultJwt = it
         }
-        val jwtJson = resultJwt?.data!!.payload.toJSONObject()!!
 
-        assert(jwtJson["iss"] == iss)
-        assert(jwtJson["jti"] == jti)
+        val jwt = resultJwt?.data
+        assert(jwt!!.header?.toJSONObject()?.get("alg") as? String == "ES256K")
+        assert(((jwt.header?.toJSONObject()?.get("jwk") as? Map<String, Any>)!!["crv"] as? String) == "secp256k1")
+        assert(jwt.header?.toJSONObject()?.get("typ") as? String == "JWT")
     }
 
     @Test
@@ -60,30 +70,61 @@ internal class JwtServiceUseCaseTest {
         var resultJwt: VCLResult<VCLJwt>? = null
         var resultVerified: VCLResult<Boolean>? = null
 
-        subject.generateSignedJwt(VCLJwtDescriptor(payload = JwtServiceMocks.JsonObject, iss = "", jti = "")) {
+        subject.generateSignedJwt(
+            jwtDescriptor = VCLJwtDescriptor(
+                payload = JwtServiceMocks.Json.toJsonObject()!!,
+                jti = "some jti",
+                iss = "some iss"
+            )
+        ) {
             resultJwt = it
         }
-        subject.verifyJwt(resultJwt?.data!!, VCLJwkPublic(resultJwt?.data!!.header.jwk.toString())) {
+
+        val jwt = resultJwt?.data
+        subject.verifyJwt(
+            jwt = jwt!!,
+            publicJwk = VCLPublicJwk(valueStr = jwt.header?.jwk.toString())
+        ) {
             resultVerified = it
         }
-//        Verification actual algorithm
-        val isVerified = resultJwt?.data!!.signedJwt.verify(ECDSAVerifier(resultJwt?.data!!.header.jwk.toECKey()))
-
-//        Assert both have the same result
-        assert(resultVerified?.data!! == isVerified)
+        val isVerified = resultVerified?.data as Boolean
+        assert(isVerified)
     }
 
     @Test
-    fun testGenerateDidJwk() {
-        var resultDidJwk: VCLResult<VCLDidJwk>? = null
+    fun testSignByExistingKey() {
+        keyService.generateDidJwk { didJwkResult ->
+            didJwkResult.handleResult({ didJwk ->
+                var resultJwt: VCLResult<VCLJwt>? = null
+                var resultVerified: VCLResult<Boolean>? = null
 
-        subject.generateDidJwk {
-            resultDidJwk = it
+                subject.generateSignedJwt(
+                    kid = didJwk.kid,
+                    nonce = "some nonce",
+                    jwtDescriptor = VCLJwtDescriptor(
+                        keyId = didJwk.keyId,
+                        payload = JwtServiceMocks.Json.toJsonObject()!!,
+                        jti = "some jti",
+                        iss = "some iss"
+                    )
+                ) {
+                    resultJwt = it
+                }
+                val jwt = resultJwt?.data
+                subject.verifyJwt(
+                    jwt = jwt!!,
+//                    publicJwk = VCLPublicJwk(valueStr = jwt.header.jwk.toString())
+                    // Person binding provided did:jwk only:
+                    publicJwk = jwt.header?.toJSONObject()?.get("kid").toString().toPublicJwk()
+                ) {
+                    resultVerified = it
+                }
+                val isVerified = resultVerified?.data as Boolean
+                assert(isVerified)
+            }, {
+                assert(false) { "Failed to generate did:jwk $it" }
+            })
         }
-        val didJwk = resultDidJwk?.data!!
-
-        assert(didJwk.value.startsWith(VCLDidJwk.DidJwkPrefix))
-        assert(didJwk.value.substringAfter(VCLDidJwk.DidJwkPrefix).decodeBase64().isNotEmpty())
     }
 
     @After

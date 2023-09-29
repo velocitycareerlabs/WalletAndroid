@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.repositories.FinalizeOffersRepository
@@ -22,6 +23,7 @@ internal class FinalizeOffersRepositoryImpl(
 
     override fun finalizeOffers(
         token: VCLToken,
+        proof: VCLJwt,
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         completionBlock: (VCLResult<List<String>>) -> Unit
     ) {
@@ -34,7 +36,7 @@ internal class FinalizeOffersRepositoryImpl(
                 ),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
-            body = finalizeOffersDescriptor.payload.toString(),
+            body = finalizeOffersDescriptor.generateRequestBody(jwt = proof).toString(),
             method = Request.HttpMethod.POST,
             contentType = Request.ContentTypeApplicationJson,
             completionBlock = { result ->

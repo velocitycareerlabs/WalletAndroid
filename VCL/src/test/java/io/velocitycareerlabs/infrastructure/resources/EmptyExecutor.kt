@@ -7,22 +7,17 @@
 
 package io.velocitycareerlabs.infrastructure.resources
 
-import android.os.Looper
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 
 internal class EmptyExecutor: Executor {
-    override fun runOnMainThread(runnable: Runnable) {
-        runnable.run()
+    override fun runOnMain(block: () -> Unit) {
+        block()
     }
 
-    override fun runOn(looper: Looper?, runnable: Runnable) {
-        runnable.run()
+    override fun runOnBackground(block: () -> Unit) {
+        block()
     }
 
-    override fun runOnBackgroundThread(runnable: Runnable) {
-        runnable.run()
-    }
-
-    override fun waitForTermination() {
+    override fun shutdown() {
     }
 }

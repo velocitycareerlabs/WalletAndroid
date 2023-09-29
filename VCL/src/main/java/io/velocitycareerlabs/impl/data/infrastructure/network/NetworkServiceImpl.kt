@@ -8,8 +8,8 @@
 package io.velocitycareerlabs.impl.data.infrastructure.network
 
 import android.accounts.NetworkErrorException
-import io.velocitycareerlabs.api.entities.VCLError
-import io.velocitycareerlabs.api.entities.VCLStatusCode
+import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.entities.error.VCLStatusCode
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.extensions.convertToString
@@ -67,12 +67,15 @@ internal class NetworkServiceImpl: NetworkService {
                     payload = connection.inputStream.convertToString(),
                     code = connection.responseCode
                 )
+                logResponse(response)
                 completionBlock(VCLResult.Success(response))
             } else {
                 val errorMessageStream = connection.errorStream ?: connection.inputStream
-                completionBlock(VCLResult.Failure(VCLError(
+                completionBlock(VCLResult.Failure(
+                    VCLError(
                     payload = errorMessageStream.convertToString()
-                )))
+                )
+                ))
             }
         } catch (ex: NetworkErrorException) {
             completionBlock(VCLResult.Failure(VCLError(exception = ex, statusCode = VCLStatusCode.NetworkError.value)))
@@ -131,9 +134,14 @@ internal class NetworkServiceImpl: NetworkService {
 
     private fun logRequest(request: Request) {
         val methodLog = "Request Method: ${request.method}"
-        val endpointLog = "\nRequest Endpoint: ${request.endpoint}"
-        val bodyLog = request.body?.let { "\nRequest Body: $it" }
+        val endpointLog = " Request Endpoint: ${request.endpoint}"
+        val bodyLog = request.body?.let { " Request Body: $it" }
             ?: "\n"
         VCLLog.d(TAG, "$methodLog$endpointLog$bodyLog")
+    }
+
+    private fun logResponse(response: Response) {
+        VCLLog.d(TAG, "Response:\nstatus code: "+response.code)
+        VCLLog.d(TAG, response.payload)
     }
 }

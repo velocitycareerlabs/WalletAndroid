@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.infrastructure.db.CacheService
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
@@ -85,6 +86,8 @@ internal class CredentialTypesRepositoryImpl(
                 val schemaName = payload.optString(VCLCredentialType.KeySchemaName)
                 val credentialType = payload.optString(VCLCredentialType.KeyCredentialType)
                 val recommended = payload.optBoolean(VCLCredentialType.KeyRecommended)
+                val jsonldContext = payload.optJSONArray(VCLCredentialType.KeyJsonldContext)
+                val issuerCategory = payload.optString(VCLCredentialType.KeyIssuerCategory)
 
                 credentialTypesArr.add(
                     VCLCredentialType(
@@ -94,7 +97,9 @@ internal class CredentialTypesRepositoryImpl(
                         createdAt = createdAt,
                         schemaName = schemaName,
                         credentialType = credentialType,
-                        recommended = recommended
+                        recommended = recommended,
+                        jsonldContext = jsonldContext,
+                        issuerCategory = issuerCategory
                     )
                 )
             }
