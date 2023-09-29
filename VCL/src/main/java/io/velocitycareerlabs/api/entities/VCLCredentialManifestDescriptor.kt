@@ -30,16 +30,6 @@ open class VCLCredentialManifestDescriptor(
 
     open val endpoint: String? get() =  uri
 
-    open fun toPropsString() =
-        StringBuilder()
-            .append("\nuri: $uri")
-            .append("\ndid: $did")
-            .append("\nissuingType: $issuingType")
-            .append("\ncredentialTypes: $credentialTypes")
-            .append("\npushDelegate: ${pushDelegate?.toPropsString()}")
-            .append("\nvendorOriginContext: $vendorOriginContext")
-            .toString()
-
     companion object CodingKeys {
         const val KeyId = "id"
         const val KeyDidPrefix = "did:"
