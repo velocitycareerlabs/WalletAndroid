@@ -13,19 +13,19 @@ import io.velocitycareerlabs.impl.extensions.encodeToBase64URL
 
 data class VCLDidJwk(
     /**
-     * The did:jwk
+     * The did in jwk format encoded to Base64 format
      */
     val did: String,
     /**
-     * public JWK
+     * The public JWK
      */
     val publicJwk: VCLPublicJwk,
     /**
-     * kid of jwt - did:jwk suffixed with #0
+     * The kid of jwt - did:jwk suffixed with #0
      */
     val kid: String,
     /**
-     * The id of private key save in secure enclave
+     * The id of private key save in the key store
      */
     val keyId: String
 ) {
