@@ -8,13 +8,12 @@
 package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.CredentialTypeSchemaRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialTypeSchemasUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypeSchemasUseCase
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.EmptyCacheService
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
-import io.velocitycareerlabs.infrastructure.resources.valid.CountriesMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypeSchemaMocks
 import org.json.JSONObject
 import org.junit.After
@@ -37,7 +36,7 @@ internal class CredentialTypeSchemaUseCaseTest {
                     EmptyCacheService()
                 ),
             CredentialTypeSchemaMocks.CredentialTypes,
-                EmptyExecutor()
+            ExecutorImpl()
         )
 
         subject.getCredentialTypeSchemas(0) {

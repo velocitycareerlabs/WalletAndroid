@@ -21,7 +21,6 @@ import io.velocitycareerlabs.impl.data.repositories.HeaderKeys
 import io.velocitycareerlabs.impl.data.repositories.HeaderValues
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.extensions.toJsonObject
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceRemoteImpl
 import org.json.JSONObject
 
 internal class VCLKeyServiceRemoteImpl(

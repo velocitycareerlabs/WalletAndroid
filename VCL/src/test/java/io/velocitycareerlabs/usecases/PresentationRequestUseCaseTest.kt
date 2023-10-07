@@ -9,7 +9,7 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.PresentationRequestRepositoryImpl
@@ -17,8 +17,9 @@ import io.velocitycareerlabs.impl.data.repositories.ResolveKidRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.PresentationRequestUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.PresentationRequestUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonObject
+import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
+import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestMocks
@@ -46,9 +47,10 @@ internal class PresentationRequestUseCaseTest {
                 NetworkServiceSuccess(validResponse = PresentationRequestMocks.JWK)
             ),
             JwtServiceRepositoryImpl(
-                VCLJwtServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance))
+                VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)),
+                VCLJwtVerifyServiceLocalImpl()
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
         var result: VCLResult<VCLPresentationRequest>? = null
 
@@ -62,30 +64,32 @@ internal class PresentationRequestUseCaseTest {
                 )
             )
         ) {
-            result = it
+            it.handleResult(
+                { presentationRequest ->
+                    assert(
+                        presentationRequest.publicJwk.valueStr.toCharArray().sort() ==
+                                VCLPublicJwk(PresentationRequestMocks.JWK.toJsonObject()!!).valueStr.toCharArray().sort()
+                    )
+                    assert(
+                        presentationRequest.publicJwk.valueJson.toString().toCharArray().sort() ==
+                                VCLPublicJwk(PresentationRequestMocks.JWK.toJsonObject()!!).valueJson.toString().toCharArray().sort()
+                    )
+                    assert(presentationRequest.jwt.encodedJwt == PresentationRequestMocks.PresentationRequestJwt.encodedJwt)
+                    assert(
+                        presentationRequest.jwt.header.toString() ==
+                                PresentationRequestMocks.PresentationRequestJwt.header.toString()
+                    )
+                    assert(
+                        presentationRequest.jwt.payload.toString().toCharArray().sort() ==
+                                PresentationRequestMocks.PresentationRequestJwt.payload.toString().toCharArray().sort()
+                    )
+                    assert(presentationRequest.pushDelegate!!.pushUrl == pushUrl)
+                    assert(presentationRequest.pushDelegate!!.pushToken == pushToken)
+                },
+                {
+                    assert(false) { "$it" }
+                }
+            )
         }
-
-        // Assert
-        val presentationRequest = result?.data
-
-        assert(
-            presentationRequest!!.publicJwk.valueStr.toCharArray().sort() ==
-                    VCLPublicJwk(PresentationRequestMocks.JWK.toJsonObject()!!).valueStr.toCharArray().sort()
-        )
-        assert(
-            presentationRequest.publicJwk.valueJson.toString().toCharArray().sort() ==
-                    VCLPublicJwk(PresentationRequestMocks.JWK.toJsonObject()!!).valueJson.toString().toCharArray().sort()
-        )
-        assert(presentationRequest.jwt.encodedJwt == PresentationRequestMocks.PresentationRequestJwt.encodedJwt)
-        assert(
-            presentationRequest.jwt.header.toString() ==
-                    PresentationRequestMocks.PresentationRequestJwt.header.toString()
-        )
-        assert(
-            presentationRequest.jwt.payload.toString().toCharArray().sort() ==
-                    PresentationRequestMocks.PresentationRequestJwt.payload.toString().toCharArray().sort()
-        )
-        assert(presentationRequest.pushDelegate!!.pushUrl == pushUrl)
-        assert(presentationRequest.pushDelegate!!.pushToken == pushToken)
     }
 }

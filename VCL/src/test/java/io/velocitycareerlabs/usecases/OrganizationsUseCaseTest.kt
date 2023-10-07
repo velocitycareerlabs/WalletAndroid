@@ -12,11 +12,12 @@ import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLService
 import io.velocitycareerlabs.api.entities.data
 import io.velocitycareerlabs.api.entities.VCLOrganizationsSearchDescriptor
+import io.velocitycareerlabs.api.entities.handleResult
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.OrganizationsRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.OrganizationsUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.OrganizationsUseCase
 import io.velocitycareerlabs.impl.extensions.toList
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.OrganizationsMocks
 import org.json.JSONObject
@@ -40,25 +41,29 @@ internal class OrganizationsUseCaseTest {
                     OrganizationsMocks.OrganizationJsonResult
                 ),
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
         val serviceJsonMock = JSONObject(OrganizationsMocks.ServiceJsonStr)
-        var result: VCLResult<VCLOrganizations>? = null
 
         subject.searchForOrganizations(VCLOrganizationsSearchDescriptor(query = "")) {
-            result = it
+            it.handleResult(
+                { orgs ->
+                    val serviceCredentialAgentIssuer = orgs.all[0].serviceCredentialAgentIssuers[0]
+                    assert(serviceCredentialAgentIssuer.payload.toString() == serviceJsonMock.toString())
+                    assert(serviceCredentialAgentIssuer.id == serviceJsonMock.getString(VCLService.KeyId))
+                    assert(serviceCredentialAgentIssuer.type == serviceJsonMock.getString(VCLService.KeyType))
+                    assert(
+                        serviceCredentialAgentIssuer.credentialTypes == serviceJsonMock.getJSONArray(
+                            VCLService.KeyCredentialTypes
+                        ).toList()
+                    )
+                    assert(serviceCredentialAgentIssuer.serviceEndpoint == OrganizationsMocks.ServiceEndpoint)
+                },
+                {
+                    assert(false) { "$it" }
+                }
+            )
         }
-
-        val serviceCredentialAgentIssuer = result!!.data!!.all[0].serviceCredentialAgentIssuers[0]
-        assert(serviceCredentialAgentIssuer.payload.toString() == serviceJsonMock.toString())
-        assert(serviceCredentialAgentIssuer.id == serviceJsonMock.getString(VCLService.KeyId))
-        assert(serviceCredentialAgentIssuer.type == serviceJsonMock.getString(VCLService.KeyType))
-        assert(
-            serviceCredentialAgentIssuer.credentialTypes == serviceJsonMock.getJSONArray(
-                VCLService.KeyCredentialTypes
-            ).toList()
-        )
-        assert(serviceCredentialAgentIssuer.serviceEndpoint == OrganizationsMocks.ServiceEndpoint)
     }
 
     @After

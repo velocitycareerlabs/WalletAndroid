@@ -1,5 +1,5 @@
 /**
- * Created by Michael Avoyan on 4/28/21.
+ * Created by Michael Avoyan on 02/10/2023.
  *
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
@@ -7,17 +7,11 @@
 
 package io.velocitycareerlabs.api.jwt
 
-import com.nimbusds.jose.*
-import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.VCLJwt
+import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
+import io.velocitycareerlabs.api.entities.VCLResult
 
-interface VCLJwtService {
-    @Throws(JOSEException::class)
-    fun verify(
-        jwt: VCLJwt,
-        publicPublic: VCLPublicJwk,
-        completionBlock: (VCLResult<Boolean>) -> Unit
-    )
-
+interface VCLJwtSignService {
     fun sign(
         kid: String? = null,
         nonce: String? = null,

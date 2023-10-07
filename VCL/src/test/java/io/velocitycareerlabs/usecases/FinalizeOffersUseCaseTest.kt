@@ -9,7 +9,7 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.FinalizeOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
@@ -21,11 +21,13 @@ import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierImpl
 import io.velocitycareerlabs.impl.domain.usecases.FinalizeOffersUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
+import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
+import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CommonMocks
 import io.velocitycareerlabs.infrastructure.resources.CredentialTypesModelMock
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.GenerateOffersMocks
@@ -43,12 +45,12 @@ internal class FinalizeOffersUseCaseTest {
 
     lateinit var subject: FinalizeOffersUseCase
 
-    lateinit var didJwk: VCLDidJwk
+    private lateinit var didJwk: VCLDidJwk
     private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
-    lateinit var credentialManifestFailed: VCLCredentialManifest
-    lateinit var credentialManifestPassed: VCLCredentialManifest
-    lateinit var finalizeOffersDescriptorFailed: VCLFinalizeOffersDescriptor
-    lateinit var finalizeOffersDescriptorPassed: VCLFinalizeOffersDescriptor
+    private lateinit var credentialManifestFailed: VCLCredentialManifest
+    private lateinit var credentialManifestPassed: VCLCredentialManifest
+    private lateinit var finalizeOffersDescriptorFailed: VCLFinalizeOffersDescriptor
+    private lateinit var finalizeOffersDescriptorPassed: VCLFinalizeOffersDescriptor
     private val vclJwtFailed = VCLJwt(encodedJwt = CredentialManifestMocks.JwtCredentialManifest1)
     private val vclJwtPassed =
         VCLJwt(encodedJwt = CredentialManifestMocks.JwtCredentialManifestFromRegularIssuer)
@@ -118,13 +120,13 @@ internal class FinalizeOffersUseCaseTest {
 
     @Test
     fun testFailedCredentials() {
-        // Arrange
         subject = FinalizeOffersUseCaseImpl(
             FinalizeOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = CredentialMocks.JwtCredentialsFromRegularIssuer)
             ),
             JwtServiceRepositoryImpl(
-                VCLJwtServiceLocalImpl(keyService)
+                VCLJwtSignServiceLocalImpl(keyService),
+                VCLJwtVerifyServiceLocalImpl()
             ),
             CredentialIssuerVerifierImpl(
                 CredentialTypesModelMock(
@@ -170,7 +172,8 @@ internal class FinalizeOffersUseCaseTest {
                 NetworkServiceSuccess(validResponse = CredentialMocks.JwtCredentialsFromRegularIssuer)
             ),
             JwtServiceRepositoryImpl(
-                VCLJwtServiceLocalImpl(keyService)
+                VCLJwtSignServiceLocalImpl(keyService),
+                VCLJwtVerifyServiceLocalImpl()
             ),
             CredentialIssuerVerifierImpl(
                 CredentialTypesModelMock(
@@ -217,7 +220,8 @@ internal class FinalizeOffersUseCaseTest {
                 NetworkServiceSuccess(validResponse = CredentialMocks.JwtEmptyCredentials)
             ),
             JwtServiceRepositoryImpl(
-                VCLJwtServiceLocalImpl(keyService)
+                VCLJwtSignServiceLocalImpl(keyService),
+                VCLJwtVerifyServiceLocalImpl()
             ),
             CredentialIssuerVerifierImpl(
                 CredentialTypesModelMock(

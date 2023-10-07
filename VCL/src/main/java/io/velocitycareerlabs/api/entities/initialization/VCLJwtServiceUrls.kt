@@ -6,5 +6,5 @@ package io.velocitycareerlabs.api.entities.initialization
 
 data class VCLJwtServiceUrls(
     val jwtSignServiceUrl: String,
-    val jwtVerifyServiceUrl: String
+    val jwtVerifyServiceUrl: String? = null
 )
