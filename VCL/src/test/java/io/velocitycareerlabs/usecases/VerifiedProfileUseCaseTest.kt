@@ -8,17 +8,12 @@
 package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.api.entities.VCLServiceType
-import io.velocitycareerlabs.api.entities.VCLServiceTypes
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.VerifiedProfileRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.VerifiedProfileUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.VerifiedProfileUseCase
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
-import org.json.JSONObject
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
 internal class VerifiedProfileUseCaseTest {
@@ -31,24 +26,25 @@ internal class VerifiedProfileUseCaseTest {
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1)
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
-
-        var result: VCLResult<VCLVerifiedProfile>? = null
 
         subject.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
             )
         ) {
-            result = it
+            it.handleResult(
+                { verifiedProfile ->
+                    assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
+                    assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
+                    assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+                },
+                {
+                    assert(false) { "$it" }
+                }
+            )
         }
-
-        val verifiedProfile = result!!.data!!
-
-        assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
-        assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
-        assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
     }
 
     @Test
@@ -57,24 +53,25 @@ internal class VerifiedProfileUseCaseTest {
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
-
-        var result: VCLResult<VCLVerifiedProfile>? = null
 
         subject.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
             )
         ) {
-            result = it
+            it.handleResult(
+                { verifiedProfile ->
+                    assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
+                    assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
+                    assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+                },
+                {
+                    assert(false) { "$it" }
+                }
+            )
         }
-
-        val verifiedProfile = result!!.data!!
-
-        assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
-        assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
-        assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
     }
 
     @Test
@@ -83,24 +80,25 @@ internal class VerifiedProfileUseCaseTest {
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
-
-        var result: VCLResult<VCLVerifiedProfile>? = null
 
         subject.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
             )
         ) {
-            result = it
+            it.handleResult(
+                { verifiedProfile ->
+                    assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
+                    assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
+                    assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+                },
+                {
+                    assert(false) { "$it" }
+                }
+            )
         }
-
-        val verifiedProfile = result!!.data!!
-
-        assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
-        assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
-        assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
     }
 
     @Test
@@ -109,24 +107,25 @@ internal class VerifiedProfileUseCaseTest {
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
-
-        var result: VCLResult<VCLVerifiedProfile>? = null
 
         subject.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
             )
         ) {
-            result = it
+            it.handleResult(
+                { verifiedProfile ->
+                    assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
+                    assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
+                    assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+                },
+                {
+                    assert(false) { "$it" }
+                }
+            )
         }
-
-        val verifiedProfile = result!!.data!!
-
-        assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
-        assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
-        assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
     }
 
     @Test
@@ -135,23 +134,24 @@ internal class VerifiedProfileUseCaseTest {
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
-
-        var result: VCLResult<VCLVerifiedProfile>? = null
 
         subject.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
             )
         ) {
-            result = it
+            it.handleResult(
+                { verifiedProfile ->
+                    assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
+                    assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
+                    assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+                },
+                {
+                    assert(false) { "$it" }
+                }
+            )
         }
-
-        val verifiedProfile = result!!.data!!
-
-        assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
-        assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
-        assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
     }
 }

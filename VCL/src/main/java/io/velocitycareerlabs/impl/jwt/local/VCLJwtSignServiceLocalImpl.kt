@@ -1,48 +1,36 @@
 /**
- * Created by Michael Avoyan on 3/25/21.
+ * Created by Michael Avoyan on 02/10/2023.
  *
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.impl.jwt
+package io.velocitycareerlabs.impl.jwt.local
 
-import com.nimbusds.jose.*
+import com.nimbusds.jose.JOSEObjectType
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.ECDSASigner
-import com.nimbusds.jose.crypto.ECDSAVerifier
 import com.nimbusds.jose.jwk.ECKey
-import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.VCLJwt
+import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
+import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.error.VCLError
-import io.velocitycareerlabs.impl.GlobalConfig
-import io.velocitycareerlabs.api.jwt.VCLJwtService
+import io.velocitycareerlabs.api.entities.handleResult
+import io.velocitycareerlabs.api.jwt.VCLJwtSignService
 import io.velocitycareerlabs.api.keys.VCLKeyService
+import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.extensions.addClaims
 import io.velocitycareerlabs.impl.extensions.addDays
 import io.velocitycareerlabs.impl.extensions.randomString
 import java.lang.Exception
-import java.util.*
+import java.util.Date
 
-internal class VCLJwtServiceLocalImpl(
+class VCLJwtSignServiceLocalImpl(
     private val keyService: VCLKeyService
-): VCLJwtService {
-    override fun verify(
-        jwt: VCLJwt,
-        publicPublic: VCLPublicJwk,
-        completionBlock: (VCLResult<Boolean>) -> Unit
-    ) {
-        try {
-            completionBlock(
-                VCLResult.Success(
-                    jwt.signedJwt?.verify(ECDSAVerifier(JWK.parse(publicPublic.valueStr).toECKey())) == true
-                )
-            )
-        } catch (ex: Exception) {
-            completionBlock(VCLResult.Failure(VCLError(ex)))
-        }
-    }
+): VCLJwtSignService {
     override fun sign(
         kid: String?,
         nonce: String?,

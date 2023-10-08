@@ -8,13 +8,11 @@
 package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.VCLCountries
-import io.velocitycareerlabs.api.entities.VCLResult
-import io.velocitycareerlabs.api.entities.data
 import io.velocitycareerlabs.api.entities.handleResult
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.CountriesRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CountriesUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CountriesUseCase
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.EmptyCacheService
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.CountriesMocks
@@ -41,7 +39,7 @@ class CountriesUseCaseTest {
                 ),
                 EmptyCacheService()
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
 
         subject.getCountries(0) {

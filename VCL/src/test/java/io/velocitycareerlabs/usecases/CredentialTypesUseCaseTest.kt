@@ -8,10 +8,10 @@
 package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.CredentialTypesRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialTypesUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUseCase
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.EmptyCacheService
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypesMocks
@@ -30,24 +30,25 @@ internal class CredentialTypesUseCaseTest {
 
     @Test
     fun testGetCredentialTypes() {
-//        Arrange
         subject = CredentialTypesUseCaseImpl(
             CredentialTypesRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesMocks.CredentialTypesJson),
                 EmptyCacheService()
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
-        var result: VCLResult<VCLCredentialTypes>? = null
 
-//        Action
         subject.getCredentialTypes(0) {
-            result = it
+            it.handleResult(
+                { credentialTypes ->
+                    compareCredentialTypes(credentialTypes.all!!, geExpectedCredentialTypesArr())
+                    compareCredentialTypes(credentialTypes.recommendedTypes!!, geExpectedRecommendedCredentialTypesArr())
+                },
+                {
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
         }
-
-//        Assert
-        compareCredentialTypes(result!!.data!!.all!!, geExpectedCredentialTypesArr())
-        compareCredentialTypes(result!!.data!!.recommendedTypes!!, geExpectedRecommendedCredentialTypesArr())
     }
 
     private fun compareCredentialTypes(

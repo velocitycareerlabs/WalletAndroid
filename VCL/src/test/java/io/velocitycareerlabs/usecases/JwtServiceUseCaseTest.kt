@@ -9,16 +9,17 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.JwtServiceUseCaseImpl
 import io.velocitycareerlabs.api.keys.VCLKeyService
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.domain.usecases.JwtServiceUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.extensions.toPublicJwk
+import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
+import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
 import org.junit.After
 import org.junit.Before
@@ -36,19 +37,18 @@ internal class JwtServiceUseCaseTest {
 
     @Before
     fun setUp() {
+        keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
         subject = JwtServiceUseCaseImpl(
             JwtServiceRepositoryImpl(
-                VCLJwtServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance))
+                VCLJwtSignServiceLocalImpl(keyService),
+                VCLJwtVerifyServiceLocalImpl()
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
-        keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
     }
 
     @Test
     fun testSign() {
-        var resultJwt: VCLResult<VCLJwt>? = null
-
         subject.generateSignedJwt(
             jwtDescriptor = VCLJwtDescriptor(
                 payload = JwtServiceMocks.Json.toJsonObject()!!,
@@ -56,20 +56,21 @@ internal class JwtServiceUseCaseTest {
                 iss = "some iss"
             )
         ) {
-            resultJwt = it
+            it.handleResult(
+                { jwt ->
+                    assert(jwt.header?.toJSONObject()?.get("alg") as? String == "ES256K")
+                    assert(((jwt.header?.toJSONObject()?.get("jwk") as? Map<String, Any>)!!["crv"] as? String) == "secp256k1")
+                    assert(jwt.header?.toJSONObject()?.get("typ") as? String == "JWT")
+                },
+                {
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
         }
-
-        val jwt = resultJwt?.data
-        assert(jwt!!.header?.toJSONObject()?.get("alg") as? String == "ES256K")
-        assert(((jwt.header?.toJSONObject()?.get("jwk") as? Map<String, Any>)!!["crv"] as? String) == "secp256k1")
-        assert(jwt.header?.toJSONObject()?.get("typ") as? String == "JWT")
     }
 
     @Test
     fun testSignVerify() {
-        var resultJwt: VCLResult<VCLJwt>? = null
-        var resultVerified: VCLResult<Boolean>? = null
-
         subject.generateSignedJwt(
             jwtDescriptor = VCLJwtDescriptor(
                 payload = JwtServiceMocks.Json.toJsonObject()!!,
@@ -77,27 +78,33 @@ internal class JwtServiceUseCaseTest {
                 iss = "some iss"
             )
         ) {
-            resultJwt = it
+            it.handleResult(
+                { jwt ->
+                    subject.verifyJwt(
+                        jwt = jwt,
+                        publicJwk = VCLPublicJwk(valueStr = jwt.header?.jwk.toString())
+                    ) { isVerifiedRes ->
+                        isVerifiedRes.handleResult(
+                            { isVerified ->
+                                assert(isVerified)
+                            },
+                            {
+                                assert(false) { "${it.toJsonObject()}" }
+                            }
+                        )
+                    }
+                },
+                {
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
         }
-
-        val jwt = resultJwt?.data
-        subject.verifyJwt(
-            jwt = jwt!!,
-            publicJwk = VCLPublicJwk(valueStr = jwt.header?.jwk.toString())
-        ) {
-            resultVerified = it
-        }
-        val isVerified = resultVerified?.data as Boolean
-        assert(isVerified)
     }
 
     @Test
     fun testSignByExistingKey() {
         keyService.generateDidJwk { didJwkResult ->
             didJwkResult.handleResult({ didJwk ->
-                var resultJwt: VCLResult<VCLJwt>? = null
-                var resultVerified: VCLResult<Boolean>? = null
-
                 subject.generateSignedJwt(
                     kid = didJwk.kid,
                     nonce = "some nonce",
@@ -107,22 +114,32 @@ internal class JwtServiceUseCaseTest {
                         jti = "some jti",
                         iss = "some iss"
                     )
-                ) {
-                    resultJwt = it
-                }
-                val jwt = resultJwt?.data
-                subject.verifyJwt(
-                    jwt = jwt!!,
+                ) { jwtRes ->
+                    jwtRes.handleResult(
+                        { jwt ->
+                            subject.verifyJwt(
+                                jwt = jwt,
 //                    publicJwk = VCLPublicJwk(valueStr = jwt.header.jwk.toString())
-                    // Person binding provided did:jwk only:
-                    publicJwk = jwt.header?.toJSONObject()?.get("kid").toString().toPublicJwk()
-                ) {
-                    resultVerified = it
+                                // Person binding provided did:jwk only:
+                                publicJwk = jwt.header?.toJSONObject()?.get("kid").toString().toPublicJwk()
+                            ) { isVerifiedRes ->
+                                isVerifiedRes.handleResult(
+                                    { isVerified ->
+                                        assert(isVerified)
+                                    },
+                                    {
+                                        assert(false) { "${it.toJsonObject()}" }
+                                    }
+                                )
+                            }
+                        },
+                        {
+                            assert(false) { "${it.toJsonObject()}" }
+                        }
+                    )
                 }
-                val isVerified = resultVerified?.data as Boolean
-                assert(isVerified)
             }, {
-                assert(false) { "Failed to generate did:jwk $it" }
+                assert(false) { "Failed to generate did:jwk ${it.toJsonObject()}" }
             })
         }
     }
