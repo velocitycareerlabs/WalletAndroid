@@ -64,7 +64,7 @@ interface VCL {
 
     fun checkForOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        token: VCLToken,
+        issuingToken: VCLToken,
         successHandler: (VCLOffers) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -72,7 +72,7 @@ interface VCL {
     fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         didJwk: VCLDidJwk? = null,
-        token: VCLToken,
+        issuingToken: VCLToken,
         successHandler: (VCLJwtVerifiableCredentials) -> Unit,
         errorHandler: (VCLError) -> Unit
     )

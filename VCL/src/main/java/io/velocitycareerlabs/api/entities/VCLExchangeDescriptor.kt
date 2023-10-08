@@ -15,7 +15,7 @@ data class VCLExchangeDescriptor(
     val processUri: String get() = presentationSubmission.progressUri
     val did: String get() = presentationSubmission.iss
     val exchangeId: String get() = submissionResult.exchange.id
-    val token: VCLToken get() = submissionResult.token
+    val issuingToken: VCLToken get() = submissionResult.issuingToken
 
     companion object CodingKeys {
         const val KeyExchangeId = "exchange_id"

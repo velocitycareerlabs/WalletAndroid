@@ -9,7 +9,6 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.FinalizeOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
@@ -79,7 +78,7 @@ internal class FinalizeOffersUseCaseTest {
             ),
             EmptyExecutor()
         ).generateOffers(
-            token = VCLToken(value = ""),
+            issuingToken = VCLToken(value = ""),
             generateOffersDescriptor = generateOffersDescriptor
         ) { result ->
             result.handleResult(

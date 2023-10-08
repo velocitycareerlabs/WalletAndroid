@@ -372,7 +372,7 @@ internal class VCLImpl: VCL {
                 { identificationSubmission ->
                     invokeGenerateOffersUseCase(
                         generateOffersDescriptor = generateOffersDescriptor,
-                        token = identificationSubmission.token,
+                        issuingToken = identificationSubmission.issuingToken,
                         successHandler = successHandler,
                         errorHandler = errorHandler
                     )
@@ -387,13 +387,13 @@ internal class VCLImpl: VCL {
 
     override fun checkForOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        token: VCLToken,
+        issuingToken: VCLToken,
         successHandler: (VCLOffers) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         invokeGenerateOffersUseCase(
             generateOffersDescriptor = generateOffersDescriptor,
-            token = token,
+            issuingToken = issuingToken,
             successHandler = successHandler,
             errorHandler = errorHandler
         )
@@ -401,13 +401,13 @@ internal class VCLImpl: VCL {
 
     private fun invokeGenerateOffersUseCase(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        token: VCLToken,
+        issuingToken: VCLToken,
         successHandler: (VCLOffers) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         generateOffersUseCase.generateOffers(
-            token,
-            generateOffersDescriptor
+            generateOffersDescriptor,
+            issuingToken
         ) { vnOffersResult ->
             vnOffersResult.handleResult(
                 {
@@ -424,14 +424,14 @@ internal class VCLImpl: VCL {
     override fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         didJwk: VCLDidJwk?,
-        token: VCLToken,
+        issuingToken: VCLToken,
         successHandler: (VCLJwtVerifiableCredentials) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         finalizeOffersUseCase.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptor,
             didJwk = didJwk,
-            token = token
+            token = issuingToken
         ) { jwtVerifiableCredentials ->
             jwtVerifiableCredentials.handleResult(
                 {

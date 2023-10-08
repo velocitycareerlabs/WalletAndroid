@@ -17,12 +17,15 @@ internal class GenerateOffersUseCaseImpl(
     private val executor: Executor
 ): GenerateOffersUseCase {
     override fun generateOffers(
-        token: VCLToken,
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
+        issuingToken: VCLToken,
         completionBlock: (VCLResult<VCLOffers>) -> Unit
     ) {
         executor.runOnBackground {
-            generateOffersRepository.generateOffers(token, generateOffersDescriptor) {
+            generateOffersRepository.generateOffers(
+                generateOffersDescriptor,
+                issuingToken
+            ) {
                 executor.runOnMain {
                     completionBlock(it)
                 }

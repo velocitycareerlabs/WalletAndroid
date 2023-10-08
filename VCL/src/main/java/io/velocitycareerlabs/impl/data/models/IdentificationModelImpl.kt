@@ -25,7 +25,7 @@ internal class IdentificationModelImpl(
             submission = identificationSubmission,
             didJwk = didJwk
         ) { result ->
-            result.handleResult({ data = result.data?.token }, { })
+            result.handleResult({ data = result.data?.issuingToken }, { })
             completionBlock(result)
         }
     }

@@ -22,9 +22,9 @@ internal class FinalizeOffersRepositoryImpl(
     private val TAG = FinalizeOffersRepositoryImpl::class.simpleName
 
     override fun finalizeOffers(
-        token: VCLToken,
-        proof: VCLJwt,
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
+        issuingToken: VCLToken,
+        proof: VCLJwt,
         completionBlock: (VCLResult<List<String>>) -> Unit
     ) {
         networkService.sendRequest(
@@ -32,7 +32,7 @@ internal class FinalizeOffersRepositoryImpl(
             headers = listOf(
                 Pair(
                     HeaderKeys.HeaderKeyAuthorization,
-                    "${HeaderKeys.HeaderValuePrefixBearer} ${token.value}"
+                    "${HeaderKeys.HeaderValuePrefixBearer} ${issuingToken.value}"
                 ),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
