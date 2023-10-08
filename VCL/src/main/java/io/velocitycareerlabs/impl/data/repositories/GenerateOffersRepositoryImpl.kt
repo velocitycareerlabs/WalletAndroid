@@ -24,9 +24,11 @@ internal class GenerateOffersRepositoryImpl(
 ): GenerateOffersRepository {
     private val TAG = GenerateOffersRepositoryImpl::class.simpleName
 
-    override fun generateOffers(token: VCLToken,
-                                generateOffersDescriptor: VCLGenerateOffersDescriptor,
-                                completionBlock: (VCLResult<VCLOffers>) -> Unit) {
+    override fun generateOffers(
+        generateOffersDescriptor: VCLGenerateOffersDescriptor,
+        token: VCLToken,
+        completionBlock: (VCLResult<VCLOffers>) -> Unit
+    ) {
         networkService.sendRequest(
             endpoint = generateOffersDescriptor.checkOffersUri,
             headers = listOf(
@@ -55,14 +57,14 @@ internal class GenerateOffersRepositoryImpl(
         )
     }
 
-    private fun parse(offersResponse: Response, token: VCLToken): VCLOffers {
+    private fun parse(offersResponse: Response, issuingToken: VCLToken): VCLOffers {
 //        VCLXVnfProtocolVersion.XVnfProtocolVersion2
         offersResponse.payload.toJsonObject()?.let { payload ->
             return VCLOffers(
                 payload = payload,
                 all = payload.optJSONArray(VCLOffers.CodingKeys.KeyOffers) ?: JSONArray(),
                 responseCode = offersResponse.code,
-                token = token,
+                issuingToken = issuingToken,
                 challenge = payload.optString(VCLOffers.CodingKeys.KeyChallenge) ?: ""
             )
         } ?: run {
@@ -72,7 +74,7 @@ internal class GenerateOffersRepositoryImpl(
                     payload = JSONObject(),
                     all = allOffers,
                     responseCode = offersResponse.code,
-                    token = token,
+                    issuingToken = issuingToken,
                     challenge = ""
                 )
             } ?: run {
@@ -81,7 +83,7 @@ internal class GenerateOffersRepositoryImpl(
                     payload = JSONObject(),
                     all = JSONArray(),
                     responseCode = offersResponse.code,
-                    token = token,
+                    issuingToken = issuingToken,
                     challenge = ""
                 )
             }

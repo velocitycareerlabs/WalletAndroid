@@ -47,8 +47,8 @@ internal class GenerateOffersUseCaseTest {
             )
         )
         subject.generateOffers(
-            token = VCLToken(value = ""),
-            generateOffersDescriptor = generateOffersDescriptor
+            generateOffersDescriptor = generateOffersDescriptor,
+            issuingToken = VCLToken(value = "")
         ) {
             it.handleResult(
                 { offers ->
@@ -83,8 +83,8 @@ internal class GenerateOffersUseCaseTest {
 
         // Action
         subject.generateOffers(
-            token = VCLToken(value = ""),
-            generateOffersDescriptor = generateOffersDescriptor
+            generateOffersDescriptor = generateOffersDescriptor,
+            issuingToken = VCLToken(value = "")
         ) {
             it.handleResult(
                 {offers ->
@@ -115,8 +115,8 @@ internal class GenerateOffersUseCaseTest {
 
         // Action
         subject.generateOffers(
-            token = VCLToken(value = ""),
-            generateOffersDescriptor = generateOffersDescriptor
+            generateOffersDescriptor = generateOffersDescriptor,
+            issuingToken = VCLToken(value = "")
         ) {
             it.handleResult(
                 { offers ->

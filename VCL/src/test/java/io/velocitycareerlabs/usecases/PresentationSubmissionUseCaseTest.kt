@@ -82,7 +82,7 @@ internal class PresentationSubmissionUseCaseTest {
         ) {
             it.handleResult(
                 { presentationSubmissionResult ->
-                    assert(presentationSubmissionResult!!.token.value == expectedPresentationSubmissionResult.token.value)
+                    assert(presentationSubmissionResult!!.issuingToken.value == expectedPresentationSubmissionResult.issuingToken.value)
                     assert(presentationSubmissionResult.exchange.id == expectedPresentationSubmissionResult.exchange.id)
                     assert(presentationSubmissionResult.jti == expectedPresentationSubmissionResult.jti)
                     assert(presentationSubmissionResult.submissionId == expectedPresentationSubmissionResult.submissionId)
@@ -101,7 +101,7 @@ internal class PresentationSubmissionUseCaseTest {
     ): VCLSubmissionResult {
         val exchangeJsonObj = jsonObj.optJSONObject(VCLSubmissionResult.CodingKeys.KeyExchange)!!
         return VCLSubmissionResult(
-            token = VCLToken(value = (jsonObj[VCLSubmissionResult.CodingKeys.KeyToken] as String)),
+            issuingToken = VCLToken(value = (jsonObj[VCLSubmissionResult.CodingKeys.KeyToken] as String)),
             exchange = expectedExchange(exchangeJsonObj),
             jti = jti,
             submissionId = submissionId

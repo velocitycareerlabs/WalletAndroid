@@ -12,17 +12,12 @@ import android.util.Log
 import androidx.core.view.isVisible
 import com.vcl.wallet.databinding.ActivityMainBinding
 import io.velocitycareerlabs.api.VCL
-import io.velocitycareerlabs.api.VCLCryptoServiceType
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCLProvider
 import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
-import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescriptor
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
-import io.velocitycareerlabs.api.entities.initialization.VCLJwtServiceUrls
-import io.velocitycareerlabs.api.entities.initialization.VCLKeyServiceUrls
-import io.velocitycareerlabs.api.entities.initialization.VCLRemoteCryptoServicesUrlsDescriptor
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
@@ -279,13 +274,13 @@ class MainActivity : AppCompatActivity() {
             { offers ->
                 Log.d(TAG, "VCL Generated Offers: ${offers.all}")
                 Log.d(TAG, "VCL Generated Offers Response Code: ${offers.responseCode}")
-                Log.d(TAG, "VCL Generated Offers Token: ${offers.token}")
+                Log.d(TAG, "VCL Generated Offers Token: ${offers.issuingToken}")
 
 //                Check offers invoked after the push notification is notified the app that offers are ready:
                 checkForOffers(
                     credentialManifest = credentialManifest,
                     generateOffersDescriptor = generateOffersDescriptor,
-                    token = offers.token
+                    issuingToken = offers.issuingToken
                 )
             },
             { error ->
@@ -297,15 +292,15 @@ class MainActivity : AppCompatActivity() {
     private fun checkForOffers(
         credentialManifest: VCLCredentialManifest,
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        token: VCLToken
+        issuingToken: VCLToken
     ) {
         vcl.checkForOffers(
             generateOffersDescriptor = generateOffersDescriptor,
-            token = token,
+            issuingToken = issuingToken,
             { offers ->
                 Log.d(TAG, "VCL Checked Offers: ${offers.all}")
                 Log.d(TAG, "VCL Checked Offers Response Code: ${offers.responseCode}")
-                Log.d(TAG, "VCL Checked Offers Token: ${offers.token}")
+                Log.d(TAG, "VCL Checked Offers Token: ${offers.issuingToken}")
                 if (offers.responseCode == 200) {
                     finalizeOffers(
                         credentialManifest = credentialManifest,
@@ -333,7 +328,7 @@ class MainActivity : AppCompatActivity() {
         vcl.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptor,
             didJwk = didJwk,
-            token = offers.token,
+            issuingToken = offers.issuingToken,
             { verifiableCredentials ->
                 Log.d(TAG, "VCL finalized Offers")
                 Log.d(

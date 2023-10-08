@@ -8,7 +8,6 @@
 package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.VCLExchange
-import io.velocitycareerlabs.api.entities.VCLPresentationRequest
 import io.velocitycareerlabs.api.entities.VCLSubmissionResult
 import io.velocitycareerlabs.api.entities.VCLToken
 import org.junit.Before
@@ -34,7 +33,7 @@ class VCLSubmissionResultTest {
 
     @Test
     fun testProps() {
-        assert(subject.token.value == "token123")
+        assert(subject.issuingToken.value == "token123")
         assert(subject.exchange.id == "id123")
         assert(subject.exchange.type == "type123")
         assert(subject.exchange.exchangeComplete)
