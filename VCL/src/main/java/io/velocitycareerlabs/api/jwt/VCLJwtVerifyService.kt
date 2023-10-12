@@ -10,11 +10,13 @@ package io.velocitycareerlabs.api.jwt
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.VCLToken
 
 interface VCLJwtVerifyService {
     fun verify(
         jwt: VCLJwt,
-        publicPublic: VCLPublicJwk,
+        publicJwk: VCLPublicJwk,
+        remoteCryptoServicesToken: VCLToken? = null,
         completionBlock: (VCLResult<Boolean>) -> Unit
     )
 }

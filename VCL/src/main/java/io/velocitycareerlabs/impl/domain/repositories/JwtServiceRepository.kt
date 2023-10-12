@@ -17,12 +17,14 @@ internal interface JwtServiceRepository {
     fun verifyJwt(
         jwt: VCLJwt,
         publicJwk: VCLPublicJwk,
+        remoteCryptoServicesToken: VCLToken? = null,
         completionBlock: (VCLResult<Boolean>) -> Unit
     )
     fun generateSignedJwt(
         kid: String? = null,
         nonce: String? = null,
         jwtDescriptor: VCLJwtDescriptor,
+        remoteCryptoServicesToken: VCLToken? = null,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     )
 }

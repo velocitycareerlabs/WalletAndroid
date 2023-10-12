@@ -35,9 +35,14 @@ internal class JwtServiceRepositoryImpl(
     override fun verifyJwt(
         jwt: VCLJwt,
         publicJwk: VCLPublicJwk,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        jwtVerifyService.verify(jwt, publicJwk) {
+        jwtVerifyService.verify(
+            jwt = jwt,
+            publicJwk = publicJwk,
+            remoteCryptoServicesToken = remoteCryptoServicesToken
+        ) {
             completionBlock(it)
         }
     }
@@ -46,12 +51,14 @@ internal class JwtServiceRepositoryImpl(
         kid: String?, // did:jwk in case of person binding
         nonce: String?, // nonce == challenge
         jwtDescriptor: VCLJwtDescriptor,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
         jwtSignService.sign(
             kid = kid,
             nonce = nonce,
-            jwtDescriptor = jwtDescriptor
+            jwtDescriptor = jwtDescriptor,
+            remoteCryptoServicesToken = remoteCryptoServicesToken,
         ) {
             completionBlock(it)
         }

@@ -41,8 +41,8 @@ class Params {
 }
 
 object HeaderKeys {
-    const val HeaderKeyAuthorization = "Authorization"
-    const val HeaderValuePrefixBearer = "Bearer"
+    const val Authorization = "Authorization"
+    const val Bearer = "Bearer"
     const val XVnfProtocolVersion = "x-vnf-protocol-version"
 }
 

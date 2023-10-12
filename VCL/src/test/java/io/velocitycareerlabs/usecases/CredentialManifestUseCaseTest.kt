@@ -65,18 +65,19 @@ internal class CredentialManifestUseCaseTest {
                 deepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet,
                 issuingType = VCLIssuingType.Career
             ),
-            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!),
+            remoteCryptoServicesToken = null
         ) {
             it.handleResult(
                 { credentialManifest ->
-                    assert(credentialManifest?.jwt?.encodedJwt == CredentialManifestMocks.JwtCredentialManifest1)
+                    assert(credentialManifest.jwt.encodedJwt == CredentialManifestMocks.JwtCredentialManifest1)
                     JSONAssert.assertEquals(
-                        credentialManifest?.jwt?.header.toString(),
+                        credentialManifest.jwt.header.toString(),
                         CredentialManifestMocks.Header,
                         JSONCompareMode.LENIENT
                     )
                     assert(
-                        credentialManifest?.jwt?.payload.toString()
+                        credentialManifest.jwt.payload.toString()
                             .replace("$", "")
                             .toCharArray()
                             .sort().toString() ==
@@ -85,7 +86,7 @@ internal class CredentialManifestUseCaseTest {
                                     .toCharArray()
                                     .sort().toString()
                     ) //removed $ to compare
-                    assert(credentialManifest?.jwt?.signature.toString() == CredentialManifestMocks.Signature)
+                    assert(credentialManifest.jwt.signature.toString() == CredentialManifestMocks.Signature)
                 },
                 {
                     assert(false) { "$it" }

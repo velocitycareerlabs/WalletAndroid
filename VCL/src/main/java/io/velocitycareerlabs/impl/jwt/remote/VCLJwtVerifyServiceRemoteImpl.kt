@@ -10,8 +10,8 @@ package io.velocitycareerlabs.impl.jwt.remote
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.api.entities.initialization.VCLJwtServiceUrls
 import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.repositories.HeaderKeys
@@ -26,16 +26,18 @@ internal class VCLJwtVerifyServiceRemoteImpl(
 ): VCLJwtVerifyService {
     override fun verify(
         jwt: VCLJwt,
-        publicPublic: VCLPublicJwk,
+        publicJwk: VCLPublicJwk,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
         networkService.sendRequest(
             endpoint = jwtVerifyServiceUrl,
-            body = generatePayloadToVerify(jwt, publicPublic).toString(),
+            body = generatePayloadToVerify(jwt, publicJwk).toString(),
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.POST,
             headers = listOf(
-                Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
+                Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion),
+                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${remoteCryptoServicesToken?.value}")
             ),
             completionBlock = { verifiedJwtResult ->
                 verifiedJwtResult.handleResult(

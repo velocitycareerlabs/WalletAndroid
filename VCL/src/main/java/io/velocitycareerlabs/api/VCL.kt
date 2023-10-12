@@ -11,6 +11,7 @@ import android.content.Context
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
+import io.velocitycareerlabs.api.entities.initialization.VCLRemoteCryptoServicesUrlsDescriptor
 
 interface VCL {
     fun initialize(
@@ -26,6 +27,7 @@ interface VCL {
 
     fun getPresentationRequest(
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
+        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLPresentationRequest) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -33,6 +35,7 @@ interface VCL {
     fun submitPresentation(
         presentationSubmission: VCLPresentationSubmission,
         didJwk: VCLDidJwk? = null,
+        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLSubmissionResult) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -51,6 +54,7 @@ interface VCL {
 
     fun getCredentialManifest(
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
+        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLCredentialManifest) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -58,6 +62,7 @@ interface VCL {
     fun generateOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
         didJwk: VCLDidJwk? = null,
+        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLOffers) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -73,6 +78,7 @@ interface VCL {
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         didJwk: VCLDidJwk? = null,
         issuingToken: VCLToken,
+        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLJwtVerifiableCredentials) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -92,17 +98,20 @@ interface VCL {
     fun verifyJwt(
         jwt: VCLJwt,
         publicJwk: VCLPublicJwk,
+        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (Boolean) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
 
     fun generateSignedJwt(
         jwtDescriptor: VCLJwtDescriptor,
+        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLJwt) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
 
     fun generateDidJwk(
+        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLDidJwk) -> Unit,
         errorHandler: (VCLError) -> Unit
     )

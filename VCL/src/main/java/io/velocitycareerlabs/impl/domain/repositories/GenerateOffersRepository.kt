@@ -15,7 +15,7 @@ import io.velocitycareerlabs.api.entities.VCLGenerateOffersDescriptor
 internal interface GenerateOffersRepository {
     fun generateOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        token: VCLToken,
+        issuingToken: VCLToken,
         completionBlock: (VCLResult<VCLOffers>) -> Unit
     )
 }

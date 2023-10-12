@@ -30,7 +30,7 @@ class KeyServiceTest {
 
     @Test
     fun testGenerateDidJwk() {
-        subject.generateDidJwk() { didJwkResult ->
+        subject.generateDidJwk(null) { didJwkResult ->
             didJwkResult.handleResult({ didJwk ->
                 val jwkJson = didJwk.publicJwk.valueJson
 

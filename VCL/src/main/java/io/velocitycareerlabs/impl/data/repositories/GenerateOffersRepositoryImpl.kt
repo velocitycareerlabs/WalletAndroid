@@ -26,13 +26,13 @@ internal class GenerateOffersRepositoryImpl(
 
     override fun generateOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        token: VCLToken,
+        issuingToken: VCLToken,
         completionBlock: (VCLResult<VCLOffers>) -> Unit
     ) {
         networkService.sendRequest(
             endpoint = generateOffersDescriptor.checkOffersUri,
             headers = listOf(
-                Pair(HeaderKeys.HeaderKeyAuthorization, "${HeaderKeys.HeaderValuePrefixBearer} ${token.value}"),
+                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${issuingToken.value}"),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
             body = generateOffersDescriptor.payload.toString(),
@@ -43,7 +43,7 @@ internal class GenerateOffersRepositoryImpl(
                     { offersResponse ->
                         try {
                             completionBlock(VCLResult.Success(
-                                parse(offersResponse, token)
+                                parse(offersResponse, issuingToken)
                             ))
                         } catch (ex: Exception) {
                             completionBlock(VCLResult.Failure(VCLError(ex)))

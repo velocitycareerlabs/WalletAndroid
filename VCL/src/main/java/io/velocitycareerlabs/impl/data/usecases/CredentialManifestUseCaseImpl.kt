@@ -26,6 +26,7 @@ internal class CredentialManifestUseCaseImpl(
     override fun getCredentialManifest(
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
         verifiedProfile: VCLVerifiedProfile,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         executor.runOnBackground {
@@ -39,6 +40,7 @@ internal class CredentialManifestUseCaseImpl(
                                 VCLJwt(jwtStr),
                                 credentialManifestDescriptor,
                                 verifiedProfile,
+                                remoteCryptoServicesToken,
                                 completionBlock
                             )
                         } catch (ex: Exception) {
@@ -57,6 +59,7 @@ internal class CredentialManifestUseCaseImpl(
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
         verifiedProfile: VCLVerifiedProfile,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         jwt.kid?.replace("#", "#".encode())?.let { kid ->
@@ -68,6 +71,7 @@ internal class CredentialManifestUseCaseImpl(
                             jwt,
                             credentialManifestDescriptor,
                             verifiedProfile,
+                            remoteCryptoServicesToken,
                             completionBlock
                         )
                     },
@@ -86,9 +90,14 @@ internal class CredentialManifestUseCaseImpl(
         jwt: VCLJwt,
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
         verifiedProfile: VCLVerifiedProfile,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        jwtServiceRepository.verifyJwt(jwt, publicJwk)
+        jwtServiceRepository.verifyJwt(
+            jwt,
+            publicJwk,
+            remoteCryptoServicesToken
+        )
         { verificationResult ->
             verificationResult.handleResult(
                 { isVerified ->

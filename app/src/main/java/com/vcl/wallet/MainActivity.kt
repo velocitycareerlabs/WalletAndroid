@@ -12,12 +12,17 @@ import android.util.Log
 import androidx.core.view.isVisible
 import com.vcl.wallet.databinding.ActivityMainBinding
 import io.velocitycareerlabs.api.VCL
+import io.velocitycareerlabs.api.VCLCryptoServiceType
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCLProvider
 import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescriptor
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
+import io.velocitycareerlabs.api.entities.initialization.VCLJwtServiceUrls
+import io.velocitycareerlabs.api.entities.initialization.VCLKeyServiceUrls
+import io.velocitycareerlabs.api.entities.initialization.VCLRemoteCryptoServicesUrlsDescriptor
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
@@ -130,15 +135,15 @@ class MainActivity : AppCompatActivity() {
                 pushDelegate = VCLPushDelegate(
                     pushUrl = "pushUrl",
                     pushToken = "pushToken"
-                )
+                ),
             ),
-            { presentationRequest ->
+            successHandler = { presentationRequest ->
                 Log.d(TAG, "VCL Presentation request received: ${presentationRequest.jwt.payload}")
 //                Log.d(TAG, "VCL Presentation request received")
 
                 submitPresentation(presentationRequest)
             },
-            { error ->
+            errorHandler = { error ->
                 logError("VCL Presentation request failed:", error)
             })
     }
@@ -155,7 +160,7 @@ class MainActivity : AppCompatActivity() {
         vcl.submitPresentation(
             presentationSubmission = presentationSubmission,
             didJwk = didJwk,
-            { presentationSubmissionResult ->
+            successHandler = { presentationSubmissionResult ->
                 Log.d(TAG, "VCL Presentation submission result: $presentationSubmissionResult")
                 vcl.getExchangeProgress(
                     VCLExchangeDescriptor(
@@ -169,7 +174,7 @@ class MainActivity : AppCompatActivity() {
                         logError("VCL Presentation exchange progress failed:", error)
                     })
             },
-            { error ->
+            errorHandler = { error ->
                 logError("VCL Presentation submission failed:", error)
             })
     }
@@ -209,13 +214,13 @@ class MainActivity : AppCompatActivity() {
                 credentialIds = Constants.CredentialIdsToRefresh
             )
         vcl.getCredentialManifest(credentialManifestDescriptorRefresh,
-            { credentialManifest ->
+            successHandler = { credentialManifest ->
                 Log.d(
                     TAG,
                     "VCL Credentials refreshed, credential manifest: ${credentialManifest.jwt.payload}"
                 )
             },
-            { error ->
+            errorHandler = { error ->
                 logError("VCL Refresh Credentials failed:", error)
             })
     }
@@ -228,13 +233,13 @@ class MainActivity : AppCompatActivity() {
                 credentialTypes = serviceCredentialAgentIssuer.credentialTypes // Can come from any where
             )
         vcl.getCredentialManifest(credentialManifestDescriptorByOrganization,
-            { credentialManifest ->
+            successHandler = { credentialManifest ->
                 Log.d(TAG, "VCL Credential Manifest received: ${credentialManifest.jwt.payload}")
 //                Log.d(TAG, "VCL Credential Manifest received")
 
                 generateOffers(credentialManifest)
             },
-            { error ->
+            errorHandler = { error ->
                 logError("VCL Credential Manifest failed:", error)
             })
     }
@@ -251,13 +256,13 @@ class MainActivity : AppCompatActivity() {
 //                issuingType = VCLIssuingType.Identity
             )
         vcl.getCredentialManifest(credentialManifestDescriptorByDeepLink,
-            { credentialManifest ->
+            successHandler = { credentialManifest ->
                 Log.d(TAG, "VCL Credential Manifest received: ${credentialManifest.jwt.payload}")
 //                Log.d(TAG, "VCL Credential Manifest received")
 
                 generateOffers(credentialManifest)
             },
-            { error ->
+            errorHandler = { error ->
                 logError("VCL Credential Manifest failed:", error)
             })
     }
@@ -271,7 +276,7 @@ class MainActivity : AppCompatActivity() {
         vcl.generateOffers(
             generateOffersDescriptor = generateOffersDescriptor,
             didJwk = didJwk,
-            { offers ->
+            successHandler = { offers ->
                 Log.d(TAG, "VCL Generated Offers: ${offers.all}")
                 Log.d(TAG, "VCL Generated Offers Response Code: ${offers.responseCode}")
                 Log.d(TAG, "VCL Generated Offers Token: ${offers.issuingToken}")
@@ -283,7 +288,7 @@ class MainActivity : AppCompatActivity() {
                     issuingToken = offers.issuingToken
                 )
             },
-            { error ->
+            errorHandler = { error ->
                 logError("VCL failed to Generate Offers:", error)
             }
         )
@@ -329,7 +334,7 @@ class MainActivity : AppCompatActivity() {
             finalizeOffersDescriptor = finalizeOffersDescriptor,
             didJwk = didJwk,
             issuingToken = offers.issuingToken,
-            { verifiableCredentials ->
+            successHandler = { verifiableCredentials ->
                 Log.d(TAG, "VCL finalized Offers")
                 Log.d(
                     TAG,
@@ -340,7 +345,7 @@ class MainActivity : AppCompatActivity() {
                     "VCL Failed Credentials: ${verifiableCredentials.failedCredentials.map { it.payload }}"
                 )
             },
-            { error ->
+            errorHandler = { error ->
                 logError("VCL failed to finalize Offers:", error)
             }
         )
@@ -378,10 +383,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun verifyJwt() {
         vcl.verifyJwt(
-            Constants.SomeJwt, Constants.SomePublicJwk, { isVerified ->
+            Constants.SomeJwt, Constants.SomePublicJwk,
+            successHandler = { isVerified ->
                 Log.d(TAG, "VCL JWT verified: $isVerified")
             },
-            { error ->
+            errorHandler = { error ->
                 logError("VCL JWT verification failed:", error)
             }
         )
@@ -395,10 +401,10 @@ class MainActivity : AppCompatActivity() {
                 iss = "iss123",
                 jti = "jti123"
             ),
-            { jwt ->
+            successHandler = { jwt ->
                 Log.d(TAG, "VCL JWT generated: ${jwt.encodedJwt}")
             },
-            { error ->
+            errorHandler = { error ->
                 logError("VCL JWT generation failed:", error)
             }
         )
@@ -406,14 +412,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun generateDidJwk() {
         vcl.generateDidJwk(
-            { didJwk ->
+            successHandler = { didJwk ->
                 this.didJwk = didJwk
                 Log.d(
                     TAG,
                     "VCL DID:JWK generated: \ndid: ${didJwk.did}\nkid: ${didJwk.kid}\nkeyId: ${didJwk.keyId}\npublicJwk: ${didJwk.publicJwk.valueStr}"
                 )
             },
-            { error ->
+            errorHandler = { error ->
                 logError("VCL DID:JWK generation failed:", error)
             }
         )

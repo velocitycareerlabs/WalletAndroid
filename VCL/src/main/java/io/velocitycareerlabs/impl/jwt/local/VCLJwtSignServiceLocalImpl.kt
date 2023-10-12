@@ -17,6 +17,7 @@ import com.nimbusds.jwt.SignedJWT
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.jwt.VCLJwtSignService
@@ -35,6 +36,7 @@ class VCLJwtSignServiceLocalImpl(
         kid: String?,
         nonce: String?,
         jwtDescriptor: VCLJwtDescriptor,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
         getSecretReference(jwtDescriptor.keyId) { ecKeyResult ->

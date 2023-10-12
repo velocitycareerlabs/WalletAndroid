@@ -10,10 +10,12 @@ package io.velocitycareerlabs.api.keys
 import com.nimbusds.jose.jwk.ECKey
 import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.error.VCLError
 
 interface VCLKeyService {
     fun generateDidJwk(
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     )
 

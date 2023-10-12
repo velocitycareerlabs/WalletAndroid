@@ -8,7 +8,6 @@
 package io.velocitycareerlabs.impl.domain.repositories
 
 import io.velocitycareerlabs.api.entities.VCLResult
-import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.api.entities.VCLPresentationRequestDescriptor
 
 internal interface PresentationRequestRepository {

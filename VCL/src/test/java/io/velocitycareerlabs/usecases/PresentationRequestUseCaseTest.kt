@@ -62,10 +62,11 @@ internal class PresentationRequestUseCaseTest {
                     pushUrl = pushUrl,
                     pushToken = pushToken
                 )
-            )
+            ),
+            null
         ) {
             it.handleResult(
-                { presentationRequest ->
+                successHandler = { presentationRequest ->
                     assert(
                         presentationRequest.publicJwk.valueStr.toCharArray().sort() ==
                                 VCLPublicJwk(PresentationRequestMocks.JWK.toJsonObject()!!).valueStr.toCharArray().sort()
@@ -86,7 +87,7 @@ internal class PresentationRequestUseCaseTest {
                     assert(presentationRequest.pushDelegate!!.pushUrl == pushUrl)
                     assert(presentationRequest.pushDelegate!!.pushToken == pushToken)
                 },
-                {
+                errorHandler = {
                     assert(false) { "$it" }
                 }
             )

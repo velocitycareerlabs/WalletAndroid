@@ -12,6 +12,7 @@ import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.domain.infrastructure.db.SecretStoreService
 import io.velocitycareerlabs.api.keys.VCLKeyService
@@ -21,6 +22,7 @@ internal class VCLKeyServiceLocalImpl(
     private val secretStoreService: SecretStoreService,
 ): VCLKeyService {
     override fun generateDidJwk(
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     ) {
         generateSecret { ecKeyResult ->
