@@ -10,6 +10,7 @@ package io.velocitycareerlabs.impl.domain.usecases
 import io.velocitycareerlabs.api.entities.VCLCredentialManifest
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptor
+import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 
 /**
@@ -20,6 +21,7 @@ internal interface CredentialManifestUseCase {
     fun getCredentialManifest(
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
         verifiedProfile: VCLVerifiedProfile,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock:(VCLResult<VCLCredentialManifest>) -> Unit
     )
 }

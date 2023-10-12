@@ -54,7 +54,8 @@ internal class JwtServiceUseCaseTest {
                 payload = JwtServiceMocks.Json.toJsonObject()!!,
                 jti = "some jti",
                 iss = "some iss"
-            )
+            ),
+            remoteCryptoServicesToken = null
         ) {
             it.handleResult(
                 { jwt ->
@@ -76,13 +77,15 @@ internal class JwtServiceUseCaseTest {
                 payload = JwtServiceMocks.Json.toJsonObject()!!,
                 jti = "some jti",
                 iss = "some iss"
-            )
+            ),
+            remoteCryptoServicesToken = null
         ) {
             it.handleResult(
                 { jwt ->
                     subject.verifyJwt(
                         jwt = jwt,
-                        publicJwk = VCLPublicJwk(valueStr = jwt.header?.jwk.toString())
+                        publicJwk = VCLPublicJwk(valueStr = jwt.header?.jwk.toString()),
+                        remoteCryptoServicesToken = null
                     ) { isVerifiedRes ->
                         isVerifiedRes.handleResult(
                             { isVerified ->
@@ -103,7 +106,7 @@ internal class JwtServiceUseCaseTest {
 
     @Test
     fun testSignByExistingKey() {
-        keyService.generateDidJwk { didJwkResult ->
+        keyService.generateDidJwk(null) { didJwkResult ->
             didJwkResult.handleResult({ didJwk ->
                 subject.generateSignedJwt(
                     kid = didJwk.kid,
@@ -113,7 +116,8 @@ internal class JwtServiceUseCaseTest {
                         payload = JwtServiceMocks.Json.toJsonObject()!!,
                         jti = "some jti",
                         iss = "some iss"
-                    )
+                    ),
+                    remoteCryptoServicesToken = null
                 ) { jwtRes ->
                     jwtRes.handleResult(
                         { jwt ->
@@ -121,7 +125,8 @@ internal class JwtServiceUseCaseTest {
                                 jwt = jwt,
 //                    publicJwk = VCLPublicJwk(valueStr = jwt.header.jwk.toString())
                                 // Person binding provided did:jwk only:
-                                publicJwk = jwt.header?.toJSONObject()?.get("kid").toString().toPublicJwk()
+                                publicJwk = jwt.header?.toJSONObject()?.get("kid").toString().toPublicJwk(),
+                                remoteCryptoServicesToken = null
                             ) { isVerifiedRes ->
                                 isVerifiedRes.handleResult(
                                     { isVerified ->

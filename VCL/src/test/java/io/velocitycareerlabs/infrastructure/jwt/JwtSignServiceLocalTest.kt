@@ -38,7 +38,7 @@ class JwtSignServiceLocalTest {
 
     @Before
     fun setUp() {
-        keyService.generateDidJwk { jwkResult ->
+        keyService.generateDidJwk(null) { jwkResult ->
             jwkResult.handleResult({
                 didJwk = it
             } ,{

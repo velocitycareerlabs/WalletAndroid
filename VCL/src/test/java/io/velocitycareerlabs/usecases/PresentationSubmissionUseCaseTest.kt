@@ -41,7 +41,7 @@ internal class PresentationSubmissionUseCaseTest {
 
     @Before
     fun setUp() {
-        keyService.generateDidJwk{ didJwkResult ->
+        keyService.generateDidJwk(null) { didJwkResult ->
             didJwkResult.handleResult({
                     didJwk = it
                 }, {
@@ -78,7 +78,8 @@ internal class PresentationSubmissionUseCaseTest {
 
         subject.submit(
             submission = presentationSubmission,
-            didJwk = didJwk
+            didJwk = didJwk,
+            remoteCryptoServicesToken = null
         ) {
             it.handleResult(
                 { presentationSubmissionResult ->

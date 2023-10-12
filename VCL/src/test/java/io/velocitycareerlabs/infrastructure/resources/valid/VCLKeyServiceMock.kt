@@ -10,10 +10,14 @@ package io.velocitycareerlabs.infrastructure.resources.valid
 import com.nimbusds.jose.jwk.ECKey
 import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.keys.VCLKeyService
 
 class VCLKeyServiceMock: VCLKeyService {
-    override fun generateDidJwk(completionBlock: (VCLResult<VCLDidJwk>) -> Unit) {
+    override fun generateDidJwk(
+        remoteCryptoServicesToken: VCLToken?,
+        completionBlock: (VCLResult<VCLDidJwk>) -> Unit
+    ) {
     }
 
     override fun generateSecret(completionBlock: (VCLResult<ECKey>) -> Unit) {

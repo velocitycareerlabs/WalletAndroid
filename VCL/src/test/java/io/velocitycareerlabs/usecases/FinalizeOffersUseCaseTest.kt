@@ -59,7 +59,7 @@ internal class FinalizeOffersUseCaseTest {
 
     @Before
     fun setUp() {
-        keyService.generateDidJwk { didJwkResult ->
+        keyService.generateDidJwk(null) { didJwkResult ->
             didJwkResult.handleResult({
                 didJwk = it
             }, {
@@ -140,7 +140,8 @@ internal class FinalizeOffersUseCaseTest {
         subject.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorFailed,
             didJwk = didJwk,
-            token = VCLToken(value = "")
+            issuingToken = VCLToken(value = ""),
+            remoteCryptoServicesToken = null
         ) {
             it.handleResult(
                 successHandler = { finalizeOffers ->
@@ -187,7 +188,8 @@ internal class FinalizeOffersUseCaseTest {
         subject.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
             didJwk = didJwk,
-            token = VCLToken(value = "")
+            issuingToken = VCLToken(value = ""),
+            remoteCryptoServicesToken = null
         ) {
             it.handleResult(
                 successHandler = { finalizeOffers ->
@@ -235,7 +237,8 @@ internal class FinalizeOffersUseCaseTest {
         subject.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
             didJwk = didJwk,
-            token = VCLToken(value = "")
+            issuingToken = VCLToken(value = ""),
+            remoteCryptoServicesToken = null
         ) {
             it.handleResult(
                 successHandler = { finalizeOffers ->

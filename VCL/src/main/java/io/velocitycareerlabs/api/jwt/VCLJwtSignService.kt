@@ -10,12 +10,14 @@ package io.velocitycareerlabs.api.jwt
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.VCLToken
 
 interface VCLJwtSignService {
     fun sign(
         kid: String? = null,
         nonce: String? = null,
         jwtDescriptor: VCLJwtDescriptor,
+        remoteCryptoServicesToken: VCLToken? = null,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     )
 }

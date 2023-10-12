@@ -11,11 +11,13 @@ import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLSubmission
 import io.velocitycareerlabs.api.entities.VCLSubmissionResult
+import io.velocitycareerlabs.api.entities.VCLToken
 
 internal interface SubmissionUseCase {
     fun submit(
         submission: VCLSubmission,
         didJwk: VCLDidJwk? = null,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     )
 }

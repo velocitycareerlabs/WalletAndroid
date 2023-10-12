@@ -30,10 +30,7 @@ internal class FinalizeOffersRepositoryImpl(
         networkService.sendRequest(
             endpoint = finalizeOffersDescriptor.finalizeOffersUri,
             headers = listOf(
-                Pair(
-                    HeaderKeys.HeaderKeyAuthorization,
-                    "${HeaderKeys.HeaderValuePrefixBearer} ${issuingToken.value}"
-                ),
+                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${issuingToken.value}"),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
             body = finalizeOffersDescriptor.generateRequestBody(jwt = proof).toString(),

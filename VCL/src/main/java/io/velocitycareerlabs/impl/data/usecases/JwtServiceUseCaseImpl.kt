@@ -19,10 +19,15 @@ internal class JwtServiceUseCaseImpl(
     override fun verifyJwt(
         jwt: VCLJwt,
         publicJwk: VCLPublicJwk,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
         executor.runOnBackground {
-            jwtServiceRepository.verifyJwt(jwt, publicJwk) {
+            jwtServiceRepository.verifyJwt(
+                jwt = jwt,
+                publicJwk = publicJwk,
+                remoteCryptoServicesToken = remoteCryptoServicesToken
+            ) {
                 executor.runOnMain {
                     completionBlock(it)
                 }
@@ -34,13 +39,15 @@ internal class JwtServiceUseCaseImpl(
         kid: String?,
         nonce: String?,
         jwtDescriptor: VCLJwtDescriptor,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
         executor.runOnBackground {
             jwtServiceRepository.generateSignedJwt(
                 kid = kid,
                 nonce = nonce,
-                jwtDescriptor = jwtDescriptor
+                jwtDescriptor = jwtDescriptor,
+                remoteCryptoServicesToken = remoteCryptoServicesToken
             ) { jwtResult ->
                 executor.runOnMain {
                     completionBlock(jwtResult)

@@ -21,6 +21,7 @@ internal class SubmissionUseCaseImpl(
     override fun submit(
         submission: VCLSubmission,
         didJwk: VCLDidJwk?,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     ) {
         executor.runOnBackground {
@@ -32,6 +33,7 @@ internal class SubmissionUseCaseImpl(
                     jti = submission.jti,
                     iss = submission.iss
                 ),
+                remoteCryptoServicesToken = remoteCryptoServicesToken,
                 completionBlock = { signedJwtResult ->
                     signedJwtResult.handleResult(
                         { jwt ->

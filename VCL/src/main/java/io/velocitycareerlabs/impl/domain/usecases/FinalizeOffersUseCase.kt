@@ -17,7 +17,8 @@ internal interface FinalizeOffersUseCase {
     fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         didJwk: VCLDidJwk? = null,
-        token: VCLToken,
+        issuingToken: VCLToken,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit
     )
 }

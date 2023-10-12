@@ -43,9 +43,7 @@ class KeyServiceUseCaseTest {
 
     @Test
     fun testGenerateJwk() {
-        var resultDidJwk: VCLResult<VCLDidJwk>? = null
-
-        subject.generateDidJwk {
+        subject.generateDidJwk(null) {
             it.handleResult(
                 successHandler = { didJwk ->
                     val jwkJsonObj = didJwk.publicJwk.valueJson
@@ -68,10 +66,10 @@ class KeyServiceUseCaseTest {
 
     @Test
     fun testGenerateDifferentJwks() {
-        subject.generateDidJwk { didJwk1Res ->
+        subject.generateDidJwk(null) { didJwk1Res ->
             didJwk1Res.handleResult(
                 { didJwk1 ->
-                    subject.generateDidJwk { didJwk2Res ->
+                    subject.generateDidJwk(null) { didJwk2Res ->
                         didJwk2Res.handleResult(
                             { didJwk2 ->
                                 assert(didJwk1.did != didJwk2.did)
