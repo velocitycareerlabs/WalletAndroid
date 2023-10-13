@@ -279,7 +279,7 @@ class MainActivity : AppCompatActivity() {
             successHandler = { offers ->
                 Log.d(TAG, "VCL Generated Offers: ${offers.all}")
                 Log.d(TAG, "VCL Generated Offers Response Code: ${offers.responseCode}")
-                Log.d(TAG, "VCL Generated Offers Token: ${offers.issuingToken}")
+                Log.d(TAG, "VCL Generated Offers Issuing Token: ${offers.issuingToken}")
 
 //                Check offers invoked after the push notification is notified the app that offers are ready:
                 checkForOffers(
@@ -305,7 +305,7 @@ class MainActivity : AppCompatActivity() {
             { offers ->
                 Log.d(TAG, "VCL Checked Offers: ${offers.all}")
                 Log.d(TAG, "VCL Checked Offers Response Code: ${offers.responseCode}")
-                Log.d(TAG, "VCL Checked Offers Token: ${offers.issuingToken}")
+                Log.d(TAG, "VCL Checked Offers Issuing Token: ${offers.issuingToken}")
                 if (offers.responseCode == 200) {
                     finalizeOffers(
                         credentialManifest = credentialManifest,
