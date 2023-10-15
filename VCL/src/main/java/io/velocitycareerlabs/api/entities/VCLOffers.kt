@@ -14,7 +14,7 @@ data class VCLOffers (
     val payload: JSONObject,
     val all: JSONArray,
     val responseCode: Int,
-    val issuingToken: VCLToken,
+    val exchangeToken: VCLToken,
     val challenge: String,
 ) {
     companion object CodingKeys {

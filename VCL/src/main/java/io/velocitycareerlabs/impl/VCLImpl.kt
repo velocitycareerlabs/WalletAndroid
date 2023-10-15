@@ -380,7 +380,7 @@ internal class VCLImpl: VCL {
                 { identificationSubmission ->
                     invokeGenerateOffersUseCase(
                         generateOffersDescriptor = generateOffersDescriptor,
-                        issuingToken = identificationSubmission.issuingToken,
+                        exchangeToken = identificationSubmission.exchangeToken,
                         successHandler = successHandler,
                         errorHandler = errorHandler
                     )
@@ -395,13 +395,13 @@ internal class VCLImpl: VCL {
 
     override fun checkForOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        issuingToken: VCLToken,
+        exchangeToken: VCLToken,
         successHandler: (VCLOffers) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         invokeGenerateOffersUseCase(
             generateOffersDescriptor = generateOffersDescriptor,
-            issuingToken = issuingToken,
+            exchangeToken = exchangeToken,
             successHandler = successHandler,
             errorHandler = errorHandler
         )
@@ -409,13 +409,13 @@ internal class VCLImpl: VCL {
 
     private fun invokeGenerateOffersUseCase(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        issuingToken: VCLToken,
+        exchangeToken: VCLToken,
         successHandler: (VCLOffers) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         generateOffersUseCase.generateOffers(
             generateOffersDescriptor,
-            issuingToken
+            exchangeToken
         ) { vnOffersResult ->
             vnOffersResult.handleResult(
                 {
@@ -432,7 +432,7 @@ internal class VCLImpl: VCL {
     override fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         didJwk: VCLDidJwk?,
-        issuingToken: VCLToken,
+        exchangeToken: VCLToken,
         remoteCryptoServicesToken: VCLToken?,
         successHandler: (VCLJwtVerifiableCredentials) -> Unit,
         errorHandler: (VCLError) -> Unit
@@ -440,7 +440,7 @@ internal class VCLImpl: VCL {
         finalizeOffersUseCase.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptor,
             didJwk = didJwk,
-            issuingToken = issuingToken,
+            exchangeToken = exchangeToken,
             remoteCryptoServicesToken = remoteCryptoServicesToken
         ) { jwtVerifiableCredentials ->
             jwtVerifiableCredentials.handleResult(

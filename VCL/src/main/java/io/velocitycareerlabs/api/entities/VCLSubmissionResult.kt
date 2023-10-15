@@ -8,7 +8,7 @@
 package io.velocitycareerlabs.api.entities
 
 data class VCLSubmissionResult(
-    val issuingToken: VCLToken,
+    val exchangeToken: VCLToken,
     val exchange: VCLExchange,
     val jti: String,
     val submissionId: String

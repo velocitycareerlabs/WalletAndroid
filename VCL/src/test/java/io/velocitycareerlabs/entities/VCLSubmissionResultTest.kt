@@ -33,7 +33,7 @@ class VCLSubmissionResultTest {
 
     @Test
     fun testProps() {
-        assert(subject.issuingToken.value == "token123")
+        assert(subject.exchangeToken.value == "token123")
         assert(subject.exchange.id == "id123")
         assert(subject.exchange.type == "type123")
         assert(subject.exchange.exchangeComplete)

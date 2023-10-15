@@ -11,7 +11,6 @@ import android.content.Context
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
-import io.velocitycareerlabs.api.entities.initialization.VCLRemoteCryptoServicesUrlsDescriptor
 
 interface VCL {
     fun initialize(
@@ -69,7 +68,7 @@ interface VCL {
 
     fun checkForOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        issuingToken: VCLToken,
+        exchangeToken: VCLToken,
         successHandler: (VCLOffers) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -77,7 +76,7 @@ interface VCL {
     fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         didJwk: VCLDidJwk? = null,
-        issuingToken: VCLToken,
+        exchangeToken: VCLToken,
         remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLJwtVerifiableCredentials) -> Unit,
         errorHandler: (VCLError) -> Unit

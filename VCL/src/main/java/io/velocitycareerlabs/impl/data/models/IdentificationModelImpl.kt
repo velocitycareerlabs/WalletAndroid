@@ -27,7 +27,7 @@ internal class IdentificationModelImpl(
             didJwk = didJwk,
             remoteCryptoServicesToken = remoteCryptoServicesToken
         ) { result ->
-            result.handleResult({ data = result.data?.issuingToken }, { })
+            result.handleResult({ data = result.data?.exchangeToken }, { })
             completionBlock(result)
         }
     }
