@@ -18,13 +18,13 @@ internal class GenerateOffersUseCaseImpl(
 ): GenerateOffersUseCase {
     override fun generateOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        exchangeToken: VCLToken,
+        sessionToken: VCLToken,
         completionBlock: (VCLResult<VCLOffers>) -> Unit
     ) {
         executor.runOnBackground {
             generateOffersRepository.generateOffers(
                 generateOffersDescriptor,
-                exchangeToken
+                sessionToken
             ) {
                 executor.runOnMain {
                     completionBlock(it)

@@ -12,7 +12,7 @@ import io.velocitycareerlabs.api.entities.*
 internal interface GenerateOffersUseCase {
     fun generateOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        exchangeToken: VCLToken,
+        sessionToken: VCLToken,
         completionBlock: (VCLResult<VCLOffers>) -> Unit
     )
 }

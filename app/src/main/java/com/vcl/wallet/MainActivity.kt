@@ -274,13 +274,13 @@ class MainActivity : AppCompatActivity() {
             successHandler = { offers ->
                 Log.d(TAG, "VCL Generated Offers: ${offers.all}")
                 Log.d(TAG, "VCL Generated Offers Response Code: ${offers.responseCode}")
-                Log.d(TAG, "VCL Generated Offers Issuing Token: ${offers.exchangeToken}")
+                Log.d(TAG, "VCL Generated Offers Issuing Token: ${offers.sessionToken}")
 
 //                Check offers invoked after the push notification is notified the app that offers are ready:
                 checkForOffers(
                     credentialManifest = credentialManifest,
                     generateOffersDescriptor = generateOffersDescriptor,
-                    exchangeToken = offers.exchangeToken
+                    sessionToken = offers.sessionToken
                 )
             },
             errorHandler = { error ->
@@ -292,15 +292,15 @@ class MainActivity : AppCompatActivity() {
     private fun checkForOffers(
         credentialManifest: VCLCredentialManifest,
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        exchangeToken: VCLToken
+        sessionToken: VCLToken
     ) {
         vcl.checkForOffers(
             generateOffersDescriptor = generateOffersDescriptor,
-            exchangeToken = exchangeToken,
+            sessionToken = sessionToken,
             { offers ->
                 Log.d(TAG, "VCL Checked Offers: ${offers.all}")
                 Log.d(TAG, "VCL Checked Offers Response Code: ${offers.responseCode}")
-                Log.d(TAG, "VCL Checked Offers Exchange Token: ${offers.exchangeToken}")
+                Log.d(TAG, "VCL Checked Offers Session Token: ${offers.sessionToken}")
                 if (offers.responseCode == 200) {
                     finalizeOffers(
                         credentialManifest = credentialManifest,
@@ -328,7 +328,7 @@ class MainActivity : AppCompatActivity() {
         vcl.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptor,
             didJwk = didJwk,
-            exchangeToken = offers.exchangeToken,
+            sessionToken = offers.sessionToken,
             successHandler = { verifiableCredentials ->
                 Log.d(TAG, "VCL finalized Offers")
                 Log.d(

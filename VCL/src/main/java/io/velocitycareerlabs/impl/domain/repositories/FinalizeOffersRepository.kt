@@ -15,7 +15,7 @@ import io.velocitycareerlabs.api.entities.VCLJwt
 internal interface FinalizeOffersRepository {
     fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
-        exchangeToken: VCLToken,
+        sessionToken: VCLToken,
         proof: VCLJwt,
         completionBlock: (VCLResult<List<String>>) -> Unit
     )

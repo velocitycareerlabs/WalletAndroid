@@ -23,14 +23,14 @@ internal class FinalizeOffersRepositoryImpl(
 
     override fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
-        exchangeToken: VCLToken,
+        sessionToken: VCLToken,
         proof: VCLJwt,
         completionBlock: (VCLResult<List<String>>) -> Unit
     ) {
         networkService.sendRequest(
             endpoint = finalizeOffersDescriptor.finalizeOffersUri,
             headers = listOf(
-                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${exchangeToken.value}"),
+                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${sessionToken.value}"),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
             body = finalizeOffersDescriptor.generateRequestBody(jwt = proof).toString(),

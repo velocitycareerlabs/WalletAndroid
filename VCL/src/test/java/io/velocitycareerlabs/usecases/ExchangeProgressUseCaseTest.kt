@@ -34,7 +34,7 @@ internal class ExchangeProgressUseCaseTest {
         MockitoAnnotations.openMocks(this)
         Mockito.`when`(exchangeDescriptor.exchangeId).thenReturn("")
         Mockito.`when`(exchangeDescriptor.processUri).thenReturn("")
-        Mockito.`when`(exchangeDescriptor.exchangeToken).thenReturn(VCLToken(""))
+        Mockito.`when`(exchangeDescriptor.sessionToken).thenReturn(VCLToken(""))
     }
 
     @Test
