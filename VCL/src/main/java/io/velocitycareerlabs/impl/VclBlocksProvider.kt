@@ -26,6 +26,7 @@ import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierImpl
 import io.velocitycareerlabs.api.jwt.VCLJwtSignService
 import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
 import io.velocitycareerlabs.api.keys.VCLKeyService
+import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierEmptyImpl
 import io.velocitycareerlabs.impl.domain.models.*
 import io.velocitycareerlabs.impl.domain.usecases.*
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
@@ -254,10 +255,11 @@ internal object VclBlocksProvider {
                                 chooseJwtSignService(context, cryptoServicesDescriptor),
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
-                        CredentialIssuerVerifierImpl(
-                                credentialTypesModel,
-                                NetworkServiceImpl()
-                        ),
+//                        CredentialIssuerVerifierImpl(
+//                                credentialTypesModel,
+//                                NetworkServiceImpl()
+//                        ),
+                        CredentialIssuerVerifierEmptyImpl(),
                         CredentialDidVerifierImpl(),
                         ExecutorImpl()
                 )
