@@ -14,7 +14,7 @@ android {
         minSdk 24
         targetSdk 33
         versionName "1.17.3"
-        versionCode 103
+        versionCode 108
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
