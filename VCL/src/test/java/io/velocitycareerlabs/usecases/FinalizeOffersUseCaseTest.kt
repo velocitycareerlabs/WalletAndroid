@@ -78,7 +78,7 @@ internal class FinalizeOffersUseCaseTest {
             ),
             EmptyExecutor()
         ).generateOffers(
-            exchangeToken = VCLToken(value = ""),
+            sessionToken = VCLToken(value = ""),
             generateOffersDescriptor = generateOffersDescriptor
         ) { result ->
             result.handleResult(
@@ -140,7 +140,7 @@ internal class FinalizeOffersUseCaseTest {
         subject.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorFailed,
             didJwk = didJwk,
-            exchangeToken = VCLToken(value = ""),
+            sessionToken = VCLToken(value = ""),
             remoteCryptoServicesToken = null
         ) {
             it.handleResult(
@@ -188,7 +188,7 @@ internal class FinalizeOffersUseCaseTest {
         subject.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
             didJwk = didJwk,
-            exchangeToken = VCLToken(value = ""),
+            sessionToken = VCLToken(value = ""),
             remoteCryptoServicesToken = null
         ) {
             it.handleResult(
@@ -237,7 +237,7 @@ internal class FinalizeOffersUseCaseTest {
         subject.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
             didJwk = didJwk,
-            exchangeToken = VCLToken(value = ""),
+            sessionToken = VCLToken(value = ""),
             remoteCryptoServicesToken = null
         ) {
             it.handleResult(

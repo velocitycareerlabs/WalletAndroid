@@ -40,7 +40,7 @@ class VCLFinalizeOffersDescriptorTest {
         payload = JSONObject(),
         all = JSONArray(),
         responseCode = 200,
-        exchangeToken = VCLToken(value = ""),
+        sessionToken = VCLToken(value = ""),
         challenge = ""
     )
 

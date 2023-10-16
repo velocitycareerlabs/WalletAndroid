@@ -26,13 +26,13 @@ internal class GenerateOffersRepositoryImpl(
 
     override fun generateOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        exchangeToken: VCLToken,
+        sessionToken: VCLToken,
         completionBlock: (VCLResult<VCLOffers>) -> Unit
     ) {
         networkService.sendRequest(
             endpoint = generateOffersDescriptor.checkOffersUri,
             headers = listOf(
-                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${exchangeToken.value}"),
+                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${sessionToken.value}"),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
             body = generateOffersDescriptor.payload.toString(),
@@ -43,7 +43,7 @@ internal class GenerateOffersRepositoryImpl(
                     { offersResponse ->
                         try {
                             completionBlock(VCLResult.Success(
-                                parse(offersResponse, exchangeToken)
+                                parse(offersResponse, sessionToken)
                             ))
                         } catch (ex: Exception) {
                             completionBlock(VCLResult.Failure(VCLError(ex)))
@@ -57,14 +57,14 @@ internal class GenerateOffersRepositoryImpl(
         )
     }
 
-    private fun parse(offersResponse: Response, exchangeToken: VCLToken): VCLOffers {
+    private fun parse(offersResponse: Response, sessionToken: VCLToken): VCLOffers {
 //        VCLXVnfProtocolVersion.XVnfProtocolVersion2
         offersResponse.payload.toJsonObject()?.let { payload ->
             return VCLOffers(
                 payload = payload,
                 all = payload.optJSONArray(VCLOffers.CodingKeys.KeyOffers) ?: JSONArray(),
                 responseCode = offersResponse.code,
-                exchangeToken = exchangeToken,
+                sessionToken = sessionToken,
                 challenge = payload.optString(VCLOffers.CodingKeys.KeyChallenge) ?: ""
             )
         } ?: run {
@@ -74,7 +74,7 @@ internal class GenerateOffersRepositoryImpl(
                     payload = JSONObject(),
                     all = allOffers,
                     responseCode = offersResponse.code,
-                    exchangeToken = exchangeToken,
+                    sessionToken = sessionToken,
                     challenge = ""
                 )
             } ?: run {
@@ -83,7 +83,7 @@ internal class GenerateOffersRepositoryImpl(
                     payload = JSONObject(),
                     all = JSONArray(),
                     responseCode = offersResponse.code,
-                    exchangeToken = exchangeToken,
+                    sessionToken = sessionToken,
                     challenge = ""
                 )
             }
