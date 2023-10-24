@@ -24,12 +24,22 @@ class VCLServiceTypes {
                 VCLServiceType.CareerIssuer,
                 VCLServiceType.NotaryIssuer
             )
-            VCLIssuingType.Identity -> listOf(VCLServiceType.IdentityIssuer)
+            VCLIssuingType.Identity -> listOf(
+                VCLServiceType.IdentityIssuer,
+                VCLServiceType.IdDocumentIssuer,
+                VCLServiceType.NotaryIdDocumentIssuer,
+                VCLServiceType.ContactIssuer,
+                VCLServiceType.NotaryContactIssuer
+            )
             VCLIssuingType.Refresh -> listOf(
                 VCLServiceType.Issuer,
                 VCLServiceType.CareerIssuer,
                 VCLServiceType.NotaryIssuer,
-                VCLServiceType.IdentityIssuer
+                VCLServiceType.IdentityIssuer,
+                VCLServiceType.IdDocumentIssuer,
+                VCLServiceType.NotaryIdDocumentIssuer,
+                VCLServiceType.ContactIssuer,
+                VCLServiceType.NotaryContactIssuer
             )
             VCLIssuingType.Undefined -> listOf(VCLServiceType.Undefined)
         }

@@ -250,7 +250,7 @@ internal class CredentialIssuerVerifierTest {
     fun testVerifyIdentityIssuerSuccess() {
         subject = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
-                issuerCategory = CredentialTypesModelMock.issuerCategoryIdentityIssuer
+                issuerCategory = CredentialTypesModelMock.IssuerCategoryIdDocumentIssuer
             ),
             NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
         )
@@ -275,7 +275,7 @@ internal class CredentialIssuerVerifierTest {
     fun testVerifyEmptyCredentialsSuccess() {
         subject = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
-                issuerCategory = CredentialTypesModelMock.issuerCategoryIdentityIssuer
+                issuerCategory = CredentialTypesModelMock.IssuerCategoryNotaryContactIssuer
             ),
             NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
         )
