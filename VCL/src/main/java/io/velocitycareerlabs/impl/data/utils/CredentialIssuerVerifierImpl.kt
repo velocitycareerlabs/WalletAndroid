@@ -87,7 +87,13 @@ internal class CredentialIssuerVerifierImpl(
         serviceTypes: VCLServiceTypes,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        if (serviceTypes.contains(VCLServiceType.IdentityIssuer)) {
+        if (
+            serviceTypes.contains(VCLServiceType.IdentityIssuer) ||
+            serviceTypes.contains(VCLServiceType.IdDocumentIssuer) ||
+            serviceTypes.contains(VCLServiceType.NotaryIdDocumentIssuer) ||
+            serviceTypes.contains(VCLServiceType.NotaryContactIssuer) ||
+            serviceTypes.contains(VCLServiceType.ContactIssuer)
+        ) {
             verifyIdentityIssuer(
                 credentialType,
                 completionBlock
@@ -105,7 +111,13 @@ internal class CredentialIssuerVerifierImpl(
         credentialType: VCLCredentialType,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        if (credentialType.issuerCategory == VCLServiceType.IdentityIssuer.value) {
+        if (
+            credentialType.issuerCategory == VCLServiceType.IdentityIssuer.value ||
+            credentialType.issuerCategory == VCLServiceType.IdDocumentIssuer.value ||
+            credentialType.issuerCategory == VCLServiceType.NotaryIdDocumentIssuer.value ||
+            credentialType.issuerCategory == VCLServiceType.NotaryContactIssuer.value ||
+            credentialType.issuerCategory == VCLServiceType.ContactIssuer.value
+        ) {
             completionBlock(VCLResult.Success(true))
         } else {
             onError(
@@ -246,12 +258,14 @@ internal class CredentialIssuerVerifierImpl(
             val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
             allFutures.join()
 
-            if(isCredentialVerified)
+            if (isCredentialVerified)
                 completionBlock(VCLResult.Success(true))
             else
-                completionBlock(VCLResult.Failure(
-                    globalError ?: VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure.value)
-                )
+                completionBlock(
+                    VCLResult.Failure(
+                        globalError
+                            ?: VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure.value)
+                    )
                 )
         } ?: run {
             onError(
@@ -271,7 +285,7 @@ internal class CredentialIssuerVerifierImpl(
         return retVal
     }
 
-    private fun <T>onError(
+    private fun <T> onError(
         error: VCLError,
         completionBlock: (VCLResult<T>) -> Unit
     ) {

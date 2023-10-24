@@ -21,7 +21,11 @@ class VCLServiceTypesTest {
                 VCLServiceType.Inspector,
                 VCLServiceType.CareerIssuer,
                 VCLServiceType.NotaryIssuer,
-                VCLServiceType.IdentityIssuer
+                VCLServiceType.IdentityIssuer,
+                VCLServiceType.IdDocumentIssuer,
+                VCLServiceType.NotaryIdDocumentIssuer,
+                VCLServiceType.ContactIssuer,
+                VCLServiceType.NotaryContactIssuer
             )
         )
 
@@ -30,9 +34,15 @@ class VCLServiceTypesTest {
         assert(serviceTypes.contains(VCLServiceType.CareerIssuer))
         assert(serviceTypes.contains(VCLServiceType.NotaryIssuer))
         assert(serviceTypes.contains(VCLServiceType.IdentityIssuer))
+        assert(serviceTypes.contains(VCLServiceType.IdDocumentIssuer))
+        assert(serviceTypes.contains(VCLServiceType.NotaryIdDocumentIssuer))
+        assert(serviceTypes.contains(VCLServiceType.ContactIssuer))
+        assert(serviceTypes.contains(VCLServiceType.NotaryContactIssuer))
 
         assert(serviceTypes.containsAtLeastOneOf(VCLServiceTypes(
-            listOf(VCLServiceType.IdentityIssuer,
+            listOf(
+                VCLServiceType.IdDocumentIssuer,
+                VCLServiceType.ContactIssuer,
                 VCLServiceType.Inspector,
                 VCLServiceType.NotaryIssuer
             ))))
@@ -65,10 +75,21 @@ class VCLServiceTypesTest {
 
         assert(!serviceTypes.contains(VCLServiceType.NotaryIssuer))
         assert(!serviceTypes.contains(VCLServiceType.IdentityIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.IdDocumentIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.NotaryIdDocumentIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.ContactIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.NotaryContactIssuer))
         assert(!serviceTypes.contains(VCLServiceType.Undefined))
 
         assert(!serviceTypes.containsAtLeastOneOf(VCLServiceTypes(
-            listOf(VCLServiceType.IdentityIssuer
+            listOf(
+                VCLServiceType.NotaryIssuer,
+                VCLServiceType.IdentityIssuer,
+                VCLServiceType.IdDocumentIssuer,
+                VCLServiceType.NotaryIdDocumentIssuer,
+                VCLServiceType.ContactIssuer,
+                VCLServiceType.NotaryContactIssuer,
+                VCLServiceType.Undefined
             ))))
     }
 
@@ -81,6 +102,10 @@ class VCLServiceTypesTest {
         assert(!serviceTypes.contains(VCLServiceType.CareerIssuer))
         assert(!serviceTypes.contains(VCLServiceType.NotaryIssuer))
         assert(!serviceTypes.contains(VCLServiceType.IdentityIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.IdDocumentIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.NotaryIdDocumentIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.ContactIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.NotaryContactIssuer))
         assert(!serviceTypes.contains(VCLServiceType.Undefined))
 
         assert(!serviceTypes.containsAtLeastOneOf(VCLServiceTypes(
@@ -89,7 +114,11 @@ class VCLServiceTypesTest {
                 VCLServiceType.Inspector,
                 VCLServiceType.CareerIssuer,
                 VCLServiceType.NotaryIssuer,
-                VCLServiceType.IdentityIssuer
+                VCLServiceType.IdentityIssuer,
+                VCLServiceType.IdDocumentIssuer,
+                VCLServiceType.NotaryIdDocumentIssuer,
+                VCLServiceType.ContactIssuer,
+                VCLServiceType.NotaryContactIssuer
             ))))
     }
 
@@ -108,6 +137,10 @@ class VCLServiceTypesTest {
             ))))
 
         assert(!serviceTypes.contains(VCLServiceType.IdentityIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.IdDocumentIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.NotaryIdDocumentIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.ContactIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.NotaryContactIssuer))
         assert(!serviceTypes.contains(VCLServiceType.Undefined))
 
         assert(!serviceTypes.containsAtLeastOneOf(VCLServiceTypes(
@@ -121,9 +154,16 @@ class VCLServiceTypesTest {
         val serviceTypes = VCLServiceTypes(VCLIssuingType.Identity)
 
         assert(serviceTypes.contains(VCLServiceType.IdentityIssuer))
+        assert(serviceTypes.contains(VCLServiceType.IdDocumentIssuer))
+        assert(serviceTypes.contains(VCLServiceType.NotaryIdDocumentIssuer))
+        assert(serviceTypes.contains(VCLServiceType.ContactIssuer))
+        assert(serviceTypes.contains(VCLServiceType.NotaryContactIssuer))
 
         assert(serviceTypes.containsAtLeastOneOf(VCLServiceTypes(
-            listOf(VCLServiceType.IdentityIssuer, VCLServiceType.Inspector)
+            listOf(
+                VCLServiceType.NotaryIdDocumentIssuer,
+                VCLServiceType.Inspector
+            )
         )))
 
         assert(!serviceTypes.contains(VCLServiceType.Issuer))
@@ -140,12 +180,18 @@ class VCLServiceTypesTest {
         val serviceTypes = VCLServiceTypes(VCLIssuingType.Refresh)
 
         assert(serviceTypes.contains(VCLServiceType.IdentityIssuer))
+        assert(serviceTypes.contains(VCLServiceType.IdDocumentIssuer))
+        assert(serviceTypes.contains(VCLServiceType.NotaryIdDocumentIssuer))
+        assert(serviceTypes.contains(VCLServiceType.ContactIssuer))
+        assert(serviceTypes.contains(VCLServiceType.NotaryContactIssuer))
         assert(serviceTypes.contains(VCLServiceType.Issuer))
         assert(serviceTypes.contains(VCLServiceType.CareerIssuer))
         assert(serviceTypes.contains(VCLServiceType.NotaryIssuer))
 
         assert(serviceTypes.containsAtLeastOneOf(VCLServiceTypes(
-            listOf(VCLServiceType.IdentityIssuer, VCLServiceType.Inspector
+            listOf(
+                VCLServiceType.ContactIssuer,
+                VCLServiceType.Inspector
             ))))
 
         assert(!serviceTypes.contains(VCLServiceType.Undefined))

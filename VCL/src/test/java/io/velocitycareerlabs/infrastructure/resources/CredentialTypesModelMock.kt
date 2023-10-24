@@ -37,8 +37,13 @@ internal class CredentialTypesModelMock(
     }
 
     companion object {
-        val issuerCategoryIdentityIssuer = "IdentityIssuer"
-        val IssuerCategoryNotaryIssuer = "NotaryIssuer"
-        val issuerCategoryRegularIssuer = "RegularIssuer"
+        const val IssuerCategoryNotaryIssuer = "NotaryIssuer"
+        const val issuerCategoryRegularIssuer = "RegularIssuer"
+//        Identity issuer categories:
+        const val IssuerCategoryIdentityIssuer = "IdentityIssuer"
+        const val IssuerCategoryIdDocumentIssuer = "IdDocumentIssuer"
+        const val IssuerCategoryNotaryIdDocumentIssuer = "NotaryIdDocumentIssuer"
+        const val IssuerCategoryContactIssuer = "ContactIssuer"
+        const val IssuerCategoryNotaryContactIssuer = "NotaryContactIssuer"
     }
 }
