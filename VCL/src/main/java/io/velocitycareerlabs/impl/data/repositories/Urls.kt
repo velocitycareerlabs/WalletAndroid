@@ -23,6 +23,7 @@ internal class Urls {
             }
         private val BaseUrlRegistrar get() = "https://${EnvironmentPrefix}registrar.velocitynetwork.foundation"
 //        private val BaseUrlWalletApi get() = "https://${EnvironmentPrefix}walletapi.velocitycareerlabs.io"
+        val ServiceTypes get() = "$BaseUrlRegistrar/api/v0.6/service-types"
         val CredentialTypes get() = "$BaseUrlRegistrar/api/v0.6/credential-types"
         val CredentialTypeSchemas get() = "$BaseUrlRegistrar/schemas/"
         val Countries get() = "$BaseUrlRegistrar/reference/countries"
