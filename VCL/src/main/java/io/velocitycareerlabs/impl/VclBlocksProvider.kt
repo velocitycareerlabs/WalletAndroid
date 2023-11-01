@@ -22,7 +22,6 @@ import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.models.*
 import io.velocitycareerlabs.impl.data.repositories.*
 import io.velocitycareerlabs.impl.data.usecases.*
-import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierImpl
 import io.velocitycareerlabs.api.jwt.VCLJwtSignService
 import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
 import io.velocitycareerlabs.api.keys.VCLKeyService
