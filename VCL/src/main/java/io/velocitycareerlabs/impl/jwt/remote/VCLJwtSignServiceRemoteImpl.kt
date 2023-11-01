@@ -63,7 +63,7 @@ internal class VCLJwtSignServiceRemoteImpl(
         )
     }
 
-    private fun generateJwtPayloadToSign(
+    internal fun generateJwtPayloadToSign(
         kid: String?,
         nonce: String?,
         jwtDescriptor: VCLJwtDescriptor
@@ -78,12 +78,11 @@ internal class VCLJwtSignServiceRemoteImpl(
         header.putOpt(KeyKid, kid)
 
         options.putOpt(KeyKeyId, jwtDescriptor.keyId)
-        options.putOpt(KeyAud, jwtDescriptor.aud)
-        options.putOpt(KeyJti, jwtDescriptor.jti)
-        options.putOpt(KeyIss, jwtDescriptor.iss)
-        options.putOpt(KeyIss, jwtDescriptor.iss)
 
         payload.putOpt(KeyNonce, nonce)
+        payload.putOpt(KeyAud, jwtDescriptor.aud)
+        payload.putOpt(KeyJti, jwtDescriptor.jti)
+        payload.putOpt(KeyIss, jwtDescriptor.iss)
 
         retVal.putOpt(KeyHeader, header)
         retVal.putOpt(KeyOptions, options)

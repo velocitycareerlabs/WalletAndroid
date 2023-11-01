@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.infrastructure.jwt
+package io.velocitycareerlabs.infrastructure.jwt.local
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.VCLDidJwk
