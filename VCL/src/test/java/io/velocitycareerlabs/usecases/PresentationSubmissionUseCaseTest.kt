@@ -83,7 +83,7 @@ internal class PresentationSubmissionUseCaseTest {
         ) {
             it.handleResult(
                 { presentationSubmissionResult ->
-                    assert(presentationSubmissionResult!!.sessionToken.value == expectedPresentationSubmissionResult.sessionToken.value)
+                    assert(presentationSubmissionResult.sessionToken.value == expectedPresentationSubmissionResult.sessionToken.value)
                     assert(presentationSubmissionResult.exchange.id == expectedPresentationSubmissionResult.exchange.id)
                     assert(presentationSubmissionResult.jti == expectedPresentationSubmissionResult.jti)
                     assert(presentationSubmissionResult.submissionId == expectedPresentationSubmissionResult.submissionId)
