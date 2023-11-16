@@ -35,7 +35,7 @@ internal class VCLJwtSignServiceRemoteImpl(
     ) {
         networkService.sendRequest(
             endpoint = jwtSignServiceUrl,
-            body = generateJwtPayloadToSign(nonce, jwtDescriptor).toString(),
+            body = generateJwtPayloadToSign(kid, nonce, jwtDescriptor).toString(),
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.POST,
             headers = listOf(
@@ -63,22 +63,28 @@ internal class VCLJwtSignServiceRemoteImpl(
         )
     }
 
-    private fun generateJwtPayloadToSign(
-        nonce: String? = null,
+    internal fun generateJwtPayloadToSign(
+        kid: String?,
+        nonce: String?,
         jwtDescriptor: VCLJwtDescriptor
     ): JSONObject {
         val retVal = JSONObject()
+        val header = JSONObject()
         val options = JSONObject()
         val payload = jwtDescriptor.payload?.copy() ?: JSONObject()
 
+//        Base assumption:
+//        HeaderValues.XVnfProtocolVersion == VCLXVnfProtocolVersion.XVnfProtocolVersion2
+        header.putOpt(KeyKid, kid)
+
         options.putOpt(KeyKeyId, jwtDescriptor.keyId)
-        options.putOpt(KeyAud, jwtDescriptor.aud)
-        options.putOpt(KeyJti, jwtDescriptor.jti)
-        options.putOpt(KeyIss, jwtDescriptor.iss)
-        options.putOpt(KeyIss, jwtDescriptor.iss)
 
         payload.putOpt(KeyNonce, nonce)
+        payload.putOpt(KeyAud, jwtDescriptor.aud)
+        payload.putOpt(KeyJti, jwtDescriptor.jti)
+        payload.putOpt(KeyIss, jwtDescriptor.iss)
 
+        retVal.putOpt(KeyHeader, header)
         retVal.putOpt(KeyOptions, options)
         retVal.putOpt(KeyPayload, payload)
 
@@ -87,11 +93,13 @@ internal class VCLJwtSignServiceRemoteImpl(
 
     companion object CodingKeys {
         const val KeyKeyId = "keyId"
+        const val KeyKid = "kid"
         const val KeyIss = "iss"
         const val KeyAud = "aud"
         const val KeyJti = "jti"
         const val KeyNonce = "nonce"
 
+        const val KeyHeader = "header"
         const val KeyOptions = "options"
         const val KeyPayload = "payload"
 

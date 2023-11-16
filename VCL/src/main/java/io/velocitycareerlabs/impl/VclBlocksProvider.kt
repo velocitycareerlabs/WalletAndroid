@@ -22,13 +22,14 @@ import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.models.*
 import io.velocitycareerlabs.impl.data.repositories.*
 import io.velocitycareerlabs.impl.data.usecases.*
-import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierImpl
 import io.velocitycareerlabs.api.jwt.VCLJwtSignService
 import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
 import io.velocitycareerlabs.api.keys.VCLKeyService
 import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierEmptyImpl
+import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierImpl
 import io.velocitycareerlabs.impl.domain.models.*
 import io.velocitycareerlabs.impl.domain.usecases.*
+import io.velocitycareerlabs.impl.domain.utils.CredentialIssuerVerifier
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.impl.jwt.remote.VCLJwtSignServiceRemoteImpl
@@ -54,7 +55,8 @@ internal object VclBlocksProvider {
                                                 NetworkServiceImpl(),
                                                 keyServiceUrls
                                         )
-                                } ?: throw VCLError(errorCode = VCLErrorCode.RemoteServicesUrlsNotFount.value)
+                                }
+                                        ?: throw VCLError(errorCode = VCLErrorCode.RemoteServicesUrlsNotFount.value)
                         }
 
                         VCLCryptoServiceType.Injected -> cryptoServicesDescriptor.injectedCryptoServicesDescriptor?.keyService?.let { keyService ->
@@ -62,6 +64,7 @@ internal object VclBlocksProvider {
                         } ?: throw VCLError(errorCode = VCLErrorCode.InjectedServicesNotFount.value)
                 }
         }
+
         @Throws(VCLError::class)
         internal fun chooseJwtSignService(
                 context: Context,
@@ -80,7 +83,8 @@ internal object VclBlocksProvider {
                                         NetworkServiceImpl(),
                                         jwtSignServiceUrl
                                 )
-                        } ?: throw VCLError(errorCode = VCLErrorCode.RemoteServicesUrlsNotFount.value)
+                        }
+                                ?: throw VCLError(errorCode = VCLErrorCode.RemoteServicesUrlsNotFount.value)
 
                         VCLCryptoServiceType.Injected -> cryptoServicesDescriptor.injectedCryptoServicesDescriptor?.jwtSignService?.let { jwtSignService ->
                                 return jwtSignService
@@ -99,11 +103,13 @@ internal object VclBlocksProvider {
                                         NetworkServiceImpl(),
                                         jwtVerifyServiceUrl
                                 )
-                        } ?: return VCLJwtVerifyServiceLocalImpl() // verification may be done locally
+                        }
+                                ?: return VCLJwtVerifyServiceLocalImpl() // verification may be done locally
 
                         VCLCryptoServiceType.Injected -> cryptoServicesDescriptor.injectedCryptoServicesDescriptor?.jwtVerifyService?.let { jwtVerifyService ->
                                 return jwtVerifyService
-                        } ?: return VCLJwtVerifyServiceLocalImpl() // verification may be done locally
+                        }
+                                ?: return VCLJwtVerifyServiceLocalImpl() // verification may be done locally
                 }
         }
 
@@ -257,9 +263,18 @@ internal object VclBlocksProvider {
         fun provideFinalizeOffersUseCase(
                 context: Context,
                 credentialTypesModel: CredentialTypesModel,
-                cryptoServicesDescriptor: VCLCryptoServicesDescriptor
-        ): FinalizeOffersUseCase =
-                FinalizeOffersUseCaseImpl(
+                cryptoServicesDescriptor: VCLCryptoServicesDescriptor,
+                isDirectIssuerCheckOn: Boolean
+        ): FinalizeOffersUseCase {
+                var credentialIssuerVerifier: CredentialIssuerVerifier =
+                        CredentialIssuerVerifierEmptyImpl()
+                if (isDirectIssuerCheckOn) {
+                        credentialIssuerVerifier = CredentialIssuerVerifierImpl(
+                                credentialTypesModel,
+                                NetworkServiceImpl()
+                        )
+                }
+                return FinalizeOffersUseCaseImpl(
                         FinalizeOffersRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
@@ -267,14 +282,11 @@ internal object VclBlocksProvider {
                                 chooseJwtSignService(context, cryptoServicesDescriptor),
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
-//                        CredentialIssuerVerifierImpl(
-//                                credentialTypesModel,
-//                                NetworkServiceImpl()
-//                        ),
-                        CredentialIssuerVerifierEmptyImpl(),
+                        credentialIssuerVerifier,
                         CredentialDidVerifierImpl(),
                         ExecutorImpl()
                 )
+        }
 
         fun provideCredentialTypesUIFormSchemaUseCase(): CredentialTypesUIFormSchemaUseCase =
                 CredentialTypesUIFormSchemaUseCaseImpl(
