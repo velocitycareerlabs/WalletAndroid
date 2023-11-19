@@ -1,7 +1,6 @@
 Properties properties = new Properties()
 properties.load(new FileInputStream(rootProject.file(
-//        '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/sonatype.properties'
-        '/Users/michaelavoyan/Downloads/maven/sonatype.properties'
+        '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/sonatype.properties'
 )))
 
 ext {

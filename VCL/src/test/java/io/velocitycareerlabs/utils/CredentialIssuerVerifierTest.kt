@@ -347,7 +347,7 @@ internal class CredentialIssuerVerifierTest {
     }
 
     @Test
-    fun testVerifyIssuerWithoutServicesFailedPrimaryOrganizationNotFound() {
+    fun testVerifyIssuerPrimaryOrganizationNotFound() {
         subject = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
@@ -361,11 +361,11 @@ internal class CredentialIssuerVerifierTest {
             finalizeOffersDescriptor = finalizeOffersDescriptorOfRegularIssuer,
         ) { verificationResult ->
             verificationResult.handleResult(
-                successHandler = {
-                    assert(false) { "${VCLErrorCode.InvalidCredentialSubjectType.value} error code is expected" }
+                successHandler = { isVerified ->
+                    assert(isVerified) // K not found => verification passed
                 },
                 errorHandler = { error ->
-                    assert(error.errorCode == VCLErrorCode.InvalidCredentialSubjectType.value)
+                    assert(false) { "${error.toJsonObject()}" }
                 }
             )
         }
