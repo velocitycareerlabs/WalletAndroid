@@ -21,17 +21,21 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 
+//internal fun String.isUrlEquivalentTo(url: String): Boolean {
+//    var retVal = true
+//    val thisQueryParams = this.decode().getUrlQueryParams()!!
+//    val urlQueryParams = url.decode().getUrlQueryParams()!!
+//
+//    thisQueryParams.forEach {
+//        retVal = retVal && urlQueryParams[it.key] == it.value
+//    }
+//    retVal = retVal && URI(this.encode()).host == URI(url.encode()).host
+//    retVal = retVal && URI(this.encode()).path == URI(url.encode()).path
+//    return retVal
+//}
 internal fun String.isUrlEquivalentTo(url: String): Boolean {
-    var retVal = true
-    val thisQueryParams = this.getUrlQueryParams()!!
-    val urlQueryParams = url.getUrlQueryParams()!!
-
-    thisQueryParams.forEach {
-        retVal = retVal && urlQueryParams[it.key] == it.value
-    }
-    retVal = retVal && URI(this).host == URI(url).host
-    retVal = retVal && URI(this).path == URI(url).path
-    return retVal
+    return this.toCharArray().sorted().joinToString("") ==
+            url.toCharArray().sorted().joinToString("")
 }
 
 internal fun String.appendQueryParams(queryParams: String) =

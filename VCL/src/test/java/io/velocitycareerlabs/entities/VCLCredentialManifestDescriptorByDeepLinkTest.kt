@@ -33,7 +33,8 @@ internal class VCLCredentialManifestDescriptorByDeepLinkTest {
         )
 
         assert(
-            subject.endpoint?.isUrlEquivalentTo(CredentialManifestDescriptorMocks.DeepLinkRequestUri.decode())!!
+            subject.endpoint?.decode()
+                ?.isUrlEquivalentTo(CredentialManifestDescriptorMocks.DeepLinkRequestUri.decode()) == true
         )
         assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
     }
