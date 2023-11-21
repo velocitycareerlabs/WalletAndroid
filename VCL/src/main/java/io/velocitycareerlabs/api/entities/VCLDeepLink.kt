@@ -17,8 +17,8 @@ import java.net.URI
 data class VCLDeepLink(val value: String) {
     val requestUri: String? = generateUri(uriKey = KeyRequestUri)
     val vendorOriginContext: String? = retrieveQueryParam(KeyVendorOriginContext)
-//    val did: String? = requestUri?.getUrlSubPath(KeyDidPrefix) ?: issuer?.getUrlSubPath(KeyDidPrefix)
-    val did: String? = retrieveQueryParam(KeyIssuerDid) ?: retrieveQueryParam(KeyInspectorDid)
+    val did: String? = (retrieveQueryParam(KeyIssuerDid) ?: retrieveQueryParam(KeyInspectorDid))
+        ?: requestUri?.getUrlSubPath(KeyDidPrefix) // fallback for old agents
 
     private fun generateUri(uriKey: String, asSubParams: Boolean = false): String? {
         this.value.decode().getUrlQueryParams()?.let { queryParams ->
@@ -28,7 +28,7 @@ data class VCLDeepLink(val value: String) {
                     .map { (key, value) -> "$key=${value.encode()}" }
                     .joinToString("&")
                 if (queryItems.isNotEmpty()) {
-                    return if(asSubParams) "$uri&$queryItems" else uri.appendQueryParams(queryItems)
+                    return if (asSubParams) "$uri&$queryItems" else uri.appendQueryParams(queryItems)
                 }
                 return uri
             }
@@ -40,6 +40,7 @@ data class VCLDeepLink(val value: String) {
         this.value.decode().getUrlQueryParams()?.get(key)
 
     companion object CodingKeys {
+        const val KeyDidPrefix = "did:"
         const val KeyRequestUri = "request_uri"
         const val KeyVendorOriginContext = "vendorOriginContext"
         const val KeyIssuerDid = "issuerDid"
