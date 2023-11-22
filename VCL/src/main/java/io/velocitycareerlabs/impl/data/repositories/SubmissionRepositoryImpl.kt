@@ -57,7 +57,7 @@ internal class SubmissionRepositoryImpl(
     ): VCLSubmissionResult {
         val exchangeJsonObj = jsonObj.optJSONObject(VCLSubmissionResult.KeyExchange)
         return VCLSubmissionResult(
-            token = VCLToken(jsonObj.optString(VCLSubmissionResult.KeyToken)),
+            sessionToken = VCLToken(jsonObj.optString(VCLSubmissionResult.KeyToken)),
             exchange = parseExchange(exchangeJsonObj),
             jti = jti,
             submissionId = submissionId

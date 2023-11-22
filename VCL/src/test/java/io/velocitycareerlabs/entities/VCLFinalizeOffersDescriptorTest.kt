@@ -16,10 +16,10 @@ import io.velocitycareerlabs.api.entities.VCLOffers
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
+import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
@@ -40,7 +40,7 @@ class VCLFinalizeOffersDescriptorTest {
         payload = JSONObject(),
         all = JSONArray(),
         responseCode = 200,
-        token = VCLToken(value = ""),
+        sessionToken = VCLToken(value = ""),
         challenge = ""
     )
 
@@ -71,7 +71,7 @@ class VCLFinalizeOffersDescriptorTest {
     @Test
     fun testGenerateRequestBody() {
         val payload = "{\"key1\": \"value1\"}".toJsonObject()
-        VCLJwtServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)).sign(
+        VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)).sign(
             nonce = nonceMock,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payload,

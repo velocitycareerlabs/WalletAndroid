@@ -9,10 +9,10 @@ package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.VCLExchangeDescriptor
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.ExchangeProgressRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.ExchangeProgressUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.ExchangeProgressUseCase
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.ExchangeProgressMocks
 import org.json.JSONObject
@@ -34,7 +34,7 @@ internal class ExchangeProgressUseCaseTest {
         MockitoAnnotations.openMocks(this)
         Mockito.`when`(exchangeDescriptor.exchangeId).thenReturn("")
         Mockito.`when`(exchangeDescriptor.processUri).thenReturn("")
-        Mockito.`when`(exchangeDescriptor.token).thenReturn(VCLToken(""))
+        Mockito.`when`(exchangeDescriptor.sessionToken).thenReturn(VCLToken(""))
     }
 
     @Test
@@ -43,18 +43,19 @@ internal class ExchangeProgressUseCaseTest {
             ExchangeProgressRepositoryImpl(
                 NetworkServiceSuccess(ExchangeProgressMocks.ExchangeProgressJson)
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
 
-        var result: VCLResult<VCLExchange>? = null
-
-//        Action
         subject.getExchangeProgress(exchangeDescriptor) {
-            result = it
+            it.handleResult(
+                { exchange ->
+                    assert(exchange == expectedExchange(JSONObject(ExchangeProgressMocks.ExchangeProgressJson)))
+                },
+                {
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
         }
-
-//        Assert
-        assert(result!!.data == expectedExchange(JSONObject(ExchangeProgressMocks.ExchangeProgressJson)))
     }
 
     private fun expectedExchange(exchangeJsonObj: JSONObject) =

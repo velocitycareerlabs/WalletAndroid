@@ -22,18 +22,15 @@ internal class FinalizeOffersRepositoryImpl(
     private val TAG = FinalizeOffersRepositoryImpl::class.simpleName
 
     override fun finalizeOffers(
-        token: VCLToken,
-        proof: VCLJwt,
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
+        sessionToken: VCLToken,
+        proof: VCLJwt,
         completionBlock: (VCLResult<List<String>>) -> Unit
     ) {
         networkService.sendRequest(
             endpoint = finalizeOffersDescriptor.finalizeOffersUri,
             headers = listOf(
-                Pair(
-                    HeaderKeys.HeaderKeyAuthorization,
-                    "${HeaderKeys.HeaderValuePrefixBearer} ${token.value}"
-                ),
+                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${sessionToken.value}"),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
             body = finalizeOffersDescriptor.generateRequestBody(jwt = proof).toString(),

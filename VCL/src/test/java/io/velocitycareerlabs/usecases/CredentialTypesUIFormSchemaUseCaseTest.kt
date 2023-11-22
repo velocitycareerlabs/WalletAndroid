@@ -8,10 +8,10 @@
 package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.CredentialTypesUIFormSchemaRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialTypesUIFormSchemaUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUIFormSchemaUseCase
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypesUIFormSchemaMocks
 import org.json.JSONArray
@@ -32,174 +32,175 @@ internal class CredentialTypesUIFormSchemaUseCaseTest {
 
     @Test
     fun testCredentialTypesFormSchemaFull() {
-//        Arrange
         subject = CredentialTypesUIFormSchemaUseCaseImpl(
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesUIFormSchemaMocks.UISchemaFormJsonFull)
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
-        var result: VCLResult<VCLCredentialTypesUIFormSchema>? = null
 
-//        Action
         subject.getCredentialTypesUIFormSchema(
             VCLCredentialTypesUIFormSchemaDescriptor("some type", VCLCountries.CA),
             mockedCountries
         ) {
-            result = it
+            it.handleResult(
+                { credentialTypeUIFormSchema ->
+                    val addressJsonObj = credentialTypeUIFormSchema.payload.getJSONObject("place")
+                    val addressCountryJsonObj =
+                        addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressCountry)
+                    val addressRegionJsonObj =
+                        addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressRegion)
+
+                    val expectedAddressCountryCodes =
+                        addressCountryJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum).toString()
+                    val expectedAddressCountryNames =
+                        addressCountryJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames).toString()
+
+                    val expectedAddressRegionCodes =
+                        addressRegionJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum).toString()
+                    val expectedAddressRegionNames =
+                        addressRegionJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames).toString()
+
+                    assert(expectedAddressCountryCodes == CredentialTypesUIFormSchemaMocks.CountryCodes)
+                    assert(expectedAddressCountryNames == CredentialTypesUIFormSchemaMocks.CountryNames)
+                    assert(expectedAddressRegionCodes == CredentialTypesUIFormSchemaMocks.CanadaRegionCodes)
+                    assert(expectedAddressRegionNames == CredentialTypesUIFormSchemaMocks.CanadaRegionNames)
+                },
+                {
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
         }
-
-        val addressJsonObj =
-            result?.data!!.payload.getJSONObject("place")
-        val addressCountryJsonObj =
-            addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressCountry)
-        val addressRegionJsonObj =
-            addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressRegion)
-
-        val expectedAddressCountryCodes =
-            addressCountryJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum).toString()
-        val expectedAddressCountryNames =
-            addressCountryJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames).toString()
-
-        val expectedAddressRegionCodes =
-            addressRegionJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum).toString()
-        val expectedAddressRegionNames =
-            addressRegionJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames).toString()
-
-//        Assert
-        assert(expectedAddressCountryCodes == CredentialTypesUIFormSchemaMocks.CountryCodes)
-        assert(expectedAddressCountryNames == CredentialTypesUIFormSchemaMocks.CountryNames)
-        assert(expectedAddressRegionCodes == CredentialTypesUIFormSchemaMocks.CanadaRegionCodes)
-        assert(expectedAddressRegionNames == CredentialTypesUIFormSchemaMocks.CanadaRegionNames)
     }
 
     @Test
     fun testCredentialTypesFormSchemaOnlyCountries() {
-//        Arrange
         subject = CredentialTypesUIFormSchemaUseCaseImpl(
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesUIFormSchemaMocks.UISchemaFormJsonOnlyCountries)
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
-        var result: VCLResult<VCLCredentialTypesUIFormSchema>? = null
 
-//        Action
         subject.getCredentialTypesUIFormSchema(
             VCLCredentialTypesUIFormSchemaDescriptor("some type", VCLCountries.CA),
             mockedCountries
         ) {
-            result = it
+            it.handleResult(
+                { credentialTypeUIFormSchema ->
+                    val addressJsonObj = credentialTypeUIFormSchema.payload.getJSONObject("place")
+                    val addressCountryJsonObj =
+                        addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressCountry)
+                    val addressRegionJsonObj =
+                        addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressRegion)
+
+                    val expectedAddressCountryCodes =
+                        addressCountryJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum).toString()
+                    val expectedAddressCountryNames =
+                        addressCountryJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames).toString()
+
+                    val expectedAddressRegionCodes =
+                        addressRegionJsonObj.optJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum)
+                    val expectedAddressRegionNames =
+                        addressRegionJsonObj.optJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames)
+
+                    assert(expectedAddressCountryCodes == CredentialTypesUIFormSchemaMocks.CountryCodes)
+                    assert(expectedAddressCountryNames == CredentialTypesUIFormSchemaMocks.CountryNames)
+                    assert(expectedAddressRegionCodes == null)
+                    assert(expectedAddressRegionNames == null)
+                },
+                {
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
         }
-
-        val addressJsonObj =
-            result?.data!!.payload.getJSONObject("place")
-        val addressCountryJsonObj =
-            addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressCountry)
-        val addressRegionJsonObj =
-            addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressRegion)
-
-        val expectedAddressCountryCodes =
-            addressCountryJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum).toString()
-        val expectedAddressCountryNames =
-            addressCountryJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames).toString()
-
-        val expectedAddressRegionCodes =
-            addressRegionJsonObj.optJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum)
-        val expectedAddressRegionNames =
-            addressRegionJsonObj.optJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames)
-
-//        Assert
-        assert(expectedAddressCountryCodes == CredentialTypesUIFormSchemaMocks.CountryCodes)
-        assert(expectedAddressCountryNames == CredentialTypesUIFormSchemaMocks.CountryNames)
-        assert(expectedAddressRegionCodes == null)
-        assert(expectedAddressRegionNames == null)
     }
 
     @Test
     fun testCredentialTypesFormSchemaOnlyRegions() {
-//        Arrange
         subject = CredentialTypesUIFormSchemaUseCaseImpl(
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesUIFormSchemaMocks.UISchemaFormJsonOnlyRegions)
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
-        var result: VCLResult<VCLCredentialTypesUIFormSchema>? = null
 
-//        Action
         subject.getCredentialTypesUIFormSchema(
             VCLCredentialTypesUIFormSchemaDescriptor("some type", VCLCountries.CA),
             mockedCountries
         ) {
-            result = it
+            it.handleResult(
+                { credentialTypeUIFormSchema ->
+                    val addressJsonObj = credentialTypeUIFormSchema.payload.getJSONObject("place")
+                    val addressCountryJsonObj =
+                        addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressCountry)
+                    val addressRegionJsonObj =
+                        addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressRegion)
+
+                    val expectedAddressCountryCodes =
+                        addressCountryJsonObj.optJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum)
+                    val expectedAddressCountryNames =
+                        addressCountryJsonObj.optJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames)
+
+                    val expectedAddressRegionCodes =
+                        addressRegionJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum).toString()
+                    val expectedAddressRegionNames =
+                        addressRegionJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames).toString()
+
+                    assert(expectedAddressCountryCodes == null)
+                    assert(expectedAddressCountryNames == null)
+                    assert(expectedAddressRegionCodes == CredentialTypesUIFormSchemaMocks.CanadaRegionCodes)
+                    assert(expectedAddressRegionNames == CredentialTypesUIFormSchemaMocks.CanadaRegionNames)
+                },
+                {
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
         }
-
-        val addressJsonObj =
-            result?.data!!.payload.getJSONObject("place")
-        val addressCountryJsonObj =
-            addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressCountry)
-        val addressRegionJsonObj =
-            addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressRegion)
-
-        val expectedAddressCountryCodes =
-            addressCountryJsonObj.optJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum)
-        val expectedAddressCountryNames =
-            addressCountryJsonObj.optJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames)
-
-        val expectedAddressRegionCodes =
-            addressRegionJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum).toString()
-        val expectedAddressRegionNames =
-            addressRegionJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames).toString()
-
-//        Assert
-        assert(expectedAddressCountryCodes == null)
-        assert(expectedAddressCountryNames == null)
-        assert(expectedAddressRegionCodes == CredentialTypesUIFormSchemaMocks.CanadaRegionCodes)
-        assert(expectedAddressRegionNames == CredentialTypesUIFormSchemaMocks.CanadaRegionNames)
     }
 
     @Test
     fun testCredentialTypesFormSchemaOnlyEnums() {
-//        Arrange
         subject = CredentialTypesUIFormSchemaUseCaseImpl(
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesUIFormSchemaMocks.UISchemaFormJsonOnlyEnums)
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
-        var result: VCLResult<VCLCredentialTypesUIFormSchema>? = null
 
-//        Action
         subject.getCredentialTypesUIFormSchema(
             VCLCredentialTypesUIFormSchemaDescriptor("some type", VCLCountries.CA),
             mockedCountries
         ) {
-            result = it
-        }
+            it.handleResult(
+                { credentialTypeUIFormSchema ->
+                    val addressJsonObj = credentialTypeUIFormSchema.payload.getJSONObject("place")
+                    val addressCountryJsonObj =
+                        addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressCountry)
+                    val addressRegionJsonObj =
+                        addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressRegion)
 
-        val addressJsonObj =
-            result?.data!!.payload.getJSONObject("place")
-        val addressCountryJsonObj =
-            addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressCountry)
-        val addressRegionJsonObj =
-            addressJsonObj.getJSONObject(VCLCredentialTypesUIFormSchema.KeyAddressRegion)
+                    val expectedAddressCountryCodes =
+                        addressCountryJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum).toString()
+                    val expectedAddressCountryNames =
+                        addressCountryJsonObj.optJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames)
 
-        val expectedAddressCountryCodes =
-            addressCountryJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum).toString()
-        val expectedAddressCountryNames =
-            addressCountryJsonObj.optJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames)
-
-        val expectedAddressRegionCodes =
-            addressRegionJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum).toString()
-        val expectedAddressRegionNames =
-            addressRegionJsonObj.optJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames)
+                    val expectedAddressRegionCodes =
+                        addressRegionJsonObj.getJSONArray(VCLCredentialTypesUIFormSchema.KeyUiEnum).toString()
+                    val expectedAddressRegionNames =
+                        addressRegionJsonObj.optJSONArray(VCLCredentialTypesUIFormSchema.KeyUiNames)
 
 //        Assert
-        assert(expectedAddressCountryCodes == CredentialTypesUIFormSchemaMocks.CountryCodes)
-        assert(expectedAddressCountryNames == null)
-        assert(expectedAddressRegionCodes == CredentialTypesUIFormSchemaMocks.CanadaRegionCodes)
-        assert(expectedAddressRegionNames == null)
+                    assert(expectedAddressCountryCodes == CredentialTypesUIFormSchemaMocks.CountryCodes)
+                    assert(expectedAddressCountryNames == null)
+                    assert(expectedAddressRegionCodes == CredentialTypesUIFormSchemaMocks.CanadaRegionCodes)
+                    assert(expectedAddressRegionNames == null)
+                },
+                {
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
+        }
     }
 
     private fun jsonArrToCountries(countriesJsonArr: JSONArray): VCLCountries {

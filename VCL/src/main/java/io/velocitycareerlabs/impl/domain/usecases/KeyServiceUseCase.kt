@@ -9,9 +9,11 @@ package io.velocitycareerlabs.impl.domain.usecases
 
 import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.VCLToken
 
 internal interface KeyServiceUseCase {
     fun generateDidJwk(
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     )
 }

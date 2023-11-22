@@ -28,7 +28,8 @@ internal class FinalizeOffersUseCaseImpl(
     override fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         didJwk: VCLDidJwk?,
-        token: VCLToken,
+        sessionToken: VCLToken,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit
     ) {
         executor.runOnBackground {
@@ -39,12 +40,13 @@ internal class FinalizeOffersUseCaseImpl(
                     keyId = didJwk?.keyId,
                     iss = didJwk?.did ?: UUID.randomUUID().toString(),
                     aud = finalizeOffersDescriptor.issuerId
-                )
+                ),
+                remoteCryptoServicesToken = remoteCryptoServicesToken
             ) { proofJwtResult ->
                 proofJwtResult.handleResult(
                     successHandler = { proof ->
                         this.finalizeOffersRepository.finalizeOffers(
-                            token = token,
+                            sessionToken = sessionToken,
                             proof = proof,
                             finalizeOffersDescriptor = finalizeOffersDescriptor
                         ) { encodedJwtCredentialsListResult ->

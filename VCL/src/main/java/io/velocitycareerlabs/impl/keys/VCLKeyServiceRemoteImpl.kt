@@ -8,34 +8,36 @@
 package io.velocitycareerlabs.impl.keys
 
 import io.velocitycareerlabs.api.entities.VCLDidJwk
-import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.entities.initialization.VCLKeyServiceUrls
 import io.velocitycareerlabs.api.keys.VCLKeyService
-import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.repositories.HeaderKeys
 import io.velocitycareerlabs.impl.data.repositories.HeaderValues
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.extensions.toJsonObject
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceRemoteImpl
 import org.json.JSONObject
 
 internal class VCLKeyServiceRemoteImpl(
     private val networkService: NetworkService,
     private val keyServiceUrls: VCLKeyServiceUrls
 ) : VCLKeyService {
-    override fun generateDidJwk(completionBlock: (VCLResult<VCLDidJwk>) -> Unit) {
+    override fun generateDidJwk(
+        remoteCryptoServicesToken: VCLToken?,
+        completionBlock: (VCLResult<VCLDidJwk>) -> Unit
+    ) {
         networkService.sendRequest(
             endpoint = keyServiceUrls.createDidKeyServiceUrl,
             body = generatePayloadToCreateDidJwk().toString(),
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.POST,
             headers = listOf(
-                Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
+                Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion),
+                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${remoteCryptoServicesToken?.value}")
             ),
             completionBlock = { didJwkResult ->
                 didJwkResult.handleResult(

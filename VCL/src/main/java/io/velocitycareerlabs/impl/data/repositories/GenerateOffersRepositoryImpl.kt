@@ -24,13 +24,15 @@ internal class GenerateOffersRepositoryImpl(
 ): GenerateOffersRepository {
     private val TAG = GenerateOffersRepositoryImpl::class.simpleName
 
-    override fun generateOffers(token: VCLToken,
-                                generateOffersDescriptor: VCLGenerateOffersDescriptor,
-                                completionBlock: (VCLResult<VCLOffers>) -> Unit) {
+    override fun generateOffers(
+        generateOffersDescriptor: VCLGenerateOffersDescriptor,
+        sessionToken: VCLToken,
+        completionBlock: (VCLResult<VCLOffers>) -> Unit
+    ) {
         networkService.sendRequest(
             endpoint = generateOffersDescriptor.checkOffersUri,
             headers = listOf(
-                Pair(HeaderKeys.HeaderKeyAuthorization, "${HeaderKeys.HeaderValuePrefixBearer} ${token.value}"),
+                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${sessionToken.value}"),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
             body = generateOffersDescriptor.payload.toString(),
@@ -41,7 +43,7 @@ internal class GenerateOffersRepositoryImpl(
                     { offersResponse ->
                         try {
                             completionBlock(VCLResult.Success(
-                                parse(offersResponse, token)
+                                parse(offersResponse, sessionToken)
                             ))
                         } catch (ex: Exception) {
                             completionBlock(VCLResult.Failure(VCLError(ex)))
@@ -55,14 +57,14 @@ internal class GenerateOffersRepositoryImpl(
         )
     }
 
-    private fun parse(offersResponse: Response, token: VCLToken): VCLOffers {
+    private fun parse(offersResponse: Response, sessionToken: VCLToken): VCLOffers {
 //        VCLXVnfProtocolVersion.XVnfProtocolVersion2
         offersResponse.payload.toJsonObject()?.let { payload ->
             return VCLOffers(
                 payload = payload,
                 all = payload.optJSONArray(VCLOffers.CodingKeys.KeyOffers) ?: JSONArray(),
                 responseCode = offersResponse.code,
-                token = token,
+                sessionToken = sessionToken,
                 challenge = payload.optString(VCLOffers.CodingKeys.KeyChallenge) ?: ""
             )
         } ?: run {
@@ -72,7 +74,7 @@ internal class GenerateOffersRepositoryImpl(
                     payload = JSONObject(),
                     all = allOffers,
                     responseCode = offersResponse.code,
-                    token = token,
+                    sessionToken = sessionToken,
                     challenge = ""
                 )
             } ?: run {
@@ -81,7 +83,7 @@ internal class GenerateOffersRepositoryImpl(
                     payload = JSONObject(),
                     all = JSONArray(),
                     responseCode = offersResponse.code,
-                    token = token,
+                    sessionToken = sessionToken,
                     challenge = ""
                 )
             }

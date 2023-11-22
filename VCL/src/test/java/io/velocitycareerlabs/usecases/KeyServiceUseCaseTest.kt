@@ -12,14 +12,12 @@ import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.data
 import io.velocitycareerlabs.api.entities.handleResult
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.KeyServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.KeyServiceUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.KeyServiceUseCase
-import io.velocitycareerlabs.impl.extensions.decodeBase64
-import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,15 +37,13 @@ class KeyServiceUseCaseTest {
             KeyServiceRepositoryImpl(
                 VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
     }
 
     @Test
     fun testGenerateJwk() {
-        var resultDidJwk: VCLResult<VCLDidJwk>? = null
-
-        subject.generateDidJwk {
+        subject.generateDidJwk(null) {
             it.handleResult(
                 successHandler = { didJwk ->
                     val jwkJsonObj = didJwk.publicJwk.valueJson
@@ -70,22 +66,25 @@ class KeyServiceUseCaseTest {
 
     @Test
     fun testGenerateDifferentJwks() {
-        var resultDidJwk1: VCLResult<VCLDidJwk>? = null
-        var resultDidJwk2: VCLResult<VCLDidJwk>? = null
-
-        subject.generateDidJwk {
-            resultDidJwk1 = it
-        }
-        subject.generateDidJwk {
-            resultDidJwk2 = it
-        }
-        try {
-            val didJwk1 = resultDidJwk1?.data
-            val didJwk2 = resultDidJwk2?.data
-            assert(didJwk1!!.did != didJwk2!!.did)
-            assert(didJwk1.keyId != didJwk2.keyId)
-        } catch (ex: Exception) {
-            assert(false) {"$ex"}
+        subject.generateDidJwk(null) { didJwk1Res ->
+            didJwk1Res.handleResult(
+                { didJwk1 ->
+                    subject.generateDidJwk(null) { didJwk2Res ->
+                        didJwk2Res.handleResult(
+                            { didJwk2 ->
+                                assert(didJwk1.did != didJwk2.did)
+                                assert(didJwk1.keyId != didJwk2.keyId)
+                            },
+                            {
+                                assert(false) { "${it.toJsonObject()}" }
+                            }
+                        )
+                    }
+                },
+                {
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
         }
     }
 }

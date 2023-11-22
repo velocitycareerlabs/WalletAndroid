@@ -10,9 +10,15 @@ package io.velocitycareerlabs.api.entities
 enum class VCLServiceType(val value: String) {
     Inspector("Inspector"),
     Issuer("Issuer"),
-    IdentityIssuer("IdentityIssuer"),
     NotaryIssuer("NotaryIssuer"),
     CareerIssuer("CareerIssuer"),
+//    Identity issuer types:
+    IdentityIssuer("IdentityIssuer"),
+    IdDocumentIssuer("IdDocumentIssuer"),
+    NotaryIdDocumentIssuer("NotaryIdDocumentIssuer"),
+    ContactIssuer("ContactIssuer"),
+    NotaryContactIssuer("NotaryContactIssuer"),
+
     Undefined("Undefined");
 
     companion object {
@@ -25,6 +31,18 @@ enum class VCLServiceType(val value: String) {
             }
             if(value.contains(IdentityIssuer.value)) {
                 return IdentityIssuer
+            }
+            if(value.contains(NotaryIdDocumentIssuer.value)) {
+                return NotaryIdDocumentIssuer
+            }
+            if(value.contains(IdDocumentIssuer.value)) {
+                return IdDocumentIssuer
+            }
+            if(value.contains(NotaryContactIssuer.value)) {
+                return NotaryContactIssuer
+            }
+            if(value.contains(ContactIssuer.value)) {
+                return ContactIssuer
             }
             if(value.contains(CareerIssuer.value)) {
                 return CareerIssuer

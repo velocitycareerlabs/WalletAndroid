@@ -9,12 +9,14 @@ package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
-import io.velocitycareerlabs.api.jwt.VCLJwtService
+import io.velocitycareerlabs.api.jwt.VCLJwtSignService
+import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
 import java.lang.Exception
 
 internal class JwtServiceRepositoryImpl(
-        private val jwtService: VCLJwtService
+        private val jwtSignService: VCLJwtSignService,
+        private val jwtVerifyService: VCLJwtVerifyService
 ): JwtServiceRepository {
 
     override fun decode(
@@ -33,9 +35,14 @@ internal class JwtServiceRepositoryImpl(
     override fun verifyJwt(
         jwt: VCLJwt,
         publicJwk: VCLPublicJwk,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        jwtService.verify(jwt, publicJwk) {
+        jwtVerifyService.verify(
+            jwt = jwt,
+            publicJwk = publicJwk,
+            remoteCryptoServicesToken = remoteCryptoServicesToken
+        ) {
             completionBlock(it)
         }
     }
@@ -44,12 +51,14 @@ internal class JwtServiceRepositoryImpl(
         kid: String?, // did:jwk in case of person binding
         nonce: String?, // nonce == challenge
         jwtDescriptor: VCLJwtDescriptor,
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
-        jwtService.sign(
+        jwtSignService.sign(
             kid = kid,
             nonce = nonce,
-            jwtDescriptor = jwtDescriptor
+            jwtDescriptor = jwtDescriptor,
+            remoteCryptoServicesToken = remoteCryptoServicesToken,
         ) {
             completionBlock(it)
         }

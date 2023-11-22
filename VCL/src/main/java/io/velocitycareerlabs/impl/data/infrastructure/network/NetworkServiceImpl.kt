@@ -135,7 +135,7 @@ internal class NetworkServiceImpl: NetworkService {
     private fun logRequest(request: Request) {
         val methodLog = "Request Method: ${request.method}"
         val endpointLog = " Request Endpoint: ${request.endpoint}"
-        val bodyLog = request.body?.let { " Request Body: $it" }
+        val bodyLog = request.body?.let { "\nRequest Body:\n$it" }
             ?: "\n"
         VCLLog.d(TAG, "$methodLog$endpointLog$bodyLog")
     }

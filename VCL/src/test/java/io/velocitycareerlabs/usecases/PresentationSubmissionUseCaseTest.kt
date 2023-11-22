@@ -9,15 +9,16 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.jwt.VCLJwtServiceLocalImpl
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.PresentationSubmissionRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.PresentationSubmissionUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.PresentationSubmissionUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonObject
+import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
+import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CommonMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationSubmissionMocks
@@ -35,12 +36,12 @@ internal class PresentationSubmissionUseCaseTest {
 
     lateinit var subject: PresentationSubmissionUseCase
 
-    lateinit var didJwk: VCLDidJwk
+    private lateinit var didJwk: VCLDidJwk
     private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
 
     @Before
     fun setUp() {
-        keyService.generateDidJwk{ didJwkResult ->
+        keyService.generateDidJwk(null) { didJwkResult ->
             didJwkResult.handleResult({
                     didJwk = it
                 }, {
@@ -56,9 +57,10 @@ internal class PresentationSubmissionUseCaseTest {
                 NetworkServiceSuccess(validResponse = PresentationSubmissionMocks.PresentationSubmissionResultJson)
             ),
             JwtServiceRepositoryImpl(
-                VCLJwtServiceLocalImpl(keyService)
+                VCLJwtSignServiceLocalImpl(keyService),
+                VCLJwtVerifyServiceLocalImpl()
             ),
-            EmptyExecutor()
+            ExecutorImpl()
         )
         val presentationSubmission = VCLPresentationSubmission(
             presentationRequest = VCLPresentationRequest(
@@ -68,27 +70,29 @@ internal class PresentationSubmissionUseCaseTest {
             ),
             verifiableCredentials = listOf()
         )
-        var result: VCLResult<VCLSubmissionResult>? = null
-
-        subject.submit(
-            submission = presentationSubmission,
-            didJwk = didJwk
-        ) {
-            result = it
-        }
-
         val expectedPresentationSubmissionResult =
             expectedPresentationSubmissionResult(
                 PresentationSubmissionMocks.PresentationSubmissionResultJson.toJsonObject()!!,
                 presentationSubmission.jti, submissionId = presentationSubmission.submissionId
             )
 
-        val presentationSubmissionResult = result?.data
-
-        assert(presentationSubmissionResult!!.token.value == expectedPresentationSubmissionResult.token.value)
-        assert(presentationSubmissionResult.exchange.id == expectedPresentationSubmissionResult.exchange.id)
-        assert(presentationSubmissionResult.jti == expectedPresentationSubmissionResult.jti)
-        assert(presentationSubmissionResult.submissionId == expectedPresentationSubmissionResult.submissionId)
+        subject.submit(
+            submission = presentationSubmission,
+            didJwk = didJwk,
+            remoteCryptoServicesToken = null
+        ) {
+            it.handleResult(
+                { presentationSubmissionResult ->
+                    assert(presentationSubmissionResult.sessionToken.value == expectedPresentationSubmissionResult.sessionToken.value)
+                    assert(presentationSubmissionResult.exchange.id == expectedPresentationSubmissionResult.exchange.id)
+                    assert(presentationSubmissionResult.jti == expectedPresentationSubmissionResult.jti)
+                    assert(presentationSubmissionResult.submissionId == expectedPresentationSubmissionResult.submissionId)
+                },
+                {
+                    assert(false) { "$it" }
+                }
+            )
+        }
     }
 
     private fun expectedPresentationSubmissionResult(
@@ -98,7 +102,7 @@ internal class PresentationSubmissionUseCaseTest {
     ): VCLSubmissionResult {
         val exchangeJsonObj = jsonObj.optJSONObject(VCLSubmissionResult.CodingKeys.KeyExchange)!!
         return VCLSubmissionResult(
-            token = VCLToken(value = (jsonObj[VCLSubmissionResult.CodingKeys.KeyToken] as String)),
+            sessionToken = VCLToken(value = (jsonObj[VCLSubmissionResult.CodingKeys.KeyToken] as String)),
             exchange = expectedExchange(exchangeJsonObj),
             jti = jti,
             submissionId = submissionId

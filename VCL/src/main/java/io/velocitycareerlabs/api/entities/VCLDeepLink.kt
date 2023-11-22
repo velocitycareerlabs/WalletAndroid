@@ -15,10 +15,10 @@ import io.velocitycareerlabs.impl.extensions.getUrlQueryParams
 import java.net.URI
 
 data class VCLDeepLink(val value: String) {
-    val issuer: String? = generateUri(uriKey = KeyIssuer)
     val requestUri: String? = generateUri(uriKey = KeyRequestUri)
-    val vendorOriginContext: String? = retrieveVendorOriginContext()
-    val did: String? = requestUri?.getUrlSubPath(KeyDidPrefix) ?: issuer?.getUrlSubPath(KeyDidPrefix)
+    val vendorOriginContext: String? = retrieveQueryParam(KeyVendorOriginContext)
+    val did: String? = (retrieveQueryParam(KeyIssuerDid) ?: retrieveQueryParam(KeyInspectorDid))
+        ?: requestUri?.getUrlSubPath(KeyDidPrefix) // fallback for old agents
 
     private fun generateUri(uriKey: String, asSubParams: Boolean = false): String? {
         this.value.decode().getUrlQueryParams()?.let { queryParams ->
@@ -26,10 +26,9 @@ data class VCLDeepLink(val value: String) {
                 val queryItems = queryParams
                     .filter { it.key != uriKey && it.value.isNotEmpty() }
                     .map { (key, value) -> "$key=${value.encode()}" }
-                    .sortedBy { it } // Sort is needed for unit tests
                     .joinToString("&")
                 if (queryItems.isNotEmpty()) {
-                    return if(asSubParams) "$uri&$queryItems" else uri.appendQueryParams(queryItems)
+                    return if (asSubParams) "$uri&$queryItems" else uri.appendQueryParams(queryItems)
                 }
                 return uri
             }
@@ -37,13 +36,14 @@ data class VCLDeepLink(val value: String) {
         return null
     }
 
-    private fun retrieveVendorOriginContext(): String? =
-        this.value.decode().getUrlQueryParams()?.get(KeyVendorOriginContext)
+    private fun retrieveQueryParam(key: String): String? =
+        this.value.decode().getUrlQueryParams()?.get(key)
 
     companion object CodingKeys {
         const val KeyDidPrefix = "did:"
-        const val KeyIssuer = "issuer"
         const val KeyRequestUri = "request_uri"
         const val KeyVendorOriginContext = "vendorOriginContext"
+        const val KeyIssuerDid = "issuerDid"
+        const val KeyInspectorDid = "inspectorDid"
     }
 }

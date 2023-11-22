@@ -20,13 +20,15 @@ internal class ExchangeProgressRepositoryImpl(
     private val networkService: NetworkService
 ): ExchangeProgressRepository {
 
-    override fun getExchangeProgress(exchangeDescriptor: VCLExchangeDescriptor,
-                                     completionBlock: (VCLResult<VCLExchange>) -> Unit) {
+    override fun getExchangeProgress(
+        exchangeDescriptor: VCLExchangeDescriptor,
+        completionBlock: (VCLResult<VCLExchange>) -> Unit
+    ) {
         networkService.sendRequest(
             endpoint = exchangeDescriptor.processUri +
                     "?${VCLExchangeDescriptor.KeyExchangeId}=${exchangeDescriptor.exchangeId.encode()}",
             headers = listOf(
-                Pair(HeaderKeys.HeaderKeyAuthorization, "${HeaderKeys.HeaderValuePrefixBearer} ${exchangeDescriptor.token.value}"),
+                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${exchangeDescriptor.sessionToken.value}"),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
                 ),
             method = Request.HttpMethod.GET,

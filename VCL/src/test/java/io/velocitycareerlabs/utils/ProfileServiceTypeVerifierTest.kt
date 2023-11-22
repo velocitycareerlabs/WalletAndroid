@@ -9,11 +9,11 @@ package io.velocitycareerlabs.utils
 
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLStatusCode
+import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.VerifiedProfileRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.VerifiedProfileUseCaseImpl
 import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.json.JSONObject
 import org.junit.Test
@@ -29,7 +29,7 @@ class ProfileServiceTypeVerifierTest {
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
                 ),
-                EmptyExecutor()
+                ExecutorImpl()
             )
         )
 
@@ -40,7 +40,7 @@ class ProfileServiceTypeVerifierTest {
                  assert(true)
             },
             errorHandler = {
-                assert(false)
+                assert(false) { "${it.toJsonObject()}" }
             }
         )
     }
@@ -52,7 +52,7 @@ class ProfileServiceTypeVerifierTest {
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileInspectorJsonStr)
                 ),
-                EmptyExecutor()
+                ExecutorImpl()
             )
         )
 
@@ -63,7 +63,7 @@ class ProfileServiceTypeVerifierTest {
                 assert(true)
             },
             errorHandler = {
-                assert(false)
+                assert(false) { "${it.toJsonObject()}" }
             }
         )
     }
@@ -75,7 +75,7 @@ class ProfileServiceTypeVerifierTest {
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
                 ),
-                EmptyExecutor()
+                ExecutorImpl()
             )
         )
 
@@ -86,7 +86,7 @@ class ProfileServiceTypeVerifierTest {
                 assert(true)
             },
             errorHandler = {
-                assert(false)
+                assert(false) { "${it.toJsonObject()}" }
             }
         )
     }
@@ -98,7 +98,7 @@ class ProfileServiceTypeVerifierTest {
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
                 ),
-                EmptyExecutor()
+                ExecutorImpl()
             )
         )
 
@@ -122,7 +122,7 @@ class ProfileServiceTypeVerifierTest {
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1)
                 ),
-                EmptyExecutor()
+                ExecutorImpl()
             )
         )
 
@@ -146,7 +146,7 @@ class ProfileServiceTypeVerifierTest {
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
                 ),
-                EmptyExecutor()
+                ExecutorImpl()
             )
         )
 
