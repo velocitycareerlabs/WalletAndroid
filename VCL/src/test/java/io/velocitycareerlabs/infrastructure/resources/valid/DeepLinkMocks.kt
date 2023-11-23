@@ -20,9 +20,8 @@ class DeepLinkMocks {
         const val OIDIssuerDid = "did:velocity:0xc257274276a4e539741ca11b590b9447b26a8051"
 
         const val Issuer =
-            "https%3A%2F%2Fdevagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Avelocity%3A0xc257274276a4e539741ca11b590b9447b26a8051%2Foidc%26credential_type%3DPastEmploymentPosition%26pre-authorized_code%3D8L1UArquTYvE-ylC2BV_2"
-        const val IssuerDecoded =
-            "https://devagent.velocitycareerlabs.io/api/holder/v0.6/org/$OIDIssuerDid/oidc?credential_type=PastEmploymentPosition&pre-authorized_code=8L1UArquTYvE-ylC2BV_2"
+            "https%3A%2F%2Fdevagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Avelocity%3A0xc257274276a4e539741ca11b590b9447b26a8051%2Foidc%26credential_type%3DPastEmploymentPosition%26pre-authorized_code%3D8L1UArquTYvE-ylC2BV_2%26issuerDid%3Ddid%3Avelocity%3A0xc257274276a4e539741ca11b590b9447b26a8051"
+
         const val OpenidInitiateIssuanceStrDev = "openid-initiate-issuance://?issuer=$Issuer"
 
         const val InspectorDid = "did:ion:EiByBvq95tfmhl41DOxJeaa26HjSxAUoz908PITFwMRDNA"
@@ -46,10 +45,10 @@ class DeepLinkMocks {
         const val IssuerDid = "did:velocity:0xd4df29726d500f9b85bc6c7f1b3c021f16305692"
 
         const val CredentialManifestRequestDecodedUriStr =
-            "https://devagent.velocitycareerlabs.io/api/holder/v0.6/org/$IssuerDid/issue/get-credential-manifest?id=611b5836e93d08000af6f1bc&credential_types=PastEmploymentPosition"
+            "https://devagent.velocitycareerlabs.io/api/holder/v0.6/org/$IssuerDid/issue/get-credential-manifest?id=611b5836e93d08000af6f1bc&credential_types=PastEmploymentPosition&issuerDid=did:velocity:0xd4df29726d500f9b85bc6c7f1b3c021f16305692"
 
         const val CredentialManifestRequestUriStr =
-            "https%3A%2F%2Fdevagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Avelocity%3A0xd4df29726d500f9b85bc6c7f1b3c021f16305692%2Fissue%2Fget-credential-manifest%3Fid%3D611b5836e93d08000af6f1bc%26credential_types%3DPastEmploymentPosition"
+            "https%3A%2F%2Fdevagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Avelocity%3A0xd4df29726d500f9b85bc6c7f1b3c021f16305692%2Fissue%2Fget-credential-manifest%3Fid%3D611b5836e93d08000af6f1bc%26credential_types%3DPastEmploymentPosition%26issuerDid%3Ddid%3Avelocity%3A0xd4df29726d500f9b85bc6c7f1b3c021f16305692"
 
         const val CredentialManifestDeepLinkDevNetStr = "$DevNetProtocol://issue?request_uri=$CredentialManifestRequestUriStr"
         const val CredentialManifestDeepLinkTestNetStr = "$TestNetProtocol://issue?request_uri=$CredentialManifestRequestUriStr"
