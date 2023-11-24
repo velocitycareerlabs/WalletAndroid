@@ -1,6 +1,6 @@
 Properties properties = new Properties()
 properties.load(new FileInputStream(rootProject.file(
-    '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties'
+    System.getenv("PROPERIES_FILE") ? System.getenv("PROPERIES_FILE") : '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties'
 )))
 
 ext {
