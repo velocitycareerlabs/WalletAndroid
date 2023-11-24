@@ -51,7 +51,7 @@ jobs:
         run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')" >> $GITHUB_OUTPUT
       # Set properties file
       - name: Set properties file
-        run: echo "${{ secrets.ANDROID_NEXUS_XYZ }}" > ${{ github.workflow }}/${{ env.PROPERIES_FILE }}
+        run: echo "${{ env.ANDROID_NEXUS_XYZ }}" > ${{ github.workflow }}/${{ env.PROPERIES_FILE }}
       # Build
       - name: Gradle Assemble Release
         run: ./gradlew assemble
