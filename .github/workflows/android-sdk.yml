@@ -6,7 +6,6 @@ on:
       - main
       - staging
       - dev
-      - VL-6481-fix
 env:
   PACKAGE_TYPE: "aar"
   GRADLE_VERSION: "7.5"
