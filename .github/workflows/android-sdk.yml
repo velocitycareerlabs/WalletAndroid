@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Git clone repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       # Setup java
       - uses: actions/setup-java@v3
         with:
@@ -39,7 +39,7 @@ jobs:
       - test-android-sdk
     steps:
       - name: Git clone repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       # Setup java
       - uses: actions/setup-java@v3
         with:
@@ -52,8 +52,6 @@ jobs:
       - name: Rename artifact to lowercase
         run: |
           mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-release.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-release.${{ env.PACKAGE_TYPE }}
-      # - name: Debug artifact
-      #   run: ls ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-release.${{ env.PACKAGE_TYPE }}
       # Upload Artifacts
       - name: Upload Artifact
         if: success()
@@ -78,7 +76,7 @@ jobs:
           name: vcl-release.${{ env.PACKAGE_TYPE }}
           path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
       - name: Publish
-        run: echo "I'm gonna to do publish with command --> ./gradlew publish${{ env.RELEASE_TAG }}"
+        run: ./gradlew publish${{ env.RELEASE_TAG }}
         env: 
           RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Prod' ) || 'Rc' }}
 

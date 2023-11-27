@@ -12,20 +12,6 @@ if (propertiesFile.exists()) {
     println "Properties file not found: $propertiesFilePath"
 }
 
-
-// File properties_file = new File('/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties')
-
-// if(properties_file.exists())
-//     Properties properties = new Properties()
-//     properties.load(new FileInputStream(rootProject.file(
-//         '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties'
-//     )))
-
-// Properties properties = new Properties()
-// properties.load(new FileInputStream(rootProject.file(
-//     '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties'
-// )))
-
 ext {
     signingKeyId = System.getenv("ANDROID_NEXUS_SIGNING_KEY_ID") ?: properties["signingKeyId"]
     signingPassword = System.getenv("ANDROID_NEXUS_SIGNING_PWD") ?: properties["signingPassword"]
