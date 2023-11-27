@@ -1,11 +1,8 @@
 Properties properties = new Properties()
-// properties.load(new FileInputStream(rootProject.file(
-//     System.getenv("PROPERIES_FILE") ? System.getenv("PROPERIES_FILE") : '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties'
-// )))
 
-// properties.load(new FileInputStream(rootProject.file(
-//     '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties'
-// )))
+properties.load(new FileInputStream(rootProject.file(
+    '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties' ? '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties' : ''
+)))
 
 ext {
     signingKeyId = System.getenv("ANDROID_NEXUS_SIGNING_KEY_ID") ?: properties["signingKeyId"]
@@ -15,13 +12,6 @@ ext {
     sonatypeStagingProfileId = System.getenv("ANDROID_NEXUS_STAGING_PROFILE_ID") ?: properties["stagingProfileId"]
     signingPrivateKey = System.getenv("ANDROID_NEXUS_PRIVATE_KEY") ?: properties["signingPrivateKey"]
 }
-
-//println("signingKeyId: ${signingKeyId}")
-//println("signingPassword: ${signingPassword}")
-//println("ossrhUsername: ${ossrhUsername}")
-//println("ossrhPassword: ${ossrhPassword}")
-//println("sonatypeStagingProfileId: ${sonatypeStagingProfileId}")
-//println("signingPrivateKey: ${signingPrivateKey}")
 
 nexusPublishing {
     repositories {
