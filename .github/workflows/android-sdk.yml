@@ -24,14 +24,14 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-      - name: Set properties file
-        run: |
-          echo "signingKeyId=${{ secrets.ANDROID_NEXUS_SIGNING_KEY_ID }}" >> ${{github.workflow}}/${{ env.PROPERIES_FILE }}
-          echo "signingPassword=${{ secrets.ANDROID_NEXUS_SIGNING_PWD }}" >> ${{github.workflow}}/${{ env.PROPERIES_FILE }}
-          echo "ossrhUsername=${{ secrets.ANDROID_NEXUS_OSSRH_USERNAME }}" >> ${{github.workflow}}/${{ env.PROPERIES_FILE }}
-          echo "ossrhPassword=${{ secrets.ANDROID_NEXUS_OSSRH_PWD }}" >> ${{github.workflow}}/${{ env.PROPERIES_FILE }}
-          echo "stagingProfileId=${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}" >> ${{github.workflow}}/${{ env.PROPERIES_FILE }}
-          echo "signingPrivateKey=${{ secrets.ANDROID_NEXUS_PRIVATE_KEY }}" >> ${{github.workflow}}/${{ env.PROPERIES_FILE }}
+      # - name: Set properties file
+      #   run: |
+      #     echo "signingKeyId=${{ secrets.ANDROID_NEXUS_SIGNING_KEY_ID }}" >> ${{github.workflow}}/${{ env.PROPERIES_FILE }}
+      #     echo "signingPassword=${{ secrets.ANDROID_NEXUS_SIGNING_PWD }}" >> ${{github.workflow}}/${{ env.PROPERIES_FILE }}
+      #     echo "ossrhUsername=${{ secrets.ANDROID_NEXUS_OSSRH_USERNAME }}" >> ${{github.workflow}}/${{ env.PROPERIES_FILE }}
+      #     echo "ossrhPassword=${{ secrets.ANDROID_NEXUS_OSSRH_PWD }}" >> ${{github.workflow}}/${{ env.PROPERIES_FILE }}
+      #     echo "stagingProfileId=${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}" >> ${{github.workflow}}/${{ env.PROPERIES_FILE }}
+      #     echo "signingPrivateKey=${{ secrets.ANDROID_NEXUS_PRIVATE_KEY }}" >> ${{github.workflow}}/${{ env.PROPERIES_FILE }}
       # Run test
       - name: Run Test
         run: ./gradlew test
