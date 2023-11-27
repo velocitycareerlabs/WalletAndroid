@@ -1,3 +1,18 @@
+def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties'
+def propertiesFile = new File(propertiesFilePath)
+
+if (propertiesFile.exists()) {
+    def properties = new Properties()
+    try {
+        properties.load(new FileInputStream(propertiesFile))
+    } catch (IOException e) {
+        e.printStackTrace()
+    }
+} else {
+    println "Properties file not found: $propertiesFilePath"
+}
+
+
 // File properties_file = new File('/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties')
 
 // if(properties_file.exists())
