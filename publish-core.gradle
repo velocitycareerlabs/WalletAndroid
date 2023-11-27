@@ -1,11 +1,14 @@
 Properties properties = new Properties()
+File properties_file = new File('/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties')
 
 properties.load(
-File file = new File('/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties');
 if(file.exists())
-    FileInputStream file = new FileInputStream(file);    
-
+    FileInputStream file = new FileInputStream(rootProject.file(properties_file));    
 )
+
+// properties.load(new FileInputStream(rootProject.file(
+//     '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties'
+// )))
 
 ext {
     signingKeyId = System.getenv("ANDROID_NEXUS_SIGNING_KEY_ID") ?: properties["signingKeyId"]
