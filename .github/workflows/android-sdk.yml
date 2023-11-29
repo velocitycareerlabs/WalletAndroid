@@ -51,6 +51,12 @@ jobs:
       - name: Rename artifact to lowercase
         run: |
           mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-release.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-release.${{ env.PACKAGE_TYPE }}
+      # Publish Main/Staging 
+      - name: Publish Main/Staging
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' }}
+        run: ./gradlew publish${{ env.RELEASE_TAG }}
+        env: 
+          RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Prod' ) || 'Rc' }}
       # Upload Artifacts
       - name: Upload Artifact
         if: success()
@@ -61,23 +67,6 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  publish-android-sdk:
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' }}
-    runs-on: ubuntu-latest
-    needs: 
-      - test-android-sdk
-      - build-android-sdk
-    steps:
-      # Download Artifact
-      - name: Download Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: vcl-release.${{ env.PACKAGE_TYPE }}
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
-      - name: Publish
-        run: ./gradlew publish${{ env.RELEASE_TAG }}
-        env: 
-          RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Prod' ) || 'Rc' }}
 
 
 
