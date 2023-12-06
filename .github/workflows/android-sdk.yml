@@ -6,6 +6,7 @@ on:
       - main
       - staging
       - dev
+      - VL-6481-fix
 env:
   PACKAGE_TYPE: "aar"
   GRADLE_VERSION: "7.5"
@@ -51,21 +52,25 @@ jobs:
       - name: Rename artifact to lowercase
         run: |
           mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-release.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-release.${{ env.PACKAGE_TYPE }}
-      # Publish Main/Staging 
-      - name: Publish Main/Staging
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' }}
-        run: ./gradlew publish${{ env.RELEASE_TAG }}
-        env: 
-          RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Prod' ) || 'Rc' }}
+      - name: Debug
+        run: |
+          ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
+      # Publish Main/Staging
+      # # ToDO PUBSH RC and PROD.
+      # - name: Publish Main/Staging
+      #   if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' }}
+      #   run: ./gradlew publish${{ env.RELEASE_TAG }}
+      #   env: 
+      #     RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Prod' ) || 'Rc' }}
       # Upload Artifacts
-      - name: Upload Artifact
-        if: success()
-        uses: actions/upload-artifact@v3
-        with:
-          name: vcl-release.${{ env.PACKAGE_TYPE }}
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
-          if-no-files-found: error
-          retention-days: 1
+      # - name: Upload Artifact
+      #   if: success()
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: vcl-release.${{ env.PACKAGE_TYPE }}
+      #     path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
+      #     if-no-files-found: error
+      #     retention-days: 1
 
 
 
