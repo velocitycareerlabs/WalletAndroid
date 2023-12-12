@@ -154,6 +154,7 @@ afterEvaluate {
                             rootProject.ext.signingPrivateKey,
                             rootProject.ext.signingPassword,
                         )
+                        sign publishing.publications.rc
                     }
                 }
             }
@@ -206,6 +207,7 @@ afterEvaluate {
                             rootProject.ext.signingPrivateKey,
                             rootProject.ext.signingPassword,
                         )
+                        sign publishing.publications.release
                     }
 
                 }
