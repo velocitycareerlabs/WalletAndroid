@@ -14,7 +14,7 @@ android {
         minSdk 24
         targetSdk 33
         // versionName "1.21.0"
-        versionName "999.21.0"
+        versionName "99.21.0"
         versionCode 116
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -104,65 +104,73 @@ artifacts {
 afterEvaluate {
     publishing {
         publications {
-            rc(MavenPublication) {
-                groupId getGroupId()
-                def rc = getArtifactId()
-                artifactId = "${rc}-rc"
-                version = getVersionName()
+            // rc(MavenPublication) {
+            //     groupId getGroupId()
+            //     def rc = getArtifactId()
+            //     artifactId = "${rc}-rc"
+            //     version = getVersionName()
 
-                // Two artifacts, the `aar` (or `jar`) and the sources
-                if (project.plugins.findPlugin("com.android.library")) {
-                    from components.release
-                } else {
-                    from components.java
-                }
+            //     // Two artifacts, the `aar` (or `jar`) and the sources
+            //     if (project.plugins.findPlugin("com.android.library")) {
+            //         from components.release
+            //     } else {
+            //         from components.java
+            //     }
 
-                artifact androidSourcesJar
+            //     artifact androidSourcesJar
 
-                // Mostly self-explanatory metadata
-                pom {
-                    name = getArtifactId()
-                    // Library description
-                    description = 'Velocity Career Labs Android library'
-                    // Library Github URL
-                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                    licenses {
-                        license {
-                            name = 'Apache License 2.0'
-                            // Library license
-                            url = 'https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE'
-                        }
-                    }
-                    developers {
-                        developer {
-                            id = 'velocitycareerlabs'
-                            name = 'Michael Avoyan'
-                            email = 'michael.avoyan@velocitycareerlabs.com'
-                        }
-                    }
+            //     // Mostly self-explanatory metadata
+            //     pom {
+            //         name = getArtifactId()
+            //         // Library description
+            //         description = 'Velocity Career Labs Android library'
+            //         // Library Github URL
+            //         url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+            //         licenses {
+            //             license {
+            //                 name = 'Apache License 2.0'
+            //                 // Library license
+            //                 url = 'https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE'
+            //             }
+            //         }
+            //         developers {
+            //             developer {
+            //                 id = 'velocitycareerlabs'
+            //                 name = 'Michael Avoyan'
+            //                 email = 'michael.avoyan@velocitycareerlabs.com'
+            //             }
+            //         }
 
-                    scm {
-                        // Library info on Github
-                        connection = 'scm:github.com/velocitycareerlabs/WalletAndroid.git'
-                        developerConnection = 'scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git'
-                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                    }
+            //         scm {
+            //             // Library info on Github
+            //             connection = 'scm:github.com/velocitycareerlabs/WalletAndroid.git'
+            //             developerConnection = 'scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git'
+            //             url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+            //         }
                     
-                    signing {
-                        useInMemoryPgpKeys(
-                            rootProject.ext.signingKeyId,
-                            rootProject.ext.signingPrivateKey,
-                            rootProject.ext.signingPassword,
-                        )
-                        sign publishing.publications.rc
-                    }
-                }
-            }
+            //         signing {
+            //             useInMemoryPgpKeys(
+            //                 rootProject.ext.signingKeyId,
+            //                 rootProject.ext.signingPrivateKey,
+            //                 rootProject.ext.signingPassword,
+            //             )
+            //             sign publishing.publications.rc
+            //         }
+            //     }
+            // }
             release(MavenPublication) {
                 groupId getGroupId()
                 artifactId getArtifactId()
                 version getVersionName()
 
+                def buildType = android.buildTypes.rc
+                if (buildType != null) {
+                    def rc = getArtifactId()
+                    artifactId = "${rc}-rc"
+                } else {
+                    artifactId getArtifactId()
+                }
+
                 // Two artifacts, the `aar` (or `jar`) and the sources
                 if (project.plugins.findPlugin("com.android.library")) {
                     from components.release
@@ -200,16 +208,6 @@ afterEvaluate {
                         developerConnection = 'scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git'
                         url = 'https://github.com/velocitycareerlabs/WalletAndroid'
                     }
-
-                    signing {
-                        useInMemoryPgpKeys(
-                            rootProject.ext.signingKeyId,
-                            rootProject.ext.signingPrivateKey,
-                            rootProject.ext.signingPassword,
-                        )
-                        sign publishing.publications.release
-                    }
-
                 }
             }
         }
