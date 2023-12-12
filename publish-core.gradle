@@ -21,6 +21,13 @@ ext {
     signingPrivateKey = System.getenv("ANDROID_NEXUS_PRIVATE_KEY") ?: properties["signingPrivateKey"]
 }
 
+println("signingKeyId: ${signingKeyId}")
+println("signingPassword: ${signingPassword}")
+println("ossrhUsername: ${ossrhUsername}")
+println("ossrhPassword: ${ossrhPassword}")
+println("sonatypeStagingProfileId: ${sonatypeStagingProfileId}")
+println("signingPrivateKey: ${signingPrivateKey}")
+
 nexusPublishing {
     repositories {
         sonatype {
