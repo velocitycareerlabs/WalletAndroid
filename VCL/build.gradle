@@ -14,7 +14,7 @@ android {
         minSdk 24
         targetSdk 33
         // versionName "1.21.0"
-        versionName "1.21.2"
+        versionName "999.21.0"
         versionCode 116
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -148,6 +148,14 @@ afterEvaluate {
                         url = 'https://github.com/velocitycareerlabs/WalletAndroid'
                     }
                 }
+                signing {
+                        useInMemoryPgpKeys(
+                            rootProject.ext.signingKeyId,
+                            rootProject.ext.signingPrivateKey,
+                            rootProject.ext.signingPassword,
+                        )
+                        // sign publishing.publications
+                }
             }
             release(MavenPublication) {
                 groupId getGroupId()
@@ -192,19 +200,27 @@ afterEvaluate {
                         url = 'https://github.com/velocitycareerlabs/WalletAndroid'
                     }
                 }
+                signing {
+                        useInMemoryPgpKeys(
+                            rootProject.ext.signingKeyId,
+                            rootProject.ext.signingPrivateKey,
+                            rootProject.ext.signingPassword,
+                        )
+                        // sign publishing.publications
+                }
             }
         }
     }
 }
 
-signing {
-    useInMemoryPgpKeys(
-            rootProject.ext.signingKeyId,
-            rootProject.ext.signingPrivateKey,
-            rootProject.ext.signingPassword,
-    )
-    sign publishing.publications
-}
+// signing {
+//     useInMemoryPgpKeys(
+//             rootProject.ext.signingKeyId,
+//             rootProject.ext.signingPrivateKey,
+//             rootProject.ext.signingPassword,
+//     )
+//     sign publishing.publications
+// }
 
 repositories {
     mavenCentral()
