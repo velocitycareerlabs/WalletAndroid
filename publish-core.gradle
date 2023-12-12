@@ -39,3 +39,7 @@ nexusPublishing {
         }
     }
 }
+
+// Create custom tasks for publishing
+task publishRelease(dependsOn: [':VCL:publishReleasePublicationToSonatypeRepository'])
+task publishRc(dependsOn: [':VCL:publishRcPublicationToSonatypeRepository'])
