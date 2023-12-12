@@ -47,7 +47,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
       # Gradle Assemble
       - name: Gradle Assemble
-        run: ./gradlew assemble${{ env.RELEASE_TAG }}
+        run: ./gradlew assemble
         env: 
           RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Release' ) || 'Rc' }}
       # Convert artifact to lowercase

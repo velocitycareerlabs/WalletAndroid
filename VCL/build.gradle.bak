@@ -109,14 +109,14 @@ afterEvaluate {
                 artifactId getArtifactId()
                 version getVersionName()
 
-                // def buildType = android.buildTypes.rc
-                // if (buildType != null) {
-                //     def rc = getArtifactId()
-                //     def TestartifactId = "${rc}-rc"
-                //     println('RELEASE VERSION: ${TestartifactId}')
-                // } else {
-                //     println('RELEASE VERSION: ${artifactId}')
-                // }
+                def buildType = android.buildTypes.rc
+                if (buildType != null) {
+                    def rc = getArtifactId()
+                    def TestartifactId = "${rc}-rc"
+                    println('RELEASE VERSION: ${TestartifactId}')
+                } else {
+                    println('RELEASE VERSION: ${artifactId}')
+                }
 
                 // Two artifacts, the `aar` (or `jar`) and the sources
                 if (project.plugins.findPlugin("com.android.library")) {
@@ -167,7 +167,7 @@ signing {
             rootProject.ext.signingPrivateKey,
             rootProject.ext.signingPassword,
     )
-    sign publishing.publications
+    sign publishing.publications.release
 }
 
 repositories {
