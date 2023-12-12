@@ -106,9 +106,9 @@ afterEvaluate {
         publications {
             rc(MavenPublication) {
                 groupId getGroupId()
-                artifactId getArtifactId()
-                def rc = getVersionName()
-                version = "${rc}-rc"
+                def rc = getArtifactId()
+                artifactId = "${rc}-rc"
+                version = getVersionName()
 
                 // Two artifacts, the `aar` (or `jar`) and the sources
                 if (project.plugins.findPlugin("com.android.library")) {
