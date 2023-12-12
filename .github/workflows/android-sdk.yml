@@ -60,8 +60,7 @@ jobs:
         run: ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
       # Publish Main/Staging
       - name: Publish Main/Staging
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' }}
-        # if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/VL-6481-fix' }}
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/VL-6481-fix' }}
         run: ./gradlew publish${{ env.RELEASE_TAG }}
         env: 
           RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Release' ) || 'Rc' }}
