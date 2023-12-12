@@ -46,6 +46,9 @@ jobs:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
       # Gradle Assemble
+      - name: printSigning
+        run: ./gradlew printSigning
+      # Gradle Assemble
       - name: Gradle Assemble
         run: ./gradlew assemble
         env: 
