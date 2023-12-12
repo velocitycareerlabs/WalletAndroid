@@ -167,7 +167,7 @@ signing {
             rootProject.ext.signingPrivateKey,
             rootProject.ext.signingPassword,
     )
-    sign publishing.publications.release
+    sign publishing.publications
 }
 
 repositories {
