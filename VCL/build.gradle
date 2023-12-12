@@ -203,13 +203,14 @@ signing {
             rootProject.ext.signingPrivateKey,
             rootProject.ext.signingPassword,
     )
+    useGpgCmd()
     sign publishing.publications.rc {
         useGpgCmd()
-    },
-    sign publishing.publications.release {
-        useGpgCmd()
-    },
-    sign publishing.publications
+    }
+    // sign publishing.publications.release {
+    //     useGpgCmd()
+    // },
+    // sign publishing.publications
 }
 
 repositories {
