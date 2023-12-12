@@ -147,6 +147,15 @@ afterEvaluate {
                         developerConnection = 'scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git'
                         url = 'https://github.com/velocitycareerlabs/WalletAndroid'
                     }
+                    
+                    signing {
+                        useInMemoryPgpKeys(
+                            rootProject.ext.signingKeyId,
+                            rootProject.ext.signingPrivateKey,
+                            rootProject.ext.signingPassword,
+                        )
+                        sign publishing.publications
+                    }
                 }
             }
             release(MavenPublication) {
@@ -191,20 +200,30 @@ afterEvaluate {
                         developerConnection = 'scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git'
                         url = 'https://github.com/velocitycareerlabs/WalletAndroid'
                     }
+
+                    signing {
+                        useInMemoryPgpKeys(
+                            rootProject.ext.signingKeyId,
+                            rootProject.ext.signingPrivateKey,
+                            rootProject.ext.signingPassword,
+                        )
+                        sign publishing.publications
+                    }
+
                 }
             }
         }
     }
 }
 
-signing {
-    useInMemoryPgpKeys(
-            rootProject.ext.signingKeyId,
-            rootProject.ext.signingPrivateKey,
-            rootProject.ext.signingPassword,
-    )
-    sign publishing.publications
-}
+// signing {
+//     useInMemoryPgpKeys(
+//             rootProject.ext.signingKeyId,
+//             rootProject.ext.signingPrivateKey,
+//             rootProject.ext.signingPassword,
+//     )
+//     sign publishing.publications
+// }
 
 repositories {
     mavenCentral()
