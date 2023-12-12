@@ -36,3 +36,7 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+// Create custom tasks for publishing
+task publishRelease(dependsOn: ['publishReleasePublicationToSonatypeRepository'])
+task publishRc(dependsOn: ['publishRcPublicationToSonatypeRepository'])
