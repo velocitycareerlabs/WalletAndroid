@@ -48,11 +48,15 @@ jobs:
       # Gradle Assemble
       - name: printSigning
         run: ./gradlew printSigning
+      - name: debug
+        run: ls -lah ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}
       # Gradle Assemble
       - name: Gradle Assemble
         run: ./gradlew assemble
         env: 
           RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Release' ) || 'Rc' }}
+      - name: debug
+        run: ls -lah ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}
       # Convert artifact to lowercase
       - name: Rename artifact to lowercase
         run: mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-release.${{ env.PACKAGE_TYPE }}
