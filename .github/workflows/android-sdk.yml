@@ -45,32 +45,36 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-      # Build
-      - name: Gradle Assemble Release
-        run: ./gradlew assemble
+      # Gradle Assemble
+      - name: Gradle Assemble
+        run: ./gradlew assemble${{ env.RELEASE_TAG }}
+        env: 
+          RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Release' ) || 'Rc' }}
       # Convert artifact to lowercase
       - name: Rename artifact to lowercase
-        run: |
-          mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-release.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-release.${{ env.PACKAGE_TYPE }}
-      - name: Debug
-        run: |
-          ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
+        run: mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
+        env: 
+          RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'release' ) || 'rc' }}
+      # Show Me Builded packages
+      - name: Show Me Builded packages
+        run: ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
       # Publish Main/Staging
-      # # ToDO PUBSH RC and PROD.
-      # - name: Publish Main/Staging
-      #   if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' }}
-      #   run: ./gradlew publish${{ env.RELEASE_TAG }}
-      #   env: 
-      #     RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Prod' ) || 'Rc' }}
+      - name: Publish Main/Staging
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' }}
+        run: ./gradlew publish${{ env.RELEASE_TAG }}
+        env: 
+          RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Release' ) || 'Rc' }}
       # Upload Artifacts
-      # - name: Upload Artifact
-      #   if: success()
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: vcl-release.${{ env.PACKAGE_TYPE }}
-      #     path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
-      #     if-no-files-found: error
-      #     retention-days: 1
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
+          if-no-files-found: error
+          retention-days: 1
+        env: 
+          RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'release' ) || 'rc' }}
 
 
 
