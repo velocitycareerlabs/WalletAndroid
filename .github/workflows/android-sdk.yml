@@ -61,9 +61,10 @@ jobs:
       # Publish Main/Staging
       - name: Publish Main/Staging
         if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/VL-6481-fix' }}
-        run: ./gradlew publish${{ env.RELEASE_TAG }}
-        env: 
-          RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Release' ) || 'Rc' }}
+        run: ./gradlew publish
+        # ${{ env.RELEASE_TAG }}
+        # env: 
+        #   RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Release' ) || 'Rc' }}
       # Upload Artifacts
       - name: Upload Artifact
         if: success()
