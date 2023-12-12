@@ -14,7 +14,7 @@ android {
         minSdk 24
         targetSdk 33
         // versionName "1.21.0"
-        versionName "99.21.0"
+        versionName "999.21.0"
         versionCode 116
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -153,15 +153,6 @@ afterEvaluate {
                 groupId getGroupId()
                 artifactId getArtifactId()
                 version getVersionName()
-
-                // def buildType = android.buildTypes.rc
-                // if (buildType != null) {
-                //     def rc = getArtifactId()
-                //     def TestartifactId = "${rc}-rc"
-                //     println('RELEASE VERSION: ${TestartifactId}')
-                // } else {
-                //     println('RELEASE VERSION: ${artifactId}')
-                // }
 
                 // Two artifacts, the `aar` (or `jar`) and the sources
                 if (project.plugins.findPlugin("com.android.library")) {
