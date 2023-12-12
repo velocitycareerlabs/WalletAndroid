@@ -106,15 +106,16 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 groupId getGroupId()
-                // artifactId getArtifactId()
+                artifactId getArtifactId()
                 version getVersionName()
 
                 def buildType = android.buildTypes.rc
                 if (buildType != null) {
                     def rc = getArtifactId()
-                    artifactId = "${rc}-rc"
+                    def TestartifactId = "${rc}-rc"
+                    println('RELEASE VERSION: ${TestartifactId}')
                 } else {
-                    artifactId getArtifactId()
+                    println('RELEASE VERSION: ${artifactId}')
                 }
 
                 // Two artifacts, the `aar` (or `jar`) and the sources
