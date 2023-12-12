@@ -13,8 +13,7 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 33
-        // versionName "1.21.0"
-        versionName "999.21.0"
+        versionName "1.21.2"
         versionCode 116
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"

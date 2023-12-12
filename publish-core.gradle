@@ -39,3 +39,7 @@ nexusPublishing {
         }
     }
 }
+
+// Create custom tasks for publishing
+task publishRelease(dependsOn: ['publishReleasePublicationToSonatypeRepository'])
+task publishRc(dependsOn: ['publishRcPublicationToSonatypeRepository'])
