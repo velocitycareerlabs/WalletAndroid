@@ -42,13 +42,13 @@ android {
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-        // rc {
-        //     buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
-        //     buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
-        //     minifyEnabled false
-        //     shrinkResources false
-        //     proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        // }
+        rc {
+            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}-rc\""
+            buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
     }
 
     compileOptions {
@@ -104,6 +104,51 @@ artifacts {
 afterEvaluate {
     publishing {
         publications {
+            rc(MavenPublication) {
+                groupId getGroupId()
+                artifactId getArtifactId()
+                def rc = getVersionName()
+                version = "${rc}-rc"
+
+                // Two artifacts, the `aar` (or `jar`) and the sources
+                if (project.plugins.findPlugin("com.android.library")) {
+                    from components.release
+                } else {
+                    from components.java
+                }
+
+                artifact androidSourcesJar
+
+                // Mostly self-explanatory metadata
+                pom {
+                    name = getArtifactId()
+                    // Library description
+                    description = 'Velocity Career Labs Android library'
+                    // Library Github URL
+                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    licenses {
+                        license {
+                            name = 'Apache License 2.0'
+                            // Library license
+                            url = 'https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'velocitycareerlabs'
+                            name = 'Michael Avoyan'
+                            email = 'michael.avoyan@velocitycareerlabs.com'
+                        }
+                    }
+
+                    scm {
+                        // Library info on Github
+                        connection = 'scm:github.com/velocitycareerlabs/WalletAndroid.git'
+                        developerConnection = 'scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git'
+                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    }
+                }
+            }
             release(MavenPublication) {
                 groupId getGroupId()
                 artifactId getArtifactId()
