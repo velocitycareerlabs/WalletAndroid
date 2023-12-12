@@ -154,7 +154,6 @@ afterEvaluate {
                             rootProject.ext.signingPrivateKey,
                             rootProject.ext.signingPassword,
                         )
-                        sign publishing.publications
                     }
                 }
             }
@@ -207,7 +206,6 @@ afterEvaluate {
                             rootProject.ext.signingPrivateKey,
                             rootProject.ext.signingPassword,
                         )
-                        sign publishing.publications
                     }
 
                 }
