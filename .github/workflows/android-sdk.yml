@@ -54,9 +54,9 @@ jobs:
         run: ls -lah ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}
       # Convert artifact to lowercase
       - name: Rename artifact to lowercase
-        run: mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-release.${{ env.PACKAGE_TYPE }}
-        env: 
-          RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'release' ) || 'rc' }}
+        run: mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-release.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-release.${{ env.PACKAGE_TYPE }}
+        # env: 
+        #   RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'release' ) || 'rc' }}
       # Show Me Builded packages
       - name: Show Me Builded packages
         run: ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
