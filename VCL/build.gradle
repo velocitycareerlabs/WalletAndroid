@@ -42,13 +42,13 @@ android {
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-        rc {
-            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
-            buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
-            minifyEnabled false
-            shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+        // rc {
+        //     buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
+        //     buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
+        //     minifyEnabled false
+        //     shrinkResources false
+        //     proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        // }
     }
 
     compileOptions {
