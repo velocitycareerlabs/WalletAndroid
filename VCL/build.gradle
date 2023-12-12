@@ -203,7 +203,7 @@ signing {
             rootProject.ext.signingPrivateKey,
             rootProject.ext.signingPassword,
     )
-    sign publishing.publications.mavenJava
+    sign publishing.publications.MavenPublication
 }
 
 repositories {
