@@ -5,11 +5,6 @@ plugins {
     id 'signing'
 }
 
-ext {
-    // Set RC suffix for release candidate
-    rcSuffix = "RC"
-}
-
 android {
     compileSdk 33
 //    buildToolsVersion "30.0.3"
@@ -115,7 +110,7 @@ afterEvaluate {
 
                 // define rc version name
                 def vers = getVersionName()
-                def rcSuffix = ext.rcSuffix
+                def rcSuffix = rootProject.ext.rcSuffix
                 version = "${vers}-${rcSuffix}"
 
                 // Two artifacts, the `aar` (or `jar`) and the sources
