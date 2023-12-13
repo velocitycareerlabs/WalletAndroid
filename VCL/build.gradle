@@ -5,15 +5,15 @@ plugins {
     id 'signing'
 }
 
+ext {
+    // Set RC suffix for release candidate
+    rcSuffix = "RC"
+}
+
 android {
     compileSdk 33
 //    buildToolsVersion "30.0.3"
     namespace 'io.velocitycareerlabs'
-
-    ext {
-        // Set RC suffix for release candidate
-        rcSuffix = "RC"
-    }
 
     defaultConfig {
         minSdk 24
