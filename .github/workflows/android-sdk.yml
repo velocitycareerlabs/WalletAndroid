@@ -6,10 +6,11 @@ on:
       - main
       - staging
       - dev
+      - VL-6481
 env:
   PACKAGE_TYPE: "aar"
   GRADLE_VERSION: "7.5"
-  JAVA_VERSION: "11"
+  JAVA_VERSION: "17"
   ARTIFACT_PATH: "VCL/build/outputs"
   ANDROID_NEXUS_SIGNING_KEY_ID: ${{ secrets.ANDROID_NEXUS_SIGNING_KEY_ID }}
   ANDROID_NEXUS_SIGNING_PWD: ${{ secrets.ANDROID_NEXUS_SIGNING_PWD }}
@@ -59,7 +60,7 @@ jobs:
         run: ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
       # Publish Main/Staging
       - name: Publish Main/Staging
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' }}
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/VL-6481' }}
         run: ./gradlew publish${{ env.RELEASE_TAG }}
         env: 
           RELEASE_TAG: ${{ github.ref == 'refs/heads/main' && format('{0}', 'Release' ) || 'Rc' }}
