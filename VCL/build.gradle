@@ -10,13 +10,16 @@ android {
 //    buildToolsVersion "30.0.3"
     namespace 'io.velocitycareerlabs'
 
+    ext {
+        // Set RC suffix for release candidate
+        rcSuffix = "RC"
+    }
+
     defaultConfig {
         minSdk 24
         targetSdk 33
         // Increase version for release
         versionName "1.20.2"
-        // Set RC suffix for release candidate
-        def rcSuffix = "RC"
         versionCode 116
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -86,10 +89,6 @@ def getGroupId = { ->
     return 'io.velocitycareerlabs'
 }
 
-def getRcSuffix = { ->
-    return android.defaultConfig.rcSuffix
-}
-
 tasks.register('androidSourcesJar', Jar) {
     archiveClassifier.set('sources')
     if (project.plugins.findPlugin("com.android.library")) {
@@ -115,9 +114,9 @@ afterEvaluate {
                 artifactId getArtifactId()
 
                 // define rc version name
-                def rc = getVersionName()
-                def suffix = getRcSuffix()
-                version = "${rc}-${suffix}"
+                def vers = getVersionName()
+                def rcSuffix = ext.rcSuffix
+                version = "${vers}-${rcSuffix}"
 
                 // Two artifacts, the `aar` (or `jar`) and the sources
                 if (project.plugins.findPlugin("com.android.library")) {
