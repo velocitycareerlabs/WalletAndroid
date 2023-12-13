@@ -40,15 +40,6 @@ nexusPublishing {
     }
 }
 
-nexusStaging {
-        stagingProfileId = sonatypeStagingProfileId
-        username = ossrhUsername
-        password = ossrhPassword
-        nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-    
-        repositoryDescription = 'Your custom description goes here'
-}
-
 // Create custom tasks for publishing
 task publishRelease(dependsOn: [':VCL:publishReleasePublicationToSonatypeRepository'])
 task publishRc(dependsOn: [':VCL:publishRcPublicationToSonatypeRepository'])
