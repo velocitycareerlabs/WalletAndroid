@@ -1,23 +1,32 @@
-Properties properties = new Properties()
-properties.load(new FileInputStream(rootProject.file(
-        '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/sonatype.properties'
-)))
+def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties'
+def propertiesFile = new File(propertiesFilePath)
+def properties = new Properties()
 
-ext {
-    signingKeyId = System.getenv("SIGNING_KEY_ID") ?: properties["signingKeyId"]
-    signingPassword = System.getenv("SIGNING_PASSWORD") ?: properties["signingPassword"]
-    ossrhUsername = System.getenv("OSSRH_USERNAME") ?: properties["ossrhUsername"]
-    ossrhPassword = System.getenv("OSSRH_PASSWORD") ?: properties["ossrhPassword"]
-    sonatypeStagingProfileId = System.getenv("SONATYPE_STAGING_PROFILE_ID") ?: properties["sonatypeStagingProfileId"]
-    signingPrivateKey = System.getenv("SIGNING_KEY") ?: properties["signingPrivateKey"]
+if (propertiesFile.exists()) {    
+    try {
+        properties.load(new FileInputStream(propertiesFile))
+    } catch (IOException e) {
+        e.printStackTrace()
+    }
+} else {
+    println "Properties file not found: $propertiesFilePath"
 }
 
-//println("signingKeyId: ${signingKeyId}")
-//println("signingPassword: ${signingPassword}")
-//println("ossrhUsername: ${ossrhUsername}")
-//println("ossrhPassword: ${ossrhPassword}")
-//println("sonatypeStagingProfileId: ${sonatypeStagingProfileId}")
-//println("signingPrivateKey: ${signingPrivateKey}")
+ext {
+    signingKeyId = System.getenv("ANDROID_NEXUS_SIGNING_KEY_ID") ?: properties["signingKeyId"]
+    signingPassword = System.getenv("ANDROID_NEXUS_SIGNING_PWD") ?: properties["signingPassword"]
+    ossrhUsername = System.getenv("ANDROID_NEXUS_OSSRH_USERNAME") ?: properties["ossrhUsername"]
+    ossrhPassword = System.getenv("ANDROID_NEXUS_OSSRH_PWD") ?: properties["ossrhPassword"]
+    sonatypeStagingProfileId = System.getenv("ANDROID_NEXUS_STAGING_PROFILE_ID") ?: properties["stagingProfileId"]
+    signingPrivateKey = System.getenv("ANDROID_NEXUS_PRIVATE_KEY") ?: properties["signingPrivateKey"]
+}
+
+// println("signingKeyId: ${signingKeyId}")
+// println("signingPassword: ${signingPassword}")
+// println("ossrhUsername: ${ossrhUsername}")
+// println("ossrhPassword: ${ossrhPassword}")
+// println("sonatypeStagingProfileId: ${sonatypeStagingProfileId}")
+// println("signingPrivateKey: ${signingPrivateKey}")
 
 nexusPublishing {
     repositories {
@@ -30,3 +39,7 @@ nexusPublishing {
         }
     }
 }
+
+// Create custom tasks for publishing
+task publishRelease(dependsOn: [':VCL:publishReleasePublicationToSonatypeRepository'])
+task publishRc(dependsOn: [':VCL:publishRcPublicationToSonatypeRepository'])
