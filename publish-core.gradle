@@ -1,8 +1,8 @@
 def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties'
 def propertiesFile = new File(propertiesFilePath)
 
+def properties = new Properties()
 if (propertiesFile.exists()) {
-    def properties = new Properties()
     try {
         properties.load(new FileInputStream(propertiesFile))
     } catch (IOException e) {
