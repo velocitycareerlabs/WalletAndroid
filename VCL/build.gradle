@@ -16,7 +16,7 @@ android {
         // Increase version for release
         versionName "1.20.2"
         // Set RC suffix for release candidate
-        rcSuffix "RC"
+        def rcSuffix = "RC"
         versionCode 116
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
