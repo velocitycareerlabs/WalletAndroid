@@ -13,7 +13,7 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 33
-        versionName "1.21.2"
+        versionName "1.21.3"
         versionCode 116
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -106,8 +106,10 @@ afterEvaluate {
             rc(MavenPublication) {
                 groupId getGroupId()
                 artifactId getArtifactId()
+
+                // define rc version name
                 def rc = getVersionName()
-                version = "${rc}-rc"
+                version = "${rc}-RC"
 
                 // Two artifacts, the `aar` (or `jar`) and the sources
                 if (project.plugins.findPlugin("com.android.library")) {
@@ -211,15 +213,6 @@ afterEvaluate {
         }
     }
 }
-
-// signing {
-//     useInMemoryPgpKeys(
-//             rootProject.ext.signingKeyId,
-//             rootProject.ext.signingPrivateKey,
-//             rootProject.ext.signingPassword,
-//     )
-//     sign publishing.publications
-// }
 
 repositories {
     mavenCentral()
