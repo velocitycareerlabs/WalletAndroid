@@ -15,8 +15,11 @@ import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.FinalizeOffersUseCaseImpl
 import io.velocitycareerlabs.impl.data.usecases.GenerateOffersUseCaseImpl
-import io.velocitycareerlabs.impl.data.utils.CredentialDidVerifierImpl
-import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.CredentialDidVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.CredentialManifestByDeepLinkVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.CredentialsByDeepLinkVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.OffersByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.domain.usecases.FinalizeOffersUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
@@ -76,6 +79,7 @@ internal class FinalizeOffersUseCaseTest {
             GenerateOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffers)
             ),
+            OffersByDeepLinkVerifierImpl(),
             EmptyExecutor()
         ).generateOffers(
             sessionToken = VCLToken(value = ""),
@@ -134,6 +138,7 @@ internal class FinalizeOffersUseCaseTest {
                 NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
             ),
             CredentialDidVerifierImpl(),
+            CredentialsByDeepLinkVerifierImpl(),
             EmptyExecutor()
         )
 
@@ -182,6 +187,7 @@ internal class FinalizeOffersUseCaseTest {
                 NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
             ),
             CredentialDidVerifierImpl(),
+            CredentialsByDeepLinkVerifierImpl(),
             EmptyExecutor()
         )
 
@@ -231,6 +237,7 @@ internal class FinalizeOffersUseCaseTest {
                 NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
             ),
             CredentialDidVerifierImpl(),
+            CredentialsByDeepLinkVerifierImpl(),
             EmptyExecutor()
         )
 

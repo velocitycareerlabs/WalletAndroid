@@ -15,6 +15,7 @@ import io.velocitycareerlabs.impl.data.repositories.CredentialManifestRepository
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.ResolveKidRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialManifestUseCaseImpl
+import io.velocitycareerlabs.impl.data.verifiers.CredentialManifestByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
@@ -57,6 +58,7 @@ internal class CredentialManifestUseCaseTest {
                 VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)),
                 VCLJwtVerifyServiceLocalImpl()
             ),
+            CredentialManifestByDeepLinkVerifierImpl(),
             ExecutorImpl()
         )
 

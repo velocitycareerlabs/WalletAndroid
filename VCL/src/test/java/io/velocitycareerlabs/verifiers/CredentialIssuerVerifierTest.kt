@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.utils
+package io.velocitycareerlabs.verifiers
 
 import io.velocitycareerlabs.api.entities.VCLCredentialManifest
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
@@ -15,10 +15,11 @@ import io.velocitycareerlabs.api.entities.VCLOffers
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierImpl
-import io.velocitycareerlabs.impl.domain.utils.CredentialIssuerVerifier
+import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierImpl
+import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
 import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
+import io.velocitycareerlabs.impl.extensions.toJwtList
 import io.velocitycareerlabs.impl.extensions.toListOfStrings
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CredentialTypesModelMock
@@ -35,7 +36,7 @@ internal class CredentialIssuerVerifierTest {
 
     lateinit var subject: CredentialIssuerVerifier
 
-    private val OffersMock = VCLOffers(JSONObject(), JSONArray(), 1, VCLToken(""), "")
+    private val OffersMock = VCLOffers(JSONObject(), listOf(), 1, VCLToken(""), "")
 
     lateinit var finalizeOffersDescriptorWithoutPermittedServices: VCLFinalizeOffersDescriptor
     lateinit var credentialManifestWithoutPermittedServices: VCLCredentialManifest
@@ -106,8 +107,7 @@ internal class CredentialIssuerVerifierTest {
         )
 
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtCredentialsFromNotaryIssuer.toJsonArray()
-            !!.toListOfStrings(),
+            jwtCredentials = CredentialMocks.JwtCredentialsFromNotaryIssuer.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfNotaryIssuer,
         ) { verificationResult ->
             verificationResult.handleResult(
@@ -131,8 +131,7 @@ internal class CredentialIssuerVerifierTest {
         )
 
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtCredentialsWithoutSubject.toJsonArray()
-            !!.toListOfStrings(),
+            jwtCredentials = CredentialMocks.JwtCredentialsWithoutSubject.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfNotaryIssuer,
         ) { verificationResult ->
             verificationResult.handleResult(
@@ -156,8 +155,7 @@ internal class CredentialIssuerVerifierTest {
         )
 
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtCredentialsFromRegularIssuer.toJsonArray()
-                !!.toListOfStrings(),
+            jwtCredentials = CredentialMocks.JwtCredentialsFromRegularIssuer.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfRegularIssuer,
         ) { verificationResult ->
             verificationResult.handleResult(
@@ -181,8 +179,7 @@ internal class CredentialIssuerVerifierTest {
         )
 
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtCredentialsFromNotaryIssuer.toJsonArray()
-            !!.toListOfStrings(),
+            jwtCredentials = CredentialMocks.JwtCredentialsFromNotaryIssuer.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfRegularIssuer,
         ) { verificationResult ->
             verificationResult.handleResult(
@@ -206,8 +203,7 @@ internal class CredentialIssuerVerifierTest {
         )
 
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtCredentialsFromNotaryIssuer.toJsonArray()
-            !!.toListOfStrings(),
+            jwtCredentials = CredentialMocks.JwtCredentialsFromNotaryIssuer.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorWithoutPermittedServices,
         ) { verificationResult ->
             verificationResult.handleResult(
@@ -231,8 +227,7 @@ internal class CredentialIssuerVerifierTest {
         )
 
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtCredentialsWithoutSubject.toJsonArray()
-            !!.toListOfStrings(),
+            jwtCredentials = CredentialMocks.JwtCredentialsWithoutSubject.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfRegularIssuer,
         ) { verificationResult ->
             verificationResult.handleResult(
@@ -256,8 +251,7 @@ internal class CredentialIssuerVerifierTest {
         )
 
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtCredentialsFromRegularIssuer.toJsonArray()
-            !!.toListOfStrings(),
+            jwtCredentials = CredentialMocks.JwtCredentialsFromRegularIssuer.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfIdentityIssuer,
         ) { verificationResult ->
             verificationResult.handleResult(
@@ -281,8 +275,7 @@ internal class CredentialIssuerVerifierTest {
         )
 
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtEmptyCredentials.toJsonArray()
-            !!.toListOfStrings(),
+            jwtCredentials = CredentialMocks.JwtEmptyCredentials.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfIdentityIssuer,
         ) { verificationResult ->
             verificationResult.handleResult(
@@ -306,8 +299,7 @@ internal class CredentialIssuerVerifierTest {
         )
 
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtCredentialsFromIdentityIssuer.toJsonArray()
-            !!.toListOfStrings(),
+            jwtCredentials = CredentialMocks.JwtCredentialsFromIdentityIssuer.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfIdentityIssuer,
         ) { verificationResult ->
             verificationResult.handleResult(
@@ -331,8 +323,7 @@ internal class CredentialIssuerVerifierTest {
         )
 
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtCredentialsFromRegularIssuer.toJsonArray()
-            !!.toListOfStrings(),
+            jwtCredentials = CredentialMocks.JwtCredentialsFromRegularIssuer.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfRegularIssuer,
         ) { verificationResult ->
             verificationResult.handleResult(
@@ -356,8 +347,7 @@ internal class CredentialIssuerVerifierTest {
         )
 
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtCredentialsFromRegularIssuer.toJsonArray()
-            !!.toListOfStrings(),
+            jwtCredentials = CredentialMocks.JwtCredentialsFromRegularIssuer.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfRegularIssuer,
         ) { verificationResult ->
             verificationResult.handleResult(

@@ -11,6 +11,7 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.infrastructure.network.Response
+import io.velocitycareerlabs.impl.data.utils.Utils
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.repositories.GenerateOffersRepository
 import io.velocitycareerlabs.impl.extensions.toJsonArray
@@ -42,9 +43,11 @@ internal class GenerateOffersRepositoryImpl(
                 result.handleResult(
                     { offersResponse ->
                         try {
-                            completionBlock(VCLResult.Success(
-                                parse(offersResponse, sessionToken)
-                            ))
+                            completionBlock(
+                                VCLResult.Success(
+                                    parse(offersResponse, sessionToken)
+                                )
+                            )
                         } catch (ex: Exception) {
                             completionBlock(VCLResult.Failure(VCLError(ex)))
                         }
@@ -62,17 +65,19 @@ internal class GenerateOffersRepositoryImpl(
         offersResponse.payload.toJsonObject()?.let { payload ->
             return VCLOffers(
                 payload = payload,
-                all = payload.optJSONArray(VCLOffers.CodingKeys.KeyOffers) ?: JSONArray(),
+                all = Utils.offersFromJsonArray(
+                    payload.optJSONArray(VCLOffers.CodingKeys.KeyOffers) ?: JSONArray()
+                ),
                 responseCode = offersResponse.code,
                 sessionToken = sessionToken,
                 challenge = payload.optString(VCLOffers.CodingKeys.KeyChallenge) ?: ""
             )
         } ?: run {
 //            VCLXVnfProtocolVersion.XVnfProtocolVersion1
-            offersResponse.payload.toJsonArray()?.let { allOffers ->
+            offersResponse.payload.toJsonArray()?.let { offersJsonArray ->
                 return VCLOffers(
                     payload = JSONObject(),
-                    all = allOffers,
+                    all = Utils.offersFromJsonArray(offersJsonArray),
                     responseCode = offersResponse.code,
                     sessionToken = sessionToken,
                     challenge = ""
@@ -81,7 +86,7 @@ internal class GenerateOffersRepositoryImpl(
 //                No offers
                 return VCLOffers(
                     payload = JSONObject(),
-                    all = JSONArray(),
+                    all = listOf(),
                     responseCode = offersResponse.code,
                     sessionToken = sessionToken,
                     challenge = ""

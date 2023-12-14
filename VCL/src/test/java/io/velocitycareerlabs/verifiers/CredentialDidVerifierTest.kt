@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.utils
+package io.velocitycareerlabs.verifiers
 
 import io.velocitycareerlabs.api.entities.VCLCredentialManifest
 import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
@@ -14,9 +14,10 @@ import io.velocitycareerlabs.api.entities.VCLOffers
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.data.utils.CredentialDidVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.CredentialDidVerifierImpl
 import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
+import io.velocitycareerlabs.impl.extensions.toJwtList
 import io.velocitycareerlabs.impl.extensions.toList
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialMocks
@@ -33,7 +34,7 @@ internal class CredentialDidVerifierTest {
         CredentialMocks.JwtCredentialsFromNotaryIssuer.toJsonArray()?.length()
     private val credentialsFromRegularIssuerAmount =
         CredentialMocks.JwtCredentialsFromRegularIssuer.toJsonArray()?.length()
-    private val OffersMock = VCLOffers(JSONObject(), JSONArray(), 1, VCLToken(".."), "")
+    private val OffersMock = VCLOffers(JSONObject(), listOf(), 1, VCLToken(".."), "")
 
     lateinit var finalizeOffersDescriptorOfNotaryIssuer: VCLFinalizeOffersDescriptor
     lateinit var credentialManifestFromNotaryIssuer: VCLCredentialManifest
@@ -69,8 +70,7 @@ internal class CredentialDidVerifierTest {
     @Test
     fun testVerifyCredentialsSuccess() {
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtCredentialsFromNotaryIssuer.toJsonArray()!!
-                .toList() as List<String>,
+            jwtCredentials = CredentialMocks.JwtCredentialsFromNotaryIssuer.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfNotaryIssuer
         ) { verifiableCredentialsResult ->
             verifiableCredentialsResult.handleResult(
@@ -98,8 +98,7 @@ internal class CredentialDidVerifierTest {
     @Test
     fun testVerifyCredentialsFailed() {
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtCredentialsFromRegularIssuer.toJsonArray()!!
-                .toList() as List<String>,
+            jwtCredentials = CredentialMocks.JwtCredentialsFromRegularIssuer.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfNotaryIssuer
         ) { verifiableCredentialsResult ->
             verifiableCredentialsResult.handleResult(
@@ -127,8 +126,8 @@ internal class CredentialDidVerifierTest {
     @Test
     fun testVerifyCredentials1Passed1Failed() {
         subject.verifyCredentials(
-            jwtEncodedCredentials = "[\"${CredentialMocks.JwtCredentialEmploymentPastFromNotaryIssuer}\", \"${CredentialMocks.JwtCredentialEmailFromIdentityIssuer}\"]"
-                .toJsonArray()!!.toList() as List<String>,
+            jwtCredentials = "[\"${CredentialMocks.JwtCredentialEmploymentPastFromNotaryIssuer}\", \"${CredentialMocks.JwtCredentialEmailFromIdentityIssuer}\"]"
+                .toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfNotaryIssuer
         ) { verifiableCredentialsResult ->
             verifiableCredentialsResult.handleResult(
@@ -157,8 +156,7 @@ internal class CredentialDidVerifierTest {
     @Test
     fun testVerifyCredentialsEmpty() {
         subject.verifyCredentials(
-            jwtEncodedCredentials = CredentialMocks.JwtEmptyCredentials.toJsonArray()!!
-                .toList() as List<String>,
+            jwtCredentials = CredentialMocks.JwtEmptyCredentials.toJwtList()!!,
             finalizeOffersDescriptor = finalizeOffersDescriptorOfNotaryIssuer
         ) { verifiableCredentialsResult ->
             verifiableCredentialsResult.handleResult(

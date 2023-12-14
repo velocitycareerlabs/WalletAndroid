@@ -14,10 +14,10 @@ object Utils {
     fun getApprovedRejectedOfferIdsMock(offers: VCLOffers): Pair<List<String>, List<String>> {
 
         val approvedOfferIds: List<String> = listOfNotNull(
-            offers.all.optJSONObject(0)?.optString("id")
+            offers.all[0].id
         )
         val rejectedOfferIds: List<String> = listOfNotNull(
-            offers.all.optJSONObject(1)?.optString("id")
+            offers.all[1].id
         )
         return Pair(approvedOfferIds, rejectedOfferIds)
     }

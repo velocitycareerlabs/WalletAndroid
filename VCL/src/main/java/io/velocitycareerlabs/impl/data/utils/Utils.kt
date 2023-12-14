@@ -8,6 +8,9 @@
 package io.velocitycareerlabs.impl.data.utils
 
 import io.velocitycareerlabs.api.entities.VCLJwt
+import io.velocitycareerlabs.api.entities.VCLOffer
+import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierImpl
+import org.json.JSONArray
 
 internal class Utils {
     companion object {
@@ -78,6 +81,16 @@ internal class Utils {
                 return credentialSubject
             return (credentialSubject as? Map<*, *>)?.get("identifier") as? String
                 ?: (credentialSubject as? Map<*, *>)?.get("id") as? String
+        }
+
+        internal fun offersFromJsonArray(offersJsonArray: JSONArray): List<VCLOffer> {
+            val allOffers = mutableListOf<VCLOffer>()
+            for (i in 0 until offersJsonArray.length()) {
+                offersJsonArray.optJSONObject(i)?.let { offerJsonObject ->
+                    allOffers.add(VCLOffer(offerJsonObject))
+                }
+            }
+            return allOffers
         }
     }
 }
