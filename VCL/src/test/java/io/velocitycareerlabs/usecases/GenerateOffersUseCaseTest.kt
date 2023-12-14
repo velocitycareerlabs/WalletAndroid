@@ -12,6 +12,7 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.GenerateOffersUseCaseImpl
+import io.velocitycareerlabs.impl.data.verifiers.OffersByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.domain.usecases.GenerateOffersUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
@@ -37,6 +38,7 @@ internal class GenerateOffersUseCaseTest {
             GenerateOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffers)
             ),
+            OffersByDeepLinkVerifierImpl(),
             ExecutorImpl()
         )
 
@@ -71,6 +73,7 @@ internal class GenerateOffersUseCaseTest {
             GenerateOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffersEmptyJsonObj)
             ),
+            OffersByDeepLinkVerifierImpl(),
             ExecutorImpl()
         )
 
@@ -103,6 +106,7 @@ internal class GenerateOffersUseCaseTest {
             GenerateOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffersEmptyJsonArr)
             ),
+            OffersByDeepLinkVerifierImpl(),
             ExecutorImpl()
         )
 

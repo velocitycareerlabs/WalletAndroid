@@ -22,9 +22,8 @@ data class VCLGenerateOffersDescriptor(
             .putOpt(KeyTypes,types?.toJsonArray())
             .putOpt(KeyOfferHashes,offerHashes?.toJsonArray())
 
-    val did: String get() = credentialManifest.did
+    val issuerId: String get() = credentialManifest.issuerId
     val exchangeId: String get() = credentialManifest.exchangeId
-
     val checkOffersUri: String get() = credentialManifest.checkOffersUri
 
     companion object CodingKeys {

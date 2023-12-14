@@ -9,7 +9,10 @@ package io.velocitycareerlabs.impl.extensions
 
 import android.util.Base64
 import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLPublicJwk
+import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.utils.VCLLog
 import org.json.JSONArray
 import org.json.JSONObject
@@ -19,6 +22,7 @@ import java.net.URLEncoder
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.CompletableFuture
 import java.util.regex.Pattern
 
 //internal fun String.isUrlEquivalentTo(url: String): Boolean {
@@ -127,6 +131,22 @@ internal fun String.toJsonArray(): JSONArray? {
 
 internal fun String.toPublicJwk() =
     VCLPublicJwk(this.removePrefix(VCLDidJwk.DidJwkPrefix).decodeBase64())
+
+internal fun String.toJwtList(): List<VCLJwt>? {
+    this.toJsonArray()?.toList()?.let { encodedCredentialList ->
+        val jwtCredentials = mutableListOf<VCLJwt>()
+        val completableFutures = encodedCredentialList.map { jwtEncodedCredential ->
+            CompletableFuture.supplyAsync {
+                jwtCredentials.add(VCLJwt(jwtEncodedCredential as? String ?: ""))
+            }
+        }
+        val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
+        allFutures.join()
+
+        return jwtCredentials
+    }
+    return null
+}
 
 internal fun randomString(length: Int): String =
     List(length) {

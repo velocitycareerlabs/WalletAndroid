@@ -4,18 +4,19 @@
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package io.velocitycareerlabs.impl.data.usecases
 
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
 import io.velocitycareerlabs.api.entities.error.VCLError
-import io.velocitycareerlabs.impl.domain.utils.CredentialDidVerifier
+import io.velocitycareerlabs.impl.domain.verifiers.CredentialDidVerifier
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.FinalizeOffersRepository
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
 import io.velocitycareerlabs.impl.domain.usecases.FinalizeOffersUseCase
-import io.velocitycareerlabs.impl.domain.utils.CredentialIssuerVerifier
+import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
+import io.velocitycareerlabs.impl.domain.verifiers.CredentialsByDeepLinkVerifier
+import io.velocitycareerlabs.impl.utils.VCLLog
 import java.util.UUID
 
 internal class FinalizeOffersUseCaseImpl(
@@ -23,8 +24,11 @@ internal class FinalizeOffersUseCaseImpl(
     private val jwtServiceRepository: JwtServiceRepository,
     private val credentialIssuerVerifier: CredentialIssuerVerifier,
     private val credentialDidVerifier: CredentialDidVerifier,
+    private val credentialsByDeepLinkVerifier: CredentialsByDeepLinkVerifier,
     private val executor: Executor
 ): FinalizeOffersUseCase {
+    private val TAG = FinalizeOffersUseCaseImpl::class.simpleName
+
     override fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         didJwk: VCLDidJwk?,
@@ -39,7 +43,7 @@ internal class FinalizeOffersUseCaseImpl(
                 jwtDescriptor = VCLJwtDescriptor(
                     keyId = didJwk?.keyId,
                     iss = didJwk?.did ?: UUID.randomUUID().toString(),
-                    aud = finalizeOffersDescriptor.issuerId
+                    aud = finalizeOffersDescriptor.aud
                 ),
                 remoteCryptoServicesToken = remoteCryptoServicesToken
             ) { proofJwtResult ->
@@ -49,22 +53,33 @@ internal class FinalizeOffersUseCaseImpl(
                             sessionToken = sessionToken,
                             proof = proof,
                             finalizeOffersDescriptor = finalizeOffersDescriptor
-                        ) { encodedJwtCredentialsListResult ->
-                            encodedJwtCredentialsListResult.handleResult(
-                                successHandler = { encodedJwtCredentialsList ->
-                                    verifyCredentialsByIssuer(
-                                        encodedJwtCredentialsList,
+                        ) { jwtCredentialsListResult ->
+                            jwtCredentialsListResult.handleResult(
+                                successHandler = { jwtCredentials ->
+                                    verifyCredentialsByDeepLink(
+                                        jwtCredentials,
                                         finalizeOffersDescriptor
-                                    ) {
-                                        it.handleResult(
+                                    ) { verifyCredentialsByDeepLinkResult ->
+                                        verifyCredentialsByDeepLinkResult.handleResult(
                                             successHandler = {
-                                                verifyCredentialByDid(
-                                                    encodedJwtCredentialsList,
+                                                verifyCredentialsByIssuer(
+                                                    jwtCredentials,
                                                     finalizeOffersDescriptor
-                                                ) { jwtVerifiableCredentialsResult ->
-                                                    executor.runOnMain {
-                                                        completionBlock(jwtVerifiableCredentialsResult)
-                                                    }
+                                                ) { verifyCredentialsByIssuerResult ->
+                                                    verifyCredentialsByIssuerResult.handleResult({
+                                                        verifyCredentialByDid(
+                                                            jwtCredentials,
+                                                            finalizeOffersDescriptor
+                                                        ) { jwtVerifiableCredentialsResult ->
+                                                            executor.runOnMain {
+                                                                completionBlock(
+                                                                    jwtVerifiableCredentialsResult
+                                                                )
+                                                            }
+                                                        }
+                                                    }, { error ->
+                                                        onError(error, completionBlock)
+                                                    })
                                                 }
                                             },
                                             errorHandler = { error ->
@@ -84,14 +99,37 @@ internal class FinalizeOffersUseCaseImpl(
             }
         }
     }
+    
+    private fun verifyCredentialsByDeepLink(
+        jwtCredentials: List<VCLJwt>,
+        finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
+        completionBlock: (VCLResult<Boolean>) -> Unit
+    ) {
+        finalizeOffersDescriptor.credentialManifest.deepLink?.let { deepLink ->
+            credentialsByDeepLinkVerifier.verifyCredentials(
+                jwtCredentials,
+                deepLink
+            ) {
+                it.handleResult({ isVerified ->
+                    VCLLog.d(TAG, "Credentials by deep link verification result: $isVerified")
+                    completionBlock(VCLResult.Success(true))
+                }, { error ->
+                    completionBlock(VCLResult.Failure(error))
+                })
+            }
+        } ?: run {
+            VCLLog.d(TAG, "Deep link was not provided => nothing to verify")
+            completionBlock(VCLResult.Success(true))
+        }
+    }
 
     private fun verifyCredentialsByIssuer(
-        encodedJwtCredentialsList: List<String>,
+        jwtCredentials: List<VCLJwt>,
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
         credentialIssuerVerifier.verifyCredentials(
-            encodedJwtCredentialsList,
+            jwtCredentials,
             finalizeOffersDescriptor
         ) { credentialIssuerVerifierResult ->
             credentialIssuerVerifierResult.handleResult(
@@ -106,7 +144,7 @@ internal class FinalizeOffersUseCaseImpl(
     }
 
     private fun verifyCredentialByDid(
-        encodedJwtCredentialsList: List<String>,
+        encodedJwtCredentialsList: List<VCLJwt>,
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit
     ) {

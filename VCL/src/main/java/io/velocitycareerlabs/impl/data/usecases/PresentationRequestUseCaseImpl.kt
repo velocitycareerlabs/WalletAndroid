@@ -4,7 +4,6 @@
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package io.velocitycareerlabs.impl.data.usecases
 
 import io.velocitycareerlabs.api.entities.*
@@ -12,15 +11,20 @@ import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.*
 import io.velocitycareerlabs.impl.domain.usecases.PresentationRequestUseCase
+import io.velocitycareerlabs.impl.domain.verifiers.PresentationRequestByDeepLinkVerifier
 import io.velocitycareerlabs.impl.extensions.encode
+import io.velocitycareerlabs.impl.utils.VCLLog
 import java.lang.Exception
 
 internal class PresentationRequestUseCaseImpl(
         private val presentationRequestRepository: PresentationRequestRepository,
         private val resolveKidRepository: ResolveKidRepository,
         private val jwtServiceRepository: JwtServiceRepository,
+        private val presentationRequestByDeepLinkVerifier: PresentationRequestByDeepLinkVerifier,
         private val executor: Executor
 ): PresentationRequestUseCase {
+
+    private val TAG = PresentationRequestUseCaseImpl::class.simpleName
 
     override fun getPresentationRequest(
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
@@ -34,7 +38,7 @@ internal class PresentationRequestUseCaseImpl(
                 encodedJwtStrResult.handleResult(
                     { encodedJwtStr ->
                         onGetJwtSuccess(
-                            encodedJwtStr,
+                            VCLJwt(encodedJwtStr),
                             presentationRequestDescriptor,
                             remoteCryptoServicesToken,
                             completionBlock
@@ -49,30 +53,6 @@ internal class PresentationRequestUseCaseImpl(
     }
 
     private fun onGetJwtSuccess(
-        encodedJwtStr: String,
-        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
-        remoteCryptoServicesToken: VCLToken?,
-        completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
-    ) {
-        try {
-            jwtServiceRepository.decode(encodedJwtStr) { jwtResult ->
-                jwtResult.handleResult({ jwt ->
-                    onDecodeJwtSuccess(
-                        jwt,
-                        presentationRequestDescriptor,
-                        remoteCryptoServicesToken,
-                        completionBlock
-                    )
-                }, { error ->
-                    onError(error, completionBlock)
-                })
-            }
-        } catch (ex: Exception) {
-            onError(VCLError(ex), completionBlock)
-        }
-    }
-
-    private fun onDecodeJwtSuccess(
         jwt: VCLJwt,
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         remoteCryptoServicesToken: VCLToken?,
@@ -114,17 +94,26 @@ internal class PresentationRequestUseCaseImpl(
             presentationRequest.jwt,
             presentationRequest.publicJwk,
             remoteCryptoServicesToken,
-        ) { isVerifiedResult ->
-            isVerifiedResult.handleResult({ isVerified ->
-                onVerificationSuccess(
-                    isVerified,
+        ) { jwtVerificationRes ->
+            jwtVerificationRes.handleResult({
+                presentationRequestByDeepLinkVerifier.verifyPresentationRequest(
                     presentationRequest,
-                    completionBlock
-                )
-            },
-                { error ->
-                    onError(error, completionBlock)
-                })
+                    presentationRequestDescriptor.deepLink
+                ) { byDeepLinkVerificationRes ->
+                    byDeepLinkVerificationRes.handleResult({ isVerified ->
+                        VCLLog.d(TAG, "Presentation request by deep link verification result: $isVerified")
+                        onVerificationSuccess(
+                            isVerified,
+                            presentationRequest,
+                            completionBlock
+                        )
+                    }, { error ->
+                        onError(error, completionBlock)
+                    })
+                }
+            }, { error ->
+                onError(error, completionBlock)
+            })
         }
     }
 

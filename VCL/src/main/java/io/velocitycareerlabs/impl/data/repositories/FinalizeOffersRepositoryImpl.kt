@@ -12,9 +12,12 @@ import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.repositories.FinalizeOffersRepository
+import io.velocitycareerlabs.impl.extensions.toJsonArray
+import io.velocitycareerlabs.impl.extensions.toJwtList
 import io.velocitycareerlabs.impl.extensions.toList
 import org.json.JSONArray
 import java.lang.Exception
+import java.util.concurrent.CompletableFuture
 
 internal class FinalizeOffersRepositoryImpl(
     private val networkService: NetworkService
@@ -25,7 +28,7 @@ internal class FinalizeOffersRepositoryImpl(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         sessionToken: VCLToken,
         proof: VCLJwt,
-        completionBlock: (VCLResult<List<String>>) -> Unit
+        completionBlock: (VCLResult<List<VCLJwt>>) -> Unit
     ) {
         networkService.sendRequest(
             endpoint = finalizeOffersDescriptor.finalizeOffersUri,
@@ -40,14 +43,12 @@ internal class FinalizeOffersRepositoryImpl(
                 result.handleResult(
                     { finalizedOffersResponse ->
                         try {
-                            val encodedJwts =
-                                JSONArray(finalizedOffersResponse.payload).toList() as? List<String>
-                            encodedJwts?.let {
+                            finalizedOffersResponse.payload.toJwtList()?.let {
                                 completionBlock(VCLResult.Success(it))
                             } ?: run {
                                 completionBlock(
                                     VCLResult.Failure(
-                                        VCLError("Failed to parse: $finalizedOffersResponse.payload")
+                                        VCLError("Failed to parse: ${finalizedOffersResponse.payload}")
                                     )
                                 )
                             }

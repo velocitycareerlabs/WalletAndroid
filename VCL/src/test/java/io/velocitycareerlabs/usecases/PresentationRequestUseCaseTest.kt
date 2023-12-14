@@ -15,6 +15,7 @@ import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.PresentationRequestRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.ResolveKidRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.PresentationRequestUseCaseImpl
+import io.velocitycareerlabs.impl.data.verifiers.PresentationRequestByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.domain.usecases.PresentationRequestUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
@@ -50,9 +51,9 @@ internal class PresentationRequestUseCaseTest {
                 VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)),
                 VCLJwtVerifyServiceLocalImpl()
             ),
+            PresentationRequestByDeepLinkVerifierImpl(),
             ExecutorImpl()
         )
-        var result: VCLResult<VCLPresentationRequest>? = null
 
         // Action
         subject.getPresentationRequest(

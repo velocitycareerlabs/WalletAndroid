@@ -13,5 +13,6 @@ class VCLCredentialManifestDescriptorByDeepLink(
 ): VCLCredentialManifestDescriptor(
     uri = deepLink.requestUri,
     issuingType = issuingType,
-    vendorOriginContext = deepLink.vendorOriginContext
+    vendorOriginContext = deepLink.vendorOriginContext,
+    deepLink = deepLink
 )
