@@ -150,14 +150,6 @@ afterEvaluate {
                         url = 'https://github.com/velocitycareerlabs/WalletAndroid'
                     }
                 }
-                signing {
-                        useInMemoryPgpKeys(
-                            rootProject.ext.signingKeyId,
-                            rootProject.ext.signingPrivateKey,
-                            rootProject.ext.signingPassword,
-                        )
-                        // sign publishing.publications
-                }
             }
             release(MavenPublication) {
                 groupId getGroupId()
@@ -202,16 +194,16 @@ afterEvaluate {
                         url = 'https://github.com/velocitycareerlabs/WalletAndroid'
                     }
                 }
-                signing {
-                        useInMemoryPgpKeys(
-                            rootProject.ext.signingKeyId,
-                            rootProject.ext.signingPrivateKey,
-                            rootProject.ext.signingPassword,
-                        )
-                        // sign publishing.publications
-                }
             }
         }
+    }
+    signing {
+        useInMemoryPgpKeys(
+                rootProject.ext.signingKeyId,
+                rootProject.ext.signingPrivateKey,
+                rootProject.ext.signingPassword,
+        )
+        sign publishing.publications
     }
 }
 

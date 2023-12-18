@@ -14,6 +14,7 @@ data class VCLCredentialManifest(
     val deepLink: VCLDeepLink? = null
 ) {
     val iss: String get() = jwt.payload?.toJSONObject()?.get(KeyIss) as? String ?: ""
+    val did: String get() = iss
     val aud: String get() = retrieveAud()
     val issuerId: String get() = jwt.payload?.toJSONObject()?.get(CodingKeys.KeyIssuer) as? String
         ?: (jwt.payload?.toJSONObject()?.get(CodingKeys.KeyIssuer) as? Map<*, *>)?.get(CodingKeys.KeyId) as? String

@@ -35,6 +35,7 @@ class VCLCredentialManifestTest {
     @Test
     fun testProps() {
         assert(subject.iss == "did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA")
+        assert(subject.did == "did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA")
         assert(subject.issuerId == "did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA")
         assert(subject.aud == "https://devagent.velocitycareerlabs.io/api/holder/v0.6/org/did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA")
         assert(subject.exchangeId == "645e315309237c760ac022b1")
