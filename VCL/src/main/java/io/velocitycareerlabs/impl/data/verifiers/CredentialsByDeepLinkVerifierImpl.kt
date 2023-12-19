@@ -12,16 +12,18 @@ import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialsByDeepLinkVerifier
-import java.util.concurrent.CompletableFuture
+import io.velocitycareerlabs.impl.utils.VCLLog
 
 class CredentialsByDeepLinkVerifierImpl: CredentialsByDeepLinkVerifier {
+    private val TAG = CredentialsByDeepLinkVerifierImpl::class.simpleName
+
     override fun verifyCredentials(
         jwtCredentials: List<VCLJwt>,
         deepLink: VCLDeepLink,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        val errorCredential = jwtCredentials.find { it.iss != deepLink.did }
-        errorCredential?.let {
+        jwtCredentials.find { it.iss != deepLink.did }?.let { mismatchedCredential ->
+            VCLLog.e(TAG, "mismatched credential: ${mismatchedCredential.encodedJwt} \ndeepLink: ${deepLink.value}")
             completionBlock(VCLResult.Failure(VCLError(errorCode = VCLErrorCode.MismatchedCredentialIssuerDid.value)))
         } ?: run {
             completionBlock(VCLResult.Success(true))

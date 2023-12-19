@@ -12,8 +12,11 @@ import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.domain.verifiers.PresentationRequestByDeepLinkVerifier
+import io.velocitycareerlabs.impl.utils.VCLLog
 
 class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByDeepLinkVerifier {
+    private val TAG = PresentationRequestByDeepLinkVerifierImpl::class.simpleName
+
     override fun verifyPresentationRequest(
         presentationRequest: VCLPresentationRequest,
         deepLink: VCLDeepLink,
@@ -22,6 +25,7 @@ class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByDeepLinkVe
         if (presentationRequest.iss == deepLink.did) {
             completionBlock(VCLResult.Success(true))
         } else {
+            VCLLog.e(TAG, "presentation request: ${presentationRequest.jwt.encodedJwt} \ndeepLink: ${deepLink.value}")
             completionBlock(VCLResult.Failure(
                 VCLError(errorCode = VCLErrorCode.MismatchedPresentationRequestInspectorDid.value)
             ))

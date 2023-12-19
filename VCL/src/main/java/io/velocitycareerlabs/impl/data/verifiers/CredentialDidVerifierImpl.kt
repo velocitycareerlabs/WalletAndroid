@@ -12,8 +12,6 @@ import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtVerifiableCredentials
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialDidVerifier
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CopyOnWriteArrayList
 
 internal class CredentialDidVerifierImpl: CredentialDidVerifier {
 

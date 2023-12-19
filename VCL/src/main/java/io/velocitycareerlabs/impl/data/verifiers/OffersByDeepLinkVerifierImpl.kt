@@ -12,15 +12,18 @@ import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.domain.verifiers.OffersByDeepLinkVerifier
+import io.velocitycareerlabs.impl.utils.VCLLog
 
 class OffersByDeepLinkVerifierImpl: OffersByDeepLinkVerifier {
+    private val TAG = OffersByDeepLinkVerifierImpl::class.simpleName
+
     override fun verifyOffers(
         offers: VCLOffers,
         deepLink: VCLDeepLink,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        val errorOffer = offers.all.find { it.issuerId != deepLink.did }
-        errorOffer?.let {
+        offers.all.find { it.issuerId != deepLink.did }?.let { mismatchedOffer ->
+            VCLLog.e(TAG, "mismatched offer: ${mismatchedOffer.payload} \ndeepLink: ${deepLink.value}")
             completionBlock(VCLResult.Failure(VCLError(errorCode = VCLErrorCode.MismatchedOfferIssuerDid.value)))
         } ?: run {
             completionBlock(VCLResult.Success(true))
