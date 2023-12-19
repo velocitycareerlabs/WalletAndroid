@@ -12,8 +12,11 @@ import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialManifestByDeepLinkVerifier
+import io.velocitycareerlabs.impl.utils.VCLLog
 
 class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDeepLinkVerifier {
+    private val TAG = CredentialManifestByDeepLinkVerifierImpl::class.simpleName
+
     override fun verifyCredentialManifest(
         credentialManifest: VCLCredentialManifest,
         deepLink: VCLDeepLink,
@@ -22,6 +25,7 @@ class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDeepLinkVeri
         if (credentialManifest.issuerId == deepLink.did) {
             completionBlock(VCLResult.Success(true))
         } else {
+            VCLLog.e(TAG, "credential manifest: ${credentialManifest.jwt.encodedJwt} \ndeepLink: ${deepLink.value}")
             completionBlock((VCLResult.Failure(VCLError(errorCode = VCLErrorCode.MismatchedRequestIssuerDid.value))))
         }
     }
