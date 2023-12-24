@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.utils
+package io.velocitycareerlabs.verifiers
 
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLStatusCode

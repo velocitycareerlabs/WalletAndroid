@@ -38,7 +38,7 @@ class VCLFinalizeOffersDescriptorTest {
 
     private val offers = VCLOffers(
         payload = JSONObject(),
-        all = JSONArray(),
+        all = listOf(),
         responseCode = 200,
         sessionToken = VCLToken(value = ""),
         challenge = ""

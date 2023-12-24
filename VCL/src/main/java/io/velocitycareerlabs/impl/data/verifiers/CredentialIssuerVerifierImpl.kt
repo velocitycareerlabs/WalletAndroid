@@ -4,8 +4,7 @@
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-
-package io.velocitycareerlabs.impl.data.utils
+package io.velocitycareerlabs.impl.data.verifiers
 
 import io.velocitycareerlabs.api.entities.VCLCredentialType
 import io.velocitycareerlabs.api.entities.error.VCLError
@@ -19,15 +18,15 @@ import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.repositories.HeaderKeys
 import io.velocitycareerlabs.impl.data.repositories.HeaderValues
+import io.velocitycareerlabs.impl.data.utils.Utils
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
-import io.velocitycareerlabs.impl.domain.utils.CredentialIssuerVerifier
+import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.extensions.toMap
 import io.velocitycareerlabs.impl.utils.VCLLog
-import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
-import java.util.Stack
+import java.util.concurrent.CopyOnWriteArrayList
 
 internal class CredentialIssuerVerifierImpl(
     private val credentialTypesModel: CredentialTypesModel,
@@ -36,19 +35,18 @@ internal class CredentialIssuerVerifierImpl(
     val TAG = CredentialIssuerVerifierImpl::class.java.simpleName
 
     override fun verifyCredentials(
-        jwtEncodedCredentials: List<String>,
+        jwtCredentials: List<VCLJwt>,
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        if (jwtEncodedCredentials.isEmpty()) /* nothing to verify */ {
+        if (jwtCredentials.isEmpty()) /* nothing to verify */ {
             completionBlock(VCLResult.Success(true))
         } else if (finalizeOffersDescriptor.serviceTypes.all.isEmpty()) {
             completionBlock(VCLResult.Failure(VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value)))
         } else {
             var globalError: VCLError? = null
-            val completableFutures = jwtEncodedCredentials.map { encodedJwtCredential ->
+            val completableFutures = jwtCredentials.map { jwtCredential ->
                 CompletableFuture.supplyAsync {
-                    val jwtCredential = VCLJwt(encodedJwt = encodedJwtCredential)
                     Utils.getCredentialType(jwtCredential)?.let { credentialTypeName ->
                         credentialTypesModel.credentialTypeByTypeName(credentialTypeName)
                             ?.let { credentialType ->
@@ -194,7 +192,7 @@ internal class CredentialIssuerVerifierImpl(
         credentialSubjectContexts: List<*>,
         completionBlock: (VCLResult<List<Map<*, *>>>) -> Unit
     ) {
-        val completeContexts = mutableListOf<Map<*, *>>()
+        val completeContexts = CopyOnWriteArrayList(mutableListOf<Map<*, *>>())
         val completableFutures = credentialSubjectContexts.map { credentialSubjectContext ->
             CompletableFuture.supplyAsync {
                 networkService.sendRequest(
@@ -295,7 +293,8 @@ internal class CredentialIssuerVerifierImpl(
         activeContext.forEach { (key, value) ->
             (value as? Map<*, *>)?.let { valueMap ->
                 if (valueMap[KeyId] == ValPrimaryOrganization ||
-                    valueMap[KeyId] == ValPrimarySourceProfile) {
+                    valueMap[KeyId] == ValPrimarySourceProfile
+                ) {
                     return key as? String
                 }
             }

@@ -13,9 +13,8 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 33
-        // Increase version for release
-        versionName "1.20.1"
-        versionCode 116
+        versionName "1.21.5"
+        versionCode 117
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -151,14 +150,6 @@ afterEvaluate {
                         url = 'https://github.com/velocitycareerlabs/WalletAndroid'
                     }
                 }
-                signing {
-                        useInMemoryPgpKeys(
-                            rootProject.ext.signingKeyId,
-                            rootProject.ext.signingPrivateKey,
-                            rootProject.ext.signingPassword,
-                        )
-                        // sign publishing.publications
-                }
             }
             release(MavenPublication) {
                 groupId getGroupId()
@@ -203,16 +194,16 @@ afterEvaluate {
                         url = 'https://github.com/velocitycareerlabs/WalletAndroid'
                     }
                 }
-                signing {
-                        useInMemoryPgpKeys(
-                            rootProject.ext.signingKeyId,
-                            rootProject.ext.signingPrivateKey,
-                            rootProject.ext.signingPassword,
-                        )
-                        // sign publishing.publications
-                }
             }
         }
+    }
+    signing {
+        useInMemoryPgpKeys(
+                rootProject.ext.signingKeyId,
+                rootProject.ext.signingPrivateKey,
+                rootProject.ext.signingPassword,
+        )
+        sign publishing.publications
     }
 }
 

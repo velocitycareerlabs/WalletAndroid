@@ -4,7 +4,6 @@
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package io.velocitycareerlabs.api.entities
 
 import io.velocitycareerlabs.impl.extensions.toJsonArray
@@ -22,8 +21,8 @@ data class VCLFinalizeOffersDescriptor(
             .putOpt(KeyApprovedOfferIds, approvedOfferIds.toJsonArray())
             .putOpt(KeyRejectedOfferIds, rejectedOfferIds.toJsonArray())
 
-    val did: String get() = credentialManifest.did
     val issuerId: String get() = credentialManifest.issuerId
+    val aud: String get() = credentialManifest.aud
     val exchangeId: String get() = credentialManifest.exchangeId
     val finalizeOffersUri: String get() = credentialManifest.finalizeOffersUri
     val serviceTypes: VCLServiceTypes get() = credentialManifest.verifiedProfile.serviceTypes
