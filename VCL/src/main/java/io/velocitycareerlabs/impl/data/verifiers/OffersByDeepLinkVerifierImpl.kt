@@ -24,7 +24,7 @@ class OffersByDeepLinkVerifierImpl: OffersByDeepLinkVerifier {
     ) {
         offers.all.find { it.issuerId != deepLink.did }?.let { mismatchedOffer ->
             VCLLog.e(TAG, "mismatched offer: ${mismatchedOffer.payload} \ndeepLink: ${deepLink.value}")
-            completionBlock(VCLResult.Failure(VCLError(errorCode = VCLErrorCode.MismatchedOfferIssuerDid.value)))
+            completionBlock(VCLResult.Failure(VCLError(errorCode = VCLErrorCode.MismatchedOfferIssuerDid)))
         } ?: run {
             completionBlock(VCLResult.Success(true))
         }

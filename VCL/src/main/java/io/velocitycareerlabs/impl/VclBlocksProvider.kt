@@ -61,12 +61,12 @@ internal object VclBlocksProvider {
                                                 keyServiceUrls
                                         )
                                 }
-                                        ?: throw VCLError(errorCode = VCLErrorCode.RemoteServicesUrlsNotFount.value)
+                                        ?: throw VCLError(errorCode = VCLErrorCode.RemoteServicesUrlsNotFount)
                         }
 
                         VCLCryptoServiceType.Injected -> cryptoServicesDescriptor.injectedCryptoServicesDescriptor?.keyService?.let { keyService ->
                                 return keyService
-                        } ?: throw VCLError(errorCode = VCLErrorCode.InjectedServicesNotFount.value)
+                        } ?: throw VCLError(errorCode = VCLErrorCode.InjectedServicesNotFount)
                 }
         }
 
@@ -89,11 +89,11 @@ internal object VclBlocksProvider {
                                         jwtSignServiceUrl
                                 )
                         }
-                                ?: throw VCLError(errorCode = VCLErrorCode.RemoteServicesUrlsNotFount.value)
+                                ?: throw VCLError(errorCode = VCLErrorCode.RemoteServicesUrlsNotFount)
 
                         VCLCryptoServiceType.Injected -> cryptoServicesDescriptor.injectedCryptoServicesDescriptor?.jwtSignService?.let { jwtSignService ->
                                 return jwtSignService
-                        } ?: throw VCLError(errorCode = VCLErrorCode.InjectedServicesNotFount.value)
+                        } ?: throw VCLError(errorCode = VCLErrorCode.InjectedServicesNotFount)
                 }
         }
 
