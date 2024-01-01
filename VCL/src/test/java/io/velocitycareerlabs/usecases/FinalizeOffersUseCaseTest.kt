@@ -9,6 +9,7 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.FinalizeOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
@@ -17,7 +18,6 @@ import io.velocitycareerlabs.impl.data.usecases.FinalizeOffersUseCaseImpl
 import io.velocitycareerlabs.impl.data.usecases.GenerateOffersUseCaseImpl
 import io.velocitycareerlabs.impl.data.verifiers.CredentialDidVerifierImpl
 import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierImpl
-import io.velocitycareerlabs.impl.data.verifiers.CredentialManifestByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.data.verifiers.CredentialsByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.data.verifiers.OffersByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.domain.usecases.FinalizeOffersUseCase
@@ -254,6 +254,44 @@ internal class FinalizeOffersUseCaseTest {
                 },
                 errorHandler = { error ->
                     assert(false) { "${error.toJsonObject()}" }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testFailure() {
+        subject = FinalizeOffersUseCaseImpl(
+            FinalizeOffersRepositoryImpl(
+                NetworkServiceSuccess("wrong payload")
+            ),
+            JwtServiceRepositoryImpl(
+                VCLJwtSignServiceLocalImpl(keyService),
+                VCLJwtVerifyServiceLocalImpl()
+            ),
+            CredentialIssuerVerifierImpl(
+                CredentialTypesModelMock(
+                    issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
+                ),
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            ),
+            CredentialDidVerifierImpl(),
+            CredentialsByDeepLinkVerifierImpl(),
+            EmptyExecutor()
+        )
+
+        subject.finalizeOffers(
+            finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
+            didJwk = didJwk,
+            sessionToken = VCLToken(value = ""),
+            remoteCryptoServicesToken = null
+        ) {
+            it.handleResult(
+                successHandler = {
+                    assert(false) { "${VCLErrorCode.SdkError.value} error code is expected" }
+                },
+                errorHandler = { error ->
+                    assert(error.errorCode == VCLErrorCode.SdkError.value)
                 }
             )
         }

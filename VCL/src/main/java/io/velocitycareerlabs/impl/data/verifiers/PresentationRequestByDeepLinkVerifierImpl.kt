@@ -27,7 +27,7 @@ class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByDeepLinkVe
         } else {
             VCLLog.e(TAG, "presentation request: ${presentationRequest.jwt.encodedJwt} \ndeepLink: ${deepLink.value}")
             completionBlock(VCLResult.Failure(
-                VCLError(errorCode = VCLErrorCode.MismatchedPresentationRequestInspectorDid)
+                VCLError(errorCode = VCLErrorCode.MismatchedPresentationRequestInspectorDid.value)
             ))
         }
     }

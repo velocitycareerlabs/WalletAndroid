@@ -42,7 +42,7 @@ internal class CredentialIssuerVerifierImpl(
         if (jwtCredentials.isEmpty()) /* nothing to verify */ {
             completionBlock(VCLResult.Success(true))
         } else if (finalizeOffersDescriptor.serviceTypes.all.isEmpty()) {
-            completionBlock(VCLResult.Failure(VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered)))
+            completionBlock(VCLResult.Failure(VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value)))
         } else {
             var globalError: VCLError? = null
             val completableFutures = jwtCredentials.map { jwtCredential ->
@@ -66,11 +66,11 @@ internal class CredentialIssuerVerifierImpl(
                                 }
                             } ?: run {
                             globalError =
-                                VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered)
+                                VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value)
                         }
                     } ?: run {
                         globalError =
-                            VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered)
+                            VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value)
                     }
                 }
             }
@@ -124,7 +124,7 @@ internal class CredentialIssuerVerifierImpl(
             completionBlock(VCLResult.Success(true))
         } else {
             onError(
-                VCLError(errorCode = VCLErrorCode.IssuerRequiresIdentityPermission),
+                VCLError(errorCode = VCLErrorCode.IssuerRequiresIdentityPermission.value),
                 completionBlock
             )
         }
@@ -152,7 +152,7 @@ internal class CredentialIssuerVerifierImpl(
                             onError(
                                 VCLError(
                                     payload = error.payload,
-                                    errorCode = VCLErrorCode.InvalidCredentialSubjectContext
+                                    errorCode = VCLErrorCode.InvalidCredentialSubjectContext.value
                                 ),
                                 completionBlock
                             )
@@ -160,19 +160,19 @@ internal class CredentialIssuerVerifierImpl(
                     }
                 } ?: run {
                     onError(
-                        VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectContext),
+                        VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectContext.value),
                         completionBlock
                     )
                 }
             } ?: run {
                 onError(
-                    VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectContext),
+                    VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectContext.value),
                     completionBlock
                 )
             }
         } else {
             onError(
-                VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure),
+                VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure.value),
                 completionBlock
             )
         }
@@ -226,7 +226,7 @@ internal class CredentialIssuerVerifierImpl(
 
         if (completeContexts.isEmpty()) {
             onError(
-                VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectContext),
+                VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectContext.value),
                 completionBlock = completionBlock
             )
         } else {
@@ -254,11 +254,11 @@ internal class CredentialIssuerVerifierImpl(
                                 isCredentialVerified = true
                             } else {
                                 globalError =
-                                    VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission)
+                                    VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission.value)
                             }
                         } ?: run {
                             globalError =
-                                VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission)
+                                VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission.value)
                         }
                     } ?: run {
 //                        When K is null, the credential will pass these checks:
@@ -276,12 +276,12 @@ internal class CredentialIssuerVerifierImpl(
                 completionBlock(
                     VCLResult.Failure(
                         globalError
-                            ?: VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure)
+                            ?: VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure.value)
                     )
                 )
         } ?: run {
             onError(
-                VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectType),
+                VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectType.value),
                 completionBlock = completionBlock
             )
         }

@@ -8,11 +8,11 @@
 package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.VerifiedProfileRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.VerifiedProfileUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.VerifiedProfileUseCase
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.Test
 
@@ -26,7 +26,7 @@ internal class VerifiedProfileUseCaseTest {
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1)
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
         subject.getVerifiedProfile(
@@ -53,7 +53,7 @@ internal class VerifiedProfileUseCaseTest {
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
         subject.getVerifiedProfile(
@@ -80,7 +80,7 @@ internal class VerifiedProfileUseCaseTest {
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
         subject.getVerifiedProfile(
@@ -107,7 +107,7 @@ internal class VerifiedProfileUseCaseTest {
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
         subject.getVerifiedProfile(
@@ -134,7 +134,7 @@ internal class VerifiedProfileUseCaseTest {
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
         subject.getVerifiedProfile(

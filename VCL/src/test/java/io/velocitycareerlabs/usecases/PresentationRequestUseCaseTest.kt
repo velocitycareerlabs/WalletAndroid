@@ -9,6 +9,7 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
@@ -22,6 +23,7 @@ import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestMocks
 import org.junit.Test
@@ -36,8 +38,7 @@ internal class PresentationRequestUseCaseTest {
     lateinit var subject: PresentationRequestUseCase
 
     @Test
-    fun testCountryCodesSuccess() {
-        // Arrange
+    fun testGetPresentationRequestSuccess() {
         val pushUrl = "push_url"
         val pushToken = "push_token"
         subject = PresentationRequestUseCaseImpl(
@@ -52,10 +53,9 @@ internal class PresentationRequestUseCaseTest {
                 VCLJwtVerifyServiceLocalImpl()
             ),
             PresentationRequestByDeepLinkVerifierImpl(),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
-        // Action
         subject.getPresentationRequest(
             presentationRequestDescriptor = VCLPresentationRequestDescriptor(
                 deepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet,
@@ -89,7 +89,41 @@ internal class PresentationRequestUseCaseTest {
                     assert(presentationRequest.pushDelegate!!.pushToken == pushToken)
                 },
                 errorHandler = {
-                    assert(false) { "$it" }
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testGetPresentationRequestFailure() {
+        subject = PresentationRequestUseCaseImpl(
+            PresentationRequestRepositoryImpl(
+                NetworkServiceSuccess(validResponse = "wrong payload")
+            ),
+            ResolveKidRepositoryImpl(
+                NetworkServiceSuccess(validResponse = PresentationRequestMocks.JWK)
+            ),
+            JwtServiceRepositoryImpl(
+                VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)),
+                VCLJwtVerifyServiceLocalImpl()
+            ),
+            PresentationRequestByDeepLinkVerifierImpl(),
+            EmptyExecutor()
+        )
+
+        subject.getPresentationRequest(
+            presentationRequestDescriptor = VCLPresentationRequestDescriptor(
+                deepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet
+            ),
+            null
+        ) {
+            it.handleResult(
+                successHandler = {
+                    assert(false) { "${VCLErrorCode.SdkError.value} error code is expected" }
+                },
+                errorHandler = { error ->
+                    assert(error.errorCode == VCLErrorCode.SdkError.value)
                 }
             )
         }

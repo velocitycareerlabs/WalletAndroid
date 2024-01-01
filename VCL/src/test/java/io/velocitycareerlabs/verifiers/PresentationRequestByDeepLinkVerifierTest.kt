@@ -12,12 +12,13 @@ class PresentationRequestByDeepLinkVerifierTest {
     private val subject = PresentationRequestByDeepLinkVerifierImpl()
     private val presentationRequest = PresentationRequestMocks.PresentationRequest
 
-    private val correctDeepLink =
-        VCLDeepLink("velocity-network-devnet://inspect?request_uri=https%3A%2F%2Fdevagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Avelocity%3A0xd4df29726d500f9b85bc6c7f1b3c021f16305692%2Fissue%2Fget-credential-manifest%3Fid%3D611b5836e93d08000af6f1bc%26credential_types%3DPastEmploymentPosition%26issuerDid%3Ddid%3Avelocity%3A0xd4df29726d500f9b85bc6c7f1b3c021f16305692")
-    private val wrongDeepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet
+    private val correctDeepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet
+    private val wrongDeepLink = VCLDeepLink(
+        "velocity-network-devnet://inspect?request_uri=https%3A%2F%2Fagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Avelocity%3A0xd4df29726d500f9b85bc6c7f1b3c021f163056%2Finspect%2Fget-presentation-request%3Fid%3D62e0e80c5ebfe73230b0becc%26inspectorDid%3Ddid%3Avelocity%3A0xd4df29726d500f9b85bc6c7f1b3c021f163056%26vendorOriginContext%3D%7B%22SubjectKey%22%3A%7B%22BusinessUnit%22%3A%22ZC%22%2C%22KeyCode%22%3A%2254514480%22%7D%2C%22Token%22%3A%22832077a4%22%7D"
+    )
 
     @Test
-    fun testVerifyCredentialManifestSuccess() {
+    fun testVerifyPresentationRequestSuccess() {
         subject.verifyPresentationRequest(
             presentationRequest,
             correctDeepLink
@@ -31,7 +32,7 @@ class PresentationRequestByDeepLinkVerifierTest {
     }
 
     @Test
-    fun testVerifyCredentialManifestError() {
+    fun testVerifyPresentationRequestError() {
         subject.verifyPresentationRequest(
             presentationRequest,
             wrongDeepLink

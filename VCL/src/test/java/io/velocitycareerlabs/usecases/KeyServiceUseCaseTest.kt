@@ -18,6 +18,7 @@ import io.velocitycareerlabs.impl.data.repositories.KeyServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.KeyServiceUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.KeyServiceUseCase
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,7 +38,7 @@ class KeyServiceUseCaseTest {
             KeyServiceRepositoryImpl(
                 VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
     }
 
@@ -58,7 +59,7 @@ class KeyServiceUseCaseTest {
                     assert(jwkJsonObj.optString("y") != null)
                 },
                 errorHandler = {
-                    assert(false) { "$it" }
+                    assert(false) { "${it.toJsonObject()}" }
                 }
             )
         }
