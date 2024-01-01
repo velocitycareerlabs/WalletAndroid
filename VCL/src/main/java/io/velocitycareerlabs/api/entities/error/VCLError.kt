@@ -14,13 +14,13 @@ class VCLError(
 ): Error() {
     var payload: String? = null
     var error: String? = null
-    var errorCode: String? = null
+    var errorCode: String = VCLErrorCode.SdkError.value
     override var message: String? = null
     var statusCode: Int? = null
 
     constructor(
         error: String? = null,
-        errorCode: String? = null,
+        errorCode: String = VCLErrorCode.SdkError.value,
         message: String? = null,
         statusCode: Int? = null,
     ) : this() {
@@ -34,7 +34,7 @@ class VCLError(
         val payloadJson = payload?.toJsonObject()
         this.payload = payload
         this.error = payloadJson?.optString(KeyError)
-        this.errorCode = errorCode ?: payloadJson?.optString(KeyErrorCode)
+        this.errorCode = errorCode ?: payloadJson?.optString(KeyErrorCode) ?: VCLErrorCode.SdkError.value
         this.message = payloadJson?.optString(KeyMessage)
         this.statusCode = payloadJson?.optInt(KeyStatusCode)
     }
@@ -42,7 +42,7 @@ class VCLError(
     constructor(exception: Exception, statusCode: Int? = null): this() {
         this.payload = null
         this.error = null
-        this.errorCode = null
+        this.errorCode = VCLErrorCode.SdkError.value
         this.message = exception.toString()
         this.statusCode = statusCode
     }

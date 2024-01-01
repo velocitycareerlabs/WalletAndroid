@@ -8,11 +8,13 @@
 package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.CredentialTypesUIFormSchemaRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialTypesUIFormSchemaUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUIFormSchemaUseCase
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypesUIFormSchemaMocks
 import org.json.JSONArray
 import org.json.JSONObject
@@ -36,7 +38,7 @@ internal class CredentialTypesUIFormSchemaUseCaseTest {
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesUIFormSchemaMocks.UISchemaFormJsonFull)
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
         subject.getCredentialTypesUIFormSchema(
@@ -79,7 +81,7 @@ internal class CredentialTypesUIFormSchemaUseCaseTest {
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesUIFormSchemaMocks.UISchemaFormJsonOnlyCountries)
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
         subject.getCredentialTypesUIFormSchema(
@@ -122,7 +124,7 @@ internal class CredentialTypesUIFormSchemaUseCaseTest {
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesUIFormSchemaMocks.UISchemaFormJsonOnlyRegions)
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
         subject.getCredentialTypesUIFormSchema(
@@ -165,7 +167,7 @@ internal class CredentialTypesUIFormSchemaUseCaseTest {
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesUIFormSchemaMocks.UISchemaFormJsonOnlyEnums)
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
         subject.getCredentialTypesUIFormSchema(
@@ -198,6 +200,30 @@ internal class CredentialTypesUIFormSchemaUseCaseTest {
                 },
                 {
                     assert(false) { "${it.toJsonObject()}" }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testCredentialTypesFormSchemaFailure() {
+        subject = CredentialTypesUIFormSchemaUseCaseImpl(
+            CredentialTypesUIFormSchemaRepositoryImpl(
+                NetworkServiceSuccess("wrong payload")
+            ),
+            EmptyExecutor()
+        )
+
+        subject.getCredentialTypesUIFormSchema(
+            VCLCredentialTypesUIFormSchemaDescriptor("some type", VCLCountries.CA),
+            mockedCountries
+        ) {
+            it.handleResult(
+                successHandler = {
+                    assert(false) { "${VCLErrorCode.SdkError.value} error code is expected" }
+                },
+                errorHandler = { error ->
+                    assert(error.errorCode == VCLErrorCode.SdkError.value)
                 }
             )
         }

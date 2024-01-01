@@ -8,12 +8,14 @@
 package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.CredentialTypesRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialTypesUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUseCase
 import io.velocitycareerlabs.infrastructure.resources.EmptyCacheService
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypesMocks
 import org.json.JSONObject
 import org.junit.After
@@ -29,13 +31,13 @@ internal class CredentialTypesUseCaseTest {
     }
 
     @Test
-    fun testGetCredentialTypes() {
+    fun testGetCredentialTypesSuccess() {
         subject = CredentialTypesUseCaseImpl(
             CredentialTypesRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesMocks.CredentialTypesJson),
                 EmptyCacheService()
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
         subject.getCredentialTypes(0) {
@@ -46,6 +48,28 @@ internal class CredentialTypesUseCaseTest {
                 },
                 {
                     assert(false) { "${it.toJsonObject()}" }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testGetCredentialTypesFailure() {
+        subject = CredentialTypesUseCaseImpl(
+            CredentialTypesRepositoryImpl(
+                NetworkServiceSuccess("wrong payload"),
+                EmptyCacheService()
+            ),
+            EmptyExecutor()
+        )
+
+        subject.getCredentialTypes(0) {
+            it.handleResult(
+                successHandler = {
+                    assert(false) { "${VCLErrorCode.SdkError.value} error code is expected" }
+                },
+                errorHandler = { error ->
+                    assert(error.errorCode == VCLErrorCode.SdkError.value)
                 }
             )
         }
