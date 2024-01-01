@@ -12,6 +12,7 @@ import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.repositories.SubmissionRepository
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
+import io.velocitycareerlabs.impl.extensions.toJsonObject
 import org.json.JSONObject
 import java.lang.Exception
 
@@ -34,9 +35,8 @@ internal class SubmissionRepositoryImpl(
             completionBlock = { result ->
                 result.handleResult({ submissionResponse ->
                     try {
-                        val jsonObj = JSONObject(submissionResponse.payload)
-                        val submissionResult =
-                            parse(jsonObj, submission.jti, submission.submissionId)
+                        val jsonObj = submissionResponse.payload.toJsonObject()
+                        val submissionResult = parse(jsonObj, submission.jti, submission.submissionId)
                         completionBlock(VCLResult.Success(submissionResult))
                     } catch (ex: Exception) {
                         completionBlock(VCLResult.Failure(VCLError(ex)))
@@ -51,13 +51,13 @@ internal class SubmissionRepositoryImpl(
     }
 
     private fun parse(
-        jsonObj: JSONObject,
+        jsonObj: JSONObject?,
         jti: String,
         submissionId: String
     ): VCLSubmissionResult {
-        val exchangeJsonObj = jsonObj.optJSONObject(VCLSubmissionResult.KeyExchange)
+        val exchangeJsonObj = jsonObj?.optJSONObject(VCLSubmissionResult.KeyExchange)
         return VCLSubmissionResult(
-            sessionToken = VCLToken(jsonObj.optString(VCLSubmissionResult.KeyToken)),
+            sessionToken = VCLToken(jsonObj?.optString(VCLSubmissionResult.KeyToken) ?: ""),
             exchange = parseExchange(exchangeJsonObj),
             jti = jti,
             submissionId = submissionId

@@ -13,7 +13,7 @@ import io.velocitycareerlabs.api.entities.VCLCredentialTypes
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescriptor
-import io.velocitycareerlabs.impl.data.utils.CredentialDidVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.CredentialDidVerifierImpl
 import io.velocitycareerlabs.impl.data.infrastructure.db.CacheServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.db.SecretStoreServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.network.NetworkServiceImpl
@@ -25,11 +25,16 @@ import io.velocitycareerlabs.impl.data.usecases.*
 import io.velocitycareerlabs.api.jwt.VCLJwtSignService
 import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
 import io.velocitycareerlabs.api.keys.VCLKeyService
-import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierEmptyImpl
-import io.velocitycareerlabs.impl.data.utils.CredentialIssuerVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierEmptyImpl
+import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.CredentialManifestByDeepLinkVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.CredentialsByDeepLinkVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.OffersByDeepLinkVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.PresentationRequestByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.domain.models.*
 import io.velocitycareerlabs.impl.domain.usecases.*
-import io.velocitycareerlabs.impl.domain.utils.CredentialIssuerVerifier
+import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
+import io.velocitycareerlabs.impl.domain.verifiers.PresentationRequestByDeepLinkVerifier
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.impl.jwt.remote.VCLJwtSignServiceRemoteImpl
@@ -169,6 +174,7 @@ internal object VclBlocksProvider {
                                 chooseJwtSignService(context, cryptoServicesDescriptor),
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
+                        PresentationRequestByDeepLinkVerifierImpl(),
                         ExecutorImpl()
                 )
 
@@ -212,6 +218,7 @@ internal object VclBlocksProvider {
                                 chooseJwtSignService(context, cryptoServicesDescriptor),
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
+                        CredentialManifestByDeepLinkVerifierImpl(),
                         ExecutorImpl()
                 )
 
@@ -244,6 +251,7 @@ internal object VclBlocksProvider {
                         GenerateOffersRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
+                        OffersByDeepLinkVerifierImpl(),
                         ExecutorImpl()
                 )
 
@@ -272,6 +280,7 @@ internal object VclBlocksProvider {
                         ),
                         credentialIssuerVerifier,
                         CredentialDidVerifierImpl(),
+                        CredentialsByDeepLinkVerifierImpl(),
                         ExecutorImpl()
                 )
         }

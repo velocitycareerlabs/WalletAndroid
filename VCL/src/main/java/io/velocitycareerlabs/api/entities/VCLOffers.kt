@@ -12,7 +12,7 @@ import org.json.JSONObject
 
 data class VCLOffers (
     val payload: JSONObject,
-    val all: JSONArray,
+    val all: List<VCLOffer>,
     val responseCode: Int,
     val sessionToken: VCLToken,
     val challenge: String,

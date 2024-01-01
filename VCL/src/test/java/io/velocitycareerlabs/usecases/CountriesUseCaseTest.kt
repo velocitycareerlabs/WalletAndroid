@@ -7,7 +7,9 @@
 
 package io.velocitycareerlabs.usecases
 
+import android.os.Build
 import io.velocitycareerlabs.api.entities.VCLCountries
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.CountriesRepositoryImpl
@@ -15,13 +17,12 @@ import io.velocitycareerlabs.impl.data.usecases.CountriesUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.CountriesUseCase
 import io.velocitycareerlabs.infrastructure.resources.EmptyCacheService
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.CountriesMocks
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-//@RunWith(RobolectricTestRunner::class)
-//@Config(sdk = [Build.VERSION_CODES.O_MR1])
 class CountriesUseCaseTest {
 
     internal lateinit var subject: CountriesUseCase
@@ -59,7 +60,31 @@ class CountriesUseCaseTest {
                     assert(afghanistanRegions.all[2].code == CountriesMocks.AfghanistanRegion3Code)
                 },
                 errorHandler = {
-                    assert(false) { "$it" }
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testGetCountriesFailure() {
+        subject = CountriesUseCaseImpl(
+            CountriesRepositoryImpl(
+                NetworkServiceSuccess(
+                    "wrong payload"
+                ),
+                EmptyCacheService()
+            ),
+            EmptyExecutor()
+        )
+
+        subject.getCountries(0) {
+            it.handleResult(
+                successHandler = {
+                    assert(false) { "${VCLErrorCode.SdkError.value} error code is expected" }
+                },
+                errorHandler = { error ->
+                    assert(error.errorCode == VCLErrorCode.SdkError.value)
                 }
             )
         }
