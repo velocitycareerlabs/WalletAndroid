@@ -20,15 +20,6 @@ class PresentationRequestMocks {
         const val EncodedPresentationRequestResponse =
             "{\"presentation_request\":\"$EncodedPresentationRequest\"}"
 
-        const val PresentationRequestJwtDecodedHeaderJson =
-            "{ \"typ\": \"JWT\", \"kid\": \"did:velocity:0xd4df29726d500f9b85bc6c7f1b3c021f16305692#key-1\", \"alg\": \"ES256K\" }"
-
-        const val PresentationRequestJwtDecodedPayloadJson =
-            "{ \"exchange_id\": \"60ec1f766d274e00086748ca\", \"metadata\": { \"client_name\": \"Microsoft Corporation\", \"logo_uri\": \"https://agsol.com/wp-content/uploads/2018/09/new-microsoft-logo-SIZED-SQUARE.jpg\", \"tos_uri\": \"https://www.velocityexperiencecenter.com/terms-and-conditions-vnf\", \"max_retention_period\": \"6m\" }, \"presentation_definition\": { \"id\": \"60ec1f766d274e00086748ca.60ec143e6d274e00086748bc\", \"purpose\": \"Id Check\", \"format\": { \"jwt_vp\": { \"alg\": [ \"secp256k1\" ] } }, \"input_descriptors\": [ { \"id\": \"IdDocument\", \"schema\": [ { \"uri\": \"https://devservices.velocitycareerlabs.io/api/v0.6/schemas/id-document.v1.schema.json\" } ] }, { \"id\": \"Email\", \"schema\": [ { \"uri\": \"https://devservices.velocitycareerlabs.io/api/v0.6/schemas/email.schema.json\" } ] }, { \"id\": \"Phone\", \"schema\": [ { \"uri\": \"https://devservices.velocitycareerlabs.io/api/v0.6/schemas/phone.schema.json\" } ] }, { \"id\": \"PastEmploymentPosition\", \"schema\": [ { \"uri\": \"https://devservices.velocitycareerlabs.io/api/v0.6/schemas/past-employment-position.schema.json\" } ] }, { \"id\": \"CurrentEmploymentPosition\", \"schema\": [ { \"uri\": \"https://devservices.velocitycareerlabs.io/api/v0.6/schemas/current-employment-position.schema.json\" } ] }, { \"id\": \"EducationDegree\", \"schema\": [ { \"uri\": \"https://devservices.velocitycareerlabs.io/api/v0.6/schemas/education-degree.schema.json\" } ] } ] }, \"iss\": \"did:velocity:0xd4df29726d500f9b85bc6c7f1b3c021f16305692\", \"iat\": 1626087286, \"exp\": 1626692086, \"nbf\": 1626087286 }"
-
-        const val PresentationRequestJwtSignature =
-            "BSQnMNNJyicCsh6zeh7k5GBHC6T9QgPNV4SHhSXsnz3sBJMwNBFz7v4axLCoCiKHtIxNj5"
-
         val PresentationRequestJwt = VCLJwt(
             encodedJwt = EncodedPresentationRequest
         )

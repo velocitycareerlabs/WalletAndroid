@@ -9,11 +9,13 @@ package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.VCLExchangeDescriptor
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.ExchangeProgressRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.ExchangeProgressUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.ExchangeProgressUseCase
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.ExchangeProgressMocks
 import org.json.JSONObject
 import org.junit.After
@@ -38,12 +40,12 @@ internal class ExchangeProgressUseCaseTest {
     }
 
     @Test
-    fun testGetExchangeProgress() {
+    fun testGetExchangeProgressSuccess() {
         subject = ExchangeProgressUseCaseImpl(
             ExchangeProgressRepositoryImpl(
                 NetworkServiceSuccess(ExchangeProgressMocks.ExchangeProgressJson)
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
         subject.getExchangeProgress(exchangeDescriptor) {
@@ -53,6 +55,27 @@ internal class ExchangeProgressUseCaseTest {
                 },
                 {
                     assert(false) { "${it.toJsonObject()}" }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testGetExchangeProgressFailure() {
+        subject = ExchangeProgressUseCaseImpl(
+            ExchangeProgressRepositoryImpl(
+                NetworkServiceSuccess("wrong payload")
+            ),
+            EmptyExecutor()
+        )
+
+        subject.getExchangeProgress(exchangeDescriptor) {
+            it.handleResult(
+                successHandler = {
+                    assert(false) { "${VCLErrorCode.SdkError.value} error code is expected" }
+                },
+                errorHandler = { error ->
+                    assert(error.errorCode == VCLErrorCode.SdkError.value)
                 }
             )
         }

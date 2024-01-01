@@ -9,6 +9,7 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.CredentialManifestRepositoryImpl
@@ -22,6 +23,7 @@ import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
@@ -45,7 +47,7 @@ internal class CredentialManifestUseCaseTest {
     }
 
     @Test
-    fun testGetCredentialManifest() {
+    fun testGetCredentialManifestSuccess() {
         // Arrange
         subject = CredentialManifestUseCaseImpl(
             CredentialManifestRepositoryImpl(
@@ -59,7 +61,7 @@ internal class CredentialManifestUseCaseTest {
                 VCLJwtVerifyServiceLocalImpl()
             ),
             CredentialManifestByDeepLinkVerifierImpl(),
-            ExecutorImpl()
+            EmptyExecutor()
         )
 
         subject.getCredentialManifest(
@@ -91,7 +93,44 @@ internal class CredentialManifestUseCaseTest {
                     assert(credentialManifest.jwt.signature.toString() == CredentialManifestMocks.Signature)
                 },
                 {
-                    assert(false) { "$it" }
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testGetCredentialManifestFailure() {
+        // Arrange
+        subject = CredentialManifestUseCaseImpl(
+            CredentialManifestRepositoryImpl(
+                NetworkServiceSuccess("wrong payload")
+            ),
+            ResolveKidRepositoryImpl(
+                NetworkServiceSuccess(CredentialManifestMocks.JWK)
+            ),
+            JwtServiceRepositoryImpl(
+                VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)),
+                VCLJwtVerifyServiceLocalImpl()
+            ),
+            CredentialManifestByDeepLinkVerifierImpl(),
+            EmptyExecutor()
+        )
+
+        subject.getCredentialManifest(
+            credentialManifestDescriptor = VCLCredentialManifestDescriptorByDeepLink(
+                deepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet,
+                issuingType = VCLIssuingType.Career
+            ),
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!),
+            remoteCryptoServicesToken = null
+        ) {
+            it.handleResult(
+                successHandler = {
+                    assert(false) { "${VCLErrorCode.SdkError.value} error code is expected" }
+                },
+                errorHandler = { error ->
+                    assert(error.errorCode == VCLErrorCode.SdkError.value)
                 }
             )
         }

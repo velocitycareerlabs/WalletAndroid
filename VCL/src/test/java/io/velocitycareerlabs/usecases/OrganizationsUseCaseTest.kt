@@ -7,18 +7,15 @@
 
 package io.velocitycareerlabs.usecases
 
-import io.velocitycareerlabs.api.entities.VCLOrganizations
-import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLService
-import io.velocitycareerlabs.api.entities.data
 import io.velocitycareerlabs.api.entities.VCLOrganizationsSearchDescriptor
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.OrganizationsRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.OrganizationsUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.OrganizationsUseCase
 import io.velocitycareerlabs.impl.extensions.toList
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.OrganizationsMocks
 import org.json.JSONObject
 import org.junit.After
@@ -41,7 +38,7 @@ internal class OrganizationsUseCaseTest {
                     OrganizationsMocks.OrganizationJsonResult
                 ),
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
         val serviceJsonMock = JSONObject(OrganizationsMocks.ServiceJsonStr)
 
@@ -60,7 +57,7 @@ internal class OrganizationsUseCaseTest {
                     assert(serviceCredentialAgentIssuer.serviceEndpoint == OrganizationsMocks.ServiceEndpoint)
                 },
                 {
-                    assert(false) { "$it" }
+                    assert(false) { "${it.toJsonObject()}" }
                 }
             )
         }
