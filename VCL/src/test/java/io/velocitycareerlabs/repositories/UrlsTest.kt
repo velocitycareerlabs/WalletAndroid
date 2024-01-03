@@ -62,6 +62,7 @@ internal class UrlsTest {
 
     private fun verifyUrlsPrefix(registrarPrefix: String) {
         assert(Urls.CredentialTypes.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.CredentialTypes}"}
+        assert(Urls.ServiceTypes.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.ServiceTypes}"}
         assert(Urls.CredentialTypeSchemas.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.CredentialTypeSchemas}"}
         assert(Urls.Countries.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.Countries}"}
         assert(Urls.Organizations.startsWith(registrarPrefix)) {"expected: $registrarPrefix, actual: ${Urls.Organizations}"}

@@ -19,4 +19,7 @@ internal class EmptyCacheService: CacheService {
     override fun getCredentialTypeSchema(key: String) = null
     override fun setCredentialTypeSchema(key: String, value: String, cacheSequence: Int) {}
     override fun isResetCacheCredentialTypeSchema(cacheSequence: Int) = false
+    override fun getServiceTypes(key: String) = null
+    override fun setServiceTypes(key: String, value: String, cacheSequence: Int) {}
+    override fun isResetCacheServiceTypes(cacheSequence: Int) = false
 }

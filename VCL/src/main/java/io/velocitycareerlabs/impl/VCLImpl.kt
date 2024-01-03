@@ -16,6 +16,7 @@ import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
 import io.velocitycareerlabs.impl.domain.models.CountriesModel
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
+import io.velocitycareerlabs.impl.domain.models.ServiceTypesModel
 import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUIFormSchemaUseCase
 import io.velocitycareerlabs.impl.domain.usecases.ExchangeProgressUseCase
@@ -37,13 +38,14 @@ internal class VCLImpl: VCL {
     companion object {
         val TAG = VCLImpl::class.simpleName
 
-        private const val ModelsToInitializeAmount = 3
+        private const val ModelsToInitializeAmount = 4
     }
     private lateinit var initializationDescriptor: VCLInitializationDescriptor
 
     private lateinit var credentialTypesModel: CredentialTypesModel
     private lateinit var credentialTypeSchemasModel: CredentialTypeSchemasModel
     private lateinit var countriesModel: CountriesModel
+    private lateinit var serviceTypesModel: ServiceTypesModel
 
     private lateinit var presentationRequestUseCase: PresentationRequestUseCase
     private lateinit var presentationSubmissionUseCase: PresentationSubmissionUseCase
@@ -161,6 +163,9 @@ internal class VCLImpl: VCL {
         countriesModel =
             VclBlocksProvider.provideCountriesModel(context)
 
+        serviceTypesModel =
+            VclBlocksProvider.provideServiceTypesModel(context)
+
         countriesModel.initialize(cacheSequence) { result ->
             result.handleResult(
                 {
@@ -172,6 +177,7 @@ internal class VCLImpl: VCL {
                         completionHandler(context, successHandler, errorHandler)
                 })
         }
+
         credentialTypesModel.initialize(cacheSequence) { result ->
             result.handleResult(
                 {
@@ -207,6 +213,18 @@ internal class VCLImpl: VCL {
                     if (initializationWatcher.onInitializedModel(error, true)) {
                         completionHandler(context, successHandler, errorHandler)
                     }
+                })
+        }
+
+        serviceTypesModel.initialize(cacheSequence) { result ->
+            result.handleResult(
+                {
+                    if (initializationWatcher.onInitializedModel(null))
+                        completionHandler(context, successHandler, errorHandler)
+                },
+                { error ->
+                    if (initializationWatcher.onInitializedModel(error))
+                        completionHandler(context, successHandler, errorHandler)
                 })
         }
     }

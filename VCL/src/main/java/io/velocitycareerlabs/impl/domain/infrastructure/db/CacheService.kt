@@ -21,4 +21,8 @@ internal interface CacheService {
     fun getCredentialTypeSchema(key: String): String?
     fun setCredentialTypeSchema(key: String, value: String, cacheSequence: Int)
     fun isResetCacheCredentialTypeSchema(cacheSequence: Int): Boolean
+
+    fun getServiceTypes(key: String): String?
+    fun setServiceTypes(key: String, value: String, cacheSequence: Int)
+    fun isResetCacheServiceTypes(cacheSequence: Int): Boolean
 }

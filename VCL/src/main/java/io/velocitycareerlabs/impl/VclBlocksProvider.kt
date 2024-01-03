@@ -159,6 +159,18 @@ internal object VclBlocksProvider {
                 )
 
         @Throws(VCLError::class)
+        fun provideServiceTypesModel(context: Context): ServiceTypesModel =
+                ServiceTypesModelImpl(
+                        ServiceTypesUseCaseImpl(
+                                ServiceTypesRepositoryImpl(
+                                        NetworkServiceImpl(),
+                                        CacheServiceImpl(context)
+                                ),
+                                ExecutorImpl()
+                        )
+                )
+
+        @Throws(VCLError::class)
         fun providePresentationRequestUseCase(
                 context: Context,
                 cryptoServicesDescriptor: VCLCryptoServicesDescriptor

@@ -24,9 +24,13 @@ internal class CacheServiceImpl(
         private const val MODE = Context.MODE_PRIVATE
 
         internal const val KEY_CACHE_SEQUENCE_COUNTRIES = "KEY_CACHE_SEQUENCE_COUNTRIES"
-        internal const val KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES = "KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES"
-        internal const val KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA = "KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA"
+        internal const val KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES =
+            "KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES"
+        internal const val KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA =
+            "KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA"
+        internal const val KEY_CACHE_SEQUENCE_SERVICE_TYPES = "KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES"
     }
+
     private var preferences: SharedPreferences = context.getSharedPreferences(NAME, MODE)
 
     // an inline function to put variable and save it
@@ -53,6 +57,7 @@ internal class CacheServiceImpl(
         setString(key, value)
         setInt(KEY_CACHE_SEQUENCE_COUNTRIES, cacheSequence)
     }
+
     override fun isResetCacheCountries(cacheSequence: Int) =
         getInt(KEY_CACHE_SEQUENCE_COUNTRIES) < cacheSequence
 
@@ -61,6 +66,7 @@ internal class CacheServiceImpl(
         setString(key, value)
         setInt(KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES, cacheSequence)
     }
+
     override fun isResetCacheCredentialTypes(cacheSequence: Int) =
         getInt(KEY_CACHE_SEQUENCE_CREDENTIAL_TYPES) < cacheSequence
 
@@ -69,6 +75,16 @@ internal class CacheServiceImpl(
         setString(key, value)
         setInt(KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA, cacheSequence)
     }
+
     override fun isResetCacheCredentialTypeSchema(cacheSequence: Int) =
         getInt(KEY_CACHE_SEQUENCE_CREDENTIAL_TYPE_SCHEMA) < cacheSequence
+
+    override fun getServiceTypes(key: String) = getString(key)
+    override fun setServiceTypes(key: String, value: String, cacheSequence: Int) {
+        setString(key, value)
+        setInt(KEY_CACHE_SEQUENCE_SERVICE_TYPES, cacheSequence)
+    }
+
+    override fun isResetCacheServiceTypes(cacheSequence: Int) =
+        getInt(KEY_CACHE_SEQUENCE_SERVICE_TYPES) < cacheSequence
 }
