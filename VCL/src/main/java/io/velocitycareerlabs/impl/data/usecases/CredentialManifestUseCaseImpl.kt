@@ -14,14 +14,19 @@ import io.velocitycareerlabs.impl.domain.repositories.CredentialManifestReposito
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
 import io.velocitycareerlabs.impl.domain.repositories.ResolveKidRepository
 import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
+import io.velocitycareerlabs.impl.domain.verifiers.CredentialManifestByDeepLinkVerifier
 import io.velocitycareerlabs.impl.extensions.encode
+import io.velocitycareerlabs.impl.utils.VCLLog
 
 internal class CredentialManifestUseCaseImpl(
     private val credentialManifestRepository: CredentialManifestRepository,
     private val resolveKidRepository: ResolveKidRepository,
     private val jwtServiceRepository: JwtServiceRepository,
+    private val credentialManifestByDeepLinkVerifier: CredentialManifestByDeepLinkVerifier,
     private val executor: Executor
 ): CredentialManifestUseCase {
+
+    private val TAG = CredentialManifestUseCaseImpl::class.simpleName
 
     override fun getCredentialManifest(
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
@@ -37,9 +42,12 @@ internal class CredentialManifestUseCaseImpl(
                     { jwtStr ->
                         try {
                             onGetCredentialManifestSuccess(
-                                VCLJwt(jwtStr),
-                                credentialManifestDescriptor,
-                                verifiedProfile,
+                                VCLCredentialManifest(
+                                    VCLJwt(jwtStr),
+                                    credentialManifestDescriptor.vendorOriginContext,
+                                    verifiedProfile,
+                                    credentialManifestDescriptor.deepLink
+                                ),
                                 remoteCryptoServicesToken,
                                 completionBlock
                             )
@@ -56,21 +64,48 @@ internal class CredentialManifestUseCaseImpl(
     }
 
     private fun onGetCredentialManifestSuccess(
-        jwt: VCLJwt,
-        credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        verifiedProfile: VCLVerifiedProfile,
+        credentialManifest: VCLCredentialManifest,
         remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        jwt.kid?.replace("#", "#".encode())?.let { kid ->
+        credentialManifest.deepLink?.let { deepLink ->
+            credentialManifestByDeepLinkVerifier.verifyCredentialManifest(credentialManifest, deepLink) {
+                it.handleResult(
+                    { isVerified ->
+                        VCLLog.d(TAG, "Credential manifest deep link verification result: $isVerified")
+                        onCredentialManifestDidVerificationSuccess(
+                            credentialManifest,
+                            remoteCryptoServicesToken,
+                            completionBlock
+                        )
+                    },
+                    { error ->
+                        onError(error, completionBlock)
+                    }
+                )
+            }
+        } ?: run {
+            VCLLog.d(TAG, "Deep link was not provided => nothing to verify")
+            onCredentialManifestDidVerificationSuccess(
+                credentialManifest,
+                remoteCryptoServicesToken,
+                completionBlock
+            )
+        }
+    }
+
+    private fun onCredentialManifestDidVerificationSuccess(
+        credentialManifest: VCLCredentialManifest,
+        remoteCryptoServicesToken: VCLToken?,
+        completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
+    ) {
+        credentialManifest.jwt.kid?.replace("#", "#".encode())?.let { kid ->
             resolveKidRepository.getPublicKey(kid) { publicKeyResult ->
                 publicKeyResult.handleResult(
                     { publicKey ->
                         onResolvePublicKeySuccess(
                             publicKey,
-                            jwt,
-                            credentialManifestDescriptor,
-                            verifiedProfile,
+                            credentialManifest,
                             remoteCryptoServicesToken,
                             completionBlock
                         )
@@ -87,14 +122,12 @@ internal class CredentialManifestUseCaseImpl(
 
     private fun onResolvePublicKeySuccess(
         publicJwk: VCLPublicJwk,
-        jwt: VCLJwt,
-        credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        verifiedProfile: VCLVerifiedProfile,
+        credentialManifest: VCLCredentialManifest,
         remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         jwtServiceRepository.verifyJwt(
-            jwt,
+            credentialManifest.jwt,
             publicJwk,
             remoteCryptoServicesToken
         )
@@ -103,9 +136,7 @@ internal class CredentialManifestUseCaseImpl(
                 { isVerified ->
                     onVerificationSuccess(
                         isVerified,
-                        jwt,
-                        credentialManifestDescriptor,
-                        verifiedProfile,
+                        credentialManifest,
                         completionBlock
                     )
                 },
@@ -118,21 +149,18 @@ internal class CredentialManifestUseCaseImpl(
 
     private fun onVerificationSuccess(
         isVerified: Boolean,
-        jwt: VCLJwt,
-        credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        verifiedProfile: VCLVerifiedProfile,
+        credentialManifest: VCLCredentialManifest,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         if (isVerified) {
             executor.runOnMain {
-                completionBlock(VCLResult.Success(VCLCredentialManifest(
-                    jwt,
-                    credentialManifestDescriptor.vendorOriginContext,
-                    verifiedProfile
-                )))
+                completionBlock(VCLResult.Success(credentialManifest))
             }
         } else {
-            onError(VCLError("Failed to verify: $jwt"), completionBlock)
+            onError(
+                VCLError("Failed to verify credentialManifest jwt:\n${credentialManifest.jwt}"),
+                completionBlock
+            )
         }
     }
 

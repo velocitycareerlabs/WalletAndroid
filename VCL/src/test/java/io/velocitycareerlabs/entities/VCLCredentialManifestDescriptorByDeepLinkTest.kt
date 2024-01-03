@@ -9,6 +9,7 @@ package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorByDeepLink
 import io.velocitycareerlabs.api.entities.VCLIssuingType
+import io.velocitycareerlabs.api.entities.VCLPushDelegate
 import io.velocitycareerlabs.impl.extensions.decode
 import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestDescriptorMocks
@@ -29,7 +30,8 @@ internal class VCLCredentialManifestDescriptorByDeepLinkTest {
     fun testCredentialManifestDescriptorFullValidByDeepLinkSuccess() {
         subject = VCLCredentialManifestDescriptorByDeepLink(
             deepLink = CredentialManifestDescriptorMocks.DeepLink,
-            issuingType = VCLIssuingType.Career
+            issuingType = VCLIssuingType.Career,
+            pushDelegate = VCLPushDelegate(pushUrl = "some url", pushToken = "some token")
         )
 
         assert(
@@ -37,6 +39,8 @@ internal class VCLCredentialManifestDescriptorByDeepLinkTest {
                 ?.isUrlEquivalentTo(CredentialManifestDescriptorMocks.DeepLinkRequestUri.decode()) == true
         )
         assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
+        assert(subject.pushDelegate?.pushUrl == "some url")
+        assert(subject.pushDelegate?.pushToken == "some token")
     }
 
     @After

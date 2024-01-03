@@ -9,14 +9,17 @@ package io.velocitycareerlabs.usecases
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.GenerateOffersUseCaseImpl
+import io.velocitycareerlabs.impl.data.verifiers.OffersByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.domain.usecases.GenerateOffersUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CommonMocks
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.GenerateOffersMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.After
@@ -37,7 +40,8 @@ internal class GenerateOffersUseCaseTest {
             GenerateOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffers)
             ),
-            ExecutorImpl()
+            OffersByDeepLinkVerifierImpl(),
+            EmptyExecutor()
         )
 
         val generateOffersDescriptor = VCLGenerateOffersDescriptor(
@@ -71,7 +75,8 @@ internal class GenerateOffersUseCaseTest {
             GenerateOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffersEmptyJsonObj)
             ),
-            ExecutorImpl()
+            OffersByDeepLinkVerifierImpl(),
+            EmptyExecutor()
         )
 
         val generateOffersDescriptor = VCLGenerateOffersDescriptor(
@@ -88,7 +93,7 @@ internal class GenerateOffersUseCaseTest {
         ) {
             it.handleResult(
                 {offers ->
-                    assert(offers.all == "[]".toJsonArray())
+                    assert(offers.all == listOf<VCLOffer>())
                 },
                 {
                     assert(false) { "${it.toJsonObject()}" }
@@ -103,7 +108,8 @@ internal class GenerateOffersUseCaseTest {
             GenerateOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffersEmptyJsonArr)
             ),
-            ExecutorImpl()
+            OffersByDeepLinkVerifierImpl(),
+            EmptyExecutor()
         )
 
         val generateOffersDescriptor = VCLGenerateOffersDescriptor(
@@ -120,7 +126,7 @@ internal class GenerateOffersUseCaseTest {
         ) {
             it.handleResult(
                 { offers ->
-                    assert(offers.all == GenerateOffersMocks.GeneratedOffersEmptyJsonArr.toJsonArray())
+                    assert(offers.all == listOf<VCLOffer>())
                 },
                 {
                     assert(false) { "${it.toJsonObject()}" }

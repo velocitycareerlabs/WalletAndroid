@@ -5,18 +5,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.impl.data.utils
+package io.velocitycareerlabs.impl.data.verifiers
 
 import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
+import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLResult
-import io.velocitycareerlabs.impl.domain.utils.CredentialIssuerVerifier
+import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
 import io.velocitycareerlabs.impl.utils.VCLLog
 
 internal class CredentialIssuerVerifierEmptyImpl: CredentialIssuerVerifier {
     val TAG = CredentialIssuerVerifierEmptyImpl::class.java.simpleName
 
     override fun verifyCredentials(
-        jwtEncodedCredentials: List<String>,
+        jwtCredentials: List<VCLJwt>,
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {

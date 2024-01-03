@@ -20,6 +20,7 @@ import io.velocitycareerlabs.impl.extensions.toPublicJwk
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
+import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
 import org.junit.After
 import org.junit.Before
@@ -43,7 +44,7 @@ internal class JwtServiceUseCaseTest {
                 VCLJwtSignServiceLocalImpl(keyService),
                 VCLJwtVerifyServiceLocalImpl()
             ),
-            ExecutorImpl()
+            EmptyExecutor()
         )
     }
 
