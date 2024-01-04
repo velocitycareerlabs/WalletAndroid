@@ -26,18 +26,4 @@ class VCLCredentialManifestDescriptorByService(
         StringBuilder(super.toPropsString())
             .append("\nservice: ${service.toPropsString()}")
             .toString()
-
-    override val endpoint =  generateQueryParams()?.let { queryParams ->
-        uri?.appendQueryParams(queryParams)
-    } ?: uri
-
-    private fun generateQueryParams(): String? {
-        val pCredentialTypes = credentialTypes?.let { credTypes ->
-            credTypes.map { it.encode() }.joinToString(separator = "&") { "$KeyCredentialTypes=$it" } }
-        val pPushDelegate = pushDelegate?.let {
-            "$KeyPushDelegatePushUrl=${it.pushUrl.encode()}&" + "$KeyPushDelegatePushToken=${it.pushToken}"
-        }
-        val qParams = listOfNotNull(pCredentialTypes, pPushDelegate).filter { it.isNotBlank() }
-        return if(qParams.isNotEmpty()) qParams.joinToString("&") else null
-    }
 }
