@@ -7,9 +7,11 @@
 
 package io.velocitycareerlabs.api.entities
 
+import io.velocitycareerlabs.impl.extensions.appendQueryParams
+import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.extensions.getUrlSubPath
 
-open class VCLCredentialManifestDescriptor(
+abstract class VCLCredentialManifestDescriptor(
     val uri: String? = null,
     val issuingType: VCLIssuingType = VCLIssuingType.Career,
     val credentialTypes: List<String>? = null,
@@ -17,7 +19,21 @@ open class VCLCredentialManifestDescriptor(
     val vendorOriginContext: String? = null,
     val deepLink: VCLDeepLink? = null
 ) {
+    open val endpoint =  generateQueryParams()?.let { queryParams ->
+        uri?.appendQueryParams(queryParams)
+    } ?: uri
+
     val did = uri?.getUrlSubPath(KeyDidPrefix)
+
+    private fun generateQueryParams(): String? {
+        val pCredentialTypes = credentialTypes?.let { credTypes ->
+            credTypes.map { it.encode() }.joinToString(separator = "&") { "$KeyCredentialTypes=$it" } }
+        val pPushDelegate = pushDelegate?.let {
+            "$KeyPushDelegatePushUrl=${it.pushUrl.encode()}&" + "$KeyPushDelegatePushToken=${it.pushToken}"
+        }
+        val qParams = listOfNotNull(pCredentialTypes, pPushDelegate).filter { it.isNotBlank() }
+        return if(qParams.isNotEmpty()) qParams.joinToString("&") else null
+    }
 
     open fun toPropsString() =
         StringBuilder()
@@ -28,8 +44,6 @@ open class VCLCredentialManifestDescriptor(
             .append("\npushDelegate: , ${pushDelegate?.toPropsString()}")
             .append("\nvendorOriginContext: , $vendorOriginContext")
             .toString()
-
-    open val endpoint: String? get() =  uri
 
     companion object CodingKeys {
         const val KeyId = "id"
