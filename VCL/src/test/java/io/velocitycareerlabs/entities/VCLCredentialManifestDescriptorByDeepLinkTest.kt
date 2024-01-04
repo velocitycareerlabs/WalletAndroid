@@ -31,16 +31,17 @@ internal class VCLCredentialManifestDescriptorByDeepLinkTest {
         subject = VCLCredentialManifestDescriptorByDeepLink(
             deepLink = CredentialManifestDescriptorMocks.DeepLink,
             issuingType = VCLIssuingType.Career,
-            pushDelegate = VCLPushDelegate(pushUrl = "some url", pushToken = "some token")
+            pushDelegate = VCLPushDelegate(pushUrl = "some_url", pushToken = "some_token")
         )
 
         assert(
-            subject.endpoint?.decode()
-                ?.isUrlEquivalentTo(CredentialManifestDescriptorMocks.DeepLinkRequestUri.decode()) == true
+            subject.endpoint?.decode()?.isUrlEquivalentTo(
+                CredentialManifestDescriptorMocks.DeepLinkRequestUri.decode() + "&push_delegate.push_url=some_url&push_delegate.push_token=some_token"
+            ) == true
         )
         assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
-        assert(subject.pushDelegate?.pushUrl == "some url")
-        assert(subject.pushDelegate?.pushToken == "some token")
+        assert(subject.pushDelegate?.pushUrl == "some_url")
+        assert(subject.pushDelegate?.pushToken == "some_token")
     }
 
     @After

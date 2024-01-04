@@ -13,8 +13,8 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 33
-        versionName "1.23.0"
-        versionCode 119
+        versionName "1.23.1"
+        versionCode 120
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -217,9 +217,9 @@ repositories {
 dependencies {
     implementation 'androidx.core:core-ktx:1.9.0'
 
-    implementation "com.nimbusds:nimbus-jose-jwt:9.35"
+    implementation "com.nimbusds:nimbus-jose-jwt:9.37"
     //noinspection GradleDependency
-    implementation "androidx.security:security-crypto:1.0.0-rc03"
+    implementation "androidx.security:security-crypto:1.0.0"
 
     // Reflection
 //    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
