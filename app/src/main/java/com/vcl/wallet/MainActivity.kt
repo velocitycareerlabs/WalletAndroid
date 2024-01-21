@@ -146,7 +146,8 @@ class MainActivity : AppCompatActivity() {
     private fun submitPresentation(presentationRequest: VCLPresentationRequest) {
         val presentationSubmission = VCLPresentationSubmission(
             presentationRequest = presentationRequest,
-            verifiableCredentials = Constants.PresentationSelectionsList
+            verifiableCredentials = Constants.PresentationSelectionsList,
+            iss = didJwk?.did
         )
         submitPresentation(presentationSubmission)
     }
