@@ -26,30 +26,33 @@ class VCLSubmissionTest {
     private lateinit var subjectPresentationSubmission: VCLSubmission
     private lateinit var subjectIdentificationSubmission: VCLSubmission
 
+    private val issuingIss = "issuing iss"
+    private val inspectionIss = "inspection iss"
+
     @Before
     fun setUp() {
         subjectPresentationSubmission = VCLPresentationSubmission(
             PresentationSubmissionMocks.PresentationRequest,
-            PresentationSubmissionMocks.SelectionsList,
-            iss = "inspection iss"
+            PresentationSubmissionMocks.SelectionsList
         )
         subjectIdentificationSubmission = VCLIdentificationSubmission(
             VCLCredentialManifest(
                 jwt = CommonMocks.JWT,
                 verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
             ),
-            PresentationSubmissionMocks.SelectionsList,
-            iss = "issuing iss"
+            PresentationSubmissionMocks.SelectionsList
         )
     }
 
     @Test
     fun testPayload() {
-        assert(subjectPresentationSubmission.payload.optString(VCLSubmission.KeyJti) == subjectPresentationSubmission.jti)
-        assert(subjectPresentationSubmission.payload.optString(VCLSubmission.KeyIss) == subjectPresentationSubmission.iss)
+        val presentationSubmissionPayload = subjectPresentationSubmission.generatePayload(inspectionIss)
+        assert(presentationSubmissionPayload.optString(VCLSubmission.KeyJti) == subjectPresentationSubmission.jti)
+        assert(presentationSubmissionPayload.optString(VCLSubmission.KeyIss) == inspectionIss)
 
-        assert(subjectIdentificationSubmission.payload.optString(VCLSubmission.KeyJti) == subjectIdentificationSubmission.jti)
-        assert(subjectIdentificationSubmission.payload.optString(VCLSubmission.KeyIss) == subjectIdentificationSubmission.iss)
+        val identificationSubmissionPayload = subjectIdentificationSubmission.generatePayload(issuingIss)
+        assert(identificationSubmissionPayload.optString(VCLSubmission.KeyJti) == subjectIdentificationSubmission.jti)
+        assert(identificationSubmissionPayload.optString(VCLSubmission.KeyIss) == issuingIss)
     }
 
     @Test
