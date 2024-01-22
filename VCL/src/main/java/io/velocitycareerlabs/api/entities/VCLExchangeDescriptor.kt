@@ -13,7 +13,6 @@ data class VCLExchangeDescriptor(
     ) {
 
     val processUri: String get() = presentationSubmission.progressUri
-    val did: String get() = presentationSubmission.iss
     val exchangeId: String get() = submissionResult.exchange.id
     val sessionToken: VCLToken get() = submissionResult.sessionToken
 

@@ -370,8 +370,7 @@ internal class VCLImpl: VCL {
     ) {
         val identificationSubmission = VCLIdentificationSubmission(
             credentialManifest = generateOffersDescriptor.credentialManifest,
-            verifiableCredentials = generateOffersDescriptor.identificationVerifiableCredentials,
-            iss = didJwk?.did
+            verifiableCredentials = generateOffersDescriptor.identificationVerifiableCredentials
         )
         identificationSubmissionUseCase.submit(
             submission = identificationSubmission,
