@@ -13,7 +13,7 @@ import io.velocitycareerlabs.impl.extensions.encodeToBase64URL
 
 data class VCLDidJwk(
     /**
-     * The did in jwk format encoded to Base64 format
+     * The did in jwk format encoded to Base64 format - the holder did
      */
     val did: String,
     /**

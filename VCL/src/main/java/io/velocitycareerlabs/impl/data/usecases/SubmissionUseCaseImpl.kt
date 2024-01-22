@@ -29,9 +29,9 @@ internal class SubmissionUseCaseImpl(
                 kid = didJwk?.kid,
                 jwtDescriptor = VCLJwtDescriptor(
                     keyId = didJwk?.keyId,
-                    payload = submission.payload,
+                    payload = submission.generatePayload(didJwk?.did),
                     jti = submission.jti,
-                    iss = submission.iss
+                    iss = didJwk?.did ?: ""
                 ),
                 remoteCryptoServicesToken = remoteCryptoServicesToken,
                 completionBlock = { signedJwtResult ->
