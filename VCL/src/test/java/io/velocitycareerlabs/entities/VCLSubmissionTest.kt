@@ -7,42 +7,64 @@
 
 package io.velocitycareerlabs.entities
 
+import io.velocitycareerlabs.api.entities.VCLCredentialManifest
+import io.velocitycareerlabs.api.entities.VCLIdentificationSubmission
 import io.velocitycareerlabs.api.entities.VCLPresentationSubmission
 import io.velocitycareerlabs.api.entities.VCLPushDelegate
 import io.velocitycareerlabs.api.entities.VCLSubmission
+import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
+import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.extensions.toList
+import io.velocitycareerlabs.infrastructure.resources.CommonMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationSubmissionMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.Before
 import org.junit.Test
 
 class VCLSubmissionTest {
-    internal lateinit var subject: VCLSubmission
+    private lateinit var subjectPresentationSubmission: VCLSubmission
+    private lateinit var subjectIdentificationSubmission: VCLSubmission
+
+    private val issuingIss = "issuing iss"
+    private val inspectionIss = "inspection iss"
 
     @Before
     fun setUp() {
-        subject = VCLPresentationSubmission(
+        subjectPresentationSubmission = VCLPresentationSubmission(
             PresentationSubmissionMocks.PresentationRequest,
+            PresentationSubmissionMocks.SelectionsList
+        )
+        subjectIdentificationSubmission = VCLIdentificationSubmission(
+            VCLCredentialManifest(
+                jwt = CommonMocks.JWT,
+                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
+            ),
             PresentationSubmissionMocks.SelectionsList
         )
     }
 
     @Test
     fun testPayload() {
-        assert(subject.payload.optString(VCLSubmission.KeyJti) == subject.jti)
-        assert(subject.payload.optString(VCLSubmission.KeyIss) == subject.iss)
+        val presentationSubmissionPayload = subjectPresentationSubmission.generatePayload(inspectionIss)
+        assert(presentationSubmissionPayload.optString(VCLSubmission.KeyJti) == subjectPresentationSubmission.jti)
+        assert(presentationSubmissionPayload.optString(VCLSubmission.KeyIss) == inspectionIss)
+
+        val identificationSubmissionPayload = subjectIdentificationSubmission.generatePayload(issuingIss)
+        assert(identificationSubmissionPayload.optString(VCLSubmission.KeyJti) == subjectIdentificationSubmission.jti)
+        assert(identificationSubmissionPayload.optString(VCLSubmission.KeyIss) == issuingIss)
     }
 
     @Test
     fun testPushDelegate() {
-        assert(subject.pushDelegate!!.pushUrl == PresentationSubmissionMocks.PushDelegate.pushUrl)
-        assert(subject.pushDelegate!!.pushToken == PresentationSubmissionMocks.PushDelegate.pushToken)
+        assert(subjectPresentationSubmission.pushDelegate!!.pushUrl == PresentationSubmissionMocks.PushDelegate.pushUrl)
+        assert(subjectPresentationSubmission.pushDelegate!!.pushToken == PresentationSubmissionMocks.PushDelegate.pushToken)
     }
 
     @Test
     fun testRequestBody() {
-        val requestBodyJsonObj = subject.generateRequestBody(JwtServiceMocks.JWT)
-        assert(requestBodyJsonObj.optString(VCLSubmission.KeyExchangeId) == subject.exchangeId)
+        val requestBodyJsonObj = subjectPresentationSubmission.generateRequestBody(JwtServiceMocks.JWT)
+        assert(requestBodyJsonObj.optString(VCLSubmission.KeyExchangeId) == subjectPresentationSubmission.exchangeId)
         assert(requestBodyJsonObj.optJSONArray(VCLSubmission.KeyContext)!!.toList() == VCLSubmission.ValueContextList)
 
         val pushDelegateBodyJsonObj = requestBodyJsonObj.optJSONObject(VCLSubmission.KeyPushDelegate)!!
@@ -50,8 +72,8 @@ class VCLSubmissionTest {
         assert(pushDelegateBodyJsonObj.optString(VCLPushDelegate.KeyPushUrl) == PresentationSubmissionMocks.PushDelegate.pushUrl)
         assert(pushDelegateBodyJsonObj.optString(VCLPushDelegate.KeyPushToken) == PresentationSubmissionMocks.PushDelegate.pushToken)
 
-        assert(pushDelegateBodyJsonObj.optString(VCLPushDelegate.KeyPushUrl) == subject.pushDelegate!!.pushUrl)
-        assert(pushDelegateBodyJsonObj.optString(VCLPushDelegate.KeyPushToken) == subject.pushDelegate!!.pushToken)
+        assert(pushDelegateBodyJsonObj.optString(VCLPushDelegate.KeyPushUrl) == subjectPresentationSubmission.pushDelegate!!.pushUrl)
+        assert(pushDelegateBodyJsonObj.optString(VCLPushDelegate.KeyPushToken) == subjectPresentationSubmission.pushDelegate!!.pushToken)
     }
 
     @Test

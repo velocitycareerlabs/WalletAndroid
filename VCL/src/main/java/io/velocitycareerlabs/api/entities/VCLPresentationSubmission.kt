@@ -12,7 +12,6 @@ class VCLPresentationSubmission(
     verifiableCredentials: List<VCLVerifiableCredential>
 ) : VCLSubmission(
     submitUri = presentationRequest.submitPresentationUri,
-    iss = presentationRequest.iss,
     exchangeId = presentationRequest.exchangeId,
     presentationDefinitionId = presentationRequest.presentationDefinitionId,
     verifiableCredentials = verifiableCredentials,

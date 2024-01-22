@@ -12,7 +12,6 @@ class VCLIdentificationSubmission(
     verifiableCredentials: List<VCLVerifiableCredential>? = null
 ) : VCLSubmission(
     submitUri = credentialManifest.submitPresentationUri,
-    iss = credentialManifest.iss,
     exchangeId = credentialManifest.exchangeId,
     presentationDefinitionId = credentialManifest.presentationDefinitionId,
     verifiableCredentials = verifiableCredentials,

@@ -14,7 +14,6 @@ import java.util.*
 
 abstract class VCLSubmission(
     val submitUri: String,
-    val iss: String,
     val exchangeId: String,
     val presentationDefinitionId: String,
     val verifiableCredentials: List<VCLVerifiableCredential>? = null,
@@ -24,9 +23,7 @@ abstract class VCLSubmission(
     val jti = UUID.randomUUID().toString()
     val submissionId = UUID.randomUUID().toString()
 
-    val payload get() = generatePayload()
-
-    private fun generatePayload(): JSONObject {
+    internal fun generatePayload(iss: String?): JSONObject {
         val retVal = JSONObject()
         retVal.putOpt(VCLSubmission.KeyJti, jti)
             .putOpt(VCLSubmission.KeyIss, iss)
@@ -49,7 +46,7 @@ abstract class VCLSubmission(
         return retVal
     }
 
-    fun generateRequestBody(jwt: VCLJwt) = JSONObject()
+    fun generateRequestBody(jwt: VCLJwt): JSONObject = JSONObject()
         .putOpt(VCLSubmission.KeyExchangeId, exchangeId)
         .putOpt(VCLSubmission.KeyJwtVp, jwt.encodedJwt)
         .putOpt(VCLSubmission.KeyPushDelegate, pushDelegate?.toJsonObject())
