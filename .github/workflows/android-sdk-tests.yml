@@ -4,8 +4,7 @@ on:
   pull_request:
     branches:
       - main
-      - rc
-      - dev
+
 env:
   PACKAGE_TYPE: "aar"
   GRADLE_VERSION: "7.5"
