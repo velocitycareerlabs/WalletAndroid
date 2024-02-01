@@ -16,15 +16,21 @@ import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.json.JSONObject
+import org.junit.Before
 import org.junit.Test
 
 class ProfileServiceTypeVerifierTest {
 
-    internal lateinit var subject: ProfileServiceTypeVerifier
+    private lateinit var subject1: ProfileServiceTypeVerifier
+    private lateinit var subject2: ProfileServiceTypeVerifier
+    private lateinit var subject3: ProfileServiceTypeVerifier
+    private lateinit var subject4: ProfileServiceTypeVerifier
+    private lateinit var subject5: ProfileServiceTypeVerifier
+    private lateinit var subject6: ProfileServiceTypeVerifier
 
-    @Test
-    fun verificationSuccess1() {
-        subject = ProfileServiceTypeVerifier(
+    @Before
+    fun setUp() {
+        subject1 = ProfileServiceTypeVerifier(
             VerifiedProfileUseCaseImpl(
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
@@ -32,8 +38,50 @@ class ProfileServiceTypeVerifierTest {
                 ExecutorImpl()
             )
         )
-
-        subject.verifyServiceTypeOfVerifiedProfile(
+        subject2 = ProfileServiceTypeVerifier(
+            VerifiedProfileUseCaseImpl(
+                VerifiedProfileRepositoryImpl(
+                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileInspectorJsonStr)
+                ),
+                ExecutorImpl()
+            )
+        )
+        subject3 = ProfileServiceTypeVerifier(
+            VerifiedProfileUseCaseImpl(
+                VerifiedProfileRepositoryImpl(
+                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
+                ),
+                ExecutorImpl()
+            )
+        )
+        subject4 = ProfileServiceTypeVerifier(
+            VerifiedProfileUseCaseImpl(
+                VerifiedProfileRepositoryImpl(
+                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
+                ),
+                ExecutorImpl()
+            )
+        )
+        subject5 = ProfileServiceTypeVerifier(
+            VerifiedProfileUseCaseImpl(
+                VerifiedProfileRepositoryImpl(
+                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1)
+                ),
+                ExecutorImpl()
+            )
+        )
+        subject6 = ProfileServiceTypeVerifier(
+            VerifiedProfileUseCaseImpl(
+                VerifiedProfileRepositoryImpl(
+                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
+                ),
+                ExecutorImpl()
+            )
+        )
+    }
+    @Test
+    fun verificationSuccess1() {
+        subject1.verifyServiceTypeOfVerifiedProfile(
             verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(""),
             expectedServiceTypes = VCLServiceTypes(VCLIssuingType.Career),
             successHandler = {
@@ -47,16 +95,7 @@ class ProfileServiceTypeVerifierTest {
 
     @Test
     fun verificationSuccess2() {
-        subject = ProfileServiceTypeVerifier(
-            VerifiedProfileUseCaseImpl(
-                VerifiedProfileRepositoryImpl(
-                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileInspectorJsonStr)
-                ),
-                ExecutorImpl()
-            )
-        )
-
-        subject.verifyServiceTypeOfVerifiedProfile(
+        subject2.verifyServiceTypeOfVerifiedProfile(
             verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(""),
             expectedServiceTypes = VCLServiceTypes(VCLServiceType.Inspector),
             successHandler = {
@@ -70,16 +109,7 @@ class ProfileServiceTypeVerifierTest {
 
     @Test
     fun verificationSuccess3() {
-        subject = ProfileServiceTypeVerifier(
-            VerifiedProfileUseCaseImpl(
-                VerifiedProfileRepositoryImpl(
-                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
-                ),
-                ExecutorImpl()
-            )
-        )
-
-        subject.verifyServiceTypeOfVerifiedProfile(
+        subject3.verifyServiceTypeOfVerifiedProfile(
             verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(""),
             expectedServiceTypes = VCLServiceTypes(VCLIssuingType.Career),
             successHandler = {
@@ -93,16 +123,7 @@ class ProfileServiceTypeVerifierTest {
 
     @Test
     fun verificationFailure1() {
-        subject = ProfileServiceTypeVerifier(
-            VerifiedProfileUseCaseImpl(
-                VerifiedProfileRepositoryImpl(
-                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
-                ),
-                ExecutorImpl()
-            )
-        )
-
-        subject.verifyServiceTypeOfVerifiedProfile(
+        subject4.verifyServiceTypeOfVerifiedProfile(
             verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(""),
             expectedServiceTypes = VCLServiceTypes(VCLIssuingType.Identity),
             successHandler = {
@@ -117,16 +138,7 @@ class ProfileServiceTypeVerifierTest {
 
     @Test
     fun verificationFailure2() {
-        subject = ProfileServiceTypeVerifier(
-            VerifiedProfileUseCaseImpl(
-                VerifiedProfileRepositoryImpl(
-                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1)
-                ),
-                ExecutorImpl()
-            )
-        )
-
-        subject.verifyServiceTypeOfVerifiedProfile(
+        subject5.verifyServiceTypeOfVerifiedProfile(
             verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(""),
             expectedServiceTypes = VCLServiceTypes(VCLIssuingType.Identity),
             successHandler = {
@@ -141,16 +153,7 @@ class ProfileServiceTypeVerifierTest {
 
     @Test
     fun verificationFailure3() {
-        subject = ProfileServiceTypeVerifier(
-            VerifiedProfileUseCaseImpl(
-                VerifiedProfileRepositoryImpl(
-                    NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
-                ),
-                ExecutorImpl()
-            )
-        )
-
-        subject.verifyServiceTypeOfVerifiedProfile(
+        subject6.verifyServiceTypeOfVerifiedProfile(
             verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(""),
             expectedServiceTypes = VCLServiceTypes(VCLServiceType.Undefined),
             successHandler = {

@@ -250,7 +250,11 @@ internal class CredentialIssuerVerifierImpl(
                         ?: completeContext
                     findKeyForPrimaryOrganizationValue(activeContext)?.let { K ->
                         Utils.getIdentifier(K, credentialSubject)?.let { did ->
-                            if (jwtCredential.iss == did) {
+//                            Comparing issuer.id instead of iss
+//                            https://velocitycareerlabs.atlassian.net/browse/VL-6178?focusedCommentId=46933
+//                            https://velocitycareerlabs.atlassian.net/browse/VL-6988
+//                            if (jwtCredential.iss == did)
+                            if (Utils.getCredentialIssuerId(jwtCredential) == did) {
                                 isCredentialVerified = true
                             } else {
                                 globalError =
