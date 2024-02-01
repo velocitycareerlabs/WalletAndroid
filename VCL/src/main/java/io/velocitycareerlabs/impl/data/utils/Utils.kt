@@ -92,5 +92,11 @@ internal class Utils {
             }
             return allOffers
         }
+
+        fun getCredentialIssuerId(jwtCredential: VCLJwt): String? {
+            val vc: Map<*, *>? = jwtCredential.payload?.toJSONObject()?.get("vc") as? Map<*, *>
+            return (vc?.get("issuer") as? Map<*, *>)?.get("id") as? String
+                ?: vc?.get("issuer") as? String
+        }
     }
 }
