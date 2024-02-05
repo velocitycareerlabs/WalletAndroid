@@ -9,7 +9,7 @@ package io.velocitycareerlabs.api.entities
 
 class VCLPresentationSubmission(
     presentationRequest: VCLPresentationRequest,
-    verifiableCredentials: List<VCLVerifiableCredential>,
+    verifiableCredentials: List<VCLVerifiableCredential>
 ) : VCLSubmission(
     submitUri = presentationRequest.submitPresentationUri,
     exchangeId = presentationRequest.exchangeId,
