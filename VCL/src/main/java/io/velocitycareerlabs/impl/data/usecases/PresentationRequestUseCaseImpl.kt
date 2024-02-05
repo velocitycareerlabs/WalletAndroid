@@ -90,11 +90,12 @@ internal class PresentationRequestUseCaseImpl(
         jwtServiceRepository.verifyJwt(
             presentationRequest.jwt,
             presentationRequest.publicJwk,
+            presentationRequest.remoteCryptoServicesToken
         ) { jwtVerificationRes ->
             jwtVerificationRes.handleResult({
                 presentationRequestByDeepLinkVerifier.verifyPresentationRequest(
                     presentationRequest,
-                    presentationRequestDescriptor.deepLink
+                    presentationRequest.deepLink
                 ) { byDeepLinkVerificationRes ->
                     byDeepLinkVerificationRes.handleResult({ isVerified ->
                         VCLLog.d(TAG, "Presentation request by deep link verification result: $isVerified")
