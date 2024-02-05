@@ -206,7 +206,8 @@ class MainActivity : AppCompatActivity() {
         val credentialManifestDescriptorRefresh =
             VCLCredentialManifestDescriptorRefresh(
                 service = service,
-                credentialIds = Constants.CredentialIdsToRefresh
+                credentialIds = Constants.CredentialIdsToRefresh,
+                didJwk = this.didJwk
             )
         vcl.getCredentialManifest(credentialManifestDescriptorRefresh,
             successHandler = { credentialManifest ->
