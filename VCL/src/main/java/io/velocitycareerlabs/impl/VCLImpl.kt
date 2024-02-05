@@ -223,7 +223,6 @@ internal class VCLImpl: VCL {
 
     override fun getPresentationRequest(
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
-        remoteCryptoServicesToken: VCLToken?,
         successHandler: (VCLPresentationRequest) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
@@ -233,8 +232,7 @@ internal class VCLImpl: VCL {
                 expectedServiceTypes = VCLServiceTypes(VCLServiceType.Inspector),
                 successHandler = { _ ->
                     presentationRequestUseCase.getPresentationRequest(
-                        presentationRequestDescriptor,
-                        remoteCryptoServicesToken
+                        presentationRequestDescriptor
                     ) { presentationRequestResult ->
                         presentationRequestResult.handleResult(
                             {
@@ -262,15 +260,11 @@ internal class VCLImpl: VCL {
 
     override fun submitPresentation(
         presentationSubmission: VCLPresentationSubmission,
-        didJwk: VCLDidJwk?,
-        remoteCryptoServicesToken: VCLToken?,
         successHandler: (VCLSubmissionResult) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         presentationSubmissionUseCase.submit(
-            submission = presentationSubmission,
-            didJwk = didJwk,
-            remoteCryptoServicesToken = remoteCryptoServicesToken
+            submission = presentationSubmission
         ) { presentationSubmissionResult ->
             presentationSubmissionResult.handleResult(
                 {
@@ -322,7 +316,6 @@ internal class VCLImpl: VCL {
 
     override fun getCredentialManifest(
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        remoteCryptoServicesToken: VCLToken?,
         successHandler: (VCLCredentialManifest) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
@@ -334,8 +327,7 @@ internal class VCLImpl: VCL {
                 successHandler = { verifiedProfile ->
                     credentialManifestUseCase.getCredentialManifest(
                         credentialManifestDescriptor,
-                        verifiedProfile,
-                        remoteCryptoServicesToken
+                        verifiedProfile
                     ) { credentialManifest ->
                         credentialManifest.handleResult(
                             {
@@ -363,8 +355,6 @@ internal class VCLImpl: VCL {
 
     override fun generateOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        didJwk: VCLDidJwk?,
-        remoteCryptoServicesToken: VCLToken?,
         successHandler: (VCLOffers) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
@@ -373,9 +363,7 @@ internal class VCLImpl: VCL {
             verifiableCredentials = generateOffersDescriptor.identificationVerifiableCredentials
         )
         identificationSubmissionUseCase.submit(
-            submission = identificationSubmission,
-            didJwk = didJwk,
-            remoteCryptoServicesToken = remoteCryptoServicesToken
+            submission = identificationSubmission
         ) { identificationSubmissionResult ->
             identificationSubmissionResult.handleResult(
                 { identificationSubmission ->
@@ -432,17 +420,13 @@ internal class VCLImpl: VCL {
 
     override fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
-        didJwk: VCLDidJwk?,
         sessionToken: VCLToken,
-        remoteCryptoServicesToken: VCLToken?,
         successHandler: (VCLJwtVerifiableCredentials) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         finalizeOffersUseCase.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptor,
-            didJwk = didJwk,
-            sessionToken = sessionToken,
-            remoteCryptoServicesToken = remoteCryptoServicesToken
+            sessionToken = sessionToken
         ) { jwtVerifiableCredentials ->
             jwtVerifiableCredentials.handleResult(
                 {

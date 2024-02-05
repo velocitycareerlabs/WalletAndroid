@@ -41,9 +41,18 @@ import org.skyscreamer.jsonassert.JSONCompareMode
 internal class CredentialManifestUseCaseTest {
 
     lateinit var subject: CredentialManifestUseCase
+    private lateinit var didJwk: VCLDidJwk
+    private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
 
     @Before
     fun setUp() {
+        keyService.generateDidJwk(null) { didJwkResult ->
+            didJwkResult.handleResult({
+                didJwk = it
+            }, {
+                assert(false) { "Failed to generate did:jwk $it" }
+            })
+        }
     }
 
     @Test
@@ -67,10 +76,11 @@ internal class CredentialManifestUseCaseTest {
         subject.getCredentialManifest(
             credentialManifestDescriptor = VCLCredentialManifestDescriptorByDeepLink(
                 deepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet,
-                issuingType = VCLIssuingType.Career
+                issuingType = VCLIssuingType.Career,
+                didJwk = didJwk,
+                remoteCryptoServicesToken = VCLToken("some token")
             ),
-            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!),
-            remoteCryptoServicesToken = null
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
         ) {
             it.handleResult(
                 { credentialManifest ->
@@ -91,6 +101,8 @@ internal class CredentialManifestUseCaseTest {
                                     .sort().toString()
                     ) //removed $ to compare
                     assert(credentialManifest.jwt.signature.toString() == CredentialManifestMocks.Signature)
+                    assert(credentialManifest.didJwk?.did == this.didJwk.did)
+                    assert(credentialManifest.remoteCryptoServicesToken?.value == "some token")
                 },
                 {
                     assert(false) { "${it.toJsonObject()}" }
@@ -122,8 +134,7 @@ internal class CredentialManifestUseCaseTest {
                 deepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet,
                 issuingType = VCLIssuingType.Career
             ),
-            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!),
-            remoteCryptoServicesToken = null
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
         ) {
             it.handleResult(
                 successHandler = {

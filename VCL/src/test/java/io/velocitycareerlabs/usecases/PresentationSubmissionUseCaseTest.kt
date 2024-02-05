@@ -77,9 +77,7 @@ internal class PresentationSubmissionUseCaseTest {
             )
 
         subject.submit(
-            submission = presentationSubmission,
-            didJwk = didJwk,
-            remoteCryptoServicesToken = null
+            submission = presentationSubmission
         ) {
             it.handleResult(
                 { presentationSubmissionResult ->

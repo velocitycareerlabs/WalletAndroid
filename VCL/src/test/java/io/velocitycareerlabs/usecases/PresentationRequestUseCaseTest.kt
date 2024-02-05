@@ -26,6 +26,7 @@ import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestMocks
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -36,6 +37,19 @@ import org.robolectric.annotation.Config
 internal class PresentationRequestUseCaseTest {
 
     lateinit var subject: PresentationRequestUseCase
+    private lateinit var didJwk: VCLDidJwk
+    private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
+
+    @Before
+    fun setUp() {
+        keyService.generateDidJwk(null) { didJwkResult ->
+            didJwkResult.handleResult({
+                didJwk = it
+            }, {
+                assert(false) { "Failed to generate did:jwk $it" }
+            })
+        }
+    }
 
     @Test
     fun testGetPresentationRequestSuccess() {
@@ -62,9 +76,10 @@ internal class PresentationRequestUseCaseTest {
                 pushDelegate = VCLPushDelegate(
                     pushUrl = pushUrl,
                     pushToken = pushToken
-                )
-            ),
-            null
+                ),
+                didJwk = didJwk,
+                remoteCryptoServicesToken = VCLToken("some token")
+            )
         ) {
             it.handleResult(
                 successHandler = { presentationRequest ->
@@ -87,6 +102,8 @@ internal class PresentationRequestUseCaseTest {
                     )
                     assert(presentationRequest.pushDelegate!!.pushUrl == pushUrl)
                     assert(presentationRequest.pushDelegate!!.pushToken == pushToken)
+                    assert(presentationRequest.didJwk?.did == this.didJwk.did)
+                    assert(presentationRequest.remoteCryptoServicesToken?.value == "some token")
                 },
                 errorHandler = {
                     assert(false) { "${it.toJsonObject()}" }
@@ -115,8 +132,7 @@ internal class PresentationRequestUseCaseTest {
         subject.getPresentationRequest(
             presentationRequestDescriptor = VCLPresentationRequestDescriptor(
                 deepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet
-            ),
-            null
+            )
         ) {
             it.handleResult(
                 successHandler = {

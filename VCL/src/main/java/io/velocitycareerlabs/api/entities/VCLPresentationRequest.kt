@@ -11,7 +11,9 @@ data class VCLPresentationRequest(
     val jwt: VCLJwt,
     val publicJwk: VCLPublicJwk,
     val deepLink: VCLDeepLink,
-    val pushDelegate: VCLPushDelegate? = null
+    val pushDelegate: VCLPushDelegate? = null,
+    val didJwk: VCLDidJwk? = null,
+    val remoteCryptoServicesToken: VCLToken? = null
     ) {
     companion object CodingKeys {
         const val KeyId = "id"

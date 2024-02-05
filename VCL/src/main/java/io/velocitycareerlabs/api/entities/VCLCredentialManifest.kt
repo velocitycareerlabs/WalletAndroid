@@ -11,7 +11,9 @@ data class VCLCredentialManifest(
     val jwt: VCLJwt,
     val vendorOriginContext: String? = null,
     val verifiedProfile: VCLVerifiedProfile,
-    val deepLink: VCLDeepLink? = null
+    val deepLink: VCLDeepLink? = null,
+    val didJwk: VCLDidJwk? = null,
+    val remoteCryptoServicesToken: VCLToken? = null
 ) {
     val iss: String get() = jwt.payload?.toJSONObject()?.get(KeyIss) as? String ?: ""
     val did: String get() = iss

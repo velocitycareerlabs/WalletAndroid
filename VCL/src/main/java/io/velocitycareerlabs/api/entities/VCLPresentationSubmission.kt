@@ -9,14 +9,16 @@ package io.velocitycareerlabs.api.entities
 
 class VCLPresentationSubmission(
     presentationRequest: VCLPresentationRequest,
-    verifiableCredentials: List<VCLVerifiableCredential>
+    verifiableCredentials: List<VCLVerifiableCredential>,
 ) : VCLSubmission(
     submitUri = presentationRequest.submitPresentationUri,
     exchangeId = presentationRequest.exchangeId,
     presentationDefinitionId = presentationRequest.presentationDefinitionId,
     verifiableCredentials = verifiableCredentials,
     pushDelegate = presentationRequest.pushDelegate,
-    vendorOriginContext = presentationRequest.vendorOriginContext
+    vendorOriginContext = presentationRequest.vendorOriginContext,
+    didJwk = presentationRequest.didJwk,
+    remoteCryptoServicesToken = presentationRequest.remoteCryptoServicesToken
 ) {
     val progressUri = presentationRequest.progressUri
 }

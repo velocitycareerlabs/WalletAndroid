@@ -47,7 +47,6 @@ internal class FinalizeOffersUseCaseTest {
 
     lateinit var subject: FinalizeOffersUseCase
 
-    private lateinit var didJwk: VCLDidJwk
     private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
     private lateinit var credentialManifestFailed: VCLCredentialManifest
     private lateinit var credentialManifestPassed: VCLCredentialManifest
@@ -62,13 +61,6 @@ internal class FinalizeOffersUseCaseTest {
 
     @Before
     fun setUp() {
-        keyService.generateDidJwk(null) { didJwkResult ->
-            didJwkResult.handleResult({
-                didJwk = it
-            }, {
-                assert(false) { "Failed to generate did:jwk $it" }
-            })
-        }
         val generateOffersDescriptor = VCLGenerateOffersDescriptor(
             credentialManifest = VCLCredentialManifest(
                 jwt = CommonMocks.JWT,
@@ -144,9 +136,7 @@ internal class FinalizeOffersUseCaseTest {
 
         subject.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorFailed,
-            didJwk = didJwk,
-            sessionToken = VCLToken(value = ""),
-            remoteCryptoServicesToken = null
+            sessionToken = VCLToken(value = "")
         ) {
             it.handleResult(
                 successHandler = { finalizeOffers ->
@@ -193,9 +183,7 @@ internal class FinalizeOffersUseCaseTest {
 
         subject.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
-            didJwk = didJwk,
             sessionToken = VCLToken(value = ""),
-            remoteCryptoServicesToken = null
         ) {
             it.handleResult(
                 successHandler = { finalizeOffers ->
@@ -243,9 +231,7 @@ internal class FinalizeOffersUseCaseTest {
 
         subject.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
-            didJwk = didJwk,
-            sessionToken = VCLToken(value = ""),
-            remoteCryptoServicesToken = null
+            sessionToken = VCLToken(value = "")
         ) {
             it.handleResult(
                 successHandler = { finalizeOffers ->
@@ -282,9 +268,7 @@ internal class FinalizeOffersUseCaseTest {
 
         subject.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
-            didJwk = didJwk,
-            sessionToken = VCLToken(value = ""),
-            remoteCryptoServicesToken = null
+            sessionToken = VCLToken(value = "")
         ) {
             it.handleResult(
                 successHandler = {

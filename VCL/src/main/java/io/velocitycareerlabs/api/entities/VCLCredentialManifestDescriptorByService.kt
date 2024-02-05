@@ -15,12 +15,16 @@ class VCLCredentialManifestDescriptorByService(
     val service: VCLService, // for log
     issuingType: VCLIssuingType = VCLIssuingType.Career,
     credentialTypes: List<String>? = null,
-    pushDelegate: VCLPushDelegate? = null
+    pushDelegate: VCLPushDelegate? = null,
+    didJwk: VCLDidJwk? = null,
+    remoteCryptoServicesToken: VCLToken? = null
 ): VCLCredentialManifestDescriptor(
     uri = service.serviceEndpoint,
     issuingType = issuingType,
     credentialTypes = credentialTypes,
-    pushDelegate = pushDelegate
+    pushDelegate = pushDelegate,
+    didJwk = didJwk,
+    remoteCryptoServicesToken = remoteCryptoServicesToken
 ) {
     override fun toPropsString() =
         StringBuilder(super.toPropsString())

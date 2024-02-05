@@ -31,7 +31,6 @@ internal class CredentialManifestUseCaseImpl(
     override fun getCredentialManifest(
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
         verifiedProfile: VCLVerifiedProfile,
-        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         executor.runOnBackground {
@@ -43,12 +42,13 @@ internal class CredentialManifestUseCaseImpl(
                         try {
                             onGetCredentialManifestSuccess(
                                 VCLCredentialManifest(
-                                    VCLJwt(jwtStr),
-                                    credentialManifestDescriptor.vendorOriginContext,
-                                    verifiedProfile,
-                                    credentialManifestDescriptor.deepLink
+                                    jwt = VCLJwt(jwtStr),
+                                    vendorOriginContext = credentialManifestDescriptor.vendorOriginContext,
+                                    verifiedProfile = verifiedProfile,
+                                    deepLink = credentialManifestDescriptor.deepLink,
+                                    didJwk = credentialManifestDescriptor.didJwk,
+                                    remoteCryptoServicesToken = credentialManifestDescriptor.remoteCryptoServicesToken
                                 ),
-                                remoteCryptoServicesToken,
                                 completionBlock
                             )
                         } catch (ex: Exception) {
@@ -65,7 +65,6 @@ internal class CredentialManifestUseCaseImpl(
 
     private fun onGetCredentialManifestSuccess(
         credentialManifest: VCLCredentialManifest,
-        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         credentialManifest.deepLink?.let { deepLink ->
@@ -75,7 +74,6 @@ internal class CredentialManifestUseCaseImpl(
                         VCLLog.d(TAG, "Credential manifest deep link verification result: $isVerified")
                         onCredentialManifestDidVerificationSuccess(
                             credentialManifest,
-                            remoteCryptoServicesToken,
                             completionBlock
                         )
                     },
@@ -88,7 +86,6 @@ internal class CredentialManifestUseCaseImpl(
             VCLLog.d(TAG, "Deep link was not provided => nothing to verify")
             onCredentialManifestDidVerificationSuccess(
                 credentialManifest,
-                remoteCryptoServicesToken,
                 completionBlock
             )
         }
@@ -96,7 +93,6 @@ internal class CredentialManifestUseCaseImpl(
 
     private fun onCredentialManifestDidVerificationSuccess(
         credentialManifest: VCLCredentialManifest,
-        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         credentialManifest.jwt.kid?.replace("#", "#".encode())?.let { kid ->
@@ -106,7 +102,6 @@ internal class CredentialManifestUseCaseImpl(
                         onResolvePublicKeySuccess(
                             publicKey,
                             credentialManifest,
-                            remoteCryptoServicesToken,
                             completionBlock
                         )
                     },
@@ -123,13 +118,12 @@ internal class CredentialManifestUseCaseImpl(
     private fun onResolvePublicKeySuccess(
         publicJwk: VCLPublicJwk,
         credentialManifest: VCLCredentialManifest,
-        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
         jwtServiceRepository.verifyJwt(
             credentialManifest.jwt,
             publicJwk,
-            remoteCryptoServicesToken
+            credentialManifest.remoteCryptoServicesToken
         )
         { verificationResult ->
             verificationResult.handleResult(

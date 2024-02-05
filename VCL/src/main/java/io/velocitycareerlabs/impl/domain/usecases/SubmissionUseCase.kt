@@ -16,8 +16,6 @@ import io.velocitycareerlabs.api.entities.VCLToken
 internal interface SubmissionUseCase {
     fun submit(
         submission: VCLSubmission,
-        didJwk: VCLDidJwk? = null,
-        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     )
 }
