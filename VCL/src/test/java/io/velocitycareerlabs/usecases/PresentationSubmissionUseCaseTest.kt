@@ -35,20 +35,7 @@ import org.robolectric.annotation.Config
 internal class PresentationSubmissionUseCaseTest {
 
     lateinit var subject: PresentationSubmissionUseCase
-
-    private lateinit var didJwk: VCLDidJwk
     private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
-
-    @Before
-    fun setUp() {
-        keyService.generateDidJwk(null) { didJwkResult ->
-            didJwkResult.handleResult({
-                    didJwk = it
-                }, {
-                    assert(false) { "Failed to generate did:jwk $it" }
-            })
-        }
-    }
 
     @Test
     fun testSubmitPresentationSuccess() {
