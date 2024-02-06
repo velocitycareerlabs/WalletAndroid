@@ -16,6 +16,7 @@ import io.velocitycareerlabs.impl.jwt.remote.VCLJwtSignServiceRemoteImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
+import junit.framework.TestCase.assertEquals
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
@@ -63,6 +64,7 @@ internal class VCLJwtSignServiceTest {
         val payload = payloadToSign.optJSONObject("payload")
 
         assert(header?.optString("kid") == didJwk.kid)
+        assertEquals(header?.optJSONObject("jwk"), didJwk.publicJwk.valueJson)
 
         assert(options?.optString("keyId") == didJwk.keyId)
 

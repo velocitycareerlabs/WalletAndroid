@@ -76,9 +76,10 @@ internal class VCLJwtSignServiceRemoteImpl(
         val payload = jwtDescriptor.payload?.copy() ?: JSONObject()
 
 //        HeaderValues.XVnfProtocolVersion == VCLXVnfProtocolVersion.XVnfProtocolVersion1
-        header.putOpt(KeyJwk, didJwk.publicJwk)
+        header.putOpt(KeyJwk, didJwk.publicJwk.valueJson)
 //        HeaderValues.XVnfProtocolVersion == VCLXVnfProtocolVersion.XVnfProtocolVersion2
         header.putOpt(KeyKid, didJwk.kid)
+
         options.putOpt(KeyKeyId, didJwk.keyId)
 
         payload.putOpt(KeyNonce, nonce)
