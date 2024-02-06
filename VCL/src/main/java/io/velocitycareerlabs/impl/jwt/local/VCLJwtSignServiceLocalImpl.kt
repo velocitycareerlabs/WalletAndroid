@@ -14,8 +14,10 @@ import com.nimbusds.jose.crypto.ECDSASigner
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
+import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.error.VCLError
@@ -33,19 +35,20 @@ class VCLJwtSignServiceLocalImpl(
     private val keyService: VCLKeyService
 ): VCLJwtSignService {
     override fun sign(
-        kid: String?,
+        didJwk: VCLDidJwk,
         nonce: String?,
         jwtDescriptor: VCLJwtDescriptor,
         remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
-        getSecretReference(jwtDescriptor.keyId) { ecKeyResult ->
+        getSecretReference(didJwk.keyId) { ecKeyResult ->
             ecKeyResult.handleResult(
                 successHandler = { ecKey ->
                     try {
                         val header = JWSHeader.Builder(JWSAlgorithm.ES256K)
                             .type(JOSEObjectType(GlobalConfig.TypeJwt))
-                        kid?.let { header.keyID(it) } ?: run { header.jwk(ecKey.toPublicJWK()) }
+                            .jwk(ecKey.toPublicJWK()) // always provide
+                            .keyID(didJwk.kid) // always provide
                         val jwtHeader = header.build()
 
                         val signedJWT = SignedJWT(

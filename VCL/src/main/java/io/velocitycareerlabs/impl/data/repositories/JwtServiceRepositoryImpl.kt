@@ -48,14 +48,14 @@ internal class JwtServiceRepositoryImpl(
     }
 
     override fun generateSignedJwt(
-        kid: String?, // did:jwk in case of person binding
+        didJwk: VCLDidJwk,
         nonce: String?, // nonce == challenge
         jwtDescriptor: VCLJwtDescriptor,
         remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
         jwtSignService.sign(
-            kid = kid,
+            didJwk = didJwk,
             nonce = nonce,
             jwtDescriptor = jwtDescriptor,
             remoteCryptoServicesToken = remoteCryptoServicesToken,

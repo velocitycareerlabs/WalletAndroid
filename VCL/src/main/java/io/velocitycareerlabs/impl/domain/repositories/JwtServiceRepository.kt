@@ -21,7 +21,7 @@ internal interface JwtServiceRepository {
         completionBlock: (VCLResult<Boolean>) -> Unit
     )
     fun generateSignedJwt(
-        kid: String? = null,
+        didJwk: VCLDidJwk,
         nonce: String? = null,
         jwtDescriptor: VCLJwtDescriptor,
         remoteCryptoServicesToken: VCLToken? = null,

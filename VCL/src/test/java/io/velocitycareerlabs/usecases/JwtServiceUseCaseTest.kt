@@ -34,11 +34,19 @@ import org.robolectric.annotation.Config
 internal class JwtServiceUseCaseTest {
 
     lateinit var subject: JwtServiceUseCase
-    lateinit var keyService: VCLKeyService
+    private lateinit var didJwk: VCLDidJwk
+    private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
 
     @Before
     fun setUp() {
-        keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
+        keyService.generateDidJwk(null) { didJwkResult ->
+            didJwkResult.handleResult({
+                didJwk = it
+            }, {
+                assert(false) { "Failed to generate did:jwk $it" }
+            })
+        }
+
         subject = JwtServiceUseCaseImpl(
             JwtServiceRepositoryImpl(
                 VCLJwtSignServiceLocalImpl(keyService),
@@ -51,6 +59,7 @@ internal class JwtServiceUseCaseTest {
     @Test
     fun testSign() {
         subject.generateSignedJwt(
+            didJwk = didJwk,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = JwtServiceMocks.Json.toJsonObject()!!,
                 jti = "some jti",
@@ -74,6 +83,7 @@ internal class JwtServiceUseCaseTest {
     @Test
     fun testSignVerify() {
         subject.generateSignedJwt(
+            didJwk = didJwk,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = JwtServiceMocks.Json.toJsonObject()!!,
                 jti = "some jti",
@@ -110,10 +120,9 @@ internal class JwtServiceUseCaseTest {
         keyService.generateDidJwk(null) { didJwkResult ->
             didJwkResult.handleResult({ didJwk ->
                 subject.generateSignedJwt(
-                    kid = didJwk.kid,
+                    didJwk = didJwk,
                     nonce = "some nonce",
                     jwtDescriptor = VCLJwtDescriptor(
-                        keyId = didJwk.keyId,
                         payload = JwtServiceMocks.Json.toJsonObject()!!,
                         jti = "some jti",
                         iss = "some iss"

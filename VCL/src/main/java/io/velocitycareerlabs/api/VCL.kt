@@ -33,7 +33,7 @@ interface VCL {
 
     fun submitPresentation(
         presentationSubmission: VCLPresentationSubmission,
-        didJwk: VCLDidJwk? = null,
+        didJwk: VCLDidJwk,
         remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLSubmissionResult) -> Unit,
         errorHandler: (VCLError) -> Unit
@@ -60,7 +60,7 @@ interface VCL {
 
     fun generateOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        didJwk: VCLDidJwk? = null,
+        didJwk: VCLDidJwk,
         remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLOffers) -> Unit,
         errorHandler: (VCLError) -> Unit
@@ -75,7 +75,7 @@ interface VCL {
 
     fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
-        didJwk: VCLDidJwk? = null,
+        didJwk: VCLDidJwk,
         sessionToken: VCLToken,
         remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLJwtVerifiableCredentials) -> Unit,
@@ -103,6 +103,7 @@ interface VCL {
     )
 
     fun generateSignedJwt(
+        didJwk: VCLDidJwk,
         jwtDescriptor: VCLJwtDescriptor,
         remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLJwt) -> Unit,

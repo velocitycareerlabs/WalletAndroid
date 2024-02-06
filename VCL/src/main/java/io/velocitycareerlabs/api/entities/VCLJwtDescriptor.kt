@@ -12,10 +12,6 @@ import java.util.UUID
 
 data class VCLJwtDescriptor(
     /**
-     * The Id of the existing private key to sign with
-     */
-    val keyId: String? = null,
-    /**
      * Json formatted payload
      */
     val payload: JSONObject? = null,

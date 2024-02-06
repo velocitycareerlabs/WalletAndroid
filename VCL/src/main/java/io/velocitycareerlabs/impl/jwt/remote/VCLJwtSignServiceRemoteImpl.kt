@@ -7,8 +7,10 @@
 
 package io.velocitycareerlabs.impl.jwt.remote
 
+import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
+import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.error.VCLError
@@ -27,7 +29,7 @@ internal class VCLJwtSignServiceRemoteImpl(
     private val jwtSignServiceUrl: String
 ): VCLJwtSignService {
     override fun sign(
-        kid: String?,
+        didJwk: VCLDidJwk,
         nonce: String?,
         jwtDescriptor: VCLJwtDescriptor,
         remoteCryptoServicesToken: VCLToken?,
@@ -35,7 +37,7 @@ internal class VCLJwtSignServiceRemoteImpl(
     ) {
         networkService.sendRequest(
             endpoint = jwtSignServiceUrl,
-            body = generateJwtPayloadToSign(kid, nonce, jwtDescriptor).toString(),
+            body = generateJwtPayloadToSign(didJwk, nonce, jwtDescriptor).toString(),
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.POST,
             headers = listOf(
@@ -64,7 +66,7 @@ internal class VCLJwtSignServiceRemoteImpl(
     }
 
     internal fun generateJwtPayloadToSign(
-        kid: String?,
+        didJwk: VCLDidJwk,
         nonce: String?,
         jwtDescriptor: VCLJwtDescriptor
     ): JSONObject {
@@ -73,11 +75,11 @@ internal class VCLJwtSignServiceRemoteImpl(
         val options = JSONObject()
         val payload = jwtDescriptor.payload?.copy() ?: JSONObject()
 
-//        Base assumption:
+//        HeaderValues.XVnfProtocolVersion == VCLXVnfProtocolVersion.XVnfProtocolVersion1
+        header.putOpt(KeyJwk, didJwk.publicJwk)
 //        HeaderValues.XVnfProtocolVersion == VCLXVnfProtocolVersion.XVnfProtocolVersion2
-        header.putOpt(KeyKid, kid)
-
-        options.putOpt(KeyKeyId, jwtDescriptor.keyId)
+        header.putOpt(KeyKid, didJwk.kid)
+        options.putOpt(KeyKeyId, didJwk.keyId)
 
         payload.putOpt(KeyNonce, nonce)
         payload.putOpt(KeyAud, jwtDescriptor.aud)
@@ -94,6 +96,7 @@ internal class VCLJwtSignServiceRemoteImpl(
     companion object CodingKeys {
         const val KeyKeyId = "keyId"
         const val KeyKid = "kid"
+        const val KeyJwk = "jwk"
         const val KeyIss = "iss"
         const val KeyAud = "aud"
         const val KeyJti = "jti"
