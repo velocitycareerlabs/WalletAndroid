@@ -9,6 +9,7 @@ package io.velocitycareerlabs.entities
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.VCLCredentialManifest
+import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
@@ -36,6 +37,9 @@ import org.robolectric.annotation.Config
 class VCLFinalizeOffersDescriptorTest {
     lateinit var subject: VCLFinalizeOffersDescriptor
 
+    private lateinit var didJwk: VCLDidJwk
+    private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
+
     private val offers = VCLOffers(
         payload = JSONObject(),
         all = listOf(),
@@ -54,6 +58,14 @@ class VCLFinalizeOffersDescriptorTest {
 
     @Before
     fun setUp() {
+        keyService.generateDidJwk(null) { didJwkResult ->
+            didJwkResult.handleResult({
+                didJwk = it
+            }, {
+                assert(false) { "Failed to generate did:jwk $it" }
+            })
+        }
+
         val credentialManifest =
             VCLCredentialManifest(
                 jwt = VCLJwt(encodedJwt = CredentialManifestMocks.JwtCredentialManifest1),
@@ -72,6 +84,7 @@ class VCLFinalizeOffersDescriptorTest {
     fun testGenerateRequestBody() {
         val payload = "{\"key1\": \"value1\"}".toJsonObject()
         VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)).sign(
+            didJwk = didJwk,
             nonce = nonceMock,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payload,

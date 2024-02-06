@@ -10,7 +10,6 @@ package io.velocitycareerlabs.usecases
 import android.os.Build
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
-import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.CredentialManifestRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl

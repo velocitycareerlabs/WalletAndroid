@@ -262,7 +262,7 @@ internal class VCLImpl: VCL {
 
     override fun submitPresentation(
         presentationSubmission: VCLPresentationSubmission,
-        didJwk: VCLDidJwk?,
+        didJwk: VCLDidJwk,
         remoteCryptoServicesToken: VCLToken?,
         successHandler: (VCLSubmissionResult) -> Unit,
         errorHandler: (VCLError) -> Unit
@@ -363,7 +363,7 @@ internal class VCLImpl: VCL {
 
     override fun generateOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        didJwk: VCLDidJwk?,
+        didJwk: VCLDidJwk,
         remoteCryptoServicesToken: VCLToken?,
         successHandler: (VCLOffers) -> Unit,
         errorHandler: (VCLError) -> Unit
@@ -432,7 +432,7 @@ internal class VCLImpl: VCL {
 
     override fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
-        didJwk: VCLDidJwk?,
+        didJwk: VCLDidJwk,
         sessionToken: VCLToken,
         remoteCryptoServicesToken: VCLToken?,
         successHandler: (VCLJwtVerifiableCredentials) -> Unit,
@@ -526,12 +526,14 @@ internal class VCLImpl: VCL {
     }
 
     override fun generateSignedJwt(
+        didJwk: VCLDidJwk,
         jwtDescriptor: VCLJwtDescriptor,
         remoteCryptoServicesToken: VCLToken?,
         successHandler: (VCLJwt) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         jwtServiceUseCase.generateSignedJwt(
+            didJwk = didJwk,
             jwtDescriptor = jwtDescriptor,
             remoteCryptoServicesToken = remoteCryptoServicesToken
         ) { jwtResult ->

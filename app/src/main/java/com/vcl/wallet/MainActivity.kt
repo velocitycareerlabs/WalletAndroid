@@ -12,12 +12,17 @@ import android.util.Log
 import androidx.core.view.isVisible
 import com.vcl.wallet.databinding.ActivityMainBinding
 import io.velocitycareerlabs.api.VCL
+import io.velocitycareerlabs.api.VCLCryptoServiceType
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCLProvider
 import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescriptor
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
+import io.velocitycareerlabs.api.entities.initialization.VCLJwtServiceUrls
+import io.velocitycareerlabs.api.entities.initialization.VCLKeyServiceUrls
+import io.velocitycareerlabs.api.entities.initialization.VCLRemoteCryptoServicesUrlsDescriptor
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
@@ -28,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
     private val environment = VCLEnvironment.Dev
     private lateinit var vcl: VCL
-    private var didJwk: VCLDidJwk? = null
+    private lateinit var didJwk: VCLDidJwk
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -390,8 +395,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun generateSignedJwt() {
         vcl.generateSignedJwt(
-            VCLJwtDescriptor(
-                keyId = didJwk?.keyId,
+            didJwk = didJwk,
+            jwtDescriptor =  VCLJwtDescriptor(
                 payload = Constants.SomePayload,
                 iss = "iss123",
                 jti = "jti123"

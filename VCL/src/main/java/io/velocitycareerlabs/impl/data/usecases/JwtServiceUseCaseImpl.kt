@@ -36,7 +36,7 @@ internal class JwtServiceUseCaseImpl(
     }
 
     override fun generateSignedJwt(
-        kid: String?,
+        didJwk: VCLDidJwk,
         nonce: String?,
         jwtDescriptor: VCLJwtDescriptor,
         remoteCryptoServicesToken: VCLToken?,
@@ -44,7 +44,7 @@ internal class JwtServiceUseCaseImpl(
     ) {
         executor.runOnBackground {
             jwtServiceRepository.generateSignedJwt(
-                kid = kid,
+                didJwk = didJwk,
                 nonce = nonce,
                 jwtDescriptor = jwtDescriptor,
                 remoteCryptoServicesToken = remoteCryptoServicesToken

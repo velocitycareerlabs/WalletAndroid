@@ -50,10 +50,9 @@ class JwtSignServiceLocalTest {
     @Test
     fun testSignFullParams() {
         subject.sign(
-            kid = didJwk.kid,
+            didJwk = didJwk,
             nonce = nonceMock,
             jwtDescriptor = VCLJwtDescriptor(
-                keyId = didJwk.keyId,
                 payload = payloadMock,
                 jti = jtiMock,
                 iss = issMock,
@@ -68,7 +67,7 @@ class JwtSignServiceLocalTest {
                 assert(jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyJti) == jtiMock)
                 val iat = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyIat) as Long
                 val nbf = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyNbf) as Long
-                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyExp) as Long
+//                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyExp) as Long
                 assert(iat == nbf)
 //        assert(exp - iat == sevenDaysInSeconds)
                 assert(jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyNonce) == nonceMock)
@@ -81,9 +80,9 @@ class JwtSignServiceLocalTest {
     @Test
     fun testSignPartialParams1() {
         subject.sign(
+            didJwk = didJwk,
             nonce = nonceMock,
             jwtDescriptor = VCLJwtDescriptor(
-                keyId = didJwk.keyId,
                 payload = payloadMock,
                 jti = jtiMock,
                 iss = issMock,
@@ -98,7 +97,7 @@ class JwtSignServiceLocalTest {
                 assert(jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyJti) == jtiMock)
                 val iat = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyIat) as Long
                 val nbf = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyNbf) as Long
-                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyExp) as Long
+//                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyExp) as Long
                 assert(iat == nbf)
 //        assert(exp - iat == sevenDaysInSeconds)
                 assert(jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyNonce) == nonceMock)
@@ -111,8 +110,8 @@ class JwtSignServiceLocalTest {
     @Test
     fun testSignPartialParams2() {
         subject.sign(
+            didJwk = didJwk,
             jwtDescriptor = VCLJwtDescriptor(
-                keyId = didJwk.keyId,
                 payload = payloadMock,
                 jti = jtiMock,
                 iss = issMock,
@@ -127,7 +126,7 @@ class JwtSignServiceLocalTest {
                 assert(jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyJti) == jtiMock)
                 val iat = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyIat) as Long
                 val nbf = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyNbf) as Long
-                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyExp) as Long
+//                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyExp) as Long
                 assert(iat == nbf)
 //        assert(exp - iat == sevenDaysInSeconds)
                 assert(jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyNonce) == null)
@@ -140,6 +139,7 @@ class JwtSignServiceLocalTest {
     @Test
     fun testSignPartialParams3() {
         subject.sign(
+            didJwk = didJwk,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payloadMock,
                 iss = issMock,
@@ -154,7 +154,7 @@ class JwtSignServiceLocalTest {
                 assert((jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyJti) as? String)?.isBlank() == false)
                 val iat = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyIat) as Long
                 val nbf = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyNbf) as Long
-                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyExp) as Long
+//                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyExp) as Long
                 assert(iat == nbf)
 //        assert(exp - iat == sevenDaysInSeconds)
                 assert(jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyNonce) == null)
@@ -167,6 +167,7 @@ class JwtSignServiceLocalTest {
     @Test
     fun testSignPartialParams4() {
         subject.sign(
+            didJwk = didJwk,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payloadMock,
                 iss = issMock
@@ -180,7 +181,7 @@ class JwtSignServiceLocalTest {
                 assert((jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyJti) as? String)?.isBlank() == false)
                 val iat = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyIat) as Long
                 val nbf = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyNbf) as Long
-                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyExp) as Long
+//                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyExp) as Long
                 assert(iat == nbf)
 //        assert(exp - iat == sevenDaysInSeconds)
                 assert(jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyNonce) == null)
@@ -193,6 +194,7 @@ class JwtSignServiceLocalTest {
     @Test
     fun testSignPartParams5() {
         subject.sign(
+            didJwk = didJwk,
             jwtDescriptor = VCLJwtDescriptor(
                 iss = issMock
             )
@@ -205,7 +207,7 @@ class JwtSignServiceLocalTest {
                 assert((jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyJti) as? String)?.isBlank() == false)
                 val iat = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyIat) as Long
                 val nbf = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyNbf) as Long
-                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyExp) as Long
+//                val exp = jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyExp) as Long
                 assert(iat == nbf)
 //        assert(exp - iat == sevenDaysInSeconds)
                 assert(jwt.payload?.toJSONObject()?.get(VCLJwtSignServiceLocalImpl.CodingKeys.KeyNonce) == null)
