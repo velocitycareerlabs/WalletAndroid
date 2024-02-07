@@ -7,6 +7,7 @@
 
 package io.velocitycareerlabs.infrastructure.resources.valid
 
+import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
@@ -15,7 +16,7 @@ import io.velocitycareerlabs.api.jwt.VCLJwtSignService
 
 class VCLJwtSignServiceMock: VCLJwtSignService {
     override fun sign(
-        kid: String?,
+        didJwk: VCLDidJwk,
         nonce: String?,
         jwtDescriptor: VCLJwtDescriptor,
         remoteCryptoServicesToken: VCLToken?,

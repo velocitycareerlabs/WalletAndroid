@@ -510,12 +510,14 @@ internal class VCLImpl: VCL {
     }
 
     override fun generateSignedJwt(
+        didJwk: VCLDidJwk,
         jwtDescriptor: VCLJwtDescriptor,
         remoteCryptoServicesToken: VCLToken?,
         successHandler: (VCLJwt) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         jwtServiceUseCase.generateSignedJwt(
+            didJwk = didJwk,
             jwtDescriptor = jwtDescriptor,
             remoteCryptoServicesToken = remoteCryptoServicesToken
         ) { jwtResult ->

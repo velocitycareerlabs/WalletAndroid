@@ -95,6 +95,7 @@ interface VCL {
     )
 
     fun generateSignedJwt(
+        didJwk: VCLDidJwk,
         jwtDescriptor: VCLJwtDescriptor,
         remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLJwt) -> Unit,
