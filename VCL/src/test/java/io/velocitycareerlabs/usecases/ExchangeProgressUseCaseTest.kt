@@ -27,7 +27,8 @@ import org.mockito.MockitoAnnotations
 
 internal class ExchangeProgressUseCaseTest {
 
-    lateinit var subject: ExchangeProgressUseCase
+    private lateinit var subject1: ExchangeProgressUseCase
+    private lateinit var subject2: ExchangeProgressUseCase
     @Mock
     lateinit var exchangeDescriptor: VCLExchangeDescriptor
 
@@ -41,14 +42,14 @@ internal class ExchangeProgressUseCaseTest {
 
     @Test
     fun testGetExchangeProgressSuccess() {
-        subject = ExchangeProgressUseCaseImpl(
+        subject1 = ExchangeProgressUseCaseImpl(
             ExchangeProgressRepositoryImpl(
                 NetworkServiceSuccess(ExchangeProgressMocks.ExchangeProgressJson)
             ),
             EmptyExecutor()
         )
 
-        subject.getExchangeProgress(exchangeDescriptor) {
+        subject1.getExchangeProgress(exchangeDescriptor) {
             it.handleResult(
                 { exchange ->
                     assert(exchange == expectedExchange(JSONObject(ExchangeProgressMocks.ExchangeProgressJson)))
@@ -62,14 +63,14 @@ internal class ExchangeProgressUseCaseTest {
 
     @Test
     fun testGetExchangeProgressFailure() {
-        subject = ExchangeProgressUseCaseImpl(
+        subject2 = ExchangeProgressUseCaseImpl(
             ExchangeProgressRepositoryImpl(
                 NetworkServiceSuccess("wrong payload")
             ),
             EmptyExecutor()
         )
 
-        subject.getExchangeProgress(exchangeDescriptor) {
+        subject2.getExchangeProgress(exchangeDescriptor) {
             it.handleResult(
                 successHandler = {
                     assert(false) { "${VCLErrorCode.SdkError.value} error code is expected" }
@@ -88,8 +89,4 @@ internal class ExchangeProgressUseCaseTest {
             disclosureComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyDisclosureComplete),
             exchangeComplete = exchangeJsonObj.getBoolean(VCLExchange.KeyExchangeComplete)
         )
-
-    @After
-    fun tearDown() {
-    }
 }

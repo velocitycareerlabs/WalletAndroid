@@ -17,7 +17,9 @@ abstract class VCLCredentialManifestDescriptor(
     val credentialTypes: List<String>? = null,
     val pushDelegate: VCLPushDelegate? = null,
     val vendorOriginContext: String? = null,
-    val deepLink: VCLDeepLink? = null
+    val deepLink: VCLDeepLink? = null,
+    val didJwk: VCLDidJwk,
+    val remoteCryptoServicesToken: VCLToken? = null
 ) {
     open val endpoint =  generateQueryParams()?.let { queryParams ->
         uri?.appendQueryParams(queryParams)

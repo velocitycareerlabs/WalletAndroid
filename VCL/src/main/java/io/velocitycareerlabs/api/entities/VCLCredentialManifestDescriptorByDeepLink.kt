@@ -10,11 +10,15 @@ package io.velocitycareerlabs.api.entities
 class VCLCredentialManifestDescriptorByDeepLink(
     deepLink: VCLDeepLink,
     issuingType: VCLIssuingType = VCLIssuingType.Career,
-    pushDelegate: VCLPushDelegate? = null
+    pushDelegate: VCLPushDelegate? = null,
+    didJwk: VCLDidJwk,
+    remoteCryptoServicesToken: VCLToken? = null
 ): VCLCredentialManifestDescriptor(
     uri = deepLink.requestUri,
     issuingType = issuingType,
     pushDelegate = pushDelegate,
     vendorOriginContext = deepLink.vendorOriginContext,
-    deepLink = deepLink
+    deepLink = deepLink,
+    didJwk = didJwk,
+    remoteCryptoServicesToken = remoteCryptoServicesToken
 )

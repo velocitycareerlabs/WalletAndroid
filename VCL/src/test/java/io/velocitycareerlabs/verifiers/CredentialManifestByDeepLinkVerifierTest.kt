@@ -16,6 +16,7 @@ import io.velocitycareerlabs.impl.data.verifiers.CredentialManifestByDeepLinkVer
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.Test
 
@@ -23,7 +24,8 @@ class CredentialManifestByDeepLinkVerifierTest {
     private val subject = CredentialManifestByDeepLinkVerifierImpl()
     private val credentialManifest = VCLCredentialManifest(
         jwt = VCLJwt(CredentialManifestMocks.JwtCredentialManifest1),
-        verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfRegularIssuer.toJsonObject()!!)
+        verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfRegularIssuer.toJsonObject()!!),
+        didJwk = DidJwkMocks.DidJwk
     )
     private val correctDeepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet
     private val wrongDeepLink =

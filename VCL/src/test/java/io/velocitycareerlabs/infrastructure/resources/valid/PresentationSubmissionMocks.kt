@@ -23,7 +23,8 @@ class PresentationSubmissionMocks {
             jwt = JwtServiceMocks.JWT,
             publicJwk = JwtServiceMocks.PublicJwk,
             deepLink = DeepLinkMocks.CredentialManifestDeepLinkMainNet,
-            pushDelegate = PushDelegate
+            pushDelegate = PushDelegate,
+            didJwk = DidJwkMocks.DidJwk
         )
 
         val SelectionsList = listOf(

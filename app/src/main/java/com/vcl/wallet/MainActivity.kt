@@ -136,6 +136,7 @@ class MainActivity : AppCompatActivity() {
                     pushUrl = "pushUrl",
                     pushToken = "pushToken"
                 ),
+                didJwk = this.didJwk
             ),
             successHandler = { presentationRequest ->
                 Log.d(TAG, "VCL Presentation request received: ${presentationRequest.jwt.payload}")
@@ -159,7 +160,6 @@ class MainActivity : AppCompatActivity() {
     private fun submitPresentation(presentationSubmission: VCLPresentationSubmission) {
         vcl.submitPresentation(
             presentationSubmission = presentationSubmission,
-            didJwk = didJwk,
             successHandler = { presentationSubmissionResult ->
                 Log.d(TAG, "VCL Presentation submission result: $presentationSubmissionResult")
                 vcl.getExchangeProgress(
@@ -211,7 +211,8 @@ class MainActivity : AppCompatActivity() {
         val credentialManifestDescriptorRefresh =
             VCLCredentialManifestDescriptorRefresh(
                 service = service,
-                credentialIds = Constants.CredentialIdsToRefresh
+                credentialIds = Constants.CredentialIdsToRefresh,
+                didJwk = this.didJwk
             )
         vcl.getCredentialManifest(credentialManifestDescriptorRefresh,
             successHandler = { credentialManifest ->
@@ -230,7 +231,8 @@ class MainActivity : AppCompatActivity() {
             VCLCredentialManifestDescriptorByService(
                 service = serviceCredentialAgentIssuer,
                 issuingType = VCLIssuingType.Career,
-                credentialTypes = serviceCredentialAgentIssuer.credentialTypes // Can come from any where
+                credentialTypes = serviceCredentialAgentIssuer.credentialTypes, // Can come from any where
+                didJwk = this.didJwk
             )
         vcl.getCredentialManifest(credentialManifestDescriptorByOrganization,
             successHandler = { credentialManifest ->
@@ -253,7 +255,8 @@ class MainActivity : AppCompatActivity() {
         val credentialManifestDescriptorByDeepLink =
             VCLCredentialManifestDescriptorByDeepLink(
                 deepLink = deepLink,
-//                issuingType = VCLIssuingType.Identity
+//                issuingType = VCLIssuingType.Identity,
+                didJwk = this.didJwk
             )
         vcl.getCredentialManifest(credentialManifestDescriptorByDeepLink,
             successHandler = { credentialManifest ->
@@ -275,7 +278,6 @@ class MainActivity : AppCompatActivity() {
         )
         vcl.generateOffers(
             generateOffersDescriptor = generateOffersDescriptor,
-            didJwk = didJwk,
             successHandler = { offers ->
                 Log.d(TAG, "VCL Generated Offers: ${offers.all}")
                 Log.d(TAG, "VCL Generated Offers Response Code: ${offers.responseCode}")
@@ -332,7 +334,6 @@ class MainActivity : AppCompatActivity() {
         )
         vcl.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptor,
-            didJwk = didJwk,
             sessionToken = offers.sessionToken,
             successHandler = { verifiableCredentials ->
                 Log.d(TAG, "VCL finalized Offers")

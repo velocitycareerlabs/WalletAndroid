@@ -25,10 +25,6 @@ internal class CredentialTypeSchemaUseCaseTest {
 
     lateinit var subject: CredentialTypeSchemasUseCase
 
-    @Before
-    fun setUp() {
-    }
-
     @Test
     fun testGetCredentialTypeSchemas() {
         subject = CredentialTypeSchemasUseCaseImpl(
@@ -53,9 +49,5 @@ internal class CredentialTypeSchemaUseCaseTest {
                 }
             )
         }
-    }
-
-    @After
-    fun tearDown() {
     }
 }

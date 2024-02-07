@@ -20,19 +20,16 @@ internal class SubmissionUseCaseImpl(
 ):  SubmissionUseCase {
     override fun submit(
         submission: VCLSubmission,
-        didJwk: VCLDidJwk,
-        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     ) {
         executor.runOnBackground {
             jwtServiceRepository.generateSignedJwt(
-                didJwk = didJwk,
                 jwtDescriptor = VCLJwtDescriptor(
-                    payload = submission.generatePayload(didJwk.did),
+                    payload = submission.generatePayload(submission.didJwk.did),
                     jti = submission.jti,
-                    iss = didJwk.did
+                    iss = submission.didJwk.did
                 ),
-                remoteCryptoServicesToken = remoteCryptoServicesToken,
+                didJwk = submission.didJwk,
                 completionBlock = { signedJwtResult ->
                     signedJwtResult.handleResult(
                         { jwt ->

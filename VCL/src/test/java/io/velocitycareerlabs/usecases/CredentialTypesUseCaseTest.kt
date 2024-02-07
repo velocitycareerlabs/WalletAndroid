@@ -24,15 +24,12 @@ import org.junit.Test
 
 internal class CredentialTypesUseCaseTest {
 
-    lateinit var subject: CredentialTypesUseCase
-
-    @Before
-    fun setUp() {
-    }
+    private lateinit var subject1: CredentialTypesUseCase
+    private lateinit var subject2: CredentialTypesUseCase
 
     @Test
     fun testGetCredentialTypesSuccess() {
-        subject = CredentialTypesUseCaseImpl(
+        subject1 = CredentialTypesUseCaseImpl(
             CredentialTypesRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesMocks.CredentialTypesJson),
                 EmptyCacheService()
@@ -40,7 +37,7 @@ internal class CredentialTypesUseCaseTest {
             EmptyExecutor()
         )
 
-        subject.getCredentialTypes(0) {
+        subject1.getCredentialTypes(0) {
             it.handleResult(
                 { credentialTypes ->
                     compareCredentialTypes(credentialTypes.all!!, geExpectedCredentialTypesArr())
@@ -55,7 +52,7 @@ internal class CredentialTypesUseCaseTest {
 
     @Test
     fun testGetCredentialTypesFailure() {
-        subject = CredentialTypesUseCaseImpl(
+        subject2 = CredentialTypesUseCaseImpl(
             CredentialTypesRepositoryImpl(
                 NetworkServiceSuccess("wrong payload"),
                 EmptyCacheService()
@@ -63,7 +60,7 @@ internal class CredentialTypesUseCaseTest {
             EmptyExecutor()
         )
 
-        subject.getCredentialTypes(0) {
+        subject2.getCredentialTypes(0) {
             it.handleResult(
                 successHandler = {
                     assert(false) { "${VCLErrorCode.SdkError.value} error code is expected" }
@@ -137,9 +134,5 @@ internal class CredentialTypesUseCaseTest {
                 recommended = true
             ))
         return credentialTypesArr
-    }
-
-    @After
-    fun tearDown() {
     }
 }

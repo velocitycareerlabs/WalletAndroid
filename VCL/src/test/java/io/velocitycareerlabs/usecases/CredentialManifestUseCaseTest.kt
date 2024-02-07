@@ -25,6 +25,7 @@ import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.After
 import org.junit.Before
@@ -39,16 +40,13 @@ import org.skyscreamer.jsonassert.JSONCompareMode
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 internal class CredentialManifestUseCaseTest {
 
-    lateinit var subject: CredentialManifestUseCase
+    private lateinit var subject1: CredentialManifestUseCase
+    private lateinit var subject2: CredentialManifestUseCase
 
-    @Before
-    fun setUp() {
-    }
-
-    @Test
+            @Test
     fun testGetCredentialManifestSuccess() {
         // Arrange
-        subject = CredentialManifestUseCaseImpl(
+        subject1 = CredentialManifestUseCaseImpl(
             CredentialManifestRepositoryImpl(
                 NetworkServiceSuccess(CredentialManifestMocks.CredentialManifest1)
             ),
@@ -63,13 +61,14 @@ internal class CredentialManifestUseCaseTest {
             EmptyExecutor()
         )
 
-        subject.getCredentialManifest(
+        subject1.getCredentialManifest(
             credentialManifestDescriptor = VCLCredentialManifestDescriptorByDeepLink(
                 deepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet,
-                issuingType = VCLIssuingType.Career
+                issuingType = VCLIssuingType.Career,
+                didJwk = DidJwkMocks.DidJwk,
+                remoteCryptoServicesToken = VCLToken("some token")
             ),
-            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!),
-            remoteCryptoServicesToken = null
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
         ) {
             it.handleResult(
                 { credentialManifest ->
@@ -90,6 +89,8 @@ internal class CredentialManifestUseCaseTest {
                                     .sort().toString()
                     ) //removed $ to compare
                     assert(credentialManifest.jwt.signature.toString() == CredentialManifestMocks.Signature)
+                    assert(credentialManifest.didJwk.did == DidJwkMocks.DidJwk.did)
+                    assert(credentialManifest.remoteCryptoServicesToken?.value == "some token")
                 },
                 {
                     assert(false) { "${it.toJsonObject()}" }
@@ -101,7 +102,7 @@ internal class CredentialManifestUseCaseTest {
     @Test
     fun testGetCredentialManifestFailure() {
         // Arrange
-        subject = CredentialManifestUseCaseImpl(
+        subject2 = CredentialManifestUseCaseImpl(
             CredentialManifestRepositoryImpl(
                 NetworkServiceSuccess("wrong payload")
             ),
@@ -116,13 +117,13 @@ internal class CredentialManifestUseCaseTest {
             EmptyExecutor()
         )
 
-        subject.getCredentialManifest(
+        subject2.getCredentialManifest(
             credentialManifestDescriptor = VCLCredentialManifestDescriptorByDeepLink(
                 deepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet,
-                issuingType = VCLIssuingType.Career
+                issuingType = VCLIssuingType.Career,
+                didJwk = DidJwkMocks.DidJwk
             ),
-            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!),
-            remoteCryptoServicesToken = null
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
         ) {
             it.handleResult(
                 successHandler = {
@@ -133,9 +134,5 @@ internal class CredentialManifestUseCaseTest {
                 }
             )
         }
-    }
-
-    @After
-    fun tearDown() {
     }
 }

@@ -28,10 +28,6 @@ internal class OrganizationsUseCaseTest {
 
     @Before
     fun setUp() {
-    }
-
-    @Test
-    fun testSearchForOrganizationsSuccess() {
         subject = OrganizationsUseCaseImpl(
             OrganizationsRepositoryImpl(
                 NetworkServiceSuccess(
@@ -40,6 +36,10 @@ internal class OrganizationsUseCaseTest {
             ),
             EmptyExecutor()
         )
+    }
+
+    @Test
+    fun testSearchForOrganizationsSuccess() {
         val serviceJsonMock = JSONObject(OrganizationsMocks.ServiceJsonStr)
 
         subject.searchForOrganizations(VCLOrganizationsSearchDescriptor(query = "")) {
@@ -61,9 +61,5 @@ internal class OrganizationsUseCaseTest {
                 }
             )
         }
-    }
-
-    @After
-    fun tearDown() {
     }
 }

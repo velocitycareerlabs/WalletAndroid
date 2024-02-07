@@ -50,15 +50,15 @@ class JwtSignServiceLocalTest {
     @Test
     fun testSignFullParams() {
         subject.sign(
-            didJwk = didJwk,
-            nonce = nonceMock,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payloadMock,
                 jti = jtiMock,
                 iss = issMock,
                 aud = audMock
-            )
-        ) { jwtResult ->
+            ),
+            nonce = nonceMock,
+            didJwk = didJwk
+            ) { jwtResult ->
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid == didJwk.kid)
 
@@ -80,14 +80,14 @@ class JwtSignServiceLocalTest {
     @Test
     fun testSignPartialParams1() {
         subject.sign(
-            didJwk = didJwk,
-            nonce = nonceMock,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payloadMock,
                 jti = jtiMock,
                 iss = issMock,
                 aud = audMock
-            )
+            ),
+            nonce = nonceMock,
+            didJwk = didJwk
         ) { jwtResult ->
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid?.isBlank() == false)
@@ -110,13 +110,13 @@ class JwtSignServiceLocalTest {
     @Test
     fun testSignPartialParams2() {
         subject.sign(
-            didJwk = didJwk,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payloadMock,
                 jti = jtiMock,
                 iss = issMock,
                 aud = audMock
-            )
+            ),
+            didJwk = didJwk
         ) { jwtResult ->
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid?.isBlank() == false)
@@ -139,12 +139,12 @@ class JwtSignServiceLocalTest {
     @Test
     fun testSignPartialParams3() {
         subject.sign(
-            didJwk = didJwk,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payloadMock,
                 iss = issMock,
                 aud = audMock
-            )
+            ),
+            didJwk = didJwk
         ) { jwtResult ->
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid?.isBlank() == false)
@@ -167,11 +167,11 @@ class JwtSignServiceLocalTest {
     @Test
     fun testSignPartialParams4() {
         subject.sign(
-            didJwk = didJwk,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payloadMock,
                 iss = issMock
-            )
+            ),
+            didJwk = didJwk
         ) { jwtResult ->
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid?.isBlank() == false)
@@ -194,10 +194,10 @@ class JwtSignServiceLocalTest {
     @Test
     fun testSignPartParams5() {
         subject.sign(
-            didJwk = didJwk,
             jwtDescriptor = VCLJwtDescriptor(
                 iss = issMock
-            )
+            ),
+            didJwk = didJwk
         ) { jwtResult ->
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid?.isBlank() == false)

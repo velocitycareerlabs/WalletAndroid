@@ -26,15 +26,12 @@ interface VCL {
 
     fun getPresentationRequest(
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
-        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLPresentationRequest) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
 
     fun submitPresentation(
         presentationSubmission: VCLPresentationSubmission,
-        didJwk: VCLDidJwk,
-        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLSubmissionResult) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -53,15 +50,12 @@ interface VCL {
 
     fun getCredentialManifest(
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLCredentialManifest) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
 
     fun generateOffers(
         generateOffersDescriptor: VCLGenerateOffersDescriptor,
-        didJwk: VCLDidJwk,
-        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLOffers) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -75,9 +69,7 @@ interface VCL {
 
     fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
-        didJwk: VCLDidJwk,
         sessionToken: VCLToken,
-        remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLJwtVerifiableCredentials) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -103,8 +95,8 @@ interface VCL {
     )
 
     fun generateSignedJwt(
-        didJwk: VCLDidJwk,
         jwtDescriptor: VCLJwtDescriptor,
+        didJwk: VCLDidJwk,
         remoteCryptoServicesToken: VCLToken? = null,
         successHandler: (VCLJwt) -> Unit,
         errorHandler: (VCLError) -> Unit

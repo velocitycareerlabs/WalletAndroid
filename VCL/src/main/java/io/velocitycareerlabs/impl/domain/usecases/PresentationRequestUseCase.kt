@@ -15,7 +15,6 @@ import io.velocitycareerlabs.api.entities.VCLToken
 internal interface PresentationRequestUseCase {
     fun getPresentationRequest(
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
-        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     )
 }

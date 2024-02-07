@@ -21,6 +21,7 @@ import io.velocitycareerlabs.impl.extensions.toJwtList
 import io.velocitycareerlabs.impl.extensions.toList
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.json.JSONArray
 import org.json.JSONObject
@@ -46,7 +47,8 @@ internal class CredentialDidVerifierTest {
     fun setUp() {
         credentialManifestFromNotaryIssuer = VCLCredentialManifest(
             jwt = VCLJwt(CredentialManifestMocks.JwtCredentialManifestFromNotaryIssuer),
-            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfNotaryIssuer.toJsonObject()!!)
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfNotaryIssuer.toJsonObject()!!),
+            didJwk = DidJwkMocks.DidJwk
         )
         finalizeOffersDescriptorOfNotaryIssuer = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestFromNotaryIssuer,
@@ -57,7 +59,8 @@ internal class CredentialDidVerifierTest {
 
         credentialManifestFromRegularIssuer = VCLCredentialManifest(
             jwt = VCLJwt(CredentialManifestMocks.JwtCredentialManifestFromRegularIssuer),
-            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfRegularIssuer.toJsonObject()!!)
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfRegularIssuer.toJsonObject()!!),
+            didJwk = DidJwkMocks.DidJwk
         )
         finalizeOffersDescriptorOfRegularIssuer = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestFromRegularIssuer,

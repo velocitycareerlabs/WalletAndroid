@@ -16,6 +16,7 @@ import io.velocitycareerlabs.impl.jwt.remote.VCLJwtSignServiceRemoteImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import junit.framework.TestCase.assertEquals
 import org.json.JSONObject
 import org.junit.Before
@@ -28,19 +29,10 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 internal class VCLJwtSignServiceTest {
     lateinit var subject: VCLJwtSignServiceRemoteImpl
-    private lateinit var didJwk: VCLDidJwk
     private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
 
     @Before
     fun setUp() {
-        keyService.generateDidJwk(null) { jwkResult ->
-            jwkResult.handleResult({
-                didJwk = it
-            } ,{
-                assert(false) { "Failed to generate did:jwk $it" }
-            })
-        }
-
         subject = VCLJwtSignServiceRemoteImpl(
             NetworkServiceSuccess(""),
             ""
@@ -50,23 +42,23 @@ internal class VCLJwtSignServiceTest {
     @Test
     fun testGenerateJwtPayloadToSign() {
         val payloadToSign = subject.generateJwtPayloadToSign(
-            didJwk = didJwk,
-            nonce = "nonce 1",
             VCLJwtDescriptor(
                 payload = "{\"payload\": \"payload 1\"}".toJsonObject(),
                 jti = "jti 1",
                 iss = "iss 1",
                 aud = "aud 1"
+            ),
+            nonce = "nonce 1",
+            didJwk = DidJwkMocks.DidJwk,
             )
-        )
         val header = payloadToSign.optJSONObject("header")
         val options = payloadToSign.optJSONObject("options")
         val payload = payloadToSign.optJSONObject("payload")
 
-        assert(header?.optString("kid") == didJwk.kid)
-        assertEquals(header?.optJSONObject("jwk"), didJwk.publicJwk.valueJson)
+        assert(header?.optString("kid") == DidJwkMocks.DidJwk.kid)
+        assertEquals(header?.optJSONObject("jwk"), DidJwkMocks.DidJwk.publicJwk.valueJson)
 
-        assert(options?.optString("keyId") == didJwk.keyId)
+        assert(options?.optString("keyId") == DidJwkMocks.DidJwk.keyId)
 
         assert(payload?.optString("nonce") == "nonce 1")
         assert(payload?.optString("aud") == "aud 1")

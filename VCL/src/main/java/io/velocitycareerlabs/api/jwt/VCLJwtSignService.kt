@@ -16,9 +16,9 @@ import io.velocitycareerlabs.api.entities.VCLToken
 
 interface VCLJwtSignService {
     fun sign(
-        didJwk: VCLDidJwk,
-        nonce: String? = null,
         jwtDescriptor: VCLJwtDescriptor,
+        nonce: String? = null,
+        didJwk: VCLDidJwk,
         remoteCryptoServicesToken: VCLToken? = null,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     )

@@ -21,6 +21,7 @@ import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
 import org.junit.After
 import org.junit.Before
@@ -34,15 +35,15 @@ import org.robolectric.annotation.Config
 internal class JwtServiceUseCaseTest {
 
     lateinit var subject: JwtServiceUseCase
-    private lateinit var didJwk: VCLDidJwk
     private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
+    private lateinit var didJwk: VCLDidJwk
 
     @Before
     fun setUp() {
-        keyService.generateDidJwk(null) { didJwkResult ->
-            didJwkResult.handleResult({
+        keyService.generateDidJwk(null) { jwkResult ->
+            jwkResult.handleResult({
                 didJwk = it
-            }, {
+            } ,{
                 assert(false) { "Failed to generate did:jwk $it" }
             })
         }
@@ -59,12 +60,12 @@ internal class JwtServiceUseCaseTest {
     @Test
     fun testSign() {
         subject.generateSignedJwt(
-            didJwk = didJwk,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = JwtServiceMocks.Json.toJsonObject()!!,
                 jti = "some jti",
                 iss = "some iss"
             ),
+            didJwk = didJwk,
             remoteCryptoServicesToken = null
         ) {
             it.handleResult(
@@ -83,12 +84,12 @@ internal class JwtServiceUseCaseTest {
     @Test
     fun testSignVerify() {
         subject.generateSignedJwt(
-            didJwk = didJwk,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = JwtServiceMocks.Json.toJsonObject()!!,
                 jti = "some jti",
                 iss = "some iss"
             ),
+            didJwk = didJwk,
             remoteCryptoServicesToken = null
         ) {
             it.handleResult(
@@ -120,13 +121,12 @@ internal class JwtServiceUseCaseTest {
         keyService.generateDidJwk(null) { didJwkResult ->
             didJwkResult.handleResult({ didJwk ->
                 subject.generateSignedJwt(
-                    didJwk = didJwk,
-                    nonce = "some nonce",
                     jwtDescriptor = VCLJwtDescriptor(
                         payload = JwtServiceMocks.Json.toJsonObject()!!,
                         jti = "some jti",
                         iss = "some iss"
                     ),
+                    didJwk = didJwk,
                     remoteCryptoServicesToken = null
                 ) { jwtRes ->
                     jwtRes.handleResult(
@@ -157,9 +157,5 @@ internal class JwtServiceUseCaseTest {
                 assert(false) { "Failed to generate did:jwk ${it.toJsonObject()}" }
             })
         }
-    }
-
-    @After
-    fun tearDown() {
     }
 }

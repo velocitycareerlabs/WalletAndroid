@@ -12,6 +12,7 @@ import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.Before
 import org.junit.Test
@@ -25,7 +26,8 @@ class VCLCredentialManifestTest {
         try {
             subject = VCLCredentialManifest(
                 jwt = VCLJwt(encodedJwt = CredentialManifestMocks.JwtCredentialManifest1),
-                verifiedProfile = VCLVerifiedProfile(payload = VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
+                verifiedProfile = VCLVerifiedProfile(payload = VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!),
+                didJwk = DidJwkMocks.DidJwk
             )
         } catch (ex: Exception) {
             assert(false) {"$ex"}

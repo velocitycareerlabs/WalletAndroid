@@ -21,7 +21,6 @@ internal interface CredentialManifestUseCase {
     fun getCredentialManifest(
         credentialManifestDescriptor: VCLCredentialManifestDescriptor,
         verifiedProfile: VCLVerifiedProfile,
-        remoteCryptoServicesToken: VCLToken?,
         completionBlock:(VCLResult<VCLCredentialManifest>) -> Unit
     )
 }

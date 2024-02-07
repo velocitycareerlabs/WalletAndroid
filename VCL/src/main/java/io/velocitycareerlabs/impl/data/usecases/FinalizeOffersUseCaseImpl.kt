@@ -31,20 +31,17 @@ internal class FinalizeOffersUseCaseImpl(
 
     override fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
-        didJwk: VCLDidJwk,
         sessionToken: VCLToken,
-        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit
     ) {
         executor.runOnBackground {
             this.jwtServiceRepository.generateSignedJwt(
-                didJwk = didJwk,
-                nonce = finalizeOffersDescriptor.offers.challenge,
                 jwtDescriptor = VCLJwtDescriptor(
-                    iss = didJwk.did,
+                    iss = finalizeOffersDescriptor.didJwk?.did ?: UUID.randomUUID().toString(),
                     aud = finalizeOffersDescriptor.aud
                 ),
-                remoteCryptoServicesToken = remoteCryptoServicesToken
+                nonce = finalizeOffersDescriptor.offers.challenge,
+                didJwk = finalizeOffersDescriptor.didJwk,
             ) { proofJwtResult ->
                 proofJwtResult.handleResult(
                     successHandler = { proof ->

@@ -21,6 +21,7 @@ import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CommonMocks
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationSubmissionMocks
 import org.json.JSONObject
 import org.junit.After
@@ -35,23 +36,19 @@ import org.robolectric.annotation.Config
 internal class PresentationSubmissionUseCaseTest {
 
     lateinit var subject: PresentationSubmissionUseCase
-
     private lateinit var didJwk: VCLDidJwk
     private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
 
     @Before
     fun setUp() {
-        keyService.generateDidJwk(null) { didJwkResult ->
-            didJwkResult.handleResult({
-                    didJwk = it
-                }, {
-                    assert(false) { "Failed to generate did:jwk $it" }
+        keyService.generateDidJwk(null) { jwkResult ->
+            jwkResult.handleResult({
+                didJwk = it
+            } ,{
+                assert(false) { "Failed to generate did:jwk $it" }
             })
         }
-    }
 
-    @Test
-    fun testSubmitPresentationSuccess() {
         subject = PresentationSubmissionUseCaseImpl(
             PresentationSubmissionRepositoryImpl(
                 NetworkServiceSuccess(validResponse = PresentationSubmissionMocks.PresentationSubmissionResultJson)
@@ -62,11 +59,16 @@ internal class PresentationSubmissionUseCaseTest {
             ),
             EmptyExecutor()
         )
+    }
+
+    @Test
+    fun testSubmitPresentationSuccess() {
         val presentationSubmission = VCLPresentationSubmission(
             presentationRequest = VCLPresentationRequest(
                 jwt = CommonMocks.JWT,
                 publicJwk = VCLPublicJwk(valueStr = "{}"),
-                deepLink = VCLDeepLink(value = "")
+                deepLink = VCLDeepLink(value = ""),
+                didJwk = didJwk
             ),
             verifiableCredentials = listOf()
         )
@@ -77,9 +79,7 @@ internal class PresentationSubmissionUseCaseTest {
             )
 
         subject.submit(
-            submission = presentationSubmission,
-            didJwk = didJwk,
-            remoteCryptoServicesToken = null
+            submission = presentationSubmission
         ) {
             it.handleResult(
                 { presentationSubmissionResult ->
@@ -116,9 +116,5 @@ internal class PresentationSubmissionUseCaseTest {
             disclosureComplete = (exchangeJsonObj[VCLExchange.CodingKeys.KeyDisclosureComplete] as Boolean),
             exchangeComplete = (exchangeJsonObj[VCLExchange.CodingKeys.KeyExchangeComplete] as Boolean)
         )
-    }
-
-    @After
-    fun tearDown() {
     }
 }

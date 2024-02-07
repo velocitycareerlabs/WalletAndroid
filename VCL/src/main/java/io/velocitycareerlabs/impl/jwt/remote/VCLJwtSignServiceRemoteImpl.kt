@@ -29,15 +29,15 @@ internal class VCLJwtSignServiceRemoteImpl(
     private val jwtSignServiceUrl: String
 ): VCLJwtSignService {
     override fun sign(
-        didJwk: VCLDidJwk,
-        nonce: String?,
         jwtDescriptor: VCLJwtDescriptor,
+        nonce: String?,
+        didJwk: VCLDidJwk,
         remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
         networkService.sendRequest(
             endpoint = jwtSignServiceUrl,
-            body = generateJwtPayloadToSign(didJwk, nonce, jwtDescriptor).toString(),
+            body = generateJwtPayloadToSign(jwtDescriptor, nonce, didJwk).toString(),
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.POST,
             headers = listOf(
@@ -66,9 +66,9 @@ internal class VCLJwtSignServiceRemoteImpl(
     }
 
     internal fun generateJwtPayloadToSign(
-        didJwk: VCLDidJwk,
+        jwtDescriptor: VCLJwtDescriptor,
         nonce: String?,
-        jwtDescriptor: VCLJwtDescriptor
+        didJwk: VCLDidJwk,
     ): JSONObject {
         val retVal = JSONObject()
         val header = JSONObject()

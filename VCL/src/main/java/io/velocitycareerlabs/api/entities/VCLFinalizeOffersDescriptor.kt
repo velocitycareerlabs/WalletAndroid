@@ -21,6 +21,8 @@ data class VCLFinalizeOffersDescriptor(
             .putOpt(KeyApprovedOfferIds, approvedOfferIds.toJsonArray())
             .putOpt(KeyRejectedOfferIds, rejectedOfferIds.toJsonArray())
 
+    val didJwk: VCLDidJwk get() = credentialManifest.didJwk
+    val remoteCryptoServicesToken: VCLToken? get() = credentialManifest.remoteCryptoServicesToken
     val issuerId: String get() = credentialManifest.issuerId
     val aud: String get() = credentialManifest.aud
     val exchangeId: String get() = credentialManifest.exchangeId

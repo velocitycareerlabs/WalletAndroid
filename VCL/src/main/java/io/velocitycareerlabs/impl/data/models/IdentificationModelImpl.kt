@@ -18,14 +18,10 @@ internal class IdentificationModelImpl(
 
     override fun submit(
         identificationSubmission: VCLIdentificationSubmission,
-        didJwk: VCLDidJwk,
-        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     ) {
         identificationSubmissionUseCase.submit(
-            submission = identificationSubmission,
-            didJwk = didJwk,
-            remoteCryptoServicesToken = remoteCryptoServicesToken
+            submission = identificationSubmission
         ) { result ->
             result.handleResult({ data = result.data?.sessionToken }, { })
             completionBlock(result)
