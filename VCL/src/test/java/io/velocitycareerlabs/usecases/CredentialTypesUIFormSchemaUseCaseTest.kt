@@ -24,7 +24,12 @@ import org.junit.Test
 
 internal class CredentialTypesUIFormSchemaUseCaseTest {
 
-    lateinit var subject: CredentialTypesUIFormSchemaUseCase
+    private lateinit var subject1: CredentialTypesUIFormSchemaUseCase
+    private lateinit var subject2: CredentialTypesUIFormSchemaUseCase
+    private lateinit var subject3: CredentialTypesUIFormSchemaUseCase
+    private lateinit var subject4: CredentialTypesUIFormSchemaUseCase
+    private lateinit var subject5: CredentialTypesUIFormSchemaUseCase
+
     lateinit var mockedCountries: VCLCountries
 
     @Before
@@ -34,14 +39,14 @@ internal class CredentialTypesUIFormSchemaUseCaseTest {
 
     @Test
     fun testCredentialTypesFormSchemaFull() {
-        subject = CredentialTypesUIFormSchemaUseCaseImpl(
+        subject1 = CredentialTypesUIFormSchemaUseCaseImpl(
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesUIFormSchemaMocks.UISchemaFormJsonFull)
             ),
             EmptyExecutor()
         )
 
-        subject.getCredentialTypesUIFormSchema(
+        subject1.getCredentialTypesUIFormSchema(
             VCLCredentialTypesUIFormSchemaDescriptor("some type", VCLCountries.CA),
             mockedCountries
         ) {
@@ -77,14 +82,14 @@ internal class CredentialTypesUIFormSchemaUseCaseTest {
 
     @Test
     fun testCredentialTypesFormSchemaOnlyCountries() {
-        subject = CredentialTypesUIFormSchemaUseCaseImpl(
+        subject2 = CredentialTypesUIFormSchemaUseCaseImpl(
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesUIFormSchemaMocks.UISchemaFormJsonOnlyCountries)
             ),
             EmptyExecutor()
         )
 
-        subject.getCredentialTypesUIFormSchema(
+        subject2.getCredentialTypesUIFormSchema(
             VCLCredentialTypesUIFormSchemaDescriptor("some type", VCLCountries.CA),
             mockedCountries
         ) {
@@ -120,14 +125,14 @@ internal class CredentialTypesUIFormSchemaUseCaseTest {
 
     @Test
     fun testCredentialTypesFormSchemaOnlyRegions() {
-        subject = CredentialTypesUIFormSchemaUseCaseImpl(
+        subject3 = CredentialTypesUIFormSchemaUseCaseImpl(
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesUIFormSchemaMocks.UISchemaFormJsonOnlyRegions)
             ),
             EmptyExecutor()
         )
 
-        subject.getCredentialTypesUIFormSchema(
+        subject3.getCredentialTypesUIFormSchema(
             VCLCredentialTypesUIFormSchemaDescriptor("some type", VCLCountries.CA),
             mockedCountries
         ) {
@@ -163,14 +168,14 @@ internal class CredentialTypesUIFormSchemaUseCaseTest {
 
     @Test
     fun testCredentialTypesFormSchemaOnlyEnums() {
-        subject = CredentialTypesUIFormSchemaUseCaseImpl(
+        subject4 = CredentialTypesUIFormSchemaUseCaseImpl(
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess(CredentialTypesUIFormSchemaMocks.UISchemaFormJsonOnlyEnums)
             ),
             EmptyExecutor()
         )
 
-        subject.getCredentialTypesUIFormSchema(
+        subject4.getCredentialTypesUIFormSchema(
             VCLCredentialTypesUIFormSchemaDescriptor("some type", VCLCountries.CA),
             mockedCountries
         ) {
@@ -207,14 +212,14 @@ internal class CredentialTypesUIFormSchemaUseCaseTest {
 
     @Test
     fun testCredentialTypesFormSchemaFailure() {
-        subject = CredentialTypesUIFormSchemaUseCaseImpl(
+        subject5 = CredentialTypesUIFormSchemaUseCaseImpl(
             CredentialTypesUIFormSchemaRepositoryImpl(
                 NetworkServiceSuccess("wrong payload")
             ),
             EmptyExecutor()
         )
 
-        subject.getCredentialTypesUIFormSchema(
+        subject5.getCredentialTypesUIFormSchema(
             VCLCredentialTypesUIFormSchemaDescriptor("some type", VCLCountries.CA),
             mockedCountries
         ) {
@@ -258,9 +263,5 @@ internal class CredentialTypesUIFormSchemaUseCaseTest {
             name = countryJsonObj.optString(VCLCountry.KeyName),
             regions = regions
         )
-    }
-
-    @After
-    fun tearDown() {
     }
 }

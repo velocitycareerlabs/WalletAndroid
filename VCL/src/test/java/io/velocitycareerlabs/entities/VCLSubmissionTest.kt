@@ -16,6 +16,7 @@ import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.extensions.toList
 import io.velocitycareerlabs.infrastructure.resources.CommonMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationSubmissionMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
@@ -38,7 +39,8 @@ class VCLSubmissionTest {
         subjectIdentificationSubmission = VCLIdentificationSubmission(
             VCLCredentialManifest(
                 jwt = CommonMocks.JWT,
-                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
+                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!),
+                didJwk = DidJwkMocks.DidJwk
             ),
             PresentationSubmissionMocks.SelectionsList
         )

@@ -23,6 +23,7 @@ import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.json.JSONArray
 import org.json.JSONObject
@@ -69,7 +70,8 @@ class VCLFinalizeOffersDescriptorTest {
         val credentialManifest =
             VCLCredentialManifest(
                 jwt = VCLJwt(encodedJwt = CredentialManifestMocks.JwtCredentialManifest1),
-                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
+                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!),
+                didJwk = didJwk
             )
 
         subject = VCLFinalizeOffersDescriptor(
@@ -84,14 +86,14 @@ class VCLFinalizeOffersDescriptorTest {
     fun testGenerateRequestBody() {
         val payload = "{\"key1\": \"value1\"}".toJsonObject()
         VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)).sign(
-            didJwk = didJwk,
-            nonce = nonceMock,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payload,
                 jti = jtiMock,
                 iss = issMock,
                 aud = audMock
-            )
+            ),
+            nonce = nonceMock,
+            didJwk = didJwk
         ) { jwtResult ->
             jwtResult.handleResult({ jwt ->
                 val requestBody = subject.generateRequestBody(jwt = jwt)

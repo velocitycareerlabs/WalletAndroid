@@ -13,6 +13,7 @@ import io.velocitycareerlabs.api.entities.VCLPushDelegate
 import io.velocitycareerlabs.impl.extensions.decode
 import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestDescriptorMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 
 import org.junit.After
 import org.junit.Before
@@ -31,7 +32,8 @@ internal class VCLCredentialManifestDescriptorByDeepLinkTest {
         subject = VCLCredentialManifestDescriptorByDeepLink(
             deepLink = CredentialManifestDescriptorMocks.DeepLink,
             issuingType = VCLIssuingType.Career,
-            pushDelegate = VCLPushDelegate(pushUrl = "some_url", pushToken = "some_token")
+            pushDelegate = VCLPushDelegate(pushUrl = "some_url", pushToken = "some_token"),
+            didJwk = DidJwkMocks.DidJwk
         )
 
         assert(

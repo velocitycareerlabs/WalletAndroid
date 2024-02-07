@@ -32,6 +32,7 @@ import io.velocitycareerlabs.infrastructure.resources.CredentialTypesModelMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.GenerateOffersMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.JsonLdMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
@@ -45,9 +46,13 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 internal class FinalizeOffersUseCaseTest {
 
-    lateinit var subject: FinalizeOffersUseCase
+    private lateinit var subject1: FinalizeOffersUseCase
+    private lateinit var subject2: FinalizeOffersUseCase
+    private lateinit var subject3: FinalizeOffersUseCase
+    private lateinit var subject4: FinalizeOffersUseCase
 
     private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
+    private lateinit var didJwk: VCLDidJwk
     private lateinit var credentialManifestFailed: VCLCredentialManifest
     private lateinit var credentialManifestPassed: VCLCredentialManifest
     private lateinit var finalizeOffersDescriptorFailed: VCLFinalizeOffersDescriptor
@@ -61,10 +66,19 @@ internal class FinalizeOffersUseCaseTest {
 
     @Before
     fun setUp() {
+        keyService.generateDidJwk(null) { jwkResult ->
+            jwkResult.handleResult({
+                didJwk = it
+            } ,{
+                assert(false) { "Failed to generate did:jwk $it" }
+            })
+        }
+
         val generateOffersDescriptor = VCLGenerateOffersDescriptor(
             credentialManifest = VCLCredentialManifest(
                 jwt = CommonMocks.JWT,
-                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr2.toJsonObject()!!)
+                verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr2.toJsonObject()!!),
+                didJwk = didJwk
             )
         )
         GenerateOffersUseCaseImpl(
@@ -87,11 +101,13 @@ internal class FinalizeOffersUseCaseTest {
 
                     credentialManifestFailed = VCLCredentialManifest(
                         jwt = vclJwtFailed,
-                        verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr2.toJsonObject()!!)
+                        verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr2.toJsonObject()!!),
+                        didJwk = didJwk
                     )
                     credentialManifestPassed = VCLCredentialManifest(
                         jwt = vclJwtPassed,
-                        verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr2.toJsonObject()!!)
+                        verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr2.toJsonObject()!!),
+                        didJwk = didJwk
                     )
 
                     finalizeOffersDescriptorFailed = VCLFinalizeOffersDescriptor(
@@ -115,7 +131,7 @@ internal class FinalizeOffersUseCaseTest {
 
     @Test
     fun testFailedCredentials() {
-        subject = FinalizeOffersUseCaseImpl(
+        subject1 = FinalizeOffersUseCaseImpl(
             FinalizeOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = CredentialMocks.JwtCredentialsFromRegularIssuer)
             ),
@@ -134,7 +150,7 @@ internal class FinalizeOffersUseCaseTest {
             EmptyExecutor()
         )
 
-        subject.finalizeOffers(
+        subject1.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorFailed,
             sessionToken = VCLToken(value = "")
         ) {
@@ -162,7 +178,7 @@ internal class FinalizeOffersUseCaseTest {
 
     @Test
     fun testPassedCredentials() {
-        subject = FinalizeOffersUseCaseImpl(
+        subject2 = FinalizeOffersUseCaseImpl(
             FinalizeOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = CredentialMocks.JwtCredentialsFromRegularIssuer)
             ),
@@ -181,7 +197,7 @@ internal class FinalizeOffersUseCaseTest {
             EmptyExecutor()
         )
 
-        subject.finalizeOffers(
+        subject2.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
             sessionToken = VCLToken(value = ""),
         ) {
@@ -210,7 +226,7 @@ internal class FinalizeOffersUseCaseTest {
     @Test
     fun testEmptyCredentials() {
         // Arrange
-        subject = FinalizeOffersUseCaseImpl(
+        subject3 = FinalizeOffersUseCaseImpl(
             FinalizeOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = CredentialMocks.JwtEmptyCredentials)
             ),
@@ -229,7 +245,7 @@ internal class FinalizeOffersUseCaseTest {
             EmptyExecutor()
         )
 
-        subject.finalizeOffers(
+        subject3.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
             sessionToken = VCLToken(value = "")
         ) {
@@ -247,7 +263,7 @@ internal class FinalizeOffersUseCaseTest {
 
     @Test
     fun testFailure() {
-        subject = FinalizeOffersUseCaseImpl(
+        subject4 = FinalizeOffersUseCaseImpl(
             FinalizeOffersRepositoryImpl(
                 NetworkServiceSuccess("wrong payload")
             ),
@@ -266,7 +282,7 @@ internal class FinalizeOffersUseCaseTest {
             EmptyExecutor()
         )
 
-        subject.finalizeOffers(
+        subject4.finalizeOffers(
             finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
             sessionToken = VCLToken(value = "")
         ) {

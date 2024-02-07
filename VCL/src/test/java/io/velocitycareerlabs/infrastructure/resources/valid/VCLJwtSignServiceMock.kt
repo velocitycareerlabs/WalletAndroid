@@ -16,9 +16,9 @@ import io.velocitycareerlabs.api.jwt.VCLJwtSignService
 
 class VCLJwtSignServiceMock: VCLJwtSignService {
     override fun sign(
-        didJwk: VCLDidJwk,
-        nonce: String?,
         jwtDescriptor: VCLJwtDescriptor,
+        nonce: String?,
+        didJwk: VCLDidJwk,
         remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {

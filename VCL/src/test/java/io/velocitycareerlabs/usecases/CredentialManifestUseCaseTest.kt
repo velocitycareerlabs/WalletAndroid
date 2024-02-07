@@ -25,6 +25,7 @@ import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.After
 import org.junit.Before
@@ -39,25 +40,13 @@ import org.skyscreamer.jsonassert.JSONCompareMode
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 internal class CredentialManifestUseCaseTest {
 
-    lateinit var subject: CredentialManifestUseCase
-    private lateinit var didJwk: VCLDidJwk
-    private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
+    private lateinit var subject1: CredentialManifestUseCase
+    private lateinit var subject2: CredentialManifestUseCase
 
-    @Before
-    fun setUp() {
-        keyService.generateDidJwk(null) { didJwkResult ->
-            didJwkResult.handleResult({
-                didJwk = it
-            }, {
-                assert(false) { "Failed to generate did:jwk $it" }
-            })
-        }
-    }
-
-    @Test
+            @Test
     fun testGetCredentialManifestSuccess() {
         // Arrange
-        subject = CredentialManifestUseCaseImpl(
+        subject1 = CredentialManifestUseCaseImpl(
             CredentialManifestRepositoryImpl(
                 NetworkServiceSuccess(CredentialManifestMocks.CredentialManifest1)
             ),
@@ -72,11 +61,11 @@ internal class CredentialManifestUseCaseTest {
             EmptyExecutor()
         )
 
-        subject.getCredentialManifest(
+        subject1.getCredentialManifest(
             credentialManifestDescriptor = VCLCredentialManifestDescriptorByDeepLink(
                 deepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet,
                 issuingType = VCLIssuingType.Career,
-                didJwk = didJwk,
+                didJwk = DidJwkMocks.DidJwk,
                 remoteCryptoServicesToken = VCLToken("some token")
             ),
             verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
@@ -100,7 +89,7 @@ internal class CredentialManifestUseCaseTest {
                                     .sort().toString()
                     ) //removed $ to compare
                     assert(credentialManifest.jwt.signature.toString() == CredentialManifestMocks.Signature)
-                    assert(credentialManifest.didJwk?.did == this.didJwk.did)
+                    assert(credentialManifest.didJwk.did == DidJwkMocks.DidJwk.did)
                     assert(credentialManifest.remoteCryptoServicesToken?.value == "some token")
                 },
                 {
@@ -113,7 +102,7 @@ internal class CredentialManifestUseCaseTest {
     @Test
     fun testGetCredentialManifestFailure() {
         // Arrange
-        subject = CredentialManifestUseCaseImpl(
+        subject2 = CredentialManifestUseCaseImpl(
             CredentialManifestRepositoryImpl(
                 NetworkServiceSuccess("wrong payload")
             ),
@@ -128,10 +117,11 @@ internal class CredentialManifestUseCaseTest {
             EmptyExecutor()
         )
 
-        subject.getCredentialManifest(
+        subject2.getCredentialManifest(
             credentialManifestDescriptor = VCLCredentialManifestDescriptorByDeepLink(
                 deepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet,
-                issuingType = VCLIssuingType.Career
+                issuingType = VCLIssuingType.Career,
+                didJwk = DidJwkMocks.DidJwk
             ),
             verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1.toJsonObject()!!)
         ) {
@@ -144,9 +134,5 @@ internal class CredentialManifestUseCaseTest {
                 }
             )
         }
-    }
-
-    @After
-    fun tearDown() {
     }
 }

@@ -14,6 +14,7 @@ import io.velocitycareerlabs.api.entities.VCLIssuingType
 import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestDescriptorMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
@@ -38,7 +39,8 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
             credentialIds = listOf(
                 CredentialManifestDescriptorMocks.CredentialId1,
                 CredentialManifestDescriptorMocks.CredentialId2
-            )
+            ),
+            didJwk = DidJwkMocks.DidJwk
         )
 
         val credentialTypesQuery = "${VCLCredentialManifestDescriptor.KeyRefresh}=${true}" +
@@ -58,7 +60,8 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         )
         subject = VCLCredentialManifestDescriptorRefresh(
             service = service,
-            credentialIds = listOf(CredentialManifestDescriptorMocks.CredentialId1)
+            credentialIds = listOf(CredentialManifestDescriptorMocks.CredentialId1),
+            didJwk = DidJwkMocks.DidJwk
         )
 
         val credentialTypesQuery = "${VCLCredentialManifestDescriptor.KeyRefresh}=${true}" +
@@ -77,7 +80,8 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         )
         subject = VCLCredentialManifestDescriptorRefresh(
             service = service,
-            credentialIds = listOf()
+            credentialIds = listOf(),
+            didJwk = DidJwkMocks.DidJwk
         )
 
         val credentialTypesQuery = "${VCLCredentialManifestDescriptor.KeyRefresh}=${true}"

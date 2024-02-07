@@ -24,6 +24,7 @@ import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CredentialTypesModelMock
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.JsonLdMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.json.JSONObject
@@ -70,7 +71,8 @@ internal class CredentialIssuerVerifierTest {
     private fun setUpSubjectProperties() {
         credentialManifestWithoutPermittedServices = VCLCredentialManifest(
             jwt = VCLJwt(CredentialManifestMocks.JwtCredentialManifestFromNotaryIssuer),
-            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileWithoutServices.toJsonObject()!!)
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileWithoutServices.toJsonObject()!!),
+            didJwk = DidJwkMocks.DidJwk
         )
         finalizeOffersDescriptorWithoutPermittedServices = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestWithoutPermittedServices,
@@ -81,7 +83,8 @@ internal class CredentialIssuerVerifierTest {
 
         credentialManifestFromNotaryIssuer = VCLCredentialManifest(
             jwt = VCLJwt(CredentialManifestMocks.JwtCredentialManifestFromNotaryIssuer),
-            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfNotaryIssuer.toJsonObject()!!)
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfNotaryIssuer.toJsonObject()!!),
+            didJwk = DidJwkMocks.DidJwk
         )
         finalizeOffersDescriptorOfNotaryIssuer = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestFromNotaryIssuer,
@@ -92,7 +95,8 @@ internal class CredentialIssuerVerifierTest {
 
         credentialManifestFromRegularIssuer = VCLCredentialManifest(
             jwt = VCLJwt(CredentialManifestMocks.JwtCredentialManifestFromRegularIssuer),
-            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfRegularIssuer.toJsonObject()!!)
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfRegularIssuer.toJsonObject()!!),
+            didJwk = DidJwkMocks.DidJwk
         )
         finalizeOffersDescriptorOfRegularIssuer = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestFromRegularIssuer,
@@ -103,7 +107,8 @@ internal class CredentialIssuerVerifierTest {
 
         credentialManifestFromIdentityIssuer = VCLCredentialManifest(
             jwt = VCLJwt(CredentialManifestMocks.JwtCredentialManifestFromRegularIssuer),
-            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfIdentityIssuer.toJsonObject()!!)
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfIdentityIssuer.toJsonObject()!!),
+            didJwk = DidJwkMocks.DidJwk
         )
         finalizeOffersDescriptorOfIdentityIssuer = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestFromIdentityIssuer,

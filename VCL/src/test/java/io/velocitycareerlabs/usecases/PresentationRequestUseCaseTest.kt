@@ -25,6 +25,7 @@ import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestMocks
 import org.junit.Before
 import org.junit.Test
@@ -32,30 +33,16 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.O_MR1])
 internal class PresentationRequestUseCaseTest {
 
-    lateinit var subject: PresentationRequestUseCase
-    private lateinit var didJwk: VCLDidJwk
-    private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
-
-    @Before
-    fun setUp() {
-        keyService.generateDidJwk(null) { didJwkResult ->
-            didJwkResult.handleResult({
-                didJwk = it
-            }, {
-                assert(false) { "Failed to generate did:jwk $it" }
-            })
-        }
-    }
+    private lateinit var subject1: PresentationRequestUseCase
+    private lateinit var subject2: PresentationRequestUseCase
 
     @Test
     fun testGetPresentationRequestSuccess() {
         val pushUrl = "push_url"
         val pushToken = "push_token"
-        subject = PresentationRequestUseCaseImpl(
+        subject1 = PresentationRequestUseCaseImpl(
             PresentationRequestRepositoryImpl(
                 NetworkServiceSuccess(validResponse = PresentationRequestMocks.EncodedPresentationRequestResponse)
             ),
@@ -70,14 +57,14 @@ internal class PresentationRequestUseCaseTest {
             EmptyExecutor()
         )
 
-        subject.getPresentationRequest(
+        subject1.getPresentationRequest(
             presentationRequestDescriptor = VCLPresentationRequestDescriptor(
                 deepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet,
                 pushDelegate = VCLPushDelegate(
                     pushUrl = pushUrl,
                     pushToken = pushToken
                 ),
-                didJwk = didJwk,
+                didJwk = DidJwkMocks.DidJwk,
                 remoteCryptoServicesToken = VCLToken("some token")
             )
         ) {
@@ -102,7 +89,7 @@ internal class PresentationRequestUseCaseTest {
                     )
                     assert(presentationRequest.pushDelegate!!.pushUrl == pushUrl)
                     assert(presentationRequest.pushDelegate!!.pushToken == pushToken)
-                    assert(presentationRequest.didJwk?.did == this.didJwk.did)
+                    assert(presentationRequest.didJwk.did == DidJwkMocks.DidJwk.did)
                     assert(presentationRequest.remoteCryptoServicesToken?.value == "some token")
                 },
                 errorHandler = {
@@ -114,7 +101,7 @@ internal class PresentationRequestUseCaseTest {
 
     @Test
     fun testGetPresentationRequestFailure() {
-        subject = PresentationRequestUseCaseImpl(
+        subject2 = PresentationRequestUseCaseImpl(
             PresentationRequestRepositoryImpl(
                 NetworkServiceSuccess(validResponse = "wrong payload")
             ),
@@ -129,9 +116,10 @@ internal class PresentationRequestUseCaseTest {
             EmptyExecutor()
         )
 
-        subject.getPresentationRequest(
+        subject2.getPresentationRequest(
             presentationRequestDescriptor = VCLPresentationRequestDescriptor(
-                deepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet
+                deepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet,
+                didJwk = DidJwkMocks.DidJwk
             )
         ) {
             it.handleResult(

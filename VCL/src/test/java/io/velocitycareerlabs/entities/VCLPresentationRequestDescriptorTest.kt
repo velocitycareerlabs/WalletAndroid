@@ -11,6 +11,7 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.extensions.decode
 import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
+import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestDescriptorMocks
 import org.junit.After
 import org.junit.Before
@@ -28,7 +29,8 @@ class VCLPresentationRequestDescriptorTest {
     fun testPresentationRequestDescriptorWithPushDelegateSuccess() {
         subject = VCLPresentationRequestDescriptor(
             deepLink = PresentationRequestDescriptorMocks.DeepLink,
-            pushDelegate = PresentationRequestDescriptorMocks.PushDelegate
+            pushDelegate = PresentationRequestDescriptorMocks.PushDelegate,
+            didJwk = DidJwkMocks.DidJwk
         )
 
         val queryParams =
@@ -45,7 +47,8 @@ class VCLPresentationRequestDescriptorTest {
     @Test
     fun testPresentationRequestDescriptorWithoutPushDelegateOnlySuccess() {
         subject = VCLPresentationRequestDescriptor(
-            deepLink = PresentationRequestDescriptorMocks.DeepLink
+            deepLink = PresentationRequestDescriptorMocks.DeepLink,
+            didJwk = DidJwkMocks.DidJwk
         )
 
         assert(subject.endpoint?.decode()?.isUrlEquivalentTo(PresentationRequestDescriptorMocks.RequestUri.decode()) == true)
@@ -57,7 +60,8 @@ class VCLPresentationRequestDescriptorTest {
     fun testPresentationRequestDescriptorWithQParamsWithPushDelegateSuccess() {
         subject = VCLPresentationRequestDescriptor(
             deepLink = PresentationRequestDescriptorMocks.DeepLinkWithQParams,
-            pushDelegate = PresentationRequestDescriptorMocks.PushDelegate
+            pushDelegate = PresentationRequestDescriptorMocks.PushDelegate,
+            didJwk = DidJwkMocks.DidJwk
         )
 
         val queryParams =
@@ -76,7 +80,8 @@ class VCLPresentationRequestDescriptorTest {
     @Test
     fun testPresentationRequestDescriptorWithQParamsWithoutPushDelegateOnlySuccess() {
         subject = VCLPresentationRequestDescriptor(
-            deepLink = PresentationRequestDescriptorMocks.DeepLinkWithQParams
+            deepLink = PresentationRequestDescriptorMocks.DeepLinkWithQParams,
+            didJwk = DidJwkMocks.DidJwk
         )
 
         val mockEndpoint =

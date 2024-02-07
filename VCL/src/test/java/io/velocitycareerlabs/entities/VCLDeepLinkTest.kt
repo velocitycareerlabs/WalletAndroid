@@ -19,10 +19,6 @@ internal class VCLDeepLinkTest {
 
     lateinit var subject: VCLDeepLink
 
-    @Before
-    fun setUp() {
-    }
-
     @Test
     fun testOpenidInitiateIssuance() {
         subject = VCLDeepLink(value = DeepLinkMocks.OpenidInitiateIssuanceStrDev)

@@ -54,15 +54,15 @@ class JwtVerifyServiceLocalTest {
     @Test
     fun testSignAndVerify() {
         jwtSignServiceLocalImpl.sign(
-            didJwk = didJwk,
-            nonce = nonceMock,
             jwtDescriptor = VCLJwtDescriptor(
                 payload = payloadMock,
                 jti = jtiMock,
                 iss = issMock,
                 aud = audMock
-            )
-        ) { jwtResult ->
+            ),
+            nonce = nonceMock,
+            didJwk = didJwk
+            ) { jwtResult ->
             jwtResult.handleResult({ jwt ->
                 assert(jwt.kid == didJwk.kid)
 

@@ -18,18 +18,22 @@ import org.junit.Test
 
 internal class VerifiedProfileUseCaseTest {
 
-    lateinit var subject: VerifiedProfileUseCase
+    private lateinit var subject1: VerifiedProfileUseCase
+    private lateinit var subject2: VerifiedProfileUseCase
+    private lateinit var subject3: VerifiedProfileUseCase
+    private lateinit var subject4: VerifiedProfileUseCase
+    private lateinit var subject5: VerifiedProfileUseCase
 
     @Test
     fun testGetVerifiedProfileIssuerSuccess() {
-        subject = VerifiedProfileUseCaseImpl(
+        subject1 = VerifiedProfileUseCaseImpl(
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1)
             ),
             EmptyExecutor()
         )
 
-        subject.getVerifiedProfile(
+        subject1.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
             )
@@ -49,14 +53,14 @@ internal class VerifiedProfileUseCaseTest {
 
     @Test
     fun testGetVerifiedProfileIssuerInspector1Success() {
-        subject = VerifiedProfileUseCaseImpl(
+        subject2 = VerifiedProfileUseCaseImpl(
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
             ),
             EmptyExecutor()
         )
 
-        subject.getVerifiedProfile(
+        subject2.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
             )
@@ -76,14 +80,14 @@ internal class VerifiedProfileUseCaseTest {
 
     @Test
     fun testGetVerifiedProfileIssuerInspector2Success() {
-        subject = VerifiedProfileUseCaseImpl(
+        subject3 = VerifiedProfileUseCaseImpl(
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
             ),
             EmptyExecutor()
         )
 
-        subject.getVerifiedProfile(
+        subject3.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
             )
@@ -103,14 +107,14 @@ internal class VerifiedProfileUseCaseTest {
 
     @Test
     fun testGetVerifiedProfileIssuerNotaryIssuer2Success() {
-        subject = VerifiedProfileUseCaseImpl(
+        subject4 = VerifiedProfileUseCaseImpl(
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
             ),
             EmptyExecutor()
         )
 
-        subject.getVerifiedProfile(
+        subject4.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
             )
@@ -130,14 +134,14 @@ internal class VerifiedProfileUseCaseTest {
 
     @Test
     fun testGetVerifiedProfileIssuerNotaryIssuerSuccess() {
-        subject = VerifiedProfileUseCaseImpl(
+        subject5 = VerifiedProfileUseCaseImpl(
             VerifiedProfileRepositoryImpl(
                 NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
             ),
             EmptyExecutor()
         )
 
-        subject.getVerifiedProfile(
+        subject5.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
             )
