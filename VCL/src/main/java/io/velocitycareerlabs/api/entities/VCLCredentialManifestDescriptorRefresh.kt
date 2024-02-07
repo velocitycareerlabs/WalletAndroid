@@ -13,7 +13,7 @@ import java.net.URI
 class VCLCredentialManifestDescriptorRefresh(
     service: VCLService,
     val credentialIds: List<String>,
-    didJwk: VCLDidJwk? = null,
+    didJwk: VCLDidJwk,
     remoteCryptoServicesToken: VCLToken? = null
 ): VCLCredentialManifestDescriptor(
     uri = service.serviceEndpoint,

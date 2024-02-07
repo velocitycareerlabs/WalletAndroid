@@ -35,9 +35,9 @@ class VCLJwtSignServiceLocalImpl(
     private val keyService: VCLKeyService
 ): VCLJwtSignService {
     override fun sign(
-        didJwk: VCLDidJwk,
-        nonce: String?,
         jwtDescriptor: VCLJwtDescriptor,
+        nonce: String?,
+        didJwk: VCLDidJwk,
         remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
@@ -47,13 +47,15 @@ class VCLJwtSignServiceLocalImpl(
                     try {
                         val header = JWSHeader.Builder(JWSAlgorithm.ES256K)
                             .type(JOSEObjectType(GlobalConfig.TypeJwt))
-                            .jwk(ecKey.toPublicJWK()) // always provide
-                            .keyID(didJwk.kid) // always provide
+//        HeaderValues.XVnfProtocolVersion == VCLXVnfProtocolVersion.XVnfProtocolVersion1
+                            .jwk(ecKey.toPublicJWK())
+//        HeaderValues.XVnfProtocolVersion == VCLXVnfProtocolVersion.XVnfProtocolVersion2
+                            .keyID(didJwk.kid)
                         val jwtHeader = header.build()
 
                         val signedJWT = SignedJWT(
                             jwtHeader,
-                            generateClaims(nonce, jwtDescriptor)
+                            generateClaims(jwtDescriptor, nonce)
                         )
                         signedJWT.sign(ECDSASigner(ecKey))
 
@@ -81,9 +83,9 @@ class VCLJwtSignServiceLocalImpl(
     }
 
     private fun generateClaims(
+        jwtDescriptor: VCLJwtDescriptor,
         nonce: String?,
-        jwtDescriptor: VCLJwtDescriptor
-    ): JWTClaimsSet {
+        ): JWTClaimsSet {
         val curDate = Date()
         val claimsSetBuilder = JWTClaimsSet.Builder()
             .audience(jwtDescriptor.aud)

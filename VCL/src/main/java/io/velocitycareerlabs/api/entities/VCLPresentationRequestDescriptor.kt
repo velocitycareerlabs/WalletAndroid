@@ -14,7 +14,7 @@ import java.net.URI
 class VCLPresentationRequestDescriptor(
     val deepLink: VCLDeepLink,
     val pushDelegate: VCLPushDelegate? = null,
-    val didJwk: VCLDidJwk? = null,
+    val didJwk: VCLDidJwk,
     val remoteCryptoServicesToken: VCLToken? = null
     ) {
     val endpoint get() = generateQueryParams()?.let { queryParams ->

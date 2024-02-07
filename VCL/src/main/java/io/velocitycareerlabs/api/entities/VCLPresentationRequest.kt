@@ -12,7 +12,7 @@ data class VCLPresentationRequest(
     val publicJwk: VCLPublicJwk,
     val deepLink: VCLDeepLink,
     val pushDelegate: VCLPushDelegate? = null,
-    val didJwk: VCLDidJwk? = null,
+    val didJwk: VCLDidJwk,
     val remoteCryptoServicesToken: VCLToken? = null
     ) {
     companion object CodingKeys {

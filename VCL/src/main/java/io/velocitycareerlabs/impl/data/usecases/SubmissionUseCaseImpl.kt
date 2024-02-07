@@ -24,14 +24,12 @@ internal class SubmissionUseCaseImpl(
     ) {
         executor.runOnBackground {
             jwtServiceRepository.generateSignedJwt(
-                kid = submission.didJwk?.kid,
                 jwtDescriptor = VCLJwtDescriptor(
-                    keyId = submission.didJwk?.keyId,
-                    payload = submission.generatePayload(submission.didJwk?.did),
+                    payload = submission.generatePayload(submission.didJwk.did),
                     jti = submission.jti,
-                    iss = submission.didJwk?.did ?: ""
+                    iss = submission.didJwk.did
                 ),
-                remoteCryptoServicesToken = submission.remoteCryptoServicesToken,
+                didJwk = submission.didJwk,
                 completionBlock = { signedJwtResult ->
                     signedJwtResult.handleResult(
                         { jwt ->

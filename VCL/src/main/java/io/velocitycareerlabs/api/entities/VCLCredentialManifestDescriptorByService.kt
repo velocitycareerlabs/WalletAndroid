@@ -16,7 +16,7 @@ class VCLCredentialManifestDescriptorByService(
     issuingType: VCLIssuingType = VCLIssuingType.Career,
     credentialTypes: List<String>? = null,
     pushDelegate: VCLPushDelegate? = null,
-    didJwk: VCLDidJwk? = null,
+    didJwk: VCLDidJwk,
     remoteCryptoServicesToken: VCLToken? = null
 ): VCLCredentialManifestDescriptor(
     uri = service.serviceEndpoint,

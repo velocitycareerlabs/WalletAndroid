@@ -19,7 +19,7 @@ abstract class VCLSubmission(
     val verifiableCredentials: List<VCLVerifiableCredential>? = null,
     val pushDelegate: VCLPushDelegate? = null,
     val vendorOriginContext: String? = null,
-    val didJwk: VCLDidJwk? = null,
+    val didJwk: VCLDidJwk,
     val remoteCryptoServicesToken: VCLToken? = null
 ) {
     val jti = UUID.randomUUID().toString()

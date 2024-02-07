@@ -11,7 +11,7 @@ class VCLCredentialManifestDescriptorByDeepLink(
     deepLink: VCLDeepLink,
     issuingType: VCLIssuingType = VCLIssuingType.Career,
     pushDelegate: VCLPushDelegate? = null,
-    didJwk: VCLDidJwk? = null,
+    didJwk: VCLDidJwk,
     remoteCryptoServicesToken: VCLToken? = null
 ): VCLCredentialManifestDescriptor(
     uri = deepLink.requestUri,

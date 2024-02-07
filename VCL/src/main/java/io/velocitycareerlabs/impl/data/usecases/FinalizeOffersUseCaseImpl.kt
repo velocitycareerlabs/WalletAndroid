@@ -36,14 +36,12 @@ internal class FinalizeOffersUseCaseImpl(
     ) {
         executor.runOnBackground {
             this.jwtServiceRepository.generateSignedJwt(
-                kid = finalizeOffersDescriptor.didJwk?.kid,
-                nonce = finalizeOffersDescriptor.offers.challenge,
                 jwtDescriptor = VCLJwtDescriptor(
-                    keyId = finalizeOffersDescriptor.didJwk?.keyId,
                     iss = finalizeOffersDescriptor.didJwk?.did ?: UUID.randomUUID().toString(),
                     aud = finalizeOffersDescriptor.aud
                 ),
-                remoteCryptoServicesToken = finalizeOffersDescriptor.remoteCryptoServicesToken
+                nonce = finalizeOffersDescriptor.offers.challenge,
+                didJwk = finalizeOffersDescriptor.didJwk,
             ) { proofJwtResult ->
                 proofJwtResult.handleResult(
                     successHandler = { proof ->
