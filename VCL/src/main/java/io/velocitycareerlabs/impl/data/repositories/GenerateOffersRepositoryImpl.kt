@@ -70,7 +70,7 @@ internal class GenerateOffersRepositoryImpl(
                 ),
                 responseCode = offersResponse.code,
                 sessionToken = sessionToken,
-                challenge = payload.optString(VCLOffers.CodingKeys.KeyChallenge) ?: ""
+                challenge = payload.optString(VCLOffers.CodingKeys.KeyChallenge)
             )
         } ?: run {
 //            VCLXVnfProtocolVersion.XVnfProtocolVersion1
@@ -80,7 +80,6 @@ internal class GenerateOffersRepositoryImpl(
                     all = Utils.offersFromJsonArray(offersJsonArray),
                     responseCode = offersResponse.code,
                     sessionToken = sessionToken,
-                    challenge = ""
                 )
             } ?: run {
 //                No offers
@@ -89,8 +88,7 @@ internal class GenerateOffersRepositoryImpl(
                     all = listOf(),
                     responseCode = offersResponse.code,
                     sessionToken = sessionToken,
-                    challenge = ""
-                )
+                    )
             }
         }
     }

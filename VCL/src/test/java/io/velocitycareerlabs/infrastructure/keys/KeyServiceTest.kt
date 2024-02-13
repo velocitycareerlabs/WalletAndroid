@@ -5,8 +5,10 @@
 package io.velocitycareerlabs.infrastructure.keys
 
 import android.os.Build
+import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.handleResult
+import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.extensions.decodeBase64
 import io.velocitycareerlabs.impl.extensions.toJsonObject
@@ -29,7 +31,9 @@ class KeyServiceTest {
     }
 
     @Test
-    fun testGenerateDidJwk() {
+    fun testGenerateDidJwkES256() {
+        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.ES256
+
         subject.generateDidJwk(null) { didJwkResult ->
             didJwkResult.handleResult({ didJwk ->
                 val jwkJson = didJwk.publicJwk.valueJson
@@ -40,8 +44,31 @@ class KeyServiceTest {
 
                 assert(jwkJson.optString("kty") == "EC")
                 assert(jwkJson.optString("use") == "sig")
-                assert(jwkJson.optString("crv") == "secp256k1")
-//        assert(jwkJson?.optString("alg") == "ES256K")
+                assert(jwkJson.optString("crv") == VCLSignatureAlgorithm.ES256.curve.name)
+                assert(jwkJson.optString("use") == "sig")
+                assert(jwkJson.optString("x") != null)
+                assert(jwkJson.optString("y") != null)
+            }, {
+                assert(false) { "Failed to generate did:jwk $it" }
+            })
+        }
+    }
+
+    @Test
+    fun testGenerateDidJwkSecp256k1() {
+        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.SECP256k1
+
+        subject.generateDidJwk(null) { didJwkResult ->
+            didJwkResult.handleResult({ didJwk ->
+                val jwkJson = didJwk.publicJwk.valueJson
+
+                assert(didJwk.did.startsWith(VCLDidJwk.DidJwkPrefix))
+                assert(didJwk.kid.startsWith(VCLDidJwk.DidJwkPrefix))
+                assert(didJwk.kid.endsWith(VCLDidJwk.DidJwkSuffix))
+
+                assert(jwkJson.optString("kty") == "EC")
+                assert(jwkJson.optString("use") == "sig")
+                assert(jwkJson.optString("crv") == VCLSignatureAlgorithm.SECP256k1.curve.name)
                 assert(jwkJson.optString("use") == "sig")
                 assert(jwkJson.optString("x") != null)
                 assert(jwkJson.optString("y") != null)

@@ -39,6 +39,7 @@ internal class VCLImpl: VCL {
 
         private const val ModelsToInitializeAmount = 3
     }
+
     private lateinit var initializationDescriptor: VCLInitializationDescriptor
 
     private lateinit var credentialTypesModel: CredentialTypesModel
@@ -214,6 +215,8 @@ internal class VCLImpl: VCL {
     private fun initGlobalConfigurations() {
         GlobalConfig.CurrentEnvironment = initializationDescriptor.environment
         GlobalConfig.XVnfProtocolVersion = initializationDescriptor.xVnfProtocolVersion
+        GlobalConfig.SignatureAlgorithm =
+            initializationDescriptor.cryptoServicesDescriptor.signatureAlgorithm
         GlobalConfig.IsDebugOn = initializationDescriptor.isDebugOn
     }
 
@@ -266,14 +269,12 @@ internal class VCLImpl: VCL {
         presentationSubmissionUseCase.submit(
             submission = presentationSubmission
         ) { presentationSubmissionResult ->
-            presentationSubmissionResult.handleResult(
-                {
-                    successHandler(it)
-                },
-                {
-                    logError("submit presentation", it)
-                    errorHandler(it)
-                }
+            presentationSubmissionResult.handleResult({
+                successHandler(it)
+            }, {
+                logError("submit presentation", it)
+                errorHandler(it)
+            }
             )
         }
     }
@@ -284,14 +285,12 @@ internal class VCLImpl: VCL {
         errorHandler: (VCLError) -> Unit
     ) {
         exchangeProgressUseCase.getExchangeProgress(exchangeDescriptor) { presentationSubmissionResult ->
-            presentationSubmissionResult.handleResult(
-                {
-                    successHandler(it)
-                },
-                {
-                    logError("getExchangeProgress", it)
-                    errorHandler(it)
-                }
+            presentationSubmissionResult.handleResult({
+                successHandler(it)
+            }, {
+                logError("getExchangeProgress", it)
+                errorHandler(it)
+            }
             )
         }
     }
@@ -302,14 +301,12 @@ internal class VCLImpl: VCL {
         errorHandler: (VCLError) -> Unit
     ) {
         organizationsUseCase.searchForOrganizations(organizationsSearchDescriptor) { organization ->
-            organization.handleResult(
-                {
-                    successHandler(it)
-                },
-                {
-                    logError("searchForOrganizations", it)
-                    errorHandler(it)
-                }
+            organization.handleResult({
+                successHandler(it)
+            }, {
+                logError("searchForOrganizations", it)
+                errorHandler(it)
+            }
             )
         }
     }
@@ -319,7 +316,10 @@ internal class VCLImpl: VCL {
         successHandler: (VCLCredentialManifest) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        VCLLog.d(TAG, "credentialManifestDescriptor: ${credentialManifestDescriptor.toPropsString()}")
+        VCLLog.d(
+            TAG,
+            "credentialManifestDescriptor: ${credentialManifestDescriptor.toPropsString()}"
+        )
         credentialManifestDescriptor.did?.let { did ->
             profileServiceTypeVerifier.verifyServiceTypeOfVerifiedProfile(
                 verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = did),
@@ -329,14 +329,12 @@ internal class VCLImpl: VCL {
                         credentialManifestDescriptor,
                         verifiedProfile
                     ) { credentialManifest ->
-                        credentialManifest.handleResult(
-                            {
-                                successHandler(it)
-                            },
-                            {
-                                logError("getCredentialManifest", it)
-                                errorHandler(it)
-                            }
+                        credentialManifest.handleResult({
+                            successHandler(it)
+                        }, {
+                            logError("getCredentialManifest", it)
+                            errorHandler(it)
+                        }
                         )
                     }
                 },

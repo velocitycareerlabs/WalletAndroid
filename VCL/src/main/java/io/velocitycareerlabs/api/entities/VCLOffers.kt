@@ -15,7 +15,7 @@ data class VCLOffers (
     val all: List<VCLOffer>,
     val responseCode: Int,
     val sessionToken: VCLToken,
-    val challenge: String,
+    val challenge: String? = null,
 ) {
     companion object CodingKeys {
         const val KeyOffers = "offers"

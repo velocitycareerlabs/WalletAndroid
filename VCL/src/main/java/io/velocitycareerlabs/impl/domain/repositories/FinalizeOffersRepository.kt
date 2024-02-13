@@ -16,7 +16,7 @@ internal interface FinalizeOffersRepository {
     fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         sessionToken: VCLToken,
-        proof: VCLJwt,
+        proof: VCLJwt? = null,
         completionBlock: (VCLResult<List<VCLJwt>>) -> Unit
     )
 }

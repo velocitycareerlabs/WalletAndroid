@@ -16,6 +16,7 @@ import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.domain.infrastructure.db.SecretStoreService
 import io.velocitycareerlabs.api.keys.VCLKeyService
+import io.velocitycareerlabs.impl.GlobalConfig
 import java.util.UUID
 
 internal class VCLKeyServiceLocalImpl(
@@ -50,7 +51,7 @@ internal class VCLKeyServiceLocalImpl(
     ) {
         try {
             val keyId = UUID.randomUUID().toString()
-            val ecKey = ECKeyGenerator(Curve.SECP256K1)
+            val ecKey = ECKeyGenerator(GlobalConfig.SignatureAlgorithm.curve)
                 .keyUse(KeyUse.SIGNATURE)
                 .keyID(keyId) // must be provided, otherwise ecKey.keyID is null
 //            .keyStore(KeyStoreProvider.Instance.keyStore)

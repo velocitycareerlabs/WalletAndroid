@@ -9,6 +9,7 @@ package io.velocitycareerlabs.impl
 
 import io.velocitycareerlabs.BuildConfig
 import io.velocitycareerlabs.api.VCLEnvironment
+import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 
 internal object GlobalConfig {
@@ -16,6 +17,7 @@ internal object GlobalConfig {
 
     var CurrentEnvironment = VCLEnvironment.Prod
     var XVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1
+    var SignatureAlgorithm = VCLSignatureAlgorithm.ES256
 
     var IsDebugOn = false //BuildConfig.DEBUG
 

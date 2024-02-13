@@ -27,7 +27,7 @@ internal class FinalizeOffersRepositoryImpl(
     override fun finalizeOffers(
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         sessionToken: VCLToken,
-        proof: VCLJwt,
+        proof: VCLJwt?,
         completionBlock: (VCLResult<List<VCLJwt>>) -> Unit
     ) {
         networkService.sendRequest(
@@ -36,7 +36,7 @@ internal class FinalizeOffersRepositoryImpl(
                 Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${sessionToken.value}"),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
-            body = finalizeOffersDescriptor.generateRequestBody(jwt = proof).toString(),
+            body = finalizeOffersDescriptor.generateRequestBody(proof = proof).toString(),
             method = Request.HttpMethod.POST,
             contentType = Request.ContentTypeApplicationJson,
             completionBlock = { result ->

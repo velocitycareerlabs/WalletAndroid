@@ -15,6 +15,7 @@ import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.entities.initialization.VCLKeyServiceUrls
 import io.velocitycareerlabs.api.keys.VCLKeyService
+import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.repositories.HeaderKeys
 import io.velocitycareerlabs.impl.data.repositories.HeaderValues
@@ -75,17 +76,16 @@ internal class VCLKeyServiceRemoteImpl(
 
     private fun generatePayloadToCreateDidJwk(): JSONObject {
         val retVal = JSONObject()
-        retVal.putOpt(CodingKeys.KeyCrv, CodingKeys.ValueCrv)
+        retVal.putOpt(CodingKeys.KeyCrv, GlobalConfig.SignatureAlgorithm.curve)
         return retVal
     }
 
     companion object CodingKeys {
-        val KeyCrv = "crv"
-        val ValueCrv = "secp256k1"
+        const val KeyCrv = "crv"
 
-        val KeyDid = "did"
-        val KeyKid = "kid"
-        val KeyKeyId = "keyId"
-        val KeyPublicJwk = "publicJwk"
+        const val KeyDid = "did"
+        const val KeyKid = "kid"
+        const val KeyKeyId = "keyId"
+        const val KeyPublicJwk = "publicJwk"
     }
 }
