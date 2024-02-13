@@ -96,7 +96,7 @@ class VCLFinalizeOffersDescriptorTest {
             didJwk = didJwk
         ) { jwtResult ->
             jwtResult.handleResult({ jwt ->
-                val requestBody = subject.generateRequestBody(jwt = jwt)
+                val requestBody = subject.generateRequestBody(proof = jwt)
 
                 assert((requestBody["exchangeId"] as? String) == "645e315309237c760ac022b1")
                 assert(requestBody["approvedOfferIds"] as? JSONArray == approvedOfferIds.toJsonArray())

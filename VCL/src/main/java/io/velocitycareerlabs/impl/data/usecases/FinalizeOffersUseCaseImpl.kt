@@ -17,7 +17,6 @@ import io.velocitycareerlabs.impl.domain.usecases.FinalizeOffersUseCase
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialsByDeepLinkVerifier
 import io.velocitycareerlabs.impl.utils.VCLLog
-import java.util.UUID
 
 internal class FinalizeOffersUseCaseImpl(
     private val finalizeOffersRepository: FinalizeOffersRepository,
@@ -35,64 +34,87 @@ internal class FinalizeOffersUseCaseImpl(
         completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit
     ) {
         executor.runOnBackground {
-            this.jwtServiceRepository.generateSignedJwt(
-                jwtDescriptor = VCLJwtDescriptor(
-                    iss = finalizeOffersDescriptor.didJwk?.did ?: UUID.randomUUID().toString(),
-                    aud = finalizeOffersDescriptor.aud
-                ),
-                nonce = finalizeOffersDescriptor.offers.challenge,
-                didJwk = finalizeOffersDescriptor.didJwk,
-            ) { proofJwtResult ->
-                proofJwtResult.handleResult(
-                    successHandler = { proof ->
-                        this.finalizeOffersRepository.finalizeOffers(
-                            sessionToken = sessionToken,
-                            proof = proof,
-                            finalizeOffersDescriptor = finalizeOffersDescriptor
-                        ) { jwtCredentialsListResult ->
-                            jwtCredentialsListResult.handleResult(
-                                successHandler = { jwtCredentials ->
-                                    verifyCredentialsByDeepLink(
-                                        jwtCredentials,
-                                        finalizeOffersDescriptor
-                                    ) { verifyCredentialsByDeepLinkResult ->
-                                        verifyCredentialsByDeepLinkResult.handleResult(
-                                            successHandler = {
-                                                verifyCredentialsByIssuer(
-                                                    jwtCredentials,
-                                                    finalizeOffersDescriptor
-                                                ) { verifyCredentialsByIssuerResult ->
-                                                    verifyCredentialsByIssuerResult.handleResult({
-                                                        verifyCredentialByDid(
-                                                            jwtCredentials,
-                                                            finalizeOffersDescriptor
-                                                        ) { jwtVerifiableCredentialsResult ->
-                                                            executor.runOnMain {
-                                                                completionBlock(
-                                                                    jwtVerifiableCredentialsResult
-                                                                )
-                                                            }
-                                                        }
-                                                    }, { error ->
-                                                        onError(error, completionBlock)
-                                                    })
-                                                }
-                                            },
-                                            errorHandler = { error ->
-                                                onError(error, completionBlock)
-                                            })
-                                    }
-                                },
-                                errorHandler = { error ->
-                                    onError(error, completionBlock)
-                                })
+            finalizeOffersDescriptor.offers.challenge?.let { challenge ->
+                this.jwtServiceRepository.generateSignedJwt(
+                    jwtDescriptor = VCLJwtDescriptor(
+                        iss = finalizeOffersDescriptor.didJwk.did,
+                        aud = finalizeOffersDescriptor.aud
+                    ),
+                    nonce = challenge,
+                    didJwk = finalizeOffersDescriptor.didJwk,
+                    remoteCryptoServicesToken = finalizeOffersDescriptor.remoteCryptoServicesToken
+                ) { proofJwtResult ->
+                    proofJwtResult.handleResult(
+                        successHandler = { proof ->
+                            finalizeOffersInvoke(
+                                finalizeOffersDescriptor = finalizeOffersDescriptor,
+                                sessionToken = sessionToken,
+                                proof = proof,
+                                completionBlock = completionBlock
+                            )
+                        },
+                        errorHandler = { error ->
+                            onError(error, completionBlock)
                         }
-                    },
-                    errorHandler = { error ->
-                        onError(error, completionBlock)
-                    }
+                    )
+                }
+            } ?: run {
+                finalizeOffersInvoke(
+                    finalizeOffersDescriptor = finalizeOffersDescriptor,
+                    sessionToken = sessionToken,
+                    completionBlock = completionBlock
                 )
             }
+        }
+    }
+
+    private fun finalizeOffersInvoke(
+        finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
+        sessionToken: VCLToken,
+        proof: VCLJwt? = null,
+        completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit
+    ) {
+        this.finalizeOffersRepository.finalizeOffers(
+            sessionToken = sessionToken,
+            proof = proof,
+            finalizeOffersDescriptor = finalizeOffersDescriptor
+        ) { jwtCredentialsListResult ->
+            jwtCredentialsListResult.handleResult(
+                successHandler = { jwtCredentials ->
+                    verifyCredentialsByDeepLink(
+                        jwtCredentials,
+                        finalizeOffersDescriptor
+                    ) { verifyCredentialsByDeepLinkResult ->
+                        verifyCredentialsByDeepLinkResult.handleResult(
+                            successHandler = {
+                                verifyCredentialsByIssuer(
+                                    jwtCredentials,
+                                    finalizeOffersDescriptor
+                                ) { verifyCredentialsByIssuerResult ->
+                                    verifyCredentialsByIssuerResult.handleResult({
+                                        verifyCredentialByDid(
+                                            jwtCredentials,
+                                            finalizeOffersDescriptor
+                                        ) { jwtVerifiableCredentialsResult ->
+                                            executor.runOnMain {
+                                                completionBlock(
+                                                    jwtVerifiableCredentialsResult
+                                                )
+                                            }
+                                        }
+                                    }, { error ->
+                                        onError(error, completionBlock)
+                                    })
+                                }
+                            },
+                            errorHandler = { error ->
+                                onError(error, completionBlock)
+                            })
+                    }
+                },
+                errorHandler = { error ->
+                    onError(error, completionBlock)
+                })
         }
     }
     

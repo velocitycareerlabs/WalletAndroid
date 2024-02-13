@@ -8,9 +8,11 @@
 package io.velocitycareerlabs.api.entities.initialization
 
 import io.velocitycareerlabs.api.VCLCryptoServiceType
+import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 
 data class VCLCryptoServicesDescriptor(
     val cryptoServiceType: VCLCryptoServiceType = VCLCryptoServiceType.Local,
+    val signatureAlgorithm: VCLSignatureAlgorithm = VCLSignatureAlgorithm.ES256,
     val injectedCryptoServicesDescriptor: VCLInjectedCryptoServicesDescriptor? = null,
     val remoteCryptoServicesUrlsDescriptor: VCLRemoteCryptoServicesUrlsDescriptor? = null
 )

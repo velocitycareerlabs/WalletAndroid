@@ -15,6 +15,7 @@ import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.VCLCryptoServiceType
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCLProvider
+import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
@@ -75,18 +76,19 @@ class MainActivity : AppCompatActivity() {
             initializationDescriptor = VCLInitializationDescriptor(
                 environment = environment,
                 xVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2,
-//                cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
-//                    cryptoServiceType = VCLCryptoServiceType.Remote,
-//                    remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
-//                        keyServiceUrls = VCLKeyServiceUrls(
-//                            createDidKeyServiceUrl = Constants.getCreateDidKeyServiceUrl(environment = environment)
-//                        ),
-//                        jwtServiceUrls = VCLJwtServiceUrls(
-//                            jwtSignServiceUrl = Constants.getJwtSignServiceUrl(environment = environment),
-//                            jwtVerifyServiceUrl = Constants.getJwtVerifyServiceUrl(environment = environment)
-//                        )
-//                    )
-//                )
+                cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
+                    signatureAlgorithm = VCLSignatureAlgorithm.ES256,
+                    cryptoServiceType = VCLCryptoServiceType.Remote,
+                    remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
+                        keyServiceUrls = VCLKeyServiceUrls(
+                            createDidKeyServiceUrl = Constants.getCreateDidKeyServiceUrl(environment = environment)
+                        ),
+                        jwtServiceUrls = VCLJwtServiceUrls(
+                            jwtSignServiceUrl = Constants.getJwtSignServiceUrl(environment = environment),
+                            jwtVerifyServiceUrl = Constants.getJwtVerifyServiceUrl(environment = environment)
+                        )
+                    )
+                )
             ),
             successHandler = {
                 Log.d(TAG, "VCL Initialization succeed!")
