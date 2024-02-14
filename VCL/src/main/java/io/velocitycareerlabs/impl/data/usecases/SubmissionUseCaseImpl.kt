@@ -29,6 +29,7 @@ internal class SubmissionUseCaseImpl(
                     jti = submission.jti,
                     iss = submission.didJwk.did
                 ),
+                remoteCryptoServicesToken = submission.remoteCryptoServicesToken,
                 didJwk = submission.didJwk,
                 completionBlock = { signedJwtResult ->
                     signedJwtResult.handleResult(
