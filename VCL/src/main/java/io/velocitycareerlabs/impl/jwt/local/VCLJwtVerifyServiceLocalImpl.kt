@@ -34,4 +34,7 @@ class VCLJwtVerifyServiceLocalImpl: VCLJwtVerifyService {
             completionBlock(VCLResult.Failure(VCLError(ex)))
         }
     }
+
+//    fun getVerifier(publicJwk: VCLPublicJwk) {
+//    }
 }
