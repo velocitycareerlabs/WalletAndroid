@@ -81,6 +81,7 @@ internal class JwtServiceUseCaseTest {
         ) {
             it.handleResult(
                 { jwt ->
+                    assert(jwt.header?.toJSONObject()?.get("alg") as? String == VCLSignatureAlgorithm.SECP256k1.jwsAlgorithm.name)
                     assert(((jwt.header?.toJSONObject()?.get("jwk") as? Map<*, *>)!!["crv"] as? String) == VCLSignatureAlgorithm.SECP256k1.curve.name)
                     assert(jwt.header?.toJSONObject()?.get("typ") as? String == "JWT")
                 },
@@ -106,6 +107,7 @@ internal class JwtServiceUseCaseTest {
         ) {
             it.handleResult(
                 { jwt ->
+                    assert(jwt.header?.toJSONObject()?.get("alg") as? String == VCLSignatureAlgorithm.ES256.jwsAlgorithm.name)
                     assert(((jwt.header?.toJSONObject()?.get("jwk") as? Map<*, *>)!!["crv"] as? String) == VCLSignatureAlgorithm.ES256.curve.name)
                     assert(jwt.header?.toJSONObject()?.get("typ") as? String == "JWT")
                 },

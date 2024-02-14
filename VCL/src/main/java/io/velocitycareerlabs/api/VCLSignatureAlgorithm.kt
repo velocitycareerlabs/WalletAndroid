@@ -29,7 +29,7 @@ enum class VCLSignatureAlgorithm(val value: String) {
             when (value) {
                 ES256.value -> ES256
                 SECP256k1.value -> SECP256k1
-                else -> ES256
+                else -> SECP256k1
             }
     }
 }
