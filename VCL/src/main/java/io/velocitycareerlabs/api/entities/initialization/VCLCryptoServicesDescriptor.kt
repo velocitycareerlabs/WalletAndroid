@@ -12,7 +12,6 @@ import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 
 data class VCLCryptoServicesDescriptor(
     val cryptoServiceType: VCLCryptoServiceType = VCLCryptoServiceType.Local,
-    val signatureAlgorithm: VCLSignatureAlgorithm = VCLSignatureAlgorithm.SECP256k1,
     val injectedCryptoServicesDescriptor: VCLInjectedCryptoServicesDescriptor? = null,
     val remoteCryptoServicesUrlsDescriptor: VCLRemoteCryptoServicesUrlsDescriptor? = null
 )

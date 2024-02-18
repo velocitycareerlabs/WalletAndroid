@@ -17,7 +17,6 @@ internal object GlobalConfig {
 
     var CurrentEnvironment = VCLEnvironment.Prod
     var XVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion1
-    var SignatureAlgorithm = VCLSignatureAlgorithm.SECP256k1
 
     var IsDebugOn = false //BuildConfig.DEBUG
 

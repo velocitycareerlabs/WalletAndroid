@@ -7,15 +7,15 @@
 
 package io.velocitycareerlabs.impl.keys
 
+import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLResult
-import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.entities.initialization.VCLKeyServiceUrls
 import io.velocitycareerlabs.api.keys.VCLKeyService
-import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.repositories.HeaderKeys
 import io.velocitycareerlabs.impl.data.repositories.HeaderValues
@@ -28,17 +28,17 @@ internal class VCLKeyServiceRemoteImpl(
     private val keyServiceUrls: VCLKeyServiceUrls
 ) : VCLKeyService {
     override fun generateDidJwk(
-        remoteCryptoServicesToken: VCLToken?,
+        didJwkDescriptor: VCLDidJwkDescriptor,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     ) {
         networkService.sendRequest(
             endpoint = keyServiceUrls.createDidKeyServiceUrl,
-            body = generatePayloadToCreateDidJwk().toString(),
+            body = generatePayloadToCreateDidJwk(didJwkDescriptor.signatureAlgorithm).toString(),
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.POST,
             headers = listOf(
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion),
-                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${remoteCryptoServicesToken?.value}")
+                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${didJwkDescriptor.remoteCryptoServicesToken?.value}")
             ),
             completionBlock = { didJwkResult ->
                 didJwkResult.handleResult(
@@ -74,9 +74,11 @@ internal class VCLKeyServiceRemoteImpl(
         )
     }
 
-    private fun generatePayloadToCreateDidJwk(): JSONObject {
+    private fun generatePayloadToCreateDidJwk(
+        signatureAlgorithm: VCLSignatureAlgorithm
+    ): JSONObject {
         val retVal = JSONObject()
-        retVal.putOpt(CodingKeys.KeyCrv, GlobalConfig.SignatureAlgorithm.curve)
+        retVal.putOpt(CodingKeys.KeyCrv, signatureAlgorithm.curve)
         return retVal
     }
 

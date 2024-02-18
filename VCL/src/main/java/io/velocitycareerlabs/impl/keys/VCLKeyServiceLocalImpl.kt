@@ -8,7 +8,9 @@ import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
+import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.VCLResult
@@ -23,10 +25,12 @@ internal class VCLKeyServiceLocalImpl(
     private val secretStoreService: SecretStoreService,
 ): VCLKeyService {
     override fun generateDidJwk(
-        remoteCryptoServicesToken: VCLToken?,
+        didJwkDescriptor: VCLDidJwkDescriptor,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     ) {
-        generateSecret { ecKeyResult ->
+        generateSecret(
+            signatureAlgorithm = didJwkDescriptor.signatureAlgorithm
+        ) { ecKeyResult ->
             ecKeyResult.handleResult(
                 successHandler = { ecKey ->
                     completionBlock(
@@ -47,11 +51,12 @@ internal class VCLKeyServiceLocalImpl(
     }
 
     override fun generateSecret(
+        signatureAlgorithm: VCLSignatureAlgorithm,
         completionBlock: (VCLResult<ECKey>) -> Unit
     ) {
         try {
             val keyId = UUID.randomUUID().toString()
-            val ecKey = ECKeyGenerator(GlobalConfig.SignatureAlgorithm.curve)
+            val ecKey = ECKeyGenerator(signatureAlgorithm.curve)
                 .keyUse(KeyUse.SIGNATURE)
                 .keyID(keyId) // must be provided, otherwise ecKey.keyID is null
 //            .keyStore(KeyStoreProvider.Instance.keyStore)
