@@ -8,19 +8,24 @@
 package io.velocitycareerlabs.infrastructure.resources.valid
 
 import com.nimbusds.jose.jwk.ECKey
+import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.keys.VCLKeyService
 
 class VCLKeyServiceMock: VCLKeyService {
     override fun generateDidJwk(
-        remoteCryptoServicesToken: VCLToken?,
+        didJwkDescriptor: VCLDidJwkDescriptor,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     ) {
     }
 
-    override fun generateSecret(completionBlock: (VCLResult<ECKey>) -> Unit) {
+    override fun generateSecret(
+        signatureAlgorithm: VCLSignatureAlgorithm,
+        completionBlock: (VCLResult<ECKey>) -> Unit
+    ) {
     }
 
     override fun retrieveSecretReference(
@@ -29,6 +34,9 @@ class VCLKeyServiceMock: VCLKeyService {
     ) {
     }
 
-    override fun retrievePublicJwk(ecKey: ECKey, completionBlock: (VCLResult<ECKey>) -> Unit) {
+    override fun retrievePublicJwk(
+        ecKey: ECKey,
+        completionBlock: (VCLResult<ECKey>) -> Unit
+    ) {
     }
 }

@@ -7,12 +7,13 @@
 package io.velocitycareerlabs.impl.domain.repositories
 
 import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLToken
 
 internal interface KeyServiceRepository {
     fun generateDidJwk(
-        remoteCryptoServicesToken: VCLToken?,
+        didJwkDescriptor: VCLDidJwkDescriptor,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     )
 }

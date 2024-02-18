@@ -13,7 +13,6 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.JwtServiceUseCaseImpl
-import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.domain.usecases.JwtServiceUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.extensions.toPublicJwk
@@ -39,8 +38,9 @@ internal class JwtServiceUseCaseTest {
 
     @Before
     fun setUp() {
-        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.ES256
-        keyService.generateDidJwk(null) { jwkResult ->
+        keyService.generateDidJwk(
+            VCLDidJwkDescriptor(VCLSignatureAlgorithm.ES256)
+        ) { jwkResult ->
             jwkResult.handleResult({
                 didJwkES256 = it
             } ,{
@@ -48,8 +48,9 @@ internal class JwtServiceUseCaseTest {
             })
         }
 
-        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.SECP256k1
-        keyService.generateDidJwk(null) { jwkResult ->
+        keyService.generateDidJwk(
+            VCLDidJwkDescriptor(VCLSignatureAlgorithm.SECP256k1)
+        ) { jwkResult ->
             jwkResult.handleResult({
                 didJwkSECP256k1 = it
             } ,{
@@ -68,8 +69,6 @@ internal class JwtServiceUseCaseTest {
 
     @Test
     fun testSignSECP256k1() {
-        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.SECP256k1
-
         subject.generateSignedJwt(
             jwtDescriptor = VCLJwtDescriptor(
                 payload = JwtServiceMocks.Json.toJsonObject()!!,
@@ -94,8 +93,6 @@ internal class JwtServiceUseCaseTest {
 
     @Test
     fun testSignES256() {
-        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.ES256
-
         subject.generateSignedJwt(
             jwtDescriptor = VCLJwtDescriptor(
                 payload = JwtServiceMocks.Json.toJsonObject()!!,
@@ -120,8 +117,6 @@ internal class JwtServiceUseCaseTest {
 
     @Test
     fun testSignVerify() {
-        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.ES256
-
         subject.generateSignedJwt(
             jwtDescriptor = VCLJwtDescriptor(
                 payload = JwtServiceMocks.Json.toJsonObject()!!,
@@ -157,9 +152,9 @@ internal class JwtServiceUseCaseTest {
 
     @Test
     fun testSignByExistingKeySECP256k1() {
-        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.SECP256k1
-
-        keyService.generateDidJwk(null) { didJwkResult ->
+        keyService.generateDidJwk(
+            VCLDidJwkDescriptor(VCLSignatureAlgorithm.SECP256k1)
+        ) { didJwkResult ->
             didJwkResult.handleResult({ didJwk ->
                 subject.generateSignedJwt(
                     jwtDescriptor = VCLJwtDescriptor(
@@ -172,11 +167,14 @@ internal class JwtServiceUseCaseTest {
                 ) { jwtRes ->
                     jwtRes.handleResult(
                         { jwt ->
+                            val publicJwk1 = VCLPublicJwk(valueStr = jwt.header?.jwk.toString())
+                            val publicJwk2 = jwt.header?.toJSONObject()?.get("kid").toString().toPublicJwk()
+
+                            assert(publicJwk1.valueStr == publicJwk2.valueStr)
+
                             subject.verifyJwt(
                                 jwt = jwt,
-//                    publicJwk = VCLPublicJwk(valueStr = jwt.header.jwk.toString())
-                                // Person binding provided did:jwk only:
-                                publicJwk = jwt.header?.toJSONObject()?.get("kid").toString().toPublicJwk(),
+                                publicJwk = publicJwk1,
                                 remoteCryptoServicesToken = null
                             ) { isVerifiedRes ->
                                 isVerifiedRes.handleResult(
@@ -199,12 +197,12 @@ internal class JwtServiceUseCaseTest {
             })
         }
     }
-/*
+
     @Test
     fun testSignByExistingKeyES256() {
-        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.ES256
-
-        keyService.generateDidJwk(null) { didJwkResult ->
+        keyService.generateDidJwk(
+            VCLDidJwkDescriptor(VCLSignatureAlgorithm.ES256)
+        ) { didJwkResult ->
             didJwkResult.handleResult({ didJwk ->
                 subject.generateSignedJwt(
                     jwtDescriptor = VCLJwtDescriptor(
@@ -244,5 +242,4 @@ internal class JwtServiceUseCaseTest {
             })
         }
     }
-    */
 }

@@ -103,7 +103,7 @@ interface VCL {
     )
 
     fun generateDidJwk(
-        remoteCryptoServicesToken: VCLToken? = null,
+        didJwkDescriptor: VCLDidJwkDescriptor = VCLDidJwkDescriptor(),
         successHandler: (VCLDidJwk) -> Unit,
         errorHandler: (VCLError) -> Unit
     )

@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl.data.usecases
 
 import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
@@ -20,12 +21,12 @@ internal class KeyServiceUseCaseImpl(
 ): KeyServiceUseCase {
 
     override fun generateDidJwk(
-        remoteCryptoServicesToken: VCLToken?,
+        didJwkDescriptor: VCLDidJwkDescriptor,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     ) {
         executor.runOnBackground {
             keyServiceRepository.generateDidJwk(
-                remoteCryptoServicesToken,
+                didJwkDescriptor,
             ) {
                 executor.runOnMain {
                     completionBlock(it)
