@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl.data.repositories
 
 import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.keys.VCLKeyService
@@ -17,11 +18,11 @@ internal class KeyServiceRepositoryImpl(
     private val keyService: VCLKeyService
 ): KeyServiceRepository {
     override fun generateDidJwk(
-        remoteCryptoServicesToken: VCLToken?,
+        didJwkDescriptor: VCLDidJwkDescriptor,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     ) {
         keyService.generateDidJwk(
-            remoteCryptoServicesToken,
+            didJwkDescriptor,
         ) {
             completionBlock(it)
         }
