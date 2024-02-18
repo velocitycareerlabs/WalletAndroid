@@ -24,8 +24,6 @@ class VCLPublicJwk {
         this.valueStr = this.valueJson.toString()
     }
 
-    val curve: String get() = valueJson.optString("crv")
-
     internal enum class Format(val value: String) {
         jwk("jwk"),
         hex("hex"),

@@ -9,7 +9,6 @@ package io.velocitycareerlabs.infrastructure.jwt.local
 
 import android.os.Build
 import io.velocitycareerlabs.api.entities.VCLDidJwk
-import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.jwt.VCLJwtSignService
@@ -39,7 +38,7 @@ class JwtSignServiceLocalTest {
 
     @Before
     fun setUp() {
-        keyService.generateDidJwk(VCLDidJwkDescriptor()) { jwkResult ->
+        keyService.generateDidJwk(null) { jwkResult ->
             jwkResult.handleResult({
                 didJwk = it
             } ,{

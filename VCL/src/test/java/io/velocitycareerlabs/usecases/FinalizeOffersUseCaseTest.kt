@@ -66,7 +66,7 @@ internal class FinalizeOffersUseCaseTest {
 
     @Before
     fun setUp() {
-        keyService.generateDidJwk { jwkResult ->
+        keyService.generateDidJwk(null) { jwkResult ->
             jwkResult.handleResult({
                 didJwk = it
             } ,{

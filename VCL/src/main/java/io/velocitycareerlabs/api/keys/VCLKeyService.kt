@@ -8,16 +8,14 @@
 package io.velocitycareerlabs.api.keys
 
 import com.nimbusds.jose.jwk.ECKey
-import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.entities.VCLDidJwk
-import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.error.VCLError
 
 interface VCLKeyService {
     fun generateDidJwk(
-        didJwkDescriptor: VCLDidJwkDescriptor = VCLDidJwkDescriptor(),
+        remoteCryptoServicesToken: VCLToken?,
         completionBlock: (VCLResult<VCLDidJwk>) -> Unit
     )
 
@@ -25,7 +23,6 @@ interface VCLKeyService {
      * implemented for local crypto services only
      */
     fun generateSecret(
-        signatureAlgorithm: VCLSignatureAlgorithm,
         completionBlock: (VCLResult<ECKey>) -> Unit
     ) {
         completionBlock(VCLResult.Failure(VCLError(payload = "implemented for local crypto services only")))

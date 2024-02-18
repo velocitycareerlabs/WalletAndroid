@@ -29,8 +29,6 @@ data class VCLDidJwk(
      */
     val keyId: String
 ) {
-    val curve: String get() = publicJwk.curve
-
     companion object Utils {
         const val DidJwkPrefix = "did:jwk:"
         const val DidJwkSuffix = "#0"

@@ -7,7 +7,6 @@ package io.velocitycareerlabs.infrastructure.keys
 import android.os.Build
 import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.entities.VCLDidJwk
-import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
@@ -33,7 +32,9 @@ class KeyServiceTest {
 
     @Test
     fun testGenerateDidJwkES256() {
-        subject.generateDidJwk(VCLDidJwkDescriptor()) { didJwkResult ->
+        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.ES256
+
+        subject.generateDidJwk(null) { didJwkResult ->
             didJwkResult.handleResult({ didJwk ->
                 val jwkJson = didJwk.publicJwk.valueJson
 
@@ -45,6 +46,8 @@ class KeyServiceTest {
                 assert(jwkJson.optString("use") == "sig")
                 assert(jwkJson.optString("crv") == VCLSignatureAlgorithm.ES256.curve.name)
                 assert(jwkJson.optString("use") == "sig")
+                assert(jwkJson.optString("x") != null)
+                assert(jwkJson.optString("y") != null)
             }, {
                 assert(false) { "Failed to generate did:jwk $it" }
             })
@@ -52,8 +55,10 @@ class KeyServiceTest {
     }
 
     @Test
-    fun testGenerateDidJwkSECP256k1() {
-        subject.generateDidJwk(VCLDidJwkDescriptor(VCLSignatureAlgorithm.SECP256k1)) { didJwkResult ->
+    fun testGenerateDidJwkSecp256k1() {
+        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.SECP256k1
+
+        subject.generateDidJwk(null) { didJwkResult ->
             didJwkResult.handleResult({ didJwk ->
                 val jwkJson = didJwk.publicJwk.valueJson
 
@@ -65,6 +70,8 @@ class KeyServiceTest {
                 assert(jwkJson.optString("use") == "sig")
                 assert(jwkJson.optString("crv") == VCLSignatureAlgorithm.SECP256k1.curve.name)
                 assert(jwkJson.optString("use") == "sig")
+                assert(jwkJson.optString("x") != null)
+                assert(jwkJson.optString("y") != null)
             }, {
                 assert(false) { "Failed to generate did:jwk $it" }
             })

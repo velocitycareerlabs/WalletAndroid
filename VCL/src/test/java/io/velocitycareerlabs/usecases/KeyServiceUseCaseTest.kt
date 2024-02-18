@@ -10,7 +10,6 @@ package io.velocitycareerlabs.usecases
 import android.os.Build
 import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.entities.VCLDidJwk
-import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.data
 import io.velocitycareerlabs.api.entities.handleResult
@@ -47,9 +46,9 @@ class KeyServiceUseCaseTest {
 
     @Test
     fun testGenerateJwkES256() {
-        subject.generateDidJwk(
-            VCLDidJwkDescriptor(VCLSignatureAlgorithm.ES256)
-        ) {
+        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.ES256
+
+        subject.generateDidJwk(null) {
             it.handleResult(
                 successHandler = { didJwk ->
                     val jwkJsonObj = didJwk.publicJwk.valueJson
@@ -72,9 +71,9 @@ class KeyServiceUseCaseTest {
 
     @Test
     fun testGenerateJwkSECP256k1() {
-        subject.generateDidJwk(
-            VCLDidJwkDescriptor(VCLSignatureAlgorithm.SECP256k1)
-        ) {
+        GlobalConfig.SignatureAlgorithm = VCLSignatureAlgorithm.SECP256k1
+
+        subject.generateDidJwk(null) {
             it.handleResult(
                 successHandler = { didJwk ->
                     val jwkJsonObj = didJwk.publicJwk.valueJson
@@ -97,14 +96,10 @@ class KeyServiceUseCaseTest {
 
     @Test
     fun testGenerateDifferentJwks() {
-        subject.generateDidJwk(
-            VCLDidJwkDescriptor(VCLSignatureAlgorithm.ES256)
-        ) { didJwk1Res ->
+        subject.generateDidJwk(null) { didJwk1Res ->
             didJwk1Res.handleResult(
                 { didJwk1 ->
-                    subject.generateDidJwk(
-                        VCLDidJwkDescriptor(VCLSignatureAlgorithm.ES256)
-                    ) { didJwk2Res ->
+                    subject.generateDidJwk(null) { didJwk2Res ->
                         didJwk2Res.handleResult(
                             { didJwk2 ->
                                 assert(didJwk1.did != didJwk2.did)

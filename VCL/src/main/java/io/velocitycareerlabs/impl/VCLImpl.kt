@@ -215,6 +215,8 @@ internal class VCLImpl: VCL {
     private fun initGlobalConfigurations() {
         GlobalConfig.CurrentEnvironment = initializationDescriptor.environment
         GlobalConfig.XVnfProtocolVersion = initializationDescriptor.xVnfProtocolVersion
+        GlobalConfig.SignatureAlgorithm =
+            initializationDescriptor.cryptoServicesDescriptor.signatureAlgorithm
         GlobalConfig.IsDebugOn = initializationDescriptor.isDebugOn
     }
 
@@ -530,11 +532,11 @@ internal class VCLImpl: VCL {
     }
 
     override fun generateDidJwk(
-        didJwkDescriptor: VCLDidJwkDescriptor,
+        remoteCryptoServicesToken: VCLToken?,
         successHandler: (VCLDidJwk) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        keyServiceUseCase.generateDidJwk(didJwkDescriptor) { didJwkResult ->
+        keyServiceUseCase.generateDidJwk(remoteCryptoServicesToken) { didJwkResult ->
             didJwkResult.handleResult(
                 {
                     successHandler(it)

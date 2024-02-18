@@ -59,7 +59,7 @@ class VCLFinalizeOffersDescriptorTest {
 
     @Before
     fun setUp() {
-        keyService.generateDidJwk { didJwkResult ->
+        keyService.generateDidJwk(null) { didJwkResult ->
             didJwkResult.handleResult({
                 didJwk = it
             }, {

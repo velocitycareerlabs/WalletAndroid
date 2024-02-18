@@ -8,7 +8,6 @@
 package io.velocitycareerlabs.usecases
 
 import android.os.Build
-import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
@@ -42,9 +41,7 @@ internal class PresentationSubmissionUseCaseTest {
 
     @Before
     fun setUp() {
-        keyService.generateDidJwk(
-            VCLDidJwkDescriptor(VCLSignatureAlgorithm.ES256)
-        ) { jwkResult ->
+        keyService.generateDidJwk(null) { jwkResult ->
             jwkResult.handleResult({
                 didJwk = it
             } ,{

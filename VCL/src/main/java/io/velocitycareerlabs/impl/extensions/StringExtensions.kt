@@ -129,6 +129,9 @@ internal fun String.toJsonArray(): JSONArray? {
     }
 }
 
+internal fun String.toPublicJwk() =
+    VCLPublicJwk(this.removePrefix(VCLDidJwk.DidJwkPrefix).decodeBase64())
+
 internal fun String.toJwtList(): List<VCLJwt>? {
     this.toJsonArray()?.toList()?.let { encodedCredentialList ->
         val jwtCredentials = mutableListOf<VCLJwt>()
@@ -144,13 +147,6 @@ internal fun String.toJwtList(): List<VCLJwt>? {
     }
     return null
 }
-
-internal fun String.toPublicJwk() =
-    VCLPublicJwk(
-        this.removePrefix(VCLDidJwk.DidJwkPrefix)
-            .removeSuffix(VCLDidJwk.DidJwkSuffix)
-            .decodeBase64()
-    )
 
 internal fun randomString(length: Int): String =
     List(length) {

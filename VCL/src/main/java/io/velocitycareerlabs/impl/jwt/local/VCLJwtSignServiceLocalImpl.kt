@@ -8,15 +8,16 @@
 package io.velocitycareerlabs.impl.jwt.local
 
 import com.nimbusds.jose.JOSEObjectType
+import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.ECDSASigner
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
+import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.error.VCLError
@@ -44,9 +45,7 @@ class VCLJwtSignServiceLocalImpl(
             ecKeyResult.handleResult(
                 successHandler = { ecKey ->
                     try {
-                        val header = JWSHeader.Builder(
-                            VCLSignatureAlgorithm.fromString(didJwk.publicJwk.curve).jwsAlgorithm
-                        )
+                        val header = JWSHeader.Builder(GlobalConfig.SignatureAlgorithm.jwsAlgorithm)
                             .type(JOSEObjectType(GlobalConfig.TypeJwt))
 //        HeaderValues.XVnfProtocolVersion == VCLXVnfProtocolVersion.XVnfProtocolVersion1
                             .jwk(ecKey.toPublicJWK())
@@ -61,8 +60,6 @@ class VCLJwtSignServiceLocalImpl(
                         signedJWT.sign(ECDSASigner(ecKey))
 
                         completionBlock(VCLResult.Success(VCLJwt(signedJWT)))
-                    } catch (error: VCLError) {
-                        completionBlock(VCLResult.Failure(error))
                     } catch (ex: Exception) {
                         completionBlock(VCLResult.Failure(VCLError(ex)))
                     }
@@ -75,10 +72,14 @@ class VCLJwtSignServiceLocalImpl(
     }
 
     private fun getSecretReference(
-        keyId: String,
+        keyId: String?,
         completionBlock: (VCLResult<ECKey>) -> Unit
     ) {
-        keyService.retrieveSecretReference(keyId, completionBlock = completionBlock)
+        keyId?.let {
+            keyService.retrieveSecretReference(keyId = it, completionBlock = completionBlock)
+        } ?: run {
+            keyService.generateSecret(completionBlock = completionBlock)
+        }
     }
 
     private fun generateClaims(

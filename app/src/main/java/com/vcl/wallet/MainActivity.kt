@@ -33,11 +33,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private val environment = VCLEnvironment.Dev
-
     private lateinit var vcl: VCL
     private lateinit var didJwk: VCLDidJwk
-
-    private val didJwkDescriptor = VCLDidJwkDescriptor(signatureAlgorithm = VCLSignatureAlgorithm.ES256)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +77,7 @@ class MainActivity : AppCompatActivity() {
                 environment = environment,
                 xVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2,
                 cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
+                    signatureAlgorithm = VCLSignatureAlgorithm.ES256,
                     cryptoServiceType = VCLCryptoServiceType.Remote,
                     remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
                         keyServiceUrls = VCLKeyServiceUrls(
@@ -96,7 +94,6 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "VCL Initialization succeed!")
 
                 vcl.generateDidJwk(
-                    didJwkDescriptor = didJwkDescriptor,
                     successHandler = { didJwk ->
                         this.didJwk = didJwk
                         Log.d(
@@ -418,7 +415,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun generateDidJwk() {
         vcl.generateDidJwk(
-            didJwkDescriptor = didJwkDescriptor,
             successHandler = { didJwk ->
                 this.didJwk = didJwk
                 Log.d(
