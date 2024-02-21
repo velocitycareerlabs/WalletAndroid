@@ -47,6 +47,7 @@ internal class CredentialIssuerVerifierTest {
     private lateinit var subject11: CredentialIssuerVerifier
     private lateinit var subject12: CredentialIssuerVerifier
     private lateinit var subject13: CredentialIssuerVerifier
+    private lateinit var subjectQa: CredentialIssuerVerifier
 
     private val OffersMock = VCLOffers(JSONObject(), listOf(), 1, VCLToken(""), "")
 
@@ -61,6 +62,10 @@ internal class CredentialIssuerVerifierTest {
 
     private lateinit var finalizeOffersDescriptorOfIdentityIssuer: VCLFinalizeOffersDescriptor
     private lateinit var credentialManifestFromIdentityIssuer: VCLCredentialManifest
+
+    private lateinit var finalizeOffersDescriptorOfMicrosoftQa: VCLFinalizeOffersDescriptor
+    private lateinit var CredentialManifestForValidCredentialMicrsoftQa: VCLCredentialManifest
+    private lateinit var CredentialManifestForInvalidCredentialMicrsoftQa: VCLCredentialManifest
 
     @Before
     fun setUp() {
@@ -112,6 +117,23 @@ internal class CredentialIssuerVerifierTest {
         )
         finalizeOffersDescriptorOfIdentityIssuer = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestFromIdentityIssuer,
+            offers = OffersMock,
+            approvedOfferIds = listOf(),
+            rejectedOfferIds = listOf()
+        )
+
+        CredentialManifestForValidCredentialMicrsoftQa = VCLCredentialManifest(
+            jwt = VCLJwt(CredentialManifestMocks.JwtCredentialManifestForValidCredentialMicrsoftQa),
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerInspectorMicrosoftQa.toJsonObject()!!),
+            didJwk = DidJwkMocks.DidJwk
+        )
+        CredentialManifestForInvalidCredentialMicrsoftQa = VCLCredentialManifest(
+            jwt = VCLJwt(CredentialManifestMocks.JwtCredentialManifestForInvalidCredentialMicrsoftQa),
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerInspectorMicrosoftQa.toJsonObject()!!),
+            didJwk = DidJwkMocks.DidJwk
+        )
+        finalizeOffersDescriptorOfMicrosoftQa = VCLFinalizeOffersDescriptor(
+            credentialManifest = CredentialManifestForValidCredentialMicrsoftQa,
             offers = OffersMock,
             approvedOfferIds = listOf(),
             rejectedOfferIds = listOf()
@@ -197,6 +219,46 @@ internal class CredentialIssuerVerifierTest {
             ),
             NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10JsonldWithoutPrimaryOrganization),
         )
+        subjectQa = CredentialIssuerVerifierImpl(
+            CredentialTypesModelMock(
+                issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
+            ),
+            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10JsonldQa)
+        )
+    }
+
+    @Test
+    fun testVerifyMicrosoftValidCredentialQa() {
+        subjectQa.verifyCredentials(
+            jwtCredentials = CredentialMocks.JwtValidEmploymentCredentialsFromMicrosoftQa.toJwtList()!!,
+            finalizeOffersDescriptor = finalizeOffersDescriptorOfMicrosoftQa
+        ) { verificationResult ->
+            verificationResult.handleResult(
+                successHandler = {
+                    assert(it)
+                },
+                errorHandler = { error ->
+                    assert(false) { "${error.toJsonObject()}" }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testVerifyMicrosoftInvalidCredentialQa() {
+        subjectQa.verifyCredentials(
+            jwtCredentials = CredentialMocks.JwtInvalidEmploymentCredentialsFromMicrosoftQa.toJwtList()!!,
+            finalizeOffersDescriptor = finalizeOffersDescriptorOfMicrosoftQa
+        ) { verificationResult ->
+            verificationResult.handleResult(
+                successHandler = {
+                    assert(false) { "${VCLErrorCode.IssuerRequiresNotaryPermission.value} error code is expected" }
+                },
+                errorHandler = { error ->
+                    assert(error.errorCode == VCLErrorCode.IssuerRequiresNotaryPermission.value)
+                }
+            )
+        }
     }
 
 //    @Test
