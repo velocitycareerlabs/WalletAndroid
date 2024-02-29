@@ -254,7 +254,12 @@ internal class CredentialIssuerVerifierImpl(
 //                            https://velocitycareerlabs.atlassian.net/browse/VL-6178?focusedCommentId=46933
 //                            https://velocitycareerlabs.atlassian.net/browse/VL-6988
 //                            if (jwtCredential.iss == did)
-                            if (Utils.getCredentialIssuerId(jwtCredential) == did) {
+                            val credentialIssuerId = Utils.getCredentialIssuerId(jwtCredential)
+                            VCLLog.d(
+                                TAG,
+                                "Comparing credentialIssuerId: ${credentialIssuerId ?: ""} with did: $did"
+                            )
+                            if (credentialIssuerId == did) {
                                 isCredentialVerified = true
                             } else {
                                 globalError =
@@ -263,11 +268,21 @@ internal class CredentialIssuerVerifierImpl(
                         } ?: run {
                             globalError =
                                 VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission.value)
+
+                            VCLLog.e(
+                                TAG,
+                                "DID NOT FOUND for K = $K and credentialSubject = $credentialSubject"
+                            )
                         }
                     } ?: run {
 //                        When K is null, the credential will pass these checks:
 //                        https://velocitycareerlabs.atlassian.net/browse/VL-6181?focusedCommentId=44343
                         isCredentialVerified = true
+
+                        VCLLog.d(
+                            TAG,
+                            "Key for primary organization NOT FOUND for active context:\n$activeContext"
+                        )
                     }
                 }
             }

@@ -32,8 +32,6 @@ import org.junit.Before
 import org.junit.Test
 
 internal class CredentialIssuerVerifierTest {
-    val TAG = CredentialIssuerVerifierTest::class.simpleName
-
     private lateinit var subject1: CredentialIssuerVerifier
     private lateinit var subject2: CredentialIssuerVerifier
     private lateinit var subject3: CredentialIssuerVerifier
