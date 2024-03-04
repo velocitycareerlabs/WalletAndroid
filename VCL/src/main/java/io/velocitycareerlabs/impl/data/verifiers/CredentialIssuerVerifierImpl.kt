@@ -240,7 +240,7 @@ internal class CredentialIssuerVerifierImpl(
         completeContexts: List<Map<*, *>>,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        (credentialSubject[KeyType] as? String)?.let { credentialSubjectType ->
+        (((credentialSubject[KeyType] as? List<*>)?.get(0) as? String) ?: credentialSubject[KeyType] as? String)?.let { credentialSubjectType ->
             var globalError: VCLError? = null
             var isCredentialVerified = false
             val completableFutures = completeContexts.map { completeContext ->
