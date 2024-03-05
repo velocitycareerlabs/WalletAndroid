@@ -12,7 +12,7 @@ if (propertiesFile.exists()) {
     } catch (IOException e) {
         e.printStackTrace()
     }
-} else if (propertiesFilePath_alternative.exists()) {
+} else if (propertiesFile_alternative.exists()) {
     try {
         properties.load(new FileInputStream(propertiesFile_alternative))
     } catch (IOException e) {
