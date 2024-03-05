@@ -68,11 +68,12 @@ jobs:
       #   run: ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
       - name: Debug
         run: |
-          mkdir -p ./test/maven/
-          echo "signingPrivateKey=${{ env.ANDROID_NEXUS_PRIVATE_KEY }}" >> /test/maven/nexus.properties
-          echo "signingKeyId=${{ env.ANDROID_NEXUS_SIGNING_KEY_ID}}" >> /test/maven/nexus.properties
-          echo "signingPassword=${{ env.ANDROID_NEXUS_SIGNING_PWD }}" >> /test/maven/nexus.properties
-          echo "stagingProfileId=${{ env.ANDROID_NEXUS_STAGING_PROFILE_ID }}" >> /test/maven/nexus.properties
+          mkdir -p test/maven/
+          ls -lah
+          echo "signingPrivateKey=${{ env.ANDROID_NEXUS_PRIVATE_KEY }}" >> test/maven/nexus.properties
+          echo "signingKeyId=${{ env.ANDROID_NEXUS_SIGNING_KEY_ID}}" >> test/maven/nexus.properties
+          echo "signingPassword=${{ env.ANDROID_NEXUS_SIGNING_PWD }}" >> test/maven/nexus.properties
+          echo "stagingProfileId=${{ env.ANDROID_NEXUS_STAGING_PROFILE_ID }}" >> test/maven/nexus.properties
       # # Publish Prod/Rc
       # - name: Publish Prod/Rc
       #   if: ${{ env.GLOBAL_ENV == 'prod' || env.GLOBAL_ENV == 'rc' }}
