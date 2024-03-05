@@ -289,15 +289,18 @@ internal class CredentialIssuerVerifierImpl(
             val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
             allFutures.join()
 
-            if (isCredentialVerified)
-                completionBlock(VCLResult.Success(true))
-            else
-                completionBlock(
-                    VCLResult.Failure(
-                        globalError
-                            ?: VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure.value)
+            globalError?.let {
+                completionBlock(VCLResult.Failure(it))
+            } ?: run {
+                if (isCredentialVerified) {
+                    completionBlock(VCLResult.Success(true))
+                } else {
+                    completionBlock(
+                        VCLResult.Failure(VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure.value))
                     )
-                )
+                }
+            }
+
         } ?: run {
             onError(
                 VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectType.value),
