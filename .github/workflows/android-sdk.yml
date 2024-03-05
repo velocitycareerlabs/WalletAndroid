@@ -23,7 +23,7 @@ env:
   ARTIFACT_PATH: "VCL/build/outputs"
   ANDROID_NEXUS_OSSRH_USERNAME: ${{ secrets.ANDROID_NEXUS_OSSRH_USERNAME }}
   ANDROID_NEXUS_OSSRH_PWD: ${{ secrets.ANDROID_NEXUS_OSSRH_PWD }}
-  ANDROID_NEXUS_STAGING_PROFILE_ID: ${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}
+  # ANDROID_NEXUS_STAGING_PROFILE_ID: ${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}
   GLOBAL_ENV: ${{ github.event_name == 'push' && format('{0}', 'dev') || inputs.environment }}
 
 jobs:
@@ -78,9 +78,10 @@ jobs:
         run: |
           mkdir -p test/maven/
           ls -lah
-          echo "signingKeyId=${{ env.ANDROID_NEXUS_SIGNING_KEY_ID}}" >> test/maven/nexus.properties
-          echo "signingPassword=${{ env.ANDROID_NEXUS_SIGNING_PWD }}" >> test/maven/nexus.properties
-          echo "signingPrivateKey=${{ env.ANDROID_NEXUS_PRIVATE_KEY }}" >> test/maven/nexus.properties
+          echo "stagingProfileId=${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}" >> test/maven/nexus.properties
+          echo "signingKeyId=${{ secrets.ANDROID_NEXUS_SIGNING_KEY_ID}}" >> test/maven/nexus.properties
+          echo "signingPassword=${{ secrets.ANDROID_NEXUS_SIGNING_PWD }}" >> test/maven/nexus.properties
+          echo "signingPrivateKey=${{ secrets.ANDROID_NEXUS_PRIVATE_KEY }}" >> test/maven/nexus.properties
       # Publish Prod/Rc
       - name: Publish Prod/Rc
         if: ${{ env.GLOBAL_ENV == 'prod' || env.GLOBAL_ENV == 'rc' }}
@@ -90,7 +91,7 @@ jobs:
           # ANDROID_NEXUS_SIGNING_KEY_ID: ${{ secrets.ANDROID_NEXUS_SIGNING_KEY_ID }}
           # ANDROID_NEXUS_SIGNING_PWD: ${{ secrets.ANDROID_NEXUS_SIGNING_PWD }}
           # ANDROID_NEXUS_PRIVATE_KEY: ${{ secrets.ANDROID_NEXUS_PRIVATE_KEY }}
-          ANDROID_NEXUS_STAGING_PROFILE_ID: ${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}
+          # ANDROID_NEXUS_STAGING_PROFILE_ID: ${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}
       # # Upload Artifacts
       # - name: Upload Artifact
       #   if: success()
