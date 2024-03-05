@@ -73,7 +73,7 @@ jobs:
       - name: Publish Prod/Rc
         if: ${{ env.GLOBAL_ENV == 'prod' || env.GLOBAL_ENV == 'rc' }}
         run: |
-          mkdir -p /test/maven/
+          mkdir -p ./test/maven/
           echo "signingPrivateKey=${{ env.ANDROID_NEXUS_PRIVATE_KEY }}" >> /test/maven/nexus.properties
           echo "signingKeyId=${{ env.ANDROID_NEXUS_SIGNING_KEY_ID}}" >> /test/maven/nexus.properties
           echo "signingPassword=${{ env.ANDROID_NEXUS_SIGNING_PWD }}" >> /test/maven/nexus.properties

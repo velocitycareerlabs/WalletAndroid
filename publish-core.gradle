@@ -1,4 +1,4 @@
-def propertiesFilePath = '/test/maven/nexus.properties'
+def propertiesFilePath = './test/maven/nexus.properties'
 def propertiesFile = new File(propertiesFilePath)
 def properties = new Properties()
 
