@@ -2,7 +2,7 @@ def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/m
 def propertiesFilePath_alternative = 'nexus.properties'
 
 def propertiesFile = new File(propertiesFilePath)
-def propertiesFile = new File(propertiesFilePath_alternative)
+def propertiesFile_alternative = new File(propertiesFilePath_alternative)
 
 def properties = new Properties()
 
@@ -14,7 +14,7 @@ if (propertiesFile.exists()) {
     }
 } else if (propertiesFilePath_alternative.exists()) {
     try {
-        properties.load(new FileInputStream(propertiesFilePath_alternative))
+        properties.load(new FileInputStream(propertiesFile_alternative))
     } catch (IOException e) {
         e.printStackTrace()
     }
