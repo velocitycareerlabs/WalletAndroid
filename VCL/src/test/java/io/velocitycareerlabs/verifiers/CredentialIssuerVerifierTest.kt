@@ -19,7 +19,6 @@ import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierImpl
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.extensions.toJwtList
-import io.velocitycareerlabs.impl.utils.VCLLog
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CredentialTypesModelMock
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
