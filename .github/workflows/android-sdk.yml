@@ -92,17 +92,17 @@ jobs:
           ANDROID_NEXUS_SIGNING_PWD: ${{ secrets.ANDROID_NEXUS_SIGNING_PWD }}
           # ANDROID_NEXUS_PRIVATE_KEY: ${{ secrets.ANDROID_NEXUS_PRIVATE_KEY }}
           ANDROID_NEXUS_STAGING_PROFILE_ID: ${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}
-      # # Upload Artifacts
-      # - name: Upload Artifact
-      #   if: success()
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
-      #     path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
-      #     if-no-files-found: error
-      #     retention-days: 1
-      #   env: 
-      #     RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'release' ) || 'rc' }}
+      # Upload Artifacts
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
+          if-no-files-found: error
+          retention-days: 1
+        env: 
+          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'release' ) || 'rc' }}
 
 
 
