@@ -69,6 +69,9 @@ jobs:
       # Show Me Builded packages
       - name: Show Me Builded packages
         run: ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
+      - name: Debug
+        run: 
+        working-directory: .
       # Publish Prod/Rc
       - name: Publish Prod/Rc
         if: ${{ env.GLOBAL_ENV == 'prod' || env.GLOBAL_ENV == 'rc' }}
