@@ -64,8 +64,8 @@ jobs:
       #   env: 
       #     RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'release' ) || 'rc' }}
       # Show Me Builded packages
-      - name: Show Me Builded packages
-        run: ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
+      # - name: Show Me Builded packages
+      #   run: ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
       - name: Debug
         run: |
           mkdir -p ./test/maven/
