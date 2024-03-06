@@ -1,5 +1,9 @@
 def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties'
+def propertiesFilePath_alternative = 'nexus.properties'
+
 def propertiesFile = new File(propertiesFilePath)
+def propertiesFile_alternative = new File(propertiesFilePath_alternative)
+
 def properties = new Properties()
 
 if (propertiesFile.exists()) {    
@@ -8,8 +12,14 @@ if (propertiesFile.exists()) {
     } catch (IOException e) {
         e.printStackTrace()
     }
+} else if (propertiesFile_alternative.exists()) {
+    try {
+        properties.load(new FileInputStream(propertiesFile_alternative))
+    } catch (IOException e) {
+        e.printStackTrace()
+    }
 } else {
-    println "Properties file not found: $propertiesFilePath"
+    println "Properties file not found: $propertiesFilePath or $propertiesFilePath_alternative"
 }
 
 ext {
