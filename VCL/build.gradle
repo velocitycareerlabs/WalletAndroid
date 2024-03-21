@@ -6,15 +6,15 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 //    buildToolsVersion "30.0.3"
     namespace 'io.velocitycareerlabs'
 
     defaultConfig {
         minSdk 24
-        targetSdk 33
-        versionName "2.3.4"
-        versionCode 134
+        targetSdk 34
+        versionName "2.4.1-rc.1"
+        versionCode 135
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -63,6 +63,10 @@ android {
         unitTests.includeAndroidResources = true
         unitTests.returnDefaultValues = true
     }
+
+    buildFeatures {
+        buildConfig true
+    }
 }
 
 java {
@@ -100,6 +104,47 @@ artifacts {
     archives androidSourcesJar
 }
 
+def performPublish = {
+// Two artifacts, the `aar` (or `jar`) and the sources
+    if (project.plugins.findPlugin("com.android.library")) {
+        from components.release
+    } else {
+        from components.java
+    }
+
+    artifact androidSourcesJar
+
+    // Mostly self-explanatory metadata
+    pom {
+        name = getArtifactId()
+        // Library description
+        description = 'Velocity Career Labs Android library'
+        // Library Github URL
+        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+        licenses {
+            license {
+                name = 'Apache License 2.0'
+                // Library license
+                url = 'https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE'
+            }
+        }
+        developers {
+            developer {
+                id = 'velocitycareerlabs'
+                name = 'Michael Avoyan'
+                email = 'michael.avoyan@velocitycareerlabs.com'
+            }
+        }
+
+        scm {
+            // Library info on Github
+            connection = 'scm:github.com/velocitycareerlabs/WalletAndroid.git'
+            developerConnection = 'scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git'
+            url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+        }
+    }
+}
+
 afterEvaluate {
     publishing {
         publications {
@@ -108,92 +153,19 @@ afterEvaluate {
                 artifactId getArtifactId()
 
                 // define rc version name
-                def vers = getVersionName()
-                def rcSuffix = rootProject.ext.rcSuffix
-                version = "${vers}-${rcSuffix}"
+//                def vers = getVersionName()
+//                def rcSuffix = rootProject.ext.rcSuffix
+//                version = "${vers}-${rcSuffix}"
+                version getVersionName()
 
-                // Two artifacts, the `aar` (or `jar`) and the sources
-                if (project.plugins.findPlugin("com.android.library")) {
-                    from components.release
-                } else {
-                    from components.java
-                }
-
-                artifact androidSourcesJar
-
-                // Mostly self-explanatory metadata
-                pom {
-                    name = getArtifactId()
-                    // Library description
-                    description = 'Velocity Career Labs Android library'
-                    // Library Github URL
-                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                    licenses {
-                        license {
-                            name = 'Apache License 2.0'
-                            // Library license
-                            url = 'https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE'
-                        }
-                    }
-                    developers {
-                        developer {
-                            id = 'velocitycareerlabs'
-                            name = 'Michael Avoyan'
-                            email = 'michael.avoyan@velocitycareerlabs.com'
-                        }
-                    }
-
-                    scm {
-                        // Library info on Github
-                        connection = 'scm:github.com/velocitycareerlabs/WalletAndroid.git'
-                        developerConnection = 'scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git'
-                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                    }
-                }
+                performPublish
             }
             release(MavenPublication) {
                 groupId getGroupId()
                 artifactId getArtifactId()
                 version getVersionName()
 
-                // Two artifacts, the `aar` (or `jar`) and the sources
-                if (project.plugins.findPlugin("com.android.library")) {
-                    from components.release
-                } else {
-                    from components.java
-                }
-
-                artifact androidSourcesJar
-
-                // Mostly self-explanatory metadata
-                pom {
-                    name = getArtifactId()
-                    // Library description
-                    description = 'Velocity Career Labs Android library'
-                    // Library Github URL
-                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                    licenses {
-                        license {
-                            name = 'Apache License 2.0'
-                            // Library license
-                            url = 'https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE'
-                        }
-                    }
-                    developers {
-                        developer {
-                            id = 'velocitycareerlabs'
-                            name = 'Michael Avoyan'
-                            email = 'michael.avoyan@velocitycareerlabs.com'
-                        }
-                    }
-
-                    scm {
-                        // Library info on Github
-                        connection = 'scm:github.com/velocitycareerlabs/WalletAndroid.git'
-                        developerConnection = 'scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git'
-                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                    }
-                }
+                performPublish
             }
         }
     }
@@ -215,7 +187,7 @@ repositories {
  */
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.core:core-ktx:1.12.0'
 
     implementation "com.nimbusds:nimbus-jose-jwt:9.37"
     //noinspection GradleDependency
@@ -235,7 +207,7 @@ dependencies {
     testImplementation "org.mockito:mockito-inline:$mockito_version"
     // Required -- JSON framework
     testImplementation 'org.json:json:20201115'
-    // jsonassert
+    // json assert
     testImplementation 'org.skyscreamer:jsonassert:1.5.1'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
