@@ -13,7 +13,7 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 34
-        versionName "2.4.1-rc.1"
+        versionName "2.4.1-rc1"
         versionCode 135
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -222,7 +222,7 @@ repositories {
 dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
 
-    implementation "com.nimbusds:nimbus-jose-jwt:9.37"
+    implementation "com.nimbusds:nimbus-jose-jwt:9.37.3"
     //noinspection GradleDependency
     implementation "androidx.security:security-crypto:1.0.0"
 
