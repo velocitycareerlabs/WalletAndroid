@@ -112,9 +112,9 @@ afterEvaluate {
                 artifactId getArtifactId()
 
                 // define rc version name
-//                def vers = getVersionName()
+//                def tempVersion = getVersionName()
 //                def rcSuffix = rootProject.ext.rcSuffix
-//                version = "${vers}-${rcSuffix}"
+//                version = "${tempVersion}-${rcSuffix}"
                 version getVersionName()
 
                 // Two artifacts, the `aar` (or `jar`) and the sources
