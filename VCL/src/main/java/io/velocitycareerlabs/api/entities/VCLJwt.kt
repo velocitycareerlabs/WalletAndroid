@@ -64,10 +64,9 @@ class VCLJwt {
 
     val kid: String?
         get() = header?.keyID
-            ?: ((header?.toJSONObject()?.getOrDefault(
-                CodingKeys.KeyJwk,
-                null
-            )) as? Map<String, String>)?.getOrDefault(CodingKeys.KeyKid, null)
+            ?: ((header?.toJSONObject()
+                ?.getOrDefault(CodingKeys.KeyJwk, null)) as? Map<*, *>)
+                ?.getOrDefault(CodingKeys.KeyKid, null) as? String
     val iss: String?
         get() = this.payload?.toJSONObject()?.getOrDefault(CodingKeys.KeyIss, null) as? String
     val aud: String?

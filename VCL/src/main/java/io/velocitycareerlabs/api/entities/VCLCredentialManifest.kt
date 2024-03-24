@@ -49,7 +49,10 @@ data class VCLCredentialManifest(
             )?.toString() ?: ""
 
     private fun retrieveAud() =
-        ((jwt.payload?.toJSONObject()?.getOrDefault(CodingKeys.KeyMetadata, HashMap<String, Any>()) as? Map<String, Any> )?.getOrDefault(CodingKeys.KeyFinalizeOffersUri, "") as? String ?: "").substringBefore("/issue/")
+        ((jwt.payload?.toJSONObject()
+            ?.getOrDefault(CodingKeys.KeyMetadata, HashMap<String, Any>()) as? Map<*, *> )
+            ?.getOrDefault(CodingKeys.KeyFinalizeOffersUri, "") as? String ?: "")
+            .substringBefore("/issue/")
     companion object CodingKeys {
         const val KeyIssuingRequest = "issuing_request"
 

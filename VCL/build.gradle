@@ -13,8 +13,8 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 33
-        versionName "2.3.4"
-        versionCode 134
+        versionName "2.4.1-rc.1"
+        versionCode 135
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -107,10 +107,11 @@ afterEvaluate {
                 groupId getGroupId()
                 artifactId getArtifactId()
 
-                // define rc version name
-                def vers = getVersionName()
-                def rcSuffix = rootProject.ext.rcSuffix
-                version = "${vers}-${rcSuffix}"
+//                // define rc version name
+//                def vers = getVersionName()
+//                def rcSuffix = rootProject.ext.rcSuffix
+//                version = "${vers}-${rcSuffix}"
+                version getVersionName()
 
                 // Two artifacts, the `aar` (or `jar`) and the sources
                 if (project.plugins.findPlugin("com.android.library")) {
@@ -217,7 +218,7 @@ repositories {
 dependencies {
     implementation 'androidx.core:core-ktx:1.9.0'
 
-    implementation "com.nimbusds:nimbus-jose-jwt:9.37"
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.37.3'
     //noinspection GradleDependency
     implementation "androidx.security:security-crypto:1.0.0"
 
@@ -228,13 +229,12 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     // Optional -- Robolectric environment
     testImplementation 'androidx.test:core:1.5.0'
-    testImplementation 'org.robolectric:robolectric:4.10'
+    testImplementation 'org.robolectric:robolectric:4.11.1'
     // Optional -- Mockito framework
-    def mockito_version = "4.0.0"
-    testImplementation "org.mockito:mockito-core:$mockito_version"
-    testImplementation "org.mockito:mockito-inline:$mockito_version"
+    testImplementation "org.mockito:mockito-core:5.11.0"
+    testImplementation "org.mockito:mockito-inline:5.2.0"
     // Required -- JSON framework
-    testImplementation 'org.json:json:20201115'
+    testImplementation 'org.json:json:20240303'
     // jsonassert
     testImplementation 'org.skyscreamer:jsonassert:1.5.1'
 

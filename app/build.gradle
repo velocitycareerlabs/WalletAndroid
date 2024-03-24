@@ -51,11 +51,11 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 //    Must: be added:
-    implementation "com.nimbusds:nimbus-jose-jwt:9.37"
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.37.3'
     implementation project(':VCL')
 
 //    implementation "io.velocitycareerlabs:vcl:x.y.z"
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
