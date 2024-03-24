@@ -13,8 +13,8 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 33
-        versionName "2.3.4"
-        versionCode 134
+        versionName "2.4.1"
+        versionCode 135
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -62,6 +62,10 @@ android {
     testOptions {
         unitTests.includeAndroidResources = true
         unitTests.returnDefaultValues = true
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 }
 
