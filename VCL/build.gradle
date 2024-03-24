@@ -6,15 +6,15 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 //    buildToolsVersion "30.0.3"
     namespace 'io.velocitycareerlabs'
 
     defaultConfig {
         minSdk 24
-        targetSdk 33
-        versionName "2.3.4"
-        versionCode 134
+        targetSdk 34
+        versionName "2.4.1"
+        versionCode 135
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -62,6 +62,10 @@ android {
     testOptions {
         unitTests.includeAndroidResources = true
         unitTests.returnDefaultValues = true
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 }
 
@@ -215,9 +219,9 @@ repositories {
  */
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.core:core-ktx:1.12.0'
 
-    implementation "com.nimbusds:nimbus-jose-jwt:9.37"
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.37.3'
     //noinspection GradleDependency
     implementation "androidx.security:security-crypto:1.0.0"
 
@@ -228,13 +232,12 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     // Optional -- Robolectric environment
     testImplementation 'androidx.test:core:1.5.0'
-    testImplementation 'org.robolectric:robolectric:4.10'
+    testImplementation 'org.robolectric:robolectric:4.11.1'
     // Optional -- Mockito framework
-    def mockito_version = "4.0.0"
-    testImplementation "org.mockito:mockito-core:$mockito_version"
-    testImplementation "org.mockito:mockito-inline:$mockito_version"
+    testImplementation "org.mockito:mockito-core:5.11.0"
+    testImplementation "org.mockito:mockito-inline:5.2.0"
     // Required -- JSON framework
-    testImplementation 'org.json:json:20201115'
+    testImplementation 'org.json:json:20240303'
     // jsonassert
     testImplementation 'org.skyscreamer:jsonassert:1.5.1'
 

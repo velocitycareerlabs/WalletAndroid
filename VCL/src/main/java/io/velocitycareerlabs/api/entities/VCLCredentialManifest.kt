@@ -18,9 +18,12 @@ data class VCLCredentialManifest(
     val iss: String get() = jwt.payload?.toJSONObject()?.get(KeyIss) as? String ?: ""
     val did: String get() = iss
     val aud: String get() = retrieveAud()
-    val issuerId: String get() = jwt.payload?.toJSONObject()?.get(CodingKeys.KeyIssuer) as? String
-        ?: (jwt.payload?.toJSONObject()?.get(CodingKeys.KeyIssuer) as? Map<*, *>)?.get(CodingKeys.KeyId) as? String
-        ?: ""
+    val issuerId: String
+        get() = jwt.payload?.toJSONObject()?.get(CodingKeys.KeyIssuer) as? String
+            ?: (jwt.payload?.toJSONObject()?.get(CodingKeys.KeyIssuer) as? Map<*, *>)?.get(
+                CodingKeys.KeyId
+            ) as? String
+            ?: ""
     val exchangeId: String get() = jwt.payload?.toJSONObject()?.get(KeyExchangeId) as? String ?: ""
     val presentationDefinitionId: String
         get() = (jwt.payload?.toJSONObject()?.get(KeyPresentationDefinitionId) as? Map<*, *>)?.get(
@@ -49,7 +52,11 @@ data class VCLCredentialManifest(
             )?.toString() ?: ""
 
     private fun retrieveAud() =
-        ((jwt.payload?.toJSONObject()?.getOrDefault(CodingKeys.KeyMetadata, HashMap<String, Any>()) as? Map<String, Any> )?.getOrDefault(CodingKeys.KeyFinalizeOffersUri, "") as? String ?: "").substringBefore("/issue/")
+        ((jwt.payload?.toJSONObject()
+            ?.getOrDefault(CodingKeys.KeyMetadata, HashMap<String, Any>()) as? Map<*, *>)
+            ?.getOrDefault(CodingKeys.KeyFinalizeOffersUri, "") as? String
+            ?: "").substringBefore("/issue/")
+
     companion object CodingKeys {
         const val KeyIssuingRequest = "issuing_request"
 
