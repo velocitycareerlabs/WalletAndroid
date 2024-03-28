@@ -87,7 +87,7 @@ def getGroupId = { ->
     return 'io.velocitycareerlabs'
 }
 
-tasks.register('androidSourcesJar', Jar) {
+task androidSourcesJar(type: Jar) {
     archiveClassifier.set('sources')
     if (project.plugins.findPlugin("com.android.library")) {
         // For Android libraries
