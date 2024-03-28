@@ -31,11 +31,11 @@ allprojects {
         google()
         mavenCentral()
         maven {
-            url "$buildDir/VCL"
+            url "${getLayout().getBuildDirectory()}/VCL"
         }
     }
 }
 
 task clean(type: Delete) {
-    delete rootProject.buildDir
+    delete rootProject.getLayout().getBuildDirectory()
 }
