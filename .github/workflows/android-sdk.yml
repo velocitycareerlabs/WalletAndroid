@@ -34,8 +34,6 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
       # Run test
       - name: Run Test
         run: ./gradlew test
@@ -52,8 +50,6 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
       # Gradle Assemble
       - name: Gradle Assemble
         run: ./gradlew assemble${{ env.RELEASE_TAG }}
