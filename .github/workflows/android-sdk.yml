@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - VL-7525-upgrade
   workflow_dispatch:
     inputs:
       environment:
