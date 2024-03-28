@@ -25,7 +25,6 @@ plugins {
 // Publishing scripts
 apply from: "${rootDir}/publish-core.gradle"
 
-
 allprojects {
     repositories {
         google()
