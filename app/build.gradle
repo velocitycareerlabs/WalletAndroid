@@ -5,13 +5,13 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 //    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.vcl.wallet"
         minSdk 24
-        targetSdk 33
+        targetSdk 34
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,9 +43,9 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
