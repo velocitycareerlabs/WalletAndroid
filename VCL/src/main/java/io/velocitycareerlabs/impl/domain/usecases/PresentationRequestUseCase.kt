@@ -11,10 +11,12 @@ import io.velocitycareerlabs.api.entities.VCLPresentationRequest
 import io.velocitycareerlabs.api.entities.VCLPresentationRequestDescriptor
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLToken
+import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 
 internal interface PresentationRequestUseCase {
     fun getPresentationRequest(
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
+        verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     )
 }

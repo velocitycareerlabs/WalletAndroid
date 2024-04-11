@@ -231,9 +231,10 @@ internal class VCLImpl: VCL {
             profileServiceTypeVerifier.verifyServiceTypeOfVerifiedProfile(
                 verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = did),
                 expectedServiceTypes = VCLServiceTypes(VCLServiceType.Inspector),
-                successHandler = { _ ->
+                successHandler = { verifiedProfile ->
                     presentationRequestUseCase.getPresentationRequest(
-                        presentationRequestDescriptor
+                        presentationRequestDescriptor,
+                        verifiedProfile
                     ) { presentationRequestResult ->
                         presentationRequestResult.handleResult(
                             {

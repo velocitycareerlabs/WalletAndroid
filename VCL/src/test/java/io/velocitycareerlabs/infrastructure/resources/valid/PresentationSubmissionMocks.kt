@@ -10,6 +10,8 @@ package io.velocitycareerlabs.infrastructure.resources.valid
 import io.velocitycareerlabs.api.entities.VCLPresentationRequest
 import io.velocitycareerlabs.api.entities.VCLPushDelegate
 import io.velocitycareerlabs.api.entities.VCLVerifiableCredential
+import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
+import io.velocitycareerlabs.impl.extensions.toJsonObject
 
 class PresentationSubmissionMocks {
     companion object {
@@ -21,7 +23,7 @@ class PresentationSubmissionMocks {
             "{\"token\":\"u7yLD8KS2eTEqkg9aRQE\",\"exchange\":{\"id\":\"64131231\",\"type\":\"DISCLOSURE\",\"disclosureComplete\":true,\"exchangeComplete\":true}}"
         val PresentationRequest = VCLPresentationRequest(
             jwt = JwtServiceMocks.JWT,
-            publicJwk = JwtServiceMocks.PublicJwk,
+            verifiedProfile = VCLVerifiedProfile("{}".toJsonObject()!!),
             deepLink = DeepLinkMocks.CredentialManifestDeepLinkMainNet,
             pushDelegate = PushDelegate,
             didJwk = DidJwkMocks.DidJwk
@@ -37,7 +39,5 @@ class PresentationSubmissionMocks {
                 jwtVc = JwtServiceMocks.AdamSmithEmailJwt
             )
         )
-
-        val PresentationSubmissionJwt = PresentationRequestMocks.PresentationRequestJwt
     }
 }

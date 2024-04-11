@@ -11,6 +11,8 @@ import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLPresentationRequest
+import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
+import io.velocitycareerlabs.impl.extensions.toJsonObject
 
 class PresentationRequestMocks {
     companion object {
@@ -27,14 +29,11 @@ class PresentationRequestMocks {
         const val JWK =
             "{\"alg\":\"ES256K\",\"use\":\"sig\",\"kid\":\"uemn6l5ro6hLNrgiPRl1Dy51V9whez4tu4hlwsNOTVk\",\"crv\":\"secp256k1\",\"x\":\"oLYCa-AlnVpW8Rq9iST_1eY_XoyvGRry7y1xS4vU4qo\",\"y\":\"PUMAsawZ24WaSnRIdDb_wNbShAvfsGF71ke1DcJGxlM\",\"kty\":\"EC\"}\n"
 
-
-        val PublicJwk = VCLPublicJwk(valueStr = JWK)
-
         val PresentationRequest = VCLPresentationRequest(
             jwt = PresentationRequestJwt,
-            publicJwk = PublicJwk,
             deepLink = VCLDeepLink(value = ""),
-            didJwk = DidJwkMocks.DidJwk
+            didJwk = DidJwkMocks.DidJwk,
+            verifiedProfile = VCLVerifiedProfile("{}".toJsonObject()!!)
         )
     }
 }

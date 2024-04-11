@@ -32,7 +32,6 @@ import io.velocitycareerlabs.infrastructure.resources.CredentialTypesModelMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialMocks
-import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.GenerateOffersMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.JsonLdMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks

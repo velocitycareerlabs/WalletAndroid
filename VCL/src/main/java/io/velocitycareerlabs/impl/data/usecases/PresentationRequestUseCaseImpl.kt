@@ -14,7 +14,6 @@ import io.velocitycareerlabs.impl.domain.usecases.PresentationRequestUseCase
 import io.velocitycareerlabs.impl.domain.verifiers.PresentationRequestByDeepLinkVerifier
 import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.utils.VCLLog
-import java.lang.Exception
 
 internal class PresentationRequestUseCaseImpl(
     private val presentationRequestRepository: PresentationRequestRepository,
@@ -28,6 +27,7 @@ internal class PresentationRequestUseCaseImpl(
 
     override fun getPresentationRequest(
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
+        verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
         executor.runOnBackground {
@@ -36,9 +36,15 @@ internal class PresentationRequestUseCaseImpl(
             ) { encodedJwtStrResult ->
                 encodedJwtStrResult.handleResult(
                     { encodedJwtStr ->
-                        onGetJwtSuccess(
-                            VCLJwt(encodedJwtStr),
-                            presentationRequestDescriptor,
+                        onGetPresentationRequestSuccess(
+                            VCLPresentationRequest(
+                                jwt = VCLJwt(encodedJwtStr),
+                                verifiedProfile = verifiedProfile,
+                                deepLink = presentationRequestDescriptor.deepLink,
+                                pushDelegate = presentationRequestDescriptor.pushDelegate,
+                                didJwk = presentationRequestDescriptor.didJwk,
+                                remoteCryptoServicesToken = presentationRequestDescriptor.remoteCryptoServicesToken
+                            ),
                             completionBlock
                         )
                     },
@@ -50,18 +56,16 @@ internal class PresentationRequestUseCaseImpl(
         }
     }
 
-    private fun onGetJwtSuccess(
-        jwt: VCLJwt,
-        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
+    private fun onGetPresentationRequestSuccess(
+        presentationRequest: VCLPresentationRequest,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
-        jwt.kid?.replace("#", "#".encode())?.let { keyID ->
+        presentationRequest.jwt.kid?.replace("#", "#".encode())?.let { keyID ->
             resolveKidRepository.getPublicKey(keyID) { publicKeyResult ->
                 publicKeyResult.handleResult({ publicKey ->
                     onResolvePublicKeySuccess(
                         publicKey,
-                        jwt,
-                        presentationRequestDescriptor,
+                        presentationRequest,
                         completionBlock
                     )
                 }, { error ->
@@ -75,21 +79,12 @@ internal class PresentationRequestUseCaseImpl(
 
     private fun onResolvePublicKeySuccess(
         publicJwk: VCLPublicJwk,
-        jwt: VCLJwt,
-        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
+        presentationRequest: VCLPresentationRequest,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
-        val presentationRequest = VCLPresentationRequest(
-            jwt = jwt,
-            publicJwk = publicJwk,
-            deepLink = presentationRequestDescriptor.deepLink,
-            pushDelegate = presentationRequestDescriptor.pushDelegate,
-            didJwk = presentationRequestDescriptor.didJwk,
-            remoteCryptoServicesToken = presentationRequestDescriptor.remoteCryptoServicesToken
-        )
         jwtServiceRepository.verifyJwt(
             presentationRequest.jwt,
-            presentationRequest.publicJwk,
+            publicJwk,
             presentationRequest.remoteCryptoServicesToken
         ) { jwtVerificationRes ->
             jwtVerificationRes.handleResult({
