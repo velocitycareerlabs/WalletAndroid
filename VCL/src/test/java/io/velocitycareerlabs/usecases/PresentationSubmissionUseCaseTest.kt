@@ -22,10 +22,8 @@ import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CommonMocks
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
-import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationSubmissionMocks
 import org.json.JSONObject
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,7 +67,7 @@ internal class PresentationSubmissionUseCaseTest {
         val presentationSubmission = VCLPresentationSubmission(
             presentationRequest = VCLPresentationRequest(
                 jwt = CommonMocks.JWT,
-                publicJwk = VCLPublicJwk(valueStr = "{}"),
+                verifiedProfile = VCLVerifiedProfile("{}".toJsonObject()!!),
                 deepLink = VCLDeepLink(value = ""),
                 didJwk = didJwk
             ),

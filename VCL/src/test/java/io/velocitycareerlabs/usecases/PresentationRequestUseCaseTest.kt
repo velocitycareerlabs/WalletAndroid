@@ -7,10 +7,8 @@
 
 package io.velocitycareerlabs.usecases
 
-import android.os.Build
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
-import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.PresentationRequestRepositoryImpl
@@ -27,11 +25,7 @@ import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestMocks
-import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 internal class PresentationRequestUseCaseTest {
 
@@ -66,18 +60,11 @@ internal class PresentationRequestUseCaseTest {
                 ),
                 didJwk = DidJwkMocks.DidJwk,
                 remoteCryptoServicesToken = VCLToken("some token")
-            )
+            ),
+            verifiedProfile = VCLVerifiedProfile("{}".toJsonObject()!!)
         ) {
             it.handleResult(
                 successHandler = { presentationRequest ->
-                    assert(
-                        presentationRequest.publicJwk.valueStr.toCharArray().sort() ==
-                                VCLPublicJwk(PresentationRequestMocks.JWK.toJsonObject()!!).valueStr.toCharArray().sort()
-                    )
-                    assert(
-                        presentationRequest.publicJwk.valueJson.toString().toCharArray().sort() ==
-                                VCLPublicJwk(PresentationRequestMocks.JWK.toJsonObject()!!).valueJson.toString().toCharArray().sort()
-                    )
                     assert(presentationRequest.jwt.encodedJwt == PresentationRequestMocks.PresentationRequestJwt.encodedJwt)
                     assert(
                         presentationRequest.jwt.header.toString() ==
@@ -120,7 +107,8 @@ internal class PresentationRequestUseCaseTest {
             presentationRequestDescriptor = VCLPresentationRequestDescriptor(
                 deepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet,
                 didJwk = DidJwkMocks.DidJwk
-            )
+            ),
+            verifiedProfile = VCLVerifiedProfile("{}".toJsonObject()!!)
         ) {
             it.handleResult(
                 successHandler = {
