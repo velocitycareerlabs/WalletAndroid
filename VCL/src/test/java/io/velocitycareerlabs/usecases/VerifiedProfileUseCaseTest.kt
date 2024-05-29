@@ -18,21 +18,33 @@ import org.junit.Test
 
 internal class VerifiedProfileUseCaseTest {
 
-    private lateinit var subject1: VerifiedProfileUseCase
-    private lateinit var subject2: VerifiedProfileUseCase
-    private lateinit var subject3: VerifiedProfileUseCase
-    private lateinit var subject4: VerifiedProfileUseCase
-    private lateinit var subject5: VerifiedProfileUseCase
+    private val subject1 = VerifiedProfileUseCaseImpl(
+        VerifiedProfileRepositoryImpl(
+            NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1)
+        ),
+        EmptyExecutor()
+    )
+    private val subject2 = VerifiedProfileUseCaseImpl(
+        VerifiedProfileRepositoryImpl(
+            NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
+        ),
+        EmptyExecutor()
+    )
+    private val subject3 = VerifiedProfileUseCaseImpl(
+        VerifiedProfileRepositoryImpl(
+            NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
+        ),
+        EmptyExecutor()
+    )
+    private val subject4 = VerifiedProfileUseCaseImpl(
+        VerifiedProfileRepositoryImpl(
+            NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
+        ),
+        EmptyExecutor()
+    )
 
     @Test
     fun testGetVerifiedProfileIssuerSuccess() {
-        subject1 = VerifiedProfileUseCaseImpl(
-            VerifiedProfileRepositoryImpl(
-                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1)
-            ),
-            EmptyExecutor()
-        )
-
         subject1.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
@@ -53,13 +65,6 @@ internal class VerifiedProfileUseCaseTest {
 
     @Test
     fun testGetVerifiedProfileIssuerInspector1Success() {
-        subject2 = VerifiedProfileUseCaseImpl(
-            VerifiedProfileRepositoryImpl(
-                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
-            ),
-            EmptyExecutor()
-        )
-
         subject2.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
@@ -77,14 +82,7 @@ internal class VerifiedProfileUseCaseTest {
     }
 
     @Test
-    fun testGetVerifiedProfileIssuerInspector2Success() {
-        subject3 = VerifiedProfileUseCaseImpl(
-            VerifiedProfileRepositoryImpl(
-                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
-            ),
-            EmptyExecutor()
-        )
-
+    fun testGetVerifiedProfileIssuerNotaryIssuer2Success() {
         subject3.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
@@ -102,14 +100,7 @@ internal class VerifiedProfileUseCaseTest {
     }
 
     @Test
-    fun testGetVerifiedProfileIssuerNotaryIssuer2Success() {
-        subject4 = VerifiedProfileUseCaseImpl(
-            VerifiedProfileRepositoryImpl(
-                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
-            ),
-            EmptyExecutor()
-        )
-
+    fun testGetVerifiedProfileIssuerNotaryIssuerSuccess() {
         subject4.getVerifiedProfile(
             VCLVerifiedProfileDescriptor(
                 did = "did123"
@@ -126,32 +117,7 @@ internal class VerifiedProfileUseCaseTest {
         }
     }
 
-    @Test
-    fun testGetVerifiedProfileIssuerNotaryIssuerSuccess() {
-        subject5 = VerifiedProfileUseCaseImpl(
-            VerifiedProfileRepositoryImpl(
-                NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
-            ),
-            EmptyExecutor()
-        )
-
-        subject5.getVerifiedProfile(
-            VCLVerifiedProfileDescriptor(
-                did = "did123"
-            )
-        ) {
-            it.handleResult(
-                { verifiedProfile ->
-                    compareVerifiedProfile(verifiedProfile)
-                },
-                {
-                    assert(false) { "$it" }
-                }
-            )
-        }
-    }
-
-    fun compareVerifiedProfile(verifiedProfile: VCLVerifiedProfile) {
+    private fun compareVerifiedProfile(verifiedProfile: VCLVerifiedProfile) {
         assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
         assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
         assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
