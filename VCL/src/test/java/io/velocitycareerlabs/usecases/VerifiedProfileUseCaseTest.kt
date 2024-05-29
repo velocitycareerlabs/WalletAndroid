@@ -67,9 +67,7 @@ internal class VerifiedProfileUseCaseTest {
         ) {
             it.handleResult(
                 { verifiedProfile ->
-                    assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
-                    assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
-                    assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+                    compareVerifiedProfile(verifiedProfile)
                 },
                 {
                     assert(false) { "$it" }
@@ -94,9 +92,7 @@ internal class VerifiedProfileUseCaseTest {
         ) {
             it.handleResult(
                 { verifiedProfile ->
-                    assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
-                    assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
-                    assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+                    compareVerifiedProfile(verifiedProfile)
                 },
                 {
                     assert(false) { "$it" }
@@ -121,9 +117,7 @@ internal class VerifiedProfileUseCaseTest {
         ) {
             it.handleResult(
                 { verifiedProfile ->
-                    assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
-                    assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
-                    assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+                    compareVerifiedProfile(verifiedProfile)
                 },
                 {
                     assert(false) { "$it" }
@@ -148,14 +142,18 @@ internal class VerifiedProfileUseCaseTest {
         ) {
             it.handleResult(
                 { verifiedProfile ->
-                    assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
-                    assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
-                    assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
+                    compareVerifiedProfile(verifiedProfile)
                 },
                 {
                     assert(false) { "$it" }
                 }
             )
         }
+    }
+
+    fun compareVerifiedProfile(verifiedProfile: VCLVerifiedProfile) {
+        assert(verifiedProfile.id == VerifiedProfileMocks.ExpectedId)
+        assert(verifiedProfile.logo == VerifiedProfileMocks.ExpectedLogo)
+        assert(verifiedProfile.name == VerifiedProfileMocks.ExpectedName)
     }
 }
