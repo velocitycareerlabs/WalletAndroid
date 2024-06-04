@@ -83,11 +83,19 @@ class VCLFinalizeOffersDescriptorTest {
     }
 
     @Test
+    fun testProps() {
+        assert(subject.finalizeOffersUri == "https://devagent.velocitycareerlabs.io/api/holder/v0.6/org/did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA/issue/finalize-offers")
+        assert(subject.approvedOfferIds == approvedOfferIds)
+        assert(subject.rejectedOfferIds == rejectedOfferIds)
+        assert(subject.aud == "https://devagent.velocitycareerlabs.io/api/holder/v0.6/org/did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA")
+        assert(subject.issuerId == "did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA")
+    }
+
+    @Test
     fun testGenerateRequestBody() {
-        val payload = "{\"key1\": \"value1\"}".toJsonObject()
         VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)).sign(
             jwtDescriptor = VCLJwtDescriptor(
-                payload = payload,
+                payload = null,
                 jti = jtiMock,
                 iss = issMock,
                 aud = audMock
