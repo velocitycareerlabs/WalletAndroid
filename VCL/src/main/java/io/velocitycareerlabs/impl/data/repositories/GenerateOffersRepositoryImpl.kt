@@ -45,7 +45,11 @@ internal class GenerateOffersRepositoryImpl(
                         try {
                             completionBlock(
                                 VCLResult.Success(
-                                    parse(offersResponse, sessionToken)
+                                    VCLOffers.fromPayload(
+                                        offersResponse.payload,
+                                        offersResponse.code,
+                                        sessionToken
+                                    )
                                 )
                             )
                         } catch (ex: Exception) {
@@ -58,38 +62,5 @@ internal class GenerateOffersRepositoryImpl(
                 )
             }
         )
-    }
-
-    private fun parse(offersResponse: Response, sessionToken: VCLToken): VCLOffers {
-//        VCLXVnfProtocolVersion.XVnfProtocolVersion2
-        offersResponse.payload.toJsonObject()?.let { payload ->
-            return VCLOffers(
-                payload = payload,
-                all = Utils.offersFromJsonArray(
-                    payload.optJSONArray(VCLOffers.CodingKeys.KeyOffers) ?: JSONArray()
-                ),
-                responseCode = offersResponse.code,
-                sessionToken = sessionToken,
-                challenge = payload.optString(VCLOffers.CodingKeys.KeyChallenge)
-            )
-        } ?: run {
-//            VCLXVnfProtocolVersion.XVnfProtocolVersion1
-            offersResponse.payload.toJsonArray()?.let { offersJsonArray ->
-                return VCLOffers(
-                    payload = JSONObject(),
-                    all = Utils.offersFromJsonArray(offersJsonArray),
-                    responseCode = offersResponse.code,
-                    sessionToken = sessionToken,
-                )
-            } ?: run {
-//                No offers
-                return VCLOffers(
-                    payload = JSONObject(),
-                    all = listOf(),
-                    responseCode = offersResponse.code,
-                    sessionToken = sessionToken,
-                    )
-            }
-        }
     }
 }

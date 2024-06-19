@@ -83,16 +83,6 @@ internal class Utils {
                 ?: (credentialSubject as? Map<*, *>)?.get("id") as? String
         }
 
-        internal fun offersFromJsonArray(offersJsonArray: JSONArray): List<VCLOffer> {
-            val allOffers = mutableListOf<VCLOffer>()
-            for (i in 0 until offersJsonArray.length()) {
-                offersJsonArray.optJSONObject(i)?.let { offerJsonObject ->
-                    allOffers.add(VCLOffer(offerJsonObject))
-                }
-            }
-            return allOffers
-        }
-
         fun getCredentialIssuerId(jwtCredential: VCLJwt): String? {
             val vc: Map<*, *>? = jwtCredential.payload?.toJSONObject()?.get("vc") as? Map<*, *>
             return (vc?.get("issuer") as? Map<*, *>)?.get("id") as? String
