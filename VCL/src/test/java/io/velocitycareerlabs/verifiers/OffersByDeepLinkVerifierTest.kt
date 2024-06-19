@@ -27,8 +27,8 @@ class OffersByDeepLinkVerifierTest {
     private val offersPayload = GenerateOffersMocks.RealOffers.toJsonObject() ?: JSONObject()
     private val offers = VCLOffers(
         payload = offersPayload,
-        all = Utils.offersFromJsonArray(
-            offersPayload.optJSONArray(VCLOffers.CodingKeys.KeyOffers) ?: JSONArray()
+        all = VCLOffers.offersFromJsonArray(
+            offersPayload.optJSONArray(VCLOffers.Companion.CodingKeys.KeyOffers) ?: JSONArray()
         ),
         responseCode = 0,
         sessionToken = VCLToken(""),
