@@ -74,8 +74,8 @@ java {
 }
 
 /**
- * Publish Android library to GitHub Packages ======================================================
- */
+ * Publish Android library ======================================================
+*/
 def getVersionName = { ->
     return android.defaultConfig.versionName
 }
@@ -224,7 +224,7 @@ repositories {
 }
 /**
  * =================================================================================================
- */
+*/
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
