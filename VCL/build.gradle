@@ -123,7 +123,7 @@ afterEvaluate {
                     from components.java
                 }
 
-//                artifact androidSourcesJar
+                artifact androidSourcesJar
 
                 // Mostly self-explanatory metadata
                 pom {
@@ -167,7 +167,7 @@ afterEvaluate {
                     from components.java
                 }
 
-//                artifact androidSourcesJar
+                artifact androidSourcesJar
 
                 // Mostly self-explanatory metadata
                 pom {
@@ -201,21 +201,22 @@ afterEvaluate {
             }
         }
     }
+
     signing {
         useInMemoryPgpKeys(
                 rootProject.ext.signingKeyId,
                 rootProject.ext.signingPrivateKey,
-                rootProject.ext.signingPassword,
+                rootProject.ext.signingPassword
         )
         sign publishing.publications
     }
 
     tasks.named("publishRcPublicationToSonatypeRepository").configure {
-        dependsOn tasks.named("signReleasePublication")
+        dependsOn tasks.named("signRcPublication")
     }
 
     tasks.named("publishReleasePublicationToSonatypeRepository").configure {
-        dependsOn tasks.named("signRcPublication")
+        dependsOn tasks.named("signReleasePublication")
     }
 }
 
