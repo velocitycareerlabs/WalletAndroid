@@ -189,8 +189,9 @@ afterEvaluate {
                 rootProject.ext.signingPrivateKey,
                 rootProject.ext.signingPassword
         )
-        sign(publishing.publications['rc'])
-        sign(publishing.publications['release'])
+        sign(publishing.publications)
+//        sign(publishing.publications['rc'])
+//        sign(publishing.publications['release'])
     }
 
     tasks.named('generateMetadataFileForRcPublication') {
