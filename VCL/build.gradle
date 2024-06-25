@@ -209,6 +209,14 @@ afterEvaluate {
         )
         sign publishing.publications
     }
+
+    tasks.named("publishRcPublicationToSonatypeRepository").configure {
+        dependsOn tasks.named("signReleasePublication")
+    }
+
+    tasks.named("publishReleasePublicationToSonatypeRepository").configure {
+        dependsOn tasks.named("signRcPublication")
+    }
 }
 
 repositories {
