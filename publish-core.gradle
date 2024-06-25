@@ -24,9 +24,11 @@ if (propertiesFile.exists()) {
 
 ext {
     signingKeyId = System.getenv("ANDROID_NEXUS_SIGNING_KEY_ID") ?: properties["signingKeyId"]
-    signingPassword = System.getenv("ANDROID_NEXUS_SIGNING_PWD") ?: properties["signingPassword"]
-    ossrhUsername = System.getenv("ANDROID_NEXUS_OSSRH_USERNAME") ?: properties["ossrhUsername"]
-    ossrhPassword = System.getenv("ANDROID_NEXUS_OSSRH_PWD") ?: properties["ossrhPassword"]
+    signingPassword = System.getenv("ANDROID_NEXUS_SIGNING_PASSWORD") ?: properties["signingPassword"]
+//    ossrhUsername = System.getenv("ANDROID_NEXUS_OSSRH_USERNAME") ?: properties["ossrhUsername"]
+//    ossrhPassword = System.getenv("ANDROID_NEXUS_OSSRH_PASSWORD") ?: properties["ossrhPassword"]
+    ossrhTokenUsername = System.getenv("ANDROID_NEXUS_OSSRH_TOKEN_USERNAME") ?: properties["ossrhTokenUsername"]
+    ossrhTokenPassword = System.getenv("ANDROID_NEXUS_OSSRH_TOKEN_PASSWORD") ?: properties["ossrhTokenPassword"]
     sonatypeStagingProfileId = System.getenv("ANDROID_NEXUS_STAGING_PROFILE_ID") ?: properties["stagingProfileId"]
     signingPrivateKey = System.getenv("ANDROID_NEXUS_PRIVATE_KEY") ?: properties["signingPrivateKey"]
 }
@@ -42,8 +44,8 @@ nexusPublishing {
     repositories {
         sonatype {
             stagingProfileId = sonatypeStagingProfileId
-            username = ossrhUsername
-            password = ossrhPassword
+            username = ossrhTokenUsername
+            password = ossrhTokenPassword
             nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
             snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
         }
