@@ -1,44 +1,34 @@
 def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven/nexus.properties'
-def propertiesFilePath_alternative = 'nexus.properties'
+def propertiesFilePathAlternative = 'nexus.properties'
 
-def propertiesFile = new File(propertiesFilePath)
-def propertiesFile_alternative = new File(propertiesFilePath_alternative)
-
-def properties = new Properties()
-
-if (propertiesFile.exists()) {    
-    try {
-        properties.load(new FileInputStream(propertiesFile))
-    } catch (IOException e) {
-        e.printStackTrace()
+static def loadProperties(filePath) {
+    def properties = new Properties()
+    def file = new File(filePath)
+    if (file.exists()) {
+        file.withInputStream { stream ->
+            properties.load(stream)
+        }
     }
-} else if (propertiesFile_alternative.exists()) {
-    try {
-        properties.load(new FileInputStream(propertiesFile_alternative))
-    } catch (IOException e) {
-        e.printStackTrace()
-    }
-} else {
-    println "Properties file not found: $propertiesFilePath or $propertiesFilePath_alternative"
+    return properties
+}
+
+def properties = loadProperties(propertiesFilePath)
+if (properties.isEmpty()) {
+    properties = loadProperties(propertiesFilePathAlternative)
+}
+
+if (properties.isEmpty()) {
+    println "Properties file not found: $propertiesFilePath or $propertiesFilePathAlternative"
 }
 
 ext {
-    signingKeyId = (System.getenv("ANDROID_NEXUS_SIGNING_KEY_ID") ?: properties["signingKeyId"]) ?: println("signingKeyId was NOT found")
-    signingPassword = (System.getenv("ANDROID_NEXUS_SIGNING_PASSWORD") ?: properties["signingPassword"]) ?: println("signingPassword was NOT found")
-//    ossrhUsername = (System.getenv("ANDROID_NEXUS_OSSRH_USERNAME") ?: properties["ossrhUsername"]) ?: println("ossrhUsername was NOT found")
-//    ossrhPassword = (System.getenv("ANDROID_NEXUS_OSSRH_PASSWORD") ?: properties["ossrhPassword"]) ?: println("ossrhPassword was NOT found")
-    ossrhTokenUsername = (System.getenv("ANDROID_NEXUS_OSSRH_TOKEN_USERNAME") ?: properties["ossrhTokenUsername"]) ?: println("ossrhTokenUsername was NOT found")
-    ossrhTokenPassword = (System.getenv("ANDROID_NEXUS_OSSRH_TOKEN_PASSWORD") ?: properties["ossrhTokenPassword"]) ?: println("ossrhTokenPassword was NOT found")
-    sonatypeStagingProfileId = (System.getenv("ANDROID_NEXUS_STAGING_PROFILE_ID") ?: properties["stagingProfileId"]) ?: println("stagingProfileId was NOT found")
-    signingPrivateKey = (System.getenv("ANDROID_NEXUS_PRIVATE_KEY") ?: properties["signingPrivateKey"]) ?: println("signingPrivateKey was NOT found")
+    signingKeyId = System.getenv("ANDROID_NEXUS_SIGNING_KEY_ID") ?: properties.getProperty("signingKeyId") ?: println("signingKeyId was NOT found")
+    signingPassword = System.getenv("ANDROID_NEXUS_SIGNING_PASSWORD") ?: properties.getProperty("signingPassword") ?: println("signingPassword was NOT found")
+    ossrhTokenUsername = System.getenv("ANDROID_NEXUS_OSSRH_TOKEN_USERNAME") ?: properties.getProperty("ossrhTokenUsername") ?: println("ossrhTokenUsername was NOT found")
+    ossrhTokenPassword = System.getenv("ANDROID_NEXUS_OSSRH_TOKEN_PASSWORD") ?: properties.getProperty("ossrhTokenPassword") ?: println("ossrhTokenPassword was NOT found")
+    sonatypeStagingProfileId = System.getenv("ANDROID_NEXUS_STAGING_PROFILE_ID") ?: properties.getProperty("stagingProfileId") ?: println("stagingProfileId was NOT found")
+    signingPrivateKey = System.getenv("ANDROID_NEXUS_PRIVATE_KEY") ?: properties.getProperty("signingPrivateKey") ?: println("signingPrivateKey was NOT found")
 }
-
-// println("signingKeyId: ${signingKeyId}")
-// println("signingPassword: ${signingPassword}")
-//
-// println("ossrhPassword: ${ossrhPassword}")
-// println("sonatypeStagingProfileId: ${sonatypeStagingProfileId}")
-// println("signingPrivateKey: ${signingPrivateKey}")
 
 nexusPublishing {
     repositories {
@@ -52,6 +42,10 @@ nexusPublishing {
     }
 }
 
-// Create custom tasks for publishing
-tasks.register('publishRelease') { dependsOn([':VCL:publishReleasePublicationToSonatypeRepository']) }
-tasks.register('publishRc') { dependsOn([':VCL:publishRcPublicationToSonatypeRepository']) }
+tasks.register('publishRelease') {
+    dependsOn(':VCL:publishReleasePublicationToSonatypeRepository')
+}
+
+tasks.register('publishRc') {
+    dependsOn(':VCL:publishRcPublicationToSonatypeRepository')
+}

@@ -7,7 +7,6 @@ plugins {
 
 android {
     compileSdk 34
-//    buildToolsVersion "30.0.3"
     namespace 'io.velocitycareerlabs'
 
     defaultConfig {
@@ -88,31 +87,23 @@ def getGroupId = { ->
 
 tasks.register('androidSourcesJar', Jar) {
     archiveClassifier.set('sources')
-    if (project.plugins.findPlugin("com.android.library")) {
-        // For Android libraries
-        from android.sourceSets.main.java.srcDirs
-        from android.sourceSets.main.kotlin.srcDirs
-    } else {
-        // For pure Kotlin libraries, in case you have them
-        from sourceSets.main.java.srcDirs
-        from sourceSets.main.kotlin.srcDirs
-    }
+    from android.sourceSets.main.java.srcDirs
+    from android.sourceSets.main.kotlin.srcDirs
 }
 
 artifacts {
-    archives androidSourcesJar
+    archives tasks.named('androidSourcesJar')
 }
 
 afterEvaluate {
     publishing {
         publications {
-            rc(MavenPublication) {
-                groupId getGroupId()
-                artifactId getArtifactId()
-                version getVersionName()
+            create('rc', MavenPublication) {
+                groupId = getGroupId()
+                artifactId = getArtifactId()
+                version = getVersionName()
 
-                // Main artifact
-                if (project.plugins.findPlugin("com.android.library")) {
+                if (project.plugins.hasPlugin("com.android.library")) {
                     artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
                         builtBy tasks.named('assembleRelease')
                     }
@@ -122,46 +113,38 @@ afterEvaluate {
                     }
                 }
 
-                // Sources jar artifact
                 artifact(tasks.named('androidSourcesJar'))
 
-                // Mostly self-explanatory metadata
                 pom {
-                    name = getArtifactId()
-                    // Library description
-                    description = 'Velocity Career Labs Android library'
-                    // Library Github URL
-                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    name.set(getArtifactId())
+                    description.set('Velocity Career Labs Android library')
+                    url.set('https://github.com/velocitycareerlabs/WalletAndroid')
                     licenses {
                         license {
-                            name = 'Apache License 2.0'
-                            // Library license
-                            url = 'https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE'
+                            name.set('Apache License 2.0')
+                            url.set('https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE')
                         }
                     }
                     developers {
                         developer {
-                            id = 'velocitycareerlabs'
-                            name = 'Michael Avoyan'
-                            email = 'michael.avoyan@velocitycareerlabs.com'
+                            id.set('velocitycareerlabs')
+                            name.set('Michael Avoyan')
+                            email.set('michael.avoyan@velocitycareerlabs.com')
                         }
                     }
-
                     scm {
-                        // Library info on Github
-                        connection = 'scm:github.com/velocitycareerlabs/WalletAndroid.git'
-                        developerConnection = 'scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git'
-                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                        connection.set('scm:github.com/velocitycareerlabs/WalletAndroid.git')
+                        developerConnection.set('scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git')
+                        url.set('https://github.com/velocitycareerlabs/WalletAndroid')
                     }
                 }
             }
-            release(MavenPublication) {
-                groupId getGroupId()
-                artifactId getArtifactId()
-                version getVersionName()
+            create('release', MavenPublication) {
+                groupId = getGroupId()
+                artifactId = getArtifactId()
+                version = getVersionName()
 
-                // Main artifact
-                if (project.plugins.findPlugin("com.android.library")) {
+                if (project.plugins.hasPlugin("com.android.library")) {
                     artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
                         builtBy tasks.named('assembleRelease')
                     }
@@ -171,36 +154,29 @@ afterEvaluate {
                     }
                 }
 
-                // Sources jar artifact
                 artifact(tasks.named('androidSourcesJar'))
 
-                // Mostly self-explanatory metadata
                 pom {
-                    name = getArtifactId()
-                    // Library description
-                    description = 'Velocity Career Labs Android library'
-                    // Library Github URL
-                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    name.set(getArtifactId())
+                    description.set('Velocity Career Labs Android library')
+                    url.set('https://github.com/velocitycareerlabs/WalletAndroid')
                     licenses {
                         license {
-                            name = 'Apache License 2.0'
-                            // Library license
-                            url = 'https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE'
+                            name.set('Apache License 2.0')
+                            url.set('https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE')
                         }
                     }
                     developers {
                         developer {
-                            id = 'velocitycareerlabs'
-                            name = 'Michael Avoyan'
-                            email = 'michael.avoyan@velocitycareerlabs.com'
+                            id.set('velocitycareerlabs')
+                            name.set('Michael Avoyan')
+                            email.set('michael.avoyan@velocitycareerlabs.com')
                         }
                     }
-
                     scm {
-                        // Library info on Github
-                        connection = 'scm:github.com/velocitycareerlabs/WalletAndroid.git'
-                        developerConnection = 'scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git'
-                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                        connection.set('scm:github.com/velocitycareerlabs/WalletAndroid.git')
+                        developerConnection.set('scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git')
+                        url.set('https://github.com/velocitycareerlabs/WalletAndroid')
                     }
                 }
             }
@@ -213,21 +189,22 @@ afterEvaluate {
                 rootProject.ext.signingPrivateKey,
                 rootProject.ext.signingPassword
         )
-        sign publishing.publications
+        sign(publishing.publications['rc'])
+        sign(publishing.publications['release'])
     }
 
     tasks.named('generateMetadataFileForRcPublication') {
-        dependsOn tasks.named('androidSourcesJar')
+        dependsOn(tasks.named('androidSourcesJar'))
     }
 
-    tasks.named("publishRcPublicationToSonatypeRepository").configure {
-        dependsOn tasks.named("signRcPublication")
-        dependsOn tasks.named("signReleasePublication")
+    tasks.named("publishRcPublicationToSonatypeRepository") {
+        dependsOn(tasks.named("signRcPublication"))
+        dependsOn(tasks.named("signReleasePublication"))
     }
 
-    tasks.named("publishReleasePublicationToSonatypeRepository").configure {
-        dependsOn tasks.named("signReleasePublication")
-        dependsOn tasks.named("signRcPublication")
+    tasks.named("publishReleasePublicationToSonatypeRepository") {
+        dependsOn(tasks.named("signReleasePublication"))
+        dependsOn(tasks.named("signRcPublication"))
     }
 }
 
