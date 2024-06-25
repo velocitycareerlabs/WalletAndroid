@@ -109,21 +109,21 @@ afterEvaluate {
             rc(MavenPublication) {
                 groupId getGroupId()
                 artifactId getArtifactId()
-
-//                // define rc version name
-//                def vers = getVersionName()
-//                def rcSuffix = rootProject.ext.rcSuffix
-//                version = "${vers}-${rcSuffix}"
                 version getVersionName()
 
-                // Two artifacts, the `aar` (or `jar`) and the sources
+                // Main artifact
                 if (project.plugins.findPlugin("com.android.library")) {
-                    from components.release
+                    artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
+                        builtBy tasks.named('assembleRelease')
+                    }
                 } else {
-                    from components.java
+                    artifact("$buildDir/libs/${project.name}.jar") {
+                        builtBy tasks.named('jar')
+                    }
                 }
 
-//                artifact androidSourcesJar
+                // Sources jar artifact
+                artifact(tasks.named('androidSourcesJar'))
 
                 // Mostly self-explanatory metadata
                 pom {
@@ -160,14 +160,19 @@ afterEvaluate {
                 artifactId getArtifactId()
                 version getVersionName()
 
-                // Two artifacts, the `aar` (or `jar`) and the sources
+                // Main artifact
                 if (project.plugins.findPlugin("com.android.library")) {
-                    from components.release
+                    artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
+                        builtBy tasks.named('assembleRelease')
+                    }
                 } else {
-                    from components.java
+                    artifact("$buildDir/libs/${project.name}.jar") {
+                        builtBy tasks.named('jar')
+                    }
                 }
 
-//                artifact androidSourcesJar
+                // Sources jar artifact
+                artifact(tasks.named('androidSourcesJar'))
 
                 // Mostly self-explanatory metadata
                 pom {
@@ -201,20 +206,27 @@ afterEvaluate {
             }
         }
     }
+
     signing {
         useInMemoryPgpKeys(
                 rootProject.ext.signingKeyId,
                 rootProject.ext.signingPrivateKey,
-                rootProject.ext.signingPassword,
+                rootProject.ext.signingPassword
         )
         sign publishing.publications
     }
 
+    tasks.named('generateMetadataFileForRcPublication') {
+        dependsOn tasks.named('androidSourcesJar')
+    }
+
     tasks.named("publishRcPublicationToSonatypeRepository").configure {
+        dependsOn tasks.named("signRcPublication")
         dependsOn tasks.named("signReleasePublication")
     }
 
     tasks.named("publishReleasePublicationToSonatypeRepository").configure {
+        dependsOn tasks.named("signReleasePublication")
         dependsOn tasks.named("signRcPublication")
     }
 }
