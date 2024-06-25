@@ -55,6 +55,12 @@ jobs:
         run: ./gradlew assemble${{ env.RELEASE_TAG }}
         env: 
           RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'Release' ) || 'Rc' }}
+          ANDROID_NEXUS_OSSRH_TOKEN_USERNAME: ${{ secrets.ANDROID_NEXUS_OSSRH_TOKEN_USERNAME }}
+          ANDROID_NEXUS_OSSRH_TOKEN_PASSWORD: ${{ secrets.ANDROID_NEXUS_OSSRH_TOKEN_PASSWORD }}
+          ANDROID_NEXUS_SIGNING_KEY_ID: ${{ secrets.ANDROID_NEXUS_SIGNING_KEY_ID }}
+          ANDROID_NEXUS_SIGNING_PASSWORD: ${{ secrets.ANDROID_NEXUS_SIGNING_PASSWORD }}
+          ANDROID_NEXUS_STAGING_PROFILE_ID: ${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}
+          ANDROID_NEXUS_PRIVATE_KEY: ${{ secrets.ANDROID_NEXUS_PRIVATE_KEY }}
       # Convert artifact to lowercase
       - name: Rename artifact to lowercase
         run: mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
