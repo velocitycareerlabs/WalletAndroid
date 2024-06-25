@@ -184,6 +184,12 @@ afterEvaluate {
     }
 
     signing {
+        println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        println("rootProject.ext.signingKeyId: ${rootProject.ext.signingKeyId}")
+        println("rootProject.ext.signingPrivateKey: ${rootProject.ext.signingPrivateKey}")
+        println("rootProject.ext.signingPassword: ${rootProject.ext.signingPassword}")
+        println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+
         useInMemoryPgpKeys(
                 rootProject.ext.signingKeyId,
                 rootProject.ext.signingPrivateKey,
