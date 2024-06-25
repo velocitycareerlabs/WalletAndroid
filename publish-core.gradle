@@ -22,10 +22,6 @@ if (propertiesFile.exists()) {
     println "Properties file not found: $propertiesFilePath or $propertiesFilePath_alternative"
 }
 
-println("############# RELEASE_TAG ${System.getenv("RELEASE_TAG")}")
-println("############# ANDROID_NEXUS_SIGNING_KEY_ID ${System.getenv("ANDROID_NEXUS_SIGNING_KEY_ID")}")
-println("############# ANDROID_NEXUS_OSSRH_TOKEN_USERNAME ${System.getenv("ANDROID_NEXUS_OSSRH_TOKEN_USERNAME")}")
-
 ext {
     signingKeyId = (System.getenv("ANDROID_NEXUS_SIGNING_KEY_ID") ?: properties["signingKeyId"]) ?: println("signingKeyId was NOT found")
     signingPassword = (System.getenv("ANDROID_NEXUS_SIGNING_PASSWORD") ?: properties["signingPassword"]) ?: println("signingPassword was NOT found")
