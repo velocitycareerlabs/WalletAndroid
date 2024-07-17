@@ -6,8 +6,10 @@
  */
 package com.vcl.wallet
 
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.CalendarContract.Colors
 import android.util.Log
 import androidx.core.view.isVisible
 import com.vcl.wallet.databinding.ActivityMainBinding
@@ -32,12 +34,13 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val environment = VCLEnvironment.Dev
+    private val environment = VCLEnvironment.Staging
 
     private lateinit var vcl: VCL
     private lateinit var didJwk: VCLDidJwk
 
-    private val didJwkDescriptor = VCLDidJwkDescriptor(signatureAlgorithm = VCLSignatureAlgorithm.ES256)
+    private val didJwkDescriptor =
+        VCLDidJwkDescriptor(signatureAlgorithm = VCLSignatureAlgorithm.ES256)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +62,8 @@ class MainActivity : AppCompatActivity() {
         binding.selfReportingCredentials.setOnClickListener {
             getCredentialTypesUIFormSchema()
         }
+        binding.refreshCredentials.isEnabled = false
+        binding.refreshCredentials.setTextColor(Color.GRAY)
         binding.refreshCredentials.setOnClickListener {
             refreshCredentials()
         }
@@ -157,7 +162,7 @@ class MainActivity : AppCompatActivity() {
     private fun submitPresentation(presentationRequest: VCLPresentationRequest) {
         val presentationSubmission = VCLPresentationSubmission(
             presentationRequest = presentationRequest,
-            verifiableCredentials = Constants.PresentationSelectionsList
+            verifiableCredentials = Constants.getIdentificationList(environment)
         )
         submitPresentation(presentationSubmission)
     }
@@ -216,7 +221,7 @@ class MainActivity : AppCompatActivity() {
         val credentialManifestDescriptorRefresh =
             VCLCredentialManifestDescriptorRefresh(
                 service = service,
-                credentialIds = Constants.CredentialIdsToRefresh,
+                credentialIds = Constants.getCredentialIdsToRefresh(environment),
                 didJwk = this.didJwk
             )
         vcl.getCredentialManifest(credentialManifestDescriptorRefresh,
@@ -279,7 +284,7 @@ class MainActivity : AppCompatActivity() {
         val generateOffersDescriptor = VCLGenerateOffersDescriptor(
             credentialManifest = credentialManifest,
             types = Constants.CredentialTypes,
-            identificationVerifiableCredentials = Constants.IdentificationList
+            identificationVerifiableCredentials = Constants.getIdentificationList(environment)
         )
         vcl.generateOffers(
             generateOffersDescriptor = generateOffersDescriptor,
@@ -377,7 +382,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getVerifiedProfile() {
-        vcl.getVerifiedProfile(Constants.VerifiedProfileDescriptor,
+        vcl.getVerifiedProfile(Constants.getVerifiedProfileDescriptor(environment),
             { verifiedProfile ->
                 Log.d(TAG, "VCL Verified Profile: $verifiedProfile")
             },
@@ -402,7 +407,7 @@ class MainActivity : AppCompatActivity() {
     private fun generateSignedJwt() {
         vcl.generateSignedJwt(
             didJwk = didJwk,
-            jwtDescriptor =  VCLJwtDescriptor(
+            jwtDescriptor = VCLJwtDescriptor(
                 payload = Constants.SomePayload,
                 iss = "iss123",
                 jti = "jti123"
