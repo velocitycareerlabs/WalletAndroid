@@ -79,24 +79,28 @@ class MainActivity : AppCompatActivity() {
         binding.generateDidJwk.setOnClickListener {
             generateDidJwk()
         }
+//        val initializationDescriptor = VCLInitializationDescriptor(
+//            environment = environment,
+//            xVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2,
+//            cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
+//                cryptoServiceType = VCLCryptoServiceType.Remote,
+//                remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
+//                    keyServiceUrls = VCLKeyServiceUrls(
+//                        createDidKeyServiceUrl = Constants.getCreateDidKeyServiceUrl(environment = environment)
+//                    ),
+//                    jwtServiceUrls = VCLJwtServiceUrls(
+//                        jwtSignServiceUrl = Constants.getJwtSignServiceUrl(environment = environment),
+//                        jwtVerifyServiceUrl = Constants.getJwtVerifyServiceUrl(environment = environment)
+//                    )
+//                )
+//            )
+//        )
+        val initializationDescriptor = VCLInitializationDescriptor(
+            environment = environment
+        )
         vcl.initialize(
             context = this.applicationContext,
-            initializationDescriptor = VCLInitializationDescriptor(
-                environment = environment,
-                xVnfProtocolVersion = VCLXVnfProtocolVersion.XVnfProtocolVersion2,
-                cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
-                    cryptoServiceType = VCLCryptoServiceType.Remote,
-                    remoteCryptoServicesUrlsDescriptor = VCLRemoteCryptoServicesUrlsDescriptor(
-                        keyServiceUrls = VCLKeyServiceUrls(
-                            createDidKeyServiceUrl = Constants.getCreateDidKeyServiceUrl(environment = environment)
-                        ),
-                        jwtServiceUrls = VCLJwtServiceUrls(
-                            jwtSignServiceUrl = Constants.getJwtSignServiceUrl(environment = environment),
-                            jwtVerifyServiceUrl = Constants.getJwtVerifyServiceUrl(environment = environment)
-                        )
-                    )
-                )
-            ),
+            initializationDescriptor = initializationDescriptor,
             successHandler = {
                 Log.d(TAG, "VCL Initialization succeed!")
 

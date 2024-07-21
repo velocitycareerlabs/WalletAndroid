@@ -21,6 +21,8 @@ import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.GenerateOffersMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.Test
+import org.skyscreamer.jsonassert.JSONAssert
+import org.skyscreamer.jsonassert.JSONCompareMode
 
 internal class GenerateOffersUseCaseTest {
 
@@ -48,16 +50,17 @@ internal class GenerateOffersUseCaseTest {
 
         subject1.generateOffers(
             generateOffersDescriptor = generateOffersDescriptor,
-            sessionToken = VCLToken(value = "")
+            sessionToken = CommonMocks.Token
         ) {
             it.handleResult(
                 { offers ->
-                    assert(
-                        offers.all.toString().toCharArray().sort() ==
-                                GenerateOffersMocks.Offers.toJsonArray().toString().toCharArray()
-                                    .sort()
+                    JSONAssert.assertEquals(
+                        offers.all.map { it.payload }.toJsonArray(),
+                        GenerateOffersMocks.Offers.toJsonArray(),
+                        JSONCompareMode.LENIENT
                     )
                     assert(offers.challenge == GenerateOffersMocks.Challenge)
+                    assert(offers.sessionToken.value == CommonMocks.Token.value)
                 },
                 {
                     assert(false) { "${it.toJsonObject()}" }
@@ -86,11 +89,12 @@ internal class GenerateOffersUseCaseTest {
 
         subject2.generateOffers(
             generateOffersDescriptor = generateOffersDescriptor,
-            sessionToken = VCLToken(value = "")
+            sessionToken = CommonMocks.Token
         ) {
             it.handleResult(
                 { offers ->
                     assert(offers.all == listOf<VCLOffer>())
+                    assert(offers.sessionToken.value == CommonMocks.Token.value)
                 },
                 {
                     assert(false) { "${it.toJsonObject()}" }
@@ -119,11 +123,12 @@ internal class GenerateOffersUseCaseTest {
 
         subject3.generateOffers(
             generateOffersDescriptor = generateOffersDescriptor,
-            sessionToken = VCLToken(value = "")
+            sessionToken = CommonMocks.Token
         ) {
             it.handleResult(
                 { offers ->
                     assert(offers.all == listOf<VCLOffer>())
+                    assert(offers.sessionToken.value == CommonMocks.Token.value)
                 },
                 {
                     assert(false) { "${it.toJsonObject()}" }
