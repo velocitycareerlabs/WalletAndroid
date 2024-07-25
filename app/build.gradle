@@ -50,7 +50,7 @@ dependencies {
 
 //    Must: be added:
     implementation 'com.nimbusds:nimbus-jose-jwt:9.40'
-    
+
     implementation project(':VCL')
 //    implementation "io.velocitycareerlabs:vcl:x.y.z"
 
