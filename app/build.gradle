@@ -5,13 +5,13 @@ plugins {
 }
 
 android {
-    compileSdk 35
+    compileSdk 34
 //    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.vcl.wallet"
         minSdk 24
-        targetSdk 35
+        targetSdk 34
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
