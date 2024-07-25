@@ -20,4 +20,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# Preserve vcl api
 -keep class io.velocitycareerlabs.api.** { *; }
+# Preserve EncryptedSharedPreferences classes
+-keep class androidx.security.crypto.** { *; }
