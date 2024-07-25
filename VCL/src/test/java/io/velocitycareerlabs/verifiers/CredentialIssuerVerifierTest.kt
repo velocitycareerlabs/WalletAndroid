@@ -78,7 +78,7 @@ internal class CredentialIssuerVerifierTest {
         )
         finalizeOffersDescriptorWithoutPermittedServices = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestWithoutPermittedServices,
-            offers = OffersMock,
+            challenge = OffersMock.challenge,
             approvedOfferIds = listOf(),
             rejectedOfferIds = listOf()
         )
@@ -90,7 +90,7 @@ internal class CredentialIssuerVerifierTest {
         )
         finalizeOffersDescriptorOfNotaryIssuer = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestFromNotaryIssuer,
-            offers = OffersMock,
+            challenge = OffersMock.challenge,
             approvedOfferIds = listOf(),
             rejectedOfferIds = listOf()
         )
@@ -102,7 +102,7 @@ internal class CredentialIssuerVerifierTest {
         )
         finalizeOffersDescriptorOfRegularIssuer = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestFromRegularIssuer,
-            offers = OffersMock,
+            challenge = OffersMock.challenge,
             approvedOfferIds = listOf(),
             rejectedOfferIds = listOf()
         )
@@ -114,7 +114,7 @@ internal class CredentialIssuerVerifierTest {
         )
         finalizeOffersDescriptorOfIdentityIssuer = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestFromIdentityIssuer,
-            offers = OffersMock,
+            challenge = OffersMock.challenge,
             approvedOfferIds = listOf(),
             rejectedOfferIds = listOf()
         )
@@ -131,7 +131,7 @@ internal class CredentialIssuerVerifierTest {
         )
         finalizeOffersDescriptorOfMicrosoftQa = VCLFinalizeOffersDescriptor(
             credentialManifest = CredentialManifestForValidCredentialMicrsoftQa,
-            offers = OffersMock,
+            challenge = OffersMock.challenge,
             approvedOfferIds = listOf(),
             rejectedOfferIds = listOf()
         )

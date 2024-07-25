@@ -52,7 +52,7 @@ internal class CredentialDidVerifierTest {
         )
         finalizeOffersDescriptorOfNotaryIssuer = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestFromNotaryIssuer,
-            offers = OffersMock,
+            challenge = OffersMock.challenge,
             approvedOfferIds = listOf(),
             rejectedOfferIds = listOf()
         )
@@ -64,7 +64,7 @@ internal class CredentialDidVerifierTest {
         )
         finalizeOffersDescriptorOfRegularIssuer = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestFromRegularIssuer,
-            offers = OffersMock,
+            challenge = OffersMock.challenge,
             approvedOfferIds = listOf(),
             rejectedOfferIds = listOf()
         )

@@ -11,7 +11,7 @@ import org.json.JSONObject
 
 data class VCLFinalizeOffersDescriptor(
     val credentialManifest: VCLCredentialManifest,
-    val offers: VCLOffers,
+    val challenge: String? = null,
     val approvedOfferIds: List<String>,
     val rejectedOfferIds: List<String>
 ) {

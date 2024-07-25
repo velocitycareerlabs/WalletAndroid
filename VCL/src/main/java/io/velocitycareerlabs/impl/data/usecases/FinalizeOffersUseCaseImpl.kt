@@ -34,7 +34,7 @@ internal class FinalizeOffersUseCaseImpl(
         completionBlock: (VCLResult<VCLJwtVerifiableCredentials>) -> Unit
     ) {
         executor.runOnBackground {
-            finalizeOffersDescriptor.offers.challenge?.let { challenge ->
+            finalizeOffersDescriptor.challenge?.let { challenge ->
                 this.jwtServiceRepository.generateSignedJwt(
                     jwtDescriptor = VCLJwtDescriptor(
                         iss = finalizeOffersDescriptor.didJwk.did,
