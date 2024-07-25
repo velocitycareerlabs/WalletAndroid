@@ -6,13 +6,13 @@ plugins {
 }
 
 android {
-    compileSdk 34
+    compileSdk 35
     namespace 'io.velocitycareerlabs'
 
     defaultConfig {
         minSdk 24
-        targetSdk 34
-        versionName "2.4.6"
+        targetSdk 35
+        versionName "2.5.0"
         versionCode 142
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -217,9 +217,9 @@ repositories {
 */
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.core:core-ktx:1.13.1'
 
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.37.3'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.40'
     //noinspection GradleDependency
     implementation "androidx.security:security-crypto:1.0.0"
 
@@ -229,7 +229,7 @@ dependencies {
     // Required -- JUnit 4 framework
     testImplementation 'junit:junit:4.13.2'
     // Optional -- Robolectric environment
-    testImplementation 'androidx.test:core:1.5.0'
+    testImplementation 'androidx.test:core:1.6.1'
     testImplementation 'org.robolectric:robolectric:4.12'
     // Optional -- Mockito framework
     testImplementation "org.mockito:mockito-core:5.11.0"
@@ -239,6 +239,6 @@ dependencies {
     // json assert
     testImplementation 'org.skyscreamer:jsonassert:1.5.1'
 
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }

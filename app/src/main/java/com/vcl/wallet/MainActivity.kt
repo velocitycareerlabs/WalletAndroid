@@ -342,7 +342,7 @@ class MainActivity : AppCompatActivity() {
         val approvedRejectedOfferIds = Utils.getApprovedRejectedOfferIdsMock(offers)
         val finalizeOffersDescriptor = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifest,
-            offers = offers,
+            challenge = offers.challenge,
             approvedOfferIds = approvedRejectedOfferIds.first,
             rejectedOfferIds = approvedRejectedOfferIds.second
         )

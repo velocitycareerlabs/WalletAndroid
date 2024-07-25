@@ -111,13 +111,13 @@ internal class FinalizeOffersUseCaseTest {
 
                     finalizeOffersDescriptorFailed = VCLFinalizeOffersDescriptor(
                         credentialManifest = credentialManifestFailed,
-                        offers = offers,
+                        challenge = offers.challenge,
                         approvedOfferIds = listOf(),
                         rejectedOfferIds = listOf()
                     )
                     finalizeOffersDescriptorPassed = VCLFinalizeOffersDescriptor(
                         credentialManifest = credentialManifestPassed,
-                        offers = offers,
+                        challenge = offers.challenge,
                         approvedOfferIds = listOf(),
                         rejectedOfferIds = listOf()
                     )
