@@ -48,12 +48,15 @@ dependencies {
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 //    Must: be added:
     implementation 'com.nimbusds:nimbus-jose-jwt:9.40'
+    implementation "androidx.security:security-crypto:1.1.0-alpha06"
+
     implementation project(':VCL')
 //    implementation "io.velocitycareerlabs:vcl:x.y.z"
+
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
