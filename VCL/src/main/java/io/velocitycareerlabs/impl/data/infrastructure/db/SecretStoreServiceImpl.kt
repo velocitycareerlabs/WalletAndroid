@@ -39,7 +39,10 @@ class SecretStoreServiceImpl(
     }
 
     override fun storeKey(keyId: String, key: JWK) {
-        encryptedSharedPreferences.edit().putString(KEY_PREFIX + keyId, key.toJSONString()).apply()
+        val isStored = encryptedSharedPreferences.edit().putString(KEY_PREFIX + keyId, key.toJSONString()).commit()
+        if (!isStored) {
+            throw Exception("Failed to store key: keyId: $keyId, key: $key")
+        }
     }
 
     override fun retrieveKey(keyId: String): JWK {
