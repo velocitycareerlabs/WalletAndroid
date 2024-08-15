@@ -15,34 +15,43 @@ class VCLError(
     var payload: String? = null
     var error: String? = null
     var errorCode: String = VCLErrorCode.SdkError.value
+    var requestId: String? = null
     override var message: String? = null
     var statusCode: Int? = null
 
     constructor(
         error: String? = null,
         errorCode: String = VCLErrorCode.SdkError.value,
+        requestId: String? = null,
         message: String? = null,
         statusCode: Int? = null,
     ) : this() {
         this.error = error
         this.errorCode = errorCode
+        this.requestId = requestId
         this.message = message
         this.statusCode = statusCode
     }
 
-    constructor(payload: String?, errorCode: String? = null): this() {
+    constructor(
+        payload: String?,
+        errorCode: String? = null
+    ): this() {
         val payloadJson = payload?.toJsonObject()
         this.payload = payload
         this.error = payloadJson?.optString(KeyError)
         this.errorCode = errorCode ?: payloadJson?.optString(KeyErrorCode) ?: VCLErrorCode.SdkError.value
+        this.requestId = payloadJson?.optString(KeyRequestId)
         this.message = payloadJson?.optString(KeyMessage)
         this.statusCode = payloadJson?.optInt(KeyStatusCode)
     }
 
-    constructor(exception: Exception, statusCode: Int? = null): this() {
-        this.payload = null
-        this.error = null
-        this.errorCode = VCLErrorCode.SdkError.value
+    constructor(
+        exception: Exception,
+        errorCode: String = VCLErrorCode.SdkError.value,
+        statusCode: Int? = null
+    ): this() {
+        this.errorCode = errorCode
         this.message = exception.toString()
         this.statusCode = statusCode
     }
@@ -51,6 +60,7 @@ class VCLError(
         .putOpt(KeyPayload, payload)
         .putOpt(KeyError, error)
         .putOpt(KeyErrorCode, errorCode)
+        .putOpt(KeyRequestId, requestId)
         .putOpt(KeyMessage, message)
         .putOpt(KeyStatusCode, statusCode)
 
@@ -58,6 +68,7 @@ class VCLError(
         const val KeyPayload = "payload"
         const val KeyError = "error"
         const val KeyErrorCode = "errorCode"
+        const val KeyRequestId = "requestId"
         const val KeyMessage = "message"
         const val KeyStatusCode = "statusCode"
     }

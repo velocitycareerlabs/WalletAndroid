@@ -20,6 +20,7 @@ class VCLErrorTest {
         assert(error.payload == ErrorMocks.Payload)
         assert(error.error == ErrorMocks.Error)
         assert(error.errorCode == ErrorMocks.ErrorCode)
+        assert(error.requestId == ErrorMocks.RequestId)
         assert(error.message == ErrorMocks.Message)
         assert(error.statusCode == ErrorMocks.StatusCode)
     }
@@ -29,6 +30,7 @@ class VCLErrorTest {
         val error = VCLError(
             error = ErrorMocks.Error,
             errorCode = ErrorMocks.ErrorCode,
+            requestId = ErrorMocks.RequestId,
             message = ErrorMocks.Message,
             statusCode = ErrorMocks.StatusCode
         )
@@ -36,6 +38,7 @@ class VCLErrorTest {
         assert(error.payload == null)
         assert(error.error == ErrorMocks.Error)
         assert(error.errorCode == ErrorMocks.ErrorCode)
+        assert(error.requestId == ErrorMocks.RequestId)
         assert(error.message == ErrorMocks.Message)
         assert(error.statusCode == ErrorMocks.StatusCode)
     }
@@ -48,6 +51,7 @@ class VCLErrorTest {
         assert(errorJsonObject.optString(VCLError.KeyPayload) == ErrorMocks.Payload)
         assert(errorJsonObject.optString(VCLError.KeyError) == ErrorMocks.Error)
         assert(errorJsonObject.optString(VCLError.KeyErrorCode) == ErrorMocks.ErrorCode)
+        assert(errorJsonObject.optString(VCLError.KeyRequestId) == ErrorMocks.RequestId)
         assert(errorJsonObject.optString(VCLError.KeyMessage) == ErrorMocks.Message)
         assert(errorJsonObject.optInt(VCLError.KeyStatusCode) == ErrorMocks.StatusCode)
     }
@@ -57,6 +61,7 @@ class VCLErrorTest {
         val error = VCLError(
             error = ErrorMocks.Error,
             errorCode = ErrorMocks.ErrorCode,
+            requestId = ErrorMocks.RequestId,
             message = ErrorMocks.Message,
             statusCode = ErrorMocks.StatusCode
         )
@@ -65,6 +70,7 @@ class VCLErrorTest {
         assert(errorJsonObject.optString(VCLError.KeyPayload) == "")
         assert(errorJsonObject.optString(VCLError.KeyError) == ErrorMocks.Error)
         assert(errorJsonObject.optString(VCLError.KeyErrorCode) == ErrorMocks.ErrorCode)
+        assert(errorJsonObject.optString(VCLError.KeyRequestId) == ErrorMocks.RequestId)
         assert(errorJsonObject.optString(VCLError.KeyMessage) == ErrorMocks.Message)
         assert(errorJsonObject.optInt(VCLError.KeyStatusCode) == ErrorMocks.StatusCode)
     }

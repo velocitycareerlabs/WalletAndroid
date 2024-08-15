@@ -24,13 +24,13 @@ internal class NetworkServiceImpl: NetworkService {
     private val TAG = NetworkServiceImpl::class.simpleName
 
     override fun sendRequest(
-            endpoint: String,
-            body: String?,
-            contentType: String,
-            method: Request.HttpMethod,
-            headers: List<Pair<String, String>>?,
-            useCaches: Boolean,
-            completionBlock: (VCLResult<Response>) -> Unit
+        endpoint: String,
+        body: String?,
+        contentType: String,
+        method: Request.HttpMethod,
+        headers: List<Pair<String, String>>?,
+        useCaches: Boolean,
+        completionBlock: (VCLResult<Response>) -> Unit
     ) {
 
 //        val endpointToSend = if(method == Request.HttpMethod.GET) {
@@ -71,16 +71,30 @@ internal class NetworkServiceImpl: NetworkService {
                 completionBlock(VCLResult.Success(response))
             } else {
                 val errorMessageStream = connection.errorStream ?: connection.inputStream
-                completionBlock(VCLResult.Failure(
-                    VCLError(
-                    payload = errorMessageStream.convertToString()
+                completionBlock(
+                    VCLResult.Failure(
+                        VCLError(payload = errorMessageStream.convertToString())
+                    )
                 )
-                ))
             }
         } catch (ex: NetworkErrorException) {
-            completionBlock(VCLResult.Failure(VCLError(exception = ex, statusCode = VCLStatusCode.NetworkError.value)))
+            completionBlock(
+                VCLResult.Failure(
+                    VCLError(
+                        exception = ex,
+                        statusCode = VCLStatusCode.NetworkError.value
+                    )
+                )
+            )
         } catch (ex: UnknownHostException) {
-            completionBlock(VCLResult.Failure(VCLError(exception = ex, statusCode = VCLStatusCode.NetworkError.value)))
+            completionBlock(
+                VCLResult.Failure(
+                    VCLError(
+                        exception = ex,
+                        statusCode = VCLStatusCode.NetworkError.value
+                    )
+                )
+            )
         } catch (ex: Exception) {
             completionBlock(VCLResult.Failure(VCLError(exception = ex)))
         } finally {
@@ -141,7 +155,7 @@ internal class NetworkServiceImpl: NetworkService {
     }
 
     private fun logResponse(response: Response) {
-        VCLLog.d(TAG, "Response:\nstatus code: "+response.code)
+        VCLLog.d(TAG, "Response:\nstatus code: " + response.code)
         VCLLog.d(TAG, response.payload)
     }
 }
