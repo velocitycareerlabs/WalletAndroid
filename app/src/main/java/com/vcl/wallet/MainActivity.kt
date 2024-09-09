@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var didJwk: VCLDidJwk
 
     private val didJwkDescriptor =
-        VCLDidJwkDescriptor(signatureAlgorithm = VCLSignatureAlgorithm.ES256)
+        VCLDidJwkDescriptor(signatureAlgorithm = VCLSignatureAlgorithm.SECP256k1)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

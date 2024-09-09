@@ -12,7 +12,7 @@ import org.json.JSONObject
 import java.lang.StringBuilder
 
 class VCLServiceCredentialAgentIssuer(payload: JSONObject): VCLService(payload) {
-    val credentialTypes: List<*>? = payload.optJSONArray(VCLService.KeyCredentialTypes)?.toList()
+    val credentialTypes: List<String>? = payload.optJSONArray(VCLService.KeyCredentialTypes)?.toList() as? List<String>
 
     override fun toPropsString() =
         StringBuilder(super.toPropsString())
