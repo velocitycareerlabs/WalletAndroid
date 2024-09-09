@@ -1,7 +1,7 @@
 # WalletAndroid
 VCL library consumer app
 
-kotlin version: 1.9.23
+kotlin version: 1.9.24
 
 minSdk 24 
 
