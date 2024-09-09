@@ -9,10 +9,7 @@ import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.GlobalConfig
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
-import io.velocitycareerlabs.impl.extensions.decodeBase64
-import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import org.junit.Before
 import org.junit.Test
@@ -51,24 +48,23 @@ class KeyServiceTest {
         }
     }
 
-//    TODO: Investigate the test failure:
-//    @Test
-//    fun testGenerateDidJwkSECP256k1() {
-//        subject.generateDidJwk(VCLDidJwkDescriptor(VCLSignatureAlgorithm.SECP256k1)) { didJwkResult ->
-//            didJwkResult.handleResult({ didJwk ->
-//                val jwkJson = didJwk.publicJwk.valueJson
-//
-//                assert(didJwk.did.startsWith(VCLDidJwk.DidJwkPrefix))
-//                assert(didJwk.kid.startsWith(VCLDidJwk.DidJwkPrefix))
-//                assert(didJwk.kid.endsWith(VCLDidJwk.DidJwkSuffix))
-//
-//                assert(jwkJson.optString("kty") == "EC")
-//                assert(jwkJson.optString("use") == "sig")
-//                assert(jwkJson.optString("crv") == VCLSignatureAlgorithm.SECP256k1.curve.name)
-//                assert(jwkJson.optString("use") == "sig")
-//            }, {
-//                assert(false) { "Failed to generate did:jwk $it" }
-//            })
-//        }
-//    }
+    @Test
+    fun testGenerateDidJwkSECP256k1() {
+        subject.generateDidJwk(VCLDidJwkDescriptor(VCLSignatureAlgorithm.SECP256k1)) { didJwkResult ->
+            didJwkResult.handleResult({ didJwk ->
+                val jwkJson = didJwk.publicJwk.valueJson
+
+                assert(didJwk.did.startsWith(VCLDidJwk.DidJwkPrefix))
+                assert(didJwk.kid.startsWith(VCLDidJwk.DidJwkPrefix))
+                assert(didJwk.kid.endsWith(VCLDidJwk.DidJwkSuffix))
+
+                assert(jwkJson.optString("kty") == "EC")
+                assert(jwkJson.optString("use") == "sig")
+                assert(jwkJson.optString("crv") == VCLSignatureAlgorithm.SECP256k1.curve.name)
+                assert(jwkJson.optString("use") == "sig")
+            }, {
+                assert(false) { "Failed to generate did:jwk $it" }
+            })
+        }
+    }
 }
