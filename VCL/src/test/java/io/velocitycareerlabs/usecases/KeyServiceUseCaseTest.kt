@@ -11,11 +11,7 @@ import android.os.Build
 import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
-import io.velocitycareerlabs.api.entities.VCLResult
-import io.velocitycareerlabs.api.entities.data
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.GlobalConfig
-import io.velocitycareerlabs.impl.data.infrastructure.executors.ExecutorImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.KeyServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.KeyServiceUseCaseImpl
@@ -27,7 +23,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.lang.Exception
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
@@ -70,31 +65,30 @@ class KeyServiceUseCaseTest {
         }
     }
 
-//    TODO: Investigate test failure:
-//    @Test
-//    fun testGenerateJwkSECP256k1() {
-//        subject.generateDidJwk(
-//            VCLDidJwkDescriptor(VCLSignatureAlgorithm.SECP256k1)
-//        ) {
-//            it.handleResult(
-//                successHandler = { didJwk ->
-//                    val jwkJsonObj = didJwk.publicJwk.valueJson
-//
-//                    assert(didJwk.did.startsWith(VCLDidJwk.DidJwkPrefix))
-//
-//                    assert(jwkJsonObj.optString("kty") == "EC")
-//                    assert(jwkJsonObj.optString("use") == "sig")
-//                    assert(jwkJsonObj.optString("crv") == VCLSignatureAlgorithm.SECP256k1.curve.name)
-//                    assert(jwkJsonObj.optString("use") == "sig")
-//                    assert(jwkJsonObj.optString("x") != null)
-//                    assert(jwkJsonObj.optString("y") != null)
-//                },
-//                errorHandler = {
-//                    assert(false) { "${it.toJsonObject()}" }
-//                }
-//            )
-//        }
-//    }
+    @Test
+    fun testGenerateJwkSECP256k1() {
+        subject.generateDidJwk(
+            VCLDidJwkDescriptor(VCLSignatureAlgorithm.SECP256k1)
+        ) {
+            it.handleResult(
+                successHandler = { didJwk ->
+                    val jwkJsonObj = didJwk.publicJwk.valueJson
+
+                    assert(didJwk.did.startsWith(VCLDidJwk.DidJwkPrefix))
+
+                    assert(jwkJsonObj.optString("kty") == "EC")
+                    assert(jwkJsonObj.optString("use") == "sig")
+                    assert(jwkJsonObj.optString("crv") == VCLSignatureAlgorithm.SECP256k1.curve.name)
+                    assert(jwkJsonObj.optString("use") == "sig")
+                    assert(jwkJsonObj.optString("x") != null)
+                    assert(jwkJsonObj.optString("y") != null)
+                },
+                errorHandler = {
+                    assert(false) { "${it.toJsonObject()}" }
+                }
+            )
+        }
+    }
 
     @Test
     fun testGenerateDifferentJwks() {
