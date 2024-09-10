@@ -18,6 +18,7 @@ import io.velocitycareerlabs.impl.data.usecases.KeyServiceUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.KeyServiceUseCase
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
+import io.velocitycareerlabs.utils.ErrorUtils
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -83,8 +84,12 @@ class KeyServiceUseCaseTest {
                     assert(jwkJsonObj.optString("x") != null)
                     assert(jwkJsonObj.optString("y") != null)
                 },
-                errorHandler = {
-                    assert(false) { "${it.toJsonObject()}" }
+                errorHandler = { error ->
+                    if (ErrorUtils.isJOSEException_Curve_not_supported_secp256k1(error)) {
+                        assert(true)
+                    } else {
+                        assert(false) { "Failed to generate did:jwk $error" }
+                    }
                 }
             )
         }

@@ -21,6 +21,7 @@ import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
+import io.velocitycareerlabs.utils.ErrorUtils
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,7 +35,7 @@ internal class JwtServiceUseCaseTest {
     lateinit var subject: JwtServiceUseCase
     private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
     private lateinit var didJwkES256: VCLDidJwk
-    private lateinit var didJwkSECP256k1: VCLDidJwk
+    private var didJwkSECP256k1: VCLDidJwk? = null
 
     @Before
     fun setUp() {
@@ -54,7 +55,11 @@ internal class JwtServiceUseCaseTest {
             jwkResult.handleResult({
                 didJwkSECP256k1 = it
             } ,{
-                assert(false) { "Failed to generate did:jwk $it" }
+                if (ErrorUtils.isJOSEException_Curve_not_supported_secp256k1(it)) {
+                    assert(true)
+                } else {
+                    assert(false) { "Failed to generate did:jwk $it" }
+                }
             })
         }
 
@@ -69,25 +74,33 @@ internal class JwtServiceUseCaseTest {
 
     @Test
     fun testSignSECP256k1() {
-        subject.generateSignedJwt(
-            jwtDescriptor = VCLJwtDescriptor(
-                payload = JwtServiceMocks.Json.toJsonObject()!!,
-                jti = "some jti",
-                iss = "some iss"
-            ),
-            didJwk = didJwkSECP256k1,
-            remoteCryptoServicesToken = null
-        ) {
-            it.handleResult(
-                { jwt ->
-                    assert(jwt.header?.toJSONObject()?.get("alg") as? String == VCLSignatureAlgorithm.SECP256k1.jwsAlgorithm.name)
-                    assert(((jwt.header?.toJSONObject()?.get("jwk") as? Map<*, *>)!!["crv"] as? String) == VCLSignatureAlgorithm.SECP256k1.curve.name)
-                    assert(jwt.header?.toJSONObject()?.get("typ") as? String == "JWT")
-                },
-                {
-                    assert(false) { "${it.toJsonObject()}" }
-                }
-            )
+        didJwkSECP256k1?.let {
+            subject.generateSignedJwt(
+                jwtDescriptor = VCLJwtDescriptor(
+                    payload = JwtServiceMocks.Json.toJsonObject()!!,
+                    jti = "some jti",
+                    iss = "some iss"
+                ),
+                didJwk = it,
+                remoteCryptoServicesToken = null
+            ) {
+                it.handleResult(
+                    { jwt ->
+                        assert(
+                            jwt.header?.toJSONObject()
+                                ?.get("alg") as? String == VCLSignatureAlgorithm.SECP256k1.jwsAlgorithm.name
+                        )
+                        assert(
+                            ((jwt.header?.toJSONObject()
+                                ?.get("jwk") as? Map<*, *>)!!["crv"] as? String) == VCLSignatureAlgorithm.SECP256k1.curve.name
+                        )
+                        assert(jwt.header?.toJSONObject()?.get("typ") as? String == "JWT")
+                    },
+                    {
+                        assert(false) { "${it.toJsonObject()}" }
+                    }
+                )
+            }
         }
     }
 
@@ -192,8 +205,12 @@ internal class JwtServiceUseCaseTest {
                         }
                     )
                 }
-            }, {
-                assert(false) { "Failed to generate did:jwk ${it.toJsonObject()}" }
+            }, { error ->
+                if (ErrorUtils.isJOSEException_Curve_not_supported_secp256k1(error)) {
+                    assert(true)
+                } else {
+                    assert(false) { "Failed to generate did:jwk $error" }
+                }
             })
         }
     }

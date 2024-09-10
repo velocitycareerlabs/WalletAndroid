@@ -8,9 +8,7 @@
 package io.velocitycareerlabs.infrastructure.jwt.remote
 
 import android.os.Build
-import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
-import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.jwt.remote.VCLJwtSignServiceRemoteImpl
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
@@ -18,7 +16,6 @@ import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import junit.framework.TestCase.assertEquals
-import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
