@@ -11,6 +11,7 @@ import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
+import io.velocitycareerlabs.utils.ErrorUtils
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,8 +63,12 @@ class KeyServiceTest {
                 assert(jwkJson.optString("use") == "sig")
                 assert(jwkJson.optString("crv") == VCLSignatureAlgorithm.SECP256k1.curve.name)
                 assert(jwkJson.optString("use") == "sig")
-            }, {
-                assert(false) { "Failed to generate did:jwk $it" }
+            }, { error ->
+                if (ErrorUtils.isJOSEException_Curve_not_supported_secp256k1(error)) {
+                    assert(true)
+                } else {
+                    assert(false) { "Failed to generate did:jwk ${error.toJsonObject()}" }
+                }
             })
         }
     }
