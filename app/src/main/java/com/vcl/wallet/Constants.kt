@@ -51,6 +51,7 @@ object Constants {
         "did:velocity:v2:0xfef35344bca1454bbe844e13af77c92d4fbed13b:73421631052335:6705"
     private const val CredentialId2Staging =
         "did:velocity:v2:0xfef35344bca1454bbe844e13af77c92d4fbed13b:73421631052335:9368"
+
     fun getCredentialIdsToRefresh(environment: VCLEnvironment) =
         if (environment == VCLEnvironment.Dev)
             listOf(CredentialId1Dev, CredentialId2Dev)
@@ -118,7 +119,7 @@ object Constants {
     const val ResidentPermitV10 = "ResidentPermitV1.0"
 
     fun getVerifiedProfileDescriptor(environment: VCLEnvironment) =
-        if(environment == VCLEnvironment.Dev)
+        if (environment == VCLEnvironment.Dev)
             VCLVerifiedProfileDescriptor(did = IssuerDidDev)
         else VCLVerifiedProfileDescriptor(did = IssuerDidStaging)
 
