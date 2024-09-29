@@ -50,7 +50,7 @@ dependencies {
 
 
 //--------- Must: be added:
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.40'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.41.1'
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
 //-------------------------
 
