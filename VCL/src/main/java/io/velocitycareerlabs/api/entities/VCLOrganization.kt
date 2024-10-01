@@ -15,16 +15,16 @@ data class VCLOrganization(val payload: JSONObject) {
 
     val TAG = VCLOrganization::class.simpleName
 
-    val serviceCredentialAgentIssuers: List<VCLServiceCredentialAgentIssuer>
+    val serviceCredentialAgentIssuers: List<VCLService>
         get() = parseServiceCredentialAgentIssuers()
 
-    private fun parseServiceCredentialAgentIssuers(): List<VCLServiceCredentialAgentIssuer> {
-        val retVal = mutableListOf<VCLServiceCredentialAgentIssuer>()
+    private fun parseServiceCredentialAgentIssuers(): List<VCLService> {
+        val retVal = mutableListOf<VCLService>()
         try {
             payload.optJSONArray(CodingKeys.KeyService)?.let { serviceJsonArr ->
                 for (i in 0 until serviceJsonArr.length()) {
                     serviceJsonArr.optJSONObject(i)
-                        ?.let { retVal.add(VCLServiceCredentialAgentIssuer(it)) }
+                        ?.let { retVal.add(VCLService(it)) }
                 }
             }
         } catch (ex: Exception) {

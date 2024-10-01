@@ -7,6 +7,7 @@
 
 package io.velocitycareerlabs.entities
 
+import io.velocitycareerlabs.api.entities.SubmissionCodingKeys
 import io.velocitycareerlabs.api.entities.VCLCredentialManifest
 import io.velocitycareerlabs.api.entities.VCLIdentificationSubmission
 import io.velocitycareerlabs.api.entities.VCLPresentationSubmission
@@ -49,12 +50,12 @@ class VCLSubmissionTest {
     @Test
     fun testPayload() {
         val presentationSubmissionPayload = subjectPresentationSubmission.generatePayload(inspectionIss)
-        assert(presentationSubmissionPayload.optString(VCLSubmission.KeyJti) == subjectPresentationSubmission.jti)
-        assert(presentationSubmissionPayload.optString(VCLSubmission.KeyIss) == inspectionIss)
+        assert(presentationSubmissionPayload.optString(SubmissionCodingKeys.KeyJti) == subjectPresentationSubmission.jti)
+        assert(presentationSubmissionPayload.optString(SubmissionCodingKeys.KeyIss) == inspectionIss)
 
         val identificationSubmissionPayload = subjectIdentificationSubmission.generatePayload(issuingIss)
-        assert(identificationSubmissionPayload.optString(VCLSubmission.KeyJti) == subjectIdentificationSubmission.jti)
-        assert(identificationSubmissionPayload.optString(VCLSubmission.KeyIss) == issuingIss)
+        assert(identificationSubmissionPayload.optString(SubmissionCodingKeys.KeyJti) == subjectIdentificationSubmission.jti)
+        assert(identificationSubmissionPayload.optString(SubmissionCodingKeys.KeyIss) == issuingIss)
     }
 
     @Test
@@ -66,10 +67,10 @@ class VCLSubmissionTest {
     @Test
     fun testRequestBody() {
         val requestBodyJsonObj = subjectPresentationSubmission.generateRequestBody(JwtServiceMocks.JWT)
-        assert(requestBodyJsonObj.optString(VCLSubmission.KeyExchangeId) == subjectPresentationSubmission.exchangeId)
-        assert(requestBodyJsonObj.optJSONArray(VCLSubmission.KeyContext)!!.toList() == VCLSubmission.ValueContextList)
+        assert(requestBodyJsonObj.optString(SubmissionCodingKeys.KeyExchangeId) == subjectPresentationSubmission.exchangeId)
+        assert(requestBodyJsonObj.optJSONArray(SubmissionCodingKeys.KeyContext)!!.toList() == SubmissionCodingKeys.ValueContextList)
 
-        val pushDelegateBodyJsonObj = requestBodyJsonObj.optJSONObject(VCLSubmission.KeyPushDelegate)!!
+        val pushDelegateBodyJsonObj = requestBodyJsonObj.optJSONObject(SubmissionCodingKeys.KeyPushDelegate)!!
 
         assert(pushDelegateBodyJsonObj.optString(VCLPushDelegate.KeyPushUrl) == PresentationSubmissionMocks.PushDelegate.pushUrl)
         assert(pushDelegateBodyJsonObj.optString(VCLPushDelegate.KeyPushToken) == PresentationSubmissionMocks.PushDelegate.pushToken)
@@ -80,7 +81,7 @@ class VCLSubmissionTest {
 
     @Test
     fun testContext() {
-        assert(VCLSubmission.KeyContext == "@context")
-        assert(VCLSubmission.ValueContextList == listOf("https://www.w3.org/2018/credentials/v1"))
+        assert(SubmissionCodingKeys.KeyContext == "@context")
+        assert(SubmissionCodingKeys.ValueContextList == listOf("https://www.w3.org/2018/credentials/v1"))
     }
 }

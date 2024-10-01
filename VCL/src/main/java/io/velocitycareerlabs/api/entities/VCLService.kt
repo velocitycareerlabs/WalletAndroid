@@ -7,12 +7,14 @@
 
 package io.velocitycareerlabs.api.entities
 
+import io.velocitycareerlabs.impl.extensions.toList
 import org.json.JSONObject
 
 open class VCLService(val payload: JSONObject) {
     val id: String = payload.optString(VCLService.KeyId)
     val type: String = payload.optString(VCLService.KeyType)
     val serviceEndpoint: String = payload.optString(VCLService.KeyServiceEndpoint)
+    val credentialTypes: List<String>? = payload.optJSONArray(VCLService.KeyCredentialTypes)?.toList() as? List<String>
 
     open fun toPropsString() =
         StringBuilder()
@@ -20,6 +22,7 @@ open class VCLService(val payload: JSONObject) {
             .append("\nid: $id")
             .append("\ntype: $type")
             .append("\nserviceEndpoint: $serviceEndpoint")
+            .append("\ncredentialTypes: $credentialTypes")
             .toString()
 
     companion object CodingKeys {

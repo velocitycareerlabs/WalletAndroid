@@ -11,50 +11,76 @@ import io.velocitycareerlabs.impl.extensions.appendQueryParams
 import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.extensions.getUrlSubPath
 
-abstract class VCLCredentialManifestDescriptor(
-    val uri: String? = null,
-    val issuingType: VCLIssuingType = VCLIssuingType.Career,
-    val credentialTypes: List<String>? = null,
-    val pushDelegate: VCLPushDelegate? = null,
-    val vendorOriginContext: String? = null,
-    val deepLink: VCLDeepLink? = null,
-    val didJwk: VCLDidJwk,
-    val remoteCryptoServicesToken: VCLToken? = null
-) {
-    open val endpoint =  generateQueryParams()?.let { queryParams ->
-        uri?.appendQueryParams(queryParams)
-    } ?: uri
+interface VCLCredentialManifestDescriptor {
+    val uri: String?
+    val issuingType: VCLIssuingType
+    val credentialTypes: List<String>?
+    val pushDelegate: VCLPushDelegate?
+    val did: String?
+    val vendorOriginContext: String?
+    val deepLink: VCLDeepLink?
+    val didJwk: VCLDidJwk
+    val remoteCryptoServicesToken: VCLToken?
 
-    val did = uri?.getUrlSubPath(KeyDidPrefix)
+    val endpoint: String?
 
-    private fun generateQueryParams(): String? {
-        val pCredentialTypes = credentialTypes?.let { credTypes ->
-            credTypes.map { it.encode() }.joinToString(separator = "&") { "$KeyCredentialTypes=$it" } }
-        val pPushDelegate = pushDelegate?.let {
-            "$KeyPushDelegatePushUrl=${it.pushUrl.encode()}&" + "$KeyPushDelegatePushToken=${it.pushToken}"
-        }
-        val qParams = listOfNotNull(pCredentialTypes, pPushDelegate).filter { it.isNotBlank() }
-        return if(qParams.isNotEmpty()) qParams.joinToString("&") else null
+    fun retrieveDid(): String? {
+        return uri?.getUrlSubPath(CredentialManifestDescriptorCodingKeys.KeyDidPrefix)
     }
 
-    open fun toPropsString() =
-        StringBuilder()
-            .append("\nuri: , $uri")
-            .append("\ndid: , $did")
-            .append("\nissuingType: , $issuingType")
-            .append("\ncredentialTypes: , $credentialTypes")
-            .append("\npushDelegate: , ${pushDelegate?.toPropsString()}")
-            .append("\nvendorOriginContext: , $vendorOriginContext")
-            .toString()
+    fun retrieveEndpoint(): String? {
+        return generateQueryParams()?.let { queryParams ->
+            uri?.appendQueryParams(queryParams)
+        } ?: uri
+    }
 
-    companion object CodingKeys {
-        const val KeyId = "id"
-        const val KeyDidPrefix = "did:"
-        const val KeyCredentialTypes = "credential_types"
-        const val KeyPushDelegatePushUrl = "push_delegate.push_url"
-        const val KeyPushDelegatePushToken = "push_delegate.push_token"
+    fun generateQueryParams(): String? {
+        val pCredentialTypes: String? = credentialTypes?.joinToString("&") { type ->
+            "${CredentialManifestDescriptorCodingKeys.KeyCredentialTypes}=${type.encode() ?: ""}"
+        }
+        val pPushDelegate: String? = pushDelegate?.pushUrl?.let {
+            "${CredentialManifestDescriptorCodingKeys.KeyPushDelegatePushUrl}=${it.encode() ?: ""}"
+        }
+        val pPushToken: String? = pushDelegate?.pushToken?.let {
+            "${CredentialManifestDescriptorCodingKeys.KeyPushDelegatePushToken}=${it.encode() ?: ""}"
+        }
 
-        const val KeyCredentialId = "credentialId"
-        const val KeyRefresh = "refresh"
+        val qParams =
+            listOfNotNull(pCredentialTypes, pPushDelegate, pPushToken).filter { it.isNotEmpty() }
+        return if (qParams.isEmpty()) null else qParams.joinToString("&")
+    }
+
+//private fun generateQueryParams(): String? {
+//    val pCredentialTypes = credentialTypes?.let { credTypes ->
+//        credTypes.map { it.encode() }.joinToString(separator = "&") { "$KeyCredentialTypes=$it" } }
+//    val pPushDelegate = pushDelegate?.let {
+//        "$KeyPushDelegatePushUrl=${it.pushUrl.encode()}&" + "$KeyPushDelegatePushToken=${it.pushToken}"
+//    }
+//    val qParams = listOfNotNull(pCredentialTypes, pPushDelegate).filter { it.isNotBlank() }
+//    return if(qParams.isNotEmpty()) qParams.joinToString("&") else null
+//}
+
+    fun toPropsString(): String {
+        return buildString {
+            appendLine("uri: ${uri.orEmpty()}")
+            appendLine("did: ${did.orEmpty()}")
+            appendLine("issuingType: $issuingType")
+            appendLine("credentialTypes: ${credentialTypes?.joinToString()}")
+            appendLine("pushDelegate: ${pushDelegate?.toPropsString().orEmpty()}")
+            appendLine("vendorOriginContext: ${vendorOriginContext.orEmpty()}")
+        }
     }
 }
+
+object CredentialManifestDescriptorCodingKeys {
+    const val KeyDidPrefix = "did:"
+    const val KeyCredentialTypes = "credential_types"
+    const val KeyPushDelegatePushUrl = "push_delegate.push_url"
+    const val KeyPushDelegatePushToken = "push_delegate.push_token"
+
+    const val KeyCredentialId = "credentialId"
+    const val KeyRefresh = "refresh"
+}
+
+
+

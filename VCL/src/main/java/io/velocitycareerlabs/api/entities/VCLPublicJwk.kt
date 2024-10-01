@@ -10,19 +10,19 @@ package io.velocitycareerlabs.api.entities
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import org.json.JSONObject
 
-class VCLPublicJwk {
-    val valueStr: String
+data class VCLPublicJwk(
+    val valueStr: String,
     val valueJson: JSONObject
+) {
+    constructor(valueStr: String) : this(
+        valueStr = valueStr,
+        valueJson = valueStr.toJsonObject() ?: JSONObject("{}")
+    )
 
-    constructor(valueStr: String) {
-        this.valueStr = valueStr
-        this.valueJson = this.valueStr.toJsonObject() ?: JSONObject("{}")
-    }
-
-    constructor(valueJson: JSONObject) {
-        this.valueJson = valueJson
-        this.valueStr = this.valueJson.toString()
-    }
+    constructor(valueJson: JSONObject) : this(
+        valueStr = valueJson.toString(),
+        valueJson = valueJson
+    )
 
     val curve: String get() = valueJson.optString("crv")
 

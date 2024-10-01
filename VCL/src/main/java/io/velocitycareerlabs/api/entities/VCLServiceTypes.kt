@@ -7,14 +7,9 @@
 
 package io.velocitycareerlabs.api.entities
 
-class VCLServiceTypes {
-
+data class VCLServiceTypes(
     val all: List<VCLServiceType>
-
-    constructor(all: List<VCLServiceType>) {
-        this.all = all
-    }
-
+) {
     constructor(serviceType: VCLServiceType): this(listOf(serviceType))
 
     constructor(issuingType: VCLIssuingType) : this(
