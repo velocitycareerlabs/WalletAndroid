@@ -11,7 +11,7 @@ import io.velocitycareerlabs.impl.extensions.appendQueryParams
 import io.velocitycareerlabs.impl.extensions.encode
 import java.net.URI
 
-class VCLPresentationRequestDescriptor(
+data class VCLPresentationRequestDescriptor(
     val deepLink: VCLDeepLink,
     val pushDelegate: VCLPushDelegate? = null,
     val didJwk: VCLDidJwk,

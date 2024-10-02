@@ -7,18 +7,21 @@
 
 package io.velocitycareerlabs.api.entities
 
-class VCLCredentialManifestDescriptorByDeepLink(
-    deepLink: VCLDeepLink,
-    issuingType: VCLIssuingType = VCLIssuingType.Career,
-    pushDelegate: VCLPushDelegate? = null,
-    didJwk: VCLDidJwk,
-    remoteCryptoServicesToken: VCLToken? = null
-): VCLCredentialManifestDescriptor(
-    uri = deepLink.requestUri,
-    issuingType = issuingType,
-    pushDelegate = pushDelegate,
-    vendorOriginContext = deepLink.vendorOriginContext,
-    deepLink = deepLink,
-    didJwk = didJwk,
-    remoteCryptoServicesToken = remoteCryptoServicesToken
-)
+data class VCLCredentialManifestDescriptorByDeepLink(
+    override val deepLink: VCLDeepLink,
+    override val issuingType: VCLIssuingType = VCLIssuingType.Career,
+    override val pushDelegate: VCLPushDelegate? = null,
+    override val didJwk: VCLDidJwk,
+    override val remoteCryptoServicesToken: VCLToken? = null
+) : VCLCredentialManifestDescriptor {
+
+    override val uri: String? = deepLink.requestUri
+    override val credentialTypes: List<String>? = null
+    override val vendorOriginContext: String? = deepLink.vendorOriginContext
+
+    override val did: String?
+        get() = retrieveDid()
+
+    override val endpoint: String?
+        get() = retrieveEndpoint()
+}

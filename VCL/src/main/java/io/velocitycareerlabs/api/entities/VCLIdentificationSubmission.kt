@@ -7,15 +7,33 @@
 
 package io.velocitycareerlabs.api.entities
 
-class VCLIdentificationSubmission(
-    credentialManifest: VCLCredentialManifest,
-    verifiableCredentials: List<VCLVerifiableCredential>? = null
-) : VCLSubmission(
-    submitUri = credentialManifest.submitPresentationUri,
-    exchangeId = credentialManifest.exchangeId,
-    presentationDefinitionId = credentialManifest.presentationDefinitionId,
-    verifiableCredentials = verifiableCredentials,
-    vendorOriginContext = credentialManifest.vendorOriginContext,
-    didJwk = credentialManifest.didJwk,
-    remoteCryptoServicesToken = credentialManifest.remoteCryptoServicesToken
-)
+import java.util.UUID
+
+data class VCLIdentificationSubmission(
+    override val submitUri: String,
+    override val exchangeId: String,
+    override val presentationDefinitionId: String,
+    override val verifiableCredentials: List<VCLVerifiableCredential>?,
+    override val pushDelegate: VCLPushDelegate?,
+    override val vendorOriginContext: String?,
+    override val didJwk: VCLDidJwk,
+    override val remoteCryptoServicesToken: VCLToken?
+) : VCLSubmission {
+
+    override val jti: String = UUID.randomUUID().toString()
+    override val submissionId: String = UUID.randomUUID().toString()
+
+    constructor(
+        credentialManifest: VCLCredentialManifest,
+        verifiableCredentials: List<VCLVerifiableCredential>? = null
+    ) : this(
+        submitUri = credentialManifest.submitPresentationUri,
+        exchangeId = credentialManifest.exchangeId,
+        presentationDefinitionId = credentialManifest.presentationDefinitionId,
+        verifiableCredentials = verifiableCredentials,
+        vendorOriginContext = credentialManifest.vendorOriginContext,
+        didJwk = credentialManifest.didJwk,
+        remoteCryptoServicesToken = credentialManifest.remoteCryptoServicesToken,
+        pushDelegate = null
+    )
+}

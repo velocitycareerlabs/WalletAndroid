@@ -14,25 +14,17 @@ import com.nimbusds.jwt.SignedJWT
 import io.velocitycareerlabs.impl.utils.VCLLog
 import java.lang.Exception
 
-class VCLJwt {
+data class VCLJwt(
     internal var signedJwt: SignedJWT? = null
-
-    constructor(signedJwt: SignedJWT) {
-        this.signedJwt = signedJwt
-    }
-
-    constructor(encodedJwt: String) {
+) {
+    constructor(encodedJwt: String) : this(
         try {
-            val encodedJwtArr = encodedJwt.split(".")
-            this.signedJwt = SignedJWT(
-                Base64URL(if (encodedJwtArr.isNotEmpty()) encodedJwtArr.component1() else ""),
-                Base64URL(if (encodedJwtArr.size >= 2) encodedJwtArr.component2() else ""),
-                Base64URL(if (encodedJwtArr.size >= 3) encodedJwtArr.component3() else "")
-            )
+            SignedJWT.parse(encodedJwt)
         } catch (ex: Exception) {
             VCLLog.e("", ex.toString())
+            null
         }
-    }
+    )
 
     val header: JWSHeader? get() = signedJwt?.header
     val payload: Payload? get() = signedJwt?.payload

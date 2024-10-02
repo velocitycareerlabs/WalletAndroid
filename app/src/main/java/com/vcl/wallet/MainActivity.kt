@@ -240,7 +240,7 @@ class MainActivity : AppCompatActivity() {
             })
     }
 
-    private fun getCredentialManifestByService(serviceCredentialAgentIssuer: VCLServiceCredentialAgentIssuer) {
+    private fun getCredentialManifestByService(serviceCredentialAgentIssuer: VCLService) {
         val credentialManifestDescriptorByOrganization =
             VCLCredentialManifestDescriptorByService(
                 service = serviceCredentialAgentIssuer,
