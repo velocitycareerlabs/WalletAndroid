@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.impl
 
 import android.content.Context
+import android.util.Log
 import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
@@ -555,6 +556,6 @@ internal fun VCLImpl.logError(message: String = "", error: VCLError) {
 }
 
 internal fun VCLImpl.printVersion() {
-    VCLLog.d("VCL", "Version: ${GlobalConfig.VersionName}")
-    VCLLog.d("VCL", "Build: ${GlobalConfig.VersionCode}")
+    Log.i("VCL", "Version: ${GlobalConfig.VersionName}")
+    Log.i("VCL", "Build: ${GlobalConfig.VersionCode}")
 }
