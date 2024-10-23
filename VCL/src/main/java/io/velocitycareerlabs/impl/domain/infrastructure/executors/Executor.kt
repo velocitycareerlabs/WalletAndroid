@@ -10,5 +10,4 @@ package io.velocitycareerlabs.impl.domain.infrastructure.executors
 internal interface Executor {
     fun runOnMain(block: () -> Unit)
     fun runOnBackground(block: () -> Unit)
-    fun shutdown()
 }

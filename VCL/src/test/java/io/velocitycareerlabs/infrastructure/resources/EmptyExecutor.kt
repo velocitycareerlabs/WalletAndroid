@@ -17,7 +17,4 @@ internal class EmptyExecutor: Executor {
     override fun runOnBackground(block: () -> Unit) {
         block()
     }
-
-    override fun shutdown() {
-    }
 }

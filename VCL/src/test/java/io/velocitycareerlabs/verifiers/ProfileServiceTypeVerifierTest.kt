@@ -35,7 +35,7 @@ class ProfileServiceTypeVerifierTest {
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
                 ),
-                ExecutorImpl()
+                ExecutorImpl.instance
             )
         )
         subject2 = ProfileServiceTypeVerifier(
@@ -43,7 +43,7 @@ class ProfileServiceTypeVerifierTest {
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileInspectorJsonStr)
                 ),
-                ExecutorImpl()
+                ExecutorImpl.instance
             )
         )
         subject3 = ProfileServiceTypeVerifier(
@@ -51,7 +51,7 @@ class ProfileServiceTypeVerifierTest {
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
                 ),
-                ExecutorImpl()
+                ExecutorImpl.instance
             )
         )
         subject4 = ProfileServiceTypeVerifier(
@@ -59,7 +59,7 @@ class ProfileServiceTypeVerifierTest {
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileNotaryIssuerJsonStr)
                 ),
-                ExecutorImpl()
+                ExecutorImpl.instance
             )
         )
         subject5 = ProfileServiceTypeVerifier(
@@ -67,7 +67,7 @@ class ProfileServiceTypeVerifierTest {
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1)
                 ),
-                ExecutorImpl()
+                ExecutorImpl.instance
             )
         )
         subject6 = ProfileServiceTypeVerifier(
@@ -75,7 +75,7 @@ class ProfileServiceTypeVerifierTest {
                 VerifiedProfileRepositoryImpl(
                     NetworkServiceSuccess(VerifiedProfileMocks.VerifiedProfileIssuerInspectorJsonStr)
                 ),
-                ExecutorImpl()
+                ExecutorImpl.instance
             )
         )
     }

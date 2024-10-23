@@ -12,6 +12,8 @@ import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.CredentialTypeSchemaRepository
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypeSchemasUseCase
 import io.velocitycareerlabs.impl.utils.VCLLog
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 internal class CredentialTypeSchemasUseCaseImpl (
     private val credentialTypeSchemaRepository: CredentialTypeSchemaRepository,
@@ -25,34 +27,38 @@ internal class CredentialTypeSchemasUseCaseImpl (
         cacheSequence: Int,
         completionBlock: (VCLResult<VCLCredentialTypeSchemas>) -> Unit
     ) {
-        val credentialTypeSchemasMap = HashMap<String, VCLCredentialTypeSchema>()
-        var credentialTypeSchemasMapIsEmpty = true
+        executor.runOnBackground {
+            val credentialTypeSchemasMap = ConcurrentHashMap<String, VCLCredentialTypeSchema>()
 
-        val schemaNamesArr =
-            this.credentialTypes.all?.filter { it.schemaName != null }?.map { it.schemaName }
-                ?: listOf()
+            val schemaNamesArr =
+                credentialTypes.all?.filter { it.schemaName != null }?.map { it.schemaName }
+                    ?: listOf()
 
-        schemaNamesArr.forEach { schemaName ->
-            schemaName?.let {
-                executor.runOnBackground {
-                    credentialTypeSchemaRepository.getCredentialTypeSchema(
-                        schemaName,
-                        cacheSequence
-                    ) { result ->
-                        result.data?.let { credentialTypeSchemasMap[schemaName] = it }
-                        credentialTypeSchemasMapIsEmpty =
-                            credentialTypeSchemasMap.isEmpty() // like in Swift
+            val completableFutures = schemaNamesArr.mapNotNull { schemaName ->
+                schemaName?.let {
+                    CompletableFuture.supplyAsync {
+                        credentialTypeSchemaRepository.getCredentialTypeSchema(
+                            schemaName,
+                            cacheSequence
+                        ) { result ->
+                            result.data?.let { credentialTypeSchemasMap[schemaName] = it }
+                        }
                     }
                 }
             }
-        }
-        executor.shutdown()
 
-        if (credentialTypeSchemasMapIsEmpty) {
-            VCLLog.e(TAG, "Credential type schemas were not fount.")
-        }
-        executor.runOnMain {
-            completionBlock(VCLResult.Success(VCLCredentialTypeSchemas(credentialTypeSchemasMap)))
+            val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
+            allFutures.join()
+
+            if (credentialTypeSchemasMap.isEmpty()) {
+                VCLLog.e(TAG, "Credential type schemas were not fount.")
+            } else {
+                executor.runOnMain {
+                    completionBlock(VCLResult.Success(
+                        VCLCredentialTypeSchemas(credentialTypeSchemasMap)
+                    ))
+                }
+            }
         }
     }
 }

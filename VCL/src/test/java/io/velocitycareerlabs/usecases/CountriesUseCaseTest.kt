@@ -40,7 +40,7 @@ class CountriesUseCaseTest {
                 ),
                 EmptyCacheService()
             ),
-            ExecutorImpl()
+            ExecutorImpl.instance
         )
 
         subject.getCountries(0) {
