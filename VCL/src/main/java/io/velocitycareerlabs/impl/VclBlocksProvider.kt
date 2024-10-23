@@ -130,7 +130,7 @@ internal object VclBlocksProvider {
                                         CacheServiceImpl(context)
                                 ),
                                 credentialTypes,
-                                ExecutorImpl()
+                                ExecutorImpl.instance
                         )
                 )
 
@@ -142,7 +142,7 @@ internal object VclBlocksProvider {
                                         NetworkServiceImpl(),
                                         CacheServiceImpl(context)
                                 ),
-                                ExecutorImpl()
+                                ExecutorImpl.instance
                         )
                 )
 
@@ -154,7 +154,7 @@ internal object VclBlocksProvider {
                                         NetworkServiceImpl(),
                                         CacheServiceImpl(context)
                                 ),
-                                ExecutorImpl()
+                                ExecutorImpl.instance
                         )
                 )
 
@@ -175,7 +175,7 @@ internal object VclBlocksProvider {
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
                         PresentationRequestByDeepLinkVerifierImpl(),
-                        ExecutorImpl()
+                        ExecutorImpl.instance
                 )
 
         @Throws(VCLError::class)
@@ -191,7 +191,7 @@ internal object VclBlocksProvider {
                                 chooseJwtSignService(context, cryptoServicesDescriptor),
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
-                        ExecutorImpl()
+                        ExecutorImpl.instance
                 )
 
         fun provideOrganizationsUseCase(): OrganizationsUseCase =
@@ -199,7 +199,7 @@ internal object VclBlocksProvider {
                         OrganizationsRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
-                        ExecutorImpl()
+                        ExecutorImpl.instance
                 )
 
         @Throws(VCLError::class)
@@ -219,7 +219,7 @@ internal object VclBlocksProvider {
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
                         CredentialManifestByDeepLinkVerifierImpl(),
-                        ExecutorImpl()
+                        ExecutorImpl.instance
                 )
 
         @Throws(VCLError::class)
@@ -235,7 +235,7 @@ internal object VclBlocksProvider {
                                 chooseJwtSignService(context, cryptoServicesDescriptor),
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
-                        ExecutorImpl()
+                        ExecutorImpl.instance
                 )
 
         fun provideExchangeProgressUseCase(): ExchangeProgressUseCase =
@@ -243,7 +243,7 @@ internal object VclBlocksProvider {
                         ExchangeProgressRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
-                        ExecutorImpl()
+                        ExecutorImpl.instance
                 )
 
         fun provideGenerateOffersUseCase(): GenerateOffersUseCase =
@@ -252,7 +252,7 @@ internal object VclBlocksProvider {
                                 NetworkServiceImpl()
                         ),
                         OffersByDeepLinkVerifierImpl(),
-                        ExecutorImpl()
+                        ExecutorImpl.instance
                 )
 
         @Throws(VCLError::class)
@@ -281,7 +281,7 @@ internal object VclBlocksProvider {
                         credentialIssuerVerifier,
                         CredentialDidVerifierImpl(),
                         CredentialsByDeepLinkVerifierImpl(),
-                        ExecutorImpl()
+                        ExecutorImpl.instance
                 )
         }
 
@@ -290,7 +290,7 @@ internal object VclBlocksProvider {
                         CredentialTypesUIFormSchemaRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
-                        ExecutorImpl()
+                        ExecutorImpl.instance
                 )
 
         fun provideVerifiedProfileUseCase(): VerifiedProfileUseCase =
@@ -298,7 +298,7 @@ internal object VclBlocksProvider {
                         VerifiedProfileRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
-                        ExecutorImpl()
+                        ExecutorImpl.instance
                 )
 
         @Throws(VCLError::class)
@@ -311,7 +311,7 @@ internal object VclBlocksProvider {
                                 chooseJwtSignService(context, cryptoServicesDescriptor),
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
-                        ExecutorImpl()
+                        ExecutorImpl.instance
                 )
 
         @Throws(VCLError::class)
@@ -323,6 +323,6 @@ internal object VclBlocksProvider {
                         KeyServiceRepositoryImpl(
                                 chooseKeyService(context, cryptoServicesDescriptor)
                         ),
-                        ExecutorImpl()
+                        ExecutorImpl.instance
                 )
 }
