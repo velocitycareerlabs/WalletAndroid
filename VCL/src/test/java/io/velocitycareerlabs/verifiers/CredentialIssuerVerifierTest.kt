@@ -385,10 +385,10 @@ internal class CredentialIssuerVerifierTest {
         ) { verificationResult ->
             verificationResult.handleResult(
                 successHandler = {
-                    assert(false) { "${VCLErrorCode.InvalidCredentialSubjectContext.value} error code is expected" }
+                    assert(false) { "${VCLErrorCode.InvalidCredentialSubjectType.value} error code is expected" }
                 },
                 errorHandler = { error ->
-                    assert(error.errorCode == VCLErrorCode.InvalidCredentialSubjectContext.value)
+                    assert(error.errorCode == VCLErrorCode.InvalidCredentialSubjectType.value)
                 }
             )
         }

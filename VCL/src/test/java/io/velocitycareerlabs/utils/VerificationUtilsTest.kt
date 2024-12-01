@@ -7,10 +7,10 @@
 
 package io.velocitycareerlabs.utils
 
-import io.velocitycareerlabs.impl.data.utils.Utils
+import io.velocitycareerlabs.impl.data.verifiers.VerificationUtils
 import org.junit.Test
 
-class UtilsTest {
+class VerificationUtilsTest {
     @Test
     fun testGetIdentifier() {
         val jsonObject = mapOf(
@@ -22,7 +22,7 @@ class UtilsTest {
         )
 
         val primaryOrgProp = "id"
-        val result = Utils.getIdentifier(primaryOrgProp, jsonObject)
+        val result = VerificationUtils.getIdentifier(primaryOrgProp, jsonObject)
 
 //        assert("ValueC" == result) // what about this case?
         assert("ValueD" == result) // because of stack
@@ -37,7 +37,7 @@ class UtilsTest {
         )
 
         val primaryOrgProp = "id"
-        val result = Utils.getIdentifier(primaryOrgProp, jsonObject)
+        val result = VerificationUtils.getIdentifier(primaryOrgProp, jsonObject)
 
         assert(result == null)
     }
@@ -45,7 +45,7 @@ class UtilsTest {
     @Test
     fun testGetPrimaryIdentifier() {
         val value = "ValueX"
-        val result = Utils.getPrimaryIdentifier(value)
+        val result = VerificationUtils.getPrimaryIdentifier(value)
 
         assert("ValueX" == result)
     }
@@ -53,7 +53,7 @@ class UtilsTest {
     @Test
     fun testGetPrimaryIdentifier_MapWithId() {
         val value = mapOf("id" to "ValueY")
-        val result = Utils.getPrimaryIdentifier(value)
+        val result = VerificationUtils.getPrimaryIdentifier(value)
 
         assert("ValueY" == result)
     }
@@ -61,7 +61,7 @@ class UtilsTest {
     @Test
     fun testGetPrimaryIdentifier_MapWithIdentifier() {
         val value = mapOf("identifier" to "ValueZ")
-        val result = Utils.getPrimaryIdentifier(value)
+        val result = VerificationUtils.getPrimaryIdentifier(value)
 
         assert("ValueZ" == result)
     }
@@ -69,7 +69,7 @@ class UtilsTest {
     @Test
     fun testGetPrimaryIdentifier_Null() {
         val value: Map<*, *>? = null
-        val result = Utils.getPrimaryIdentifier(value)
+        val result = VerificationUtils.getPrimaryIdentifier(value)
 
         assert(result == null)
     }

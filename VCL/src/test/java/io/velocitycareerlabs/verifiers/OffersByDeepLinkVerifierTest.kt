@@ -7,12 +7,10 @@
 package io.velocitycareerlabs.verifiers
 
 import io.velocitycareerlabs.api.entities.VCLDeepLink
-import io.velocitycareerlabs.api.entities.VCLOffer
 import io.velocitycareerlabs.api.entities.VCLOffers
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.data.utils.Utils
 import io.velocitycareerlabs.impl.data.verifiers.OffersByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
