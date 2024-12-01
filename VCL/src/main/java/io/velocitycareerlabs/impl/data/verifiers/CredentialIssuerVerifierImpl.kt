@@ -18,7 +18,6 @@ import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.repositories.HeaderKeys
 import io.velocitycareerlabs.impl.data.repositories.HeaderValues
-import io.velocitycareerlabs.impl.data.utils.Utils
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
@@ -47,7 +46,7 @@ internal class CredentialIssuerVerifierImpl(
             var globalError: VCLError? = null
             val completableFutures = jwtCredentials.map { jwtCredential ->
                 CompletableFuture.supplyAsync {
-                    Utils.getCredentialType(jwtCredential)?.let { credentialTypeName ->
+                    VerificationUtils.getCredentialType(jwtCredential)?.let { credentialTypeName ->
                         credentialTypesModel.credentialTypeByTypeName(credentialTypeName)
                             ?.let { credentialType ->
                                 verifyCredential(
@@ -138,11 +137,11 @@ internal class CredentialIssuerVerifierImpl(
         if (permittedServiceCategory.contains(VCLServiceType.NotaryIssuer)) {
             completionBlock(VCLResult.Success(true))
         } else if (permittedServiceCategory.contains(VCLServiceType.Issuer)) {
-            Utils.getCredentialSubject(jwtCredential)?.let { credentialSubject ->
-                retrieveContextFromCredentialSubject(credentialSubject)?.let { credentialSubjectContexts ->
-                    resolveCredentialSubjectContexts(credentialSubjectContexts) { credentialSubjectContextsResult ->
-                        credentialSubjectContextsResult.handleResult({ completeContexts ->
-                            onResolveCredentialSubjectContexts(
+            VerificationUtils.getCredentialSubjectFromCredential(jwtCredential)?.let { credentialSubject ->
+                VerificationUtils.getContextsFromCredential(jwtCredential)?.let { credentialContexts ->
+                    resolveCredentialContexts(credentialContexts) { credentialContextsResult ->
+                        credentialContextsResult.handleResult({ completeContexts ->
+                            onResolveCredentialContexts(
                                 credentialSubject,
                                 jwtCredential,
                                 completeContexts,
@@ -178,17 +177,7 @@ internal class CredentialIssuerVerifierImpl(
         }
     }
 
-    private fun retrieveContextFromCredentialSubject(credentialSubject: Map<*, *>): List<*>? {
-        (credentialSubject[KeyContext] as? List<*>)?.let { credentialSubjectContexts ->
-            return credentialSubjectContexts
-        }
-        (credentialSubject[KeyContext] as? String)?.let { credentialSubjectContext ->
-            return listOf(credentialSubjectContext)
-        }
-        return null
-    }
-
-    private fun resolveCredentialSubjectContexts(
+    private fun resolveCredentialContexts(
         credentialSubjectContexts: List<*>,
         completionBlock: (VCLResult<List<Map<*, *>>>) -> Unit
     ) {
@@ -234,7 +223,7 @@ internal class CredentialIssuerVerifierImpl(
         }
     }
 
-    private fun onResolveCredentialSubjectContexts(
+    private fun onResolveCredentialContexts(
         credentialSubject: Map<*, *>,
         jwtCredential: VCLJwt,
         completeContexts: List<Map<*, *>>,
@@ -249,12 +238,12 @@ internal class CredentialIssuerVerifierImpl(
                         ?.get(KeyContext) as? Map<*, *>
                         ?: completeContext
                     findKeyForPrimaryOrganizationValue(activeContext)?.let { K ->
-                        Utils.getIdentifier(K, credentialSubject)?.let { did ->
+                        VerificationUtils.getIdentifier(K, credentialSubject)?.let { did ->
 //                            Comparing issuer.id instead of iss
 //                            https://velocitycareerlabs.atlassian.net/browse/VL-6178?focusedCommentId=46933
 //                            https://velocitycareerlabs.atlassian.net/browse/VL-6988
 //                            if (jwtCredential.iss == did)
-                            val credentialIssuerId = Utils.getCredentialIssuerId(jwtCredential)
+                            val credentialIssuerId = VerificationUtils.getCredentialIssuerId(jwtCredential)
                             VCLLog.d(
                                 TAG,
                                 "Comparing credentialIssuerId: ${credentialIssuerId ?: ""} with did: $did"
