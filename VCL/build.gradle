@@ -12,8 +12,8 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 34
-        versionName "2.6.9"
-        versionCode 153
+        versionName "2.6.10"
+        versionCode 154
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -219,7 +219,7 @@ repositories {
 dependencies {
     implementation 'androidx.core:core-ktx:1.13.1'
 
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.41.2'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.45'
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
 
     // Reflection
