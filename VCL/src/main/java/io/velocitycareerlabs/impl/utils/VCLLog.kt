@@ -96,7 +96,7 @@ internal object VCLLog {
         return if (GlobalConfig.IsLoggerOn) Log.w(LogTagPrefix+tag, msg, tr) else -1
     }
 
-    /*
+    /**
      * Send a {@link #WARN} log message and log the exception.
      * @param tag Used to identify the source of a log message.  It usually identifies
      *        the class or activity where the log call occurs.
@@ -124,6 +124,7 @@ internal object VCLLog {
      * @param tr An exception to log
      */
     fun e(tag: String?, msg: String?, tr: Throwable?): Int {
-        return if (GlobalConfig.IsLoggerOn) Log.e(LogTagPrefix+tag, msg, tr) else -1
+        // always log errors
+        return Log.e(LogTagPrefix+tag, msg, tr)
     }
 }
