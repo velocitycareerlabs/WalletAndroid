@@ -36,13 +36,13 @@ interface VCLCredentialManifestDescriptor {
 
     fun generateQueryParams(): String? {
         val pCredentialTypes: String? = credentialTypes?.joinToString("&") { type ->
-            "${CredentialManifestDescriptorCodingKeys.KeyCredentialTypes}=${type.encode() ?: ""}"
+            "${CredentialManifestDescriptorCodingKeys.KeyCredentialTypes}=${type.encode()}"
         }
         val pPushDelegate: String? = pushDelegate?.pushUrl?.let {
-            "${CredentialManifestDescriptorCodingKeys.KeyPushDelegatePushUrl}=${it.encode() ?: ""}"
+            "${CredentialManifestDescriptorCodingKeys.KeyPushDelegatePushUrl}=${it.encode()}"
         }
         val pPushToken: String? = pushDelegate?.pushToken?.let {
-            "${CredentialManifestDescriptorCodingKeys.KeyPushDelegatePushToken}=${it.encode() ?: ""}"
+            "${CredentialManifestDescriptorCodingKeys.KeyPushDelegatePushToken}=${it.encode()}"
         }
 
         val qParams =

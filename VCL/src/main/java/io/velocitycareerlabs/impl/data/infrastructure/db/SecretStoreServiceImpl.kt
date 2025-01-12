@@ -32,7 +32,7 @@ class SecretStoreServiceImpl(
         return EncryptedSharedPreferences.create(
             FILE_NAME,
             masterKeyAlias,
-            context.getApplicationContext(),
+            context.applicationContext,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )

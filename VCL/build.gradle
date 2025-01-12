@@ -6,12 +6,12 @@ plugins {
 }
 
 android {
-    compileSdk 34
+    compileSdk 35
     namespace 'io.velocitycareerlabs'
 
     defaultConfig {
         minSdk 24
-        targetSdk 34
+        targetSdk 35
         versionName "2.6.12"
         versionCode 156
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -217,7 +217,7 @@ repositories {
 */
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.core:core-ktx:1.15.0'
 
     implementation 'com.nimbusds:nimbus-jose-jwt:9.45'
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
