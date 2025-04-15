@@ -9,10 +9,13 @@ package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.GrantType
 import io.velocitycareerlabs.api.entities.VCLAuthTokenDescriptor
+import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestMocks
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import org.junit.Test
+import org.skyscreamer.jsonassert.JSONAssert
+import org.skyscreamer.jsonassert.JSONCompareMode
 
 class VCLAuthTokenDescriptorTest {
 
@@ -84,9 +87,9 @@ class VCLAuthTokenDescriptorTest {
             VCLAuthTokenDescriptor.KeyClientId to walletDid,
             GrantType.RefreshToken.value to refreshToken,
             VCLAuthTokenDescriptor.KeyAudience to relyingPartyDid
-        )
+        ).toJsonObject()
 
-        assertEquals(expected, descriptor.generateRequestBody())
+        JSONAssert.assertEquals(expected, descriptor.generateRequestBody(), JSONCompareMode.LENIENT)
     }
 
     @Test
@@ -105,9 +108,9 @@ class VCLAuthTokenDescriptorTest {
             GrantType.AuthorizationCode.value to vendorOriginContext,
             VCLAuthTokenDescriptor.KeyAudience to relyingPartyDid,
             VCLAuthTokenDescriptor.KeyTokenType to VCLAuthTokenDescriptor.KeyTokenTypeValue
-        )
+        ).toJsonObject()
 
-        assertEquals(expected, descriptor.generateRequestBody())
+        JSONAssert.assertEquals(expected, descriptor.generateRequestBody(), JSONCompareMode.LENIENT)
     }
 
     @Test
@@ -125,8 +128,8 @@ class VCLAuthTokenDescriptorTest {
             VCLAuthTokenDescriptor.KeyClientId to walletDid,
             GrantType.RefreshToken.value to refreshToken,
             VCLAuthTokenDescriptor.KeyAudience to relyingPartyDid
-        )
+        ).toJsonObject()
 
-        assertEquals(expected, descriptor.generateRequestBody())
+        JSONAssert.assertEquals(expected, descriptor.generateRequestBody(), JSONCompareMode.LENIENT)
     }
 }
