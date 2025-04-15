@@ -15,6 +15,15 @@ data class VCLPresentationRequest(
     val didJwk: VCLDidJwk,
     val remoteCryptoServicesToken: VCLToken? = null
     ) {
+
+    val feed: Boolean
+    val vendorOriginContext: String?
+
+    init {
+        this.feed =
+            (jwt.payload?.toJSONObject()?.get(KeyMetadata) as? Map<*, *>)?.get(KeyFeed) as? Boolean ?: false
+        this.vendorOriginContext = deepLink.vendorOriginContext
+    }
     companion object CodingKeys {
         const val KeyId = "id"
         const val KeyIss = "iss"
@@ -25,6 +34,8 @@ data class VCLPresentationRequest(
         const val KeyMetadata = "metadata"
         const val KeyProgressUri = "progress_uri"
         const val KeySubmitPresentationUri = "submit_presentation_uri"
+        const val KeyFeed = "feed"
+        const val KeyAuthTokenUri = "auth_token_uri";
     }
 
     val iss: String get() = jwt.payload?.toJSONObject()?.get(KeyIss)?.toString() ?: ""
@@ -32,10 +43,12 @@ data class VCLPresentationRequest(
     val presentationDefinitionId get() =
         (jwt.payload?.toJSONObject()?.get(KeyPresentationDefinition) as? Map<*, *>)?.get(KeyId) as? String ?: ""
     val keyID get() = jwt.header?.keyID ?: ""
-    val vendorOriginContext get() = deepLink.vendorOriginContext
 
     val progressUri: String get() =
         (jwt.payload?.toJSONObject()?.get(KeyMetadata) as? Map<*, *>)?.get(KeyProgressUri)?.toString() ?: ""
     val submitPresentationUri: String get() =
         (jwt.payload?.toJSONObject()?.get(KeyMetadata) as? Map<*, *>)?.get(KeySubmitPresentationUri)?.toString() ?: ""
+
+    val authTokenUri: String get() =
+        (jwt.payload?.toJSONObject()?.get(KeyMetadata) as? Map<*, *>)?.get(KeyAuthTokenUri)?.toString() ?: ""
 }

@@ -24,30 +24,47 @@ internal class SubmissionRepositoryImpl(
     override fun submit(
         submission: VCLSubmission,
         jwt: VCLJwt,
+        authToken: VCLAuthToken?,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     ) {
         networkService.sendRequest(
             endpoint = submission.submitUri,
             body = submission.generateRequestBody(jwt).toString(),
             method = Request.HttpMethod.POST,
-            headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)),
+            headers = generateHeader(authToken),
             contentType = Request.ContentTypeApplicationJson,
             completionBlock = { result ->
-                result.handleResult({ submissionResponse ->
-                    try {
-                        val jsonObj = submissionResponse.payload.toJsonObject()
-                        val submissionResult = parse(jsonObj, submission.jti, submission.submissionId)
-                        completionBlock(VCLResult.Success(submissionResult))
-                    } catch (ex: Exception) {
-                        completionBlock(VCLResult.Failure(VCLError(ex)))
-                    }
-                },
+                result.handleResult(
+                    { submissionResponse ->
+                        try {
+                            val jsonObj = submissionResponse.payload.toJsonObject()
+                            val submissionResult =
+                                parse(jsonObj, submission.jti, submission.submissionId)
+                            completionBlock(VCLResult.Success(submissionResult))
+                        } catch (ex: Exception) {
+                            completionBlock(VCLResult.Failure(VCLError(ex)))
+                        }
+                    },
                     { error ->
                         completionBlock(VCLResult.Failure(error))
                     }
                 )
             }
         )
+    }
+
+    private fun generateHeader(authToken: VCLAuthToken?): List<Pair<String, String>> {
+        return authToken?.let {
+            listOf(
+                Pair(
+                    HeaderKeys.XVnfProtocolVersion,
+                    HeaderValues.XVnfProtocolVersion
+                ),
+                Pair(
+                    HeaderKeys.Authorization,
+                    "${HeaderValues.PrefixBearer} ${authToken.accessToken.value}"
+                ))
+        } ?: listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion))
     }
 
     private fun parse(
@@ -68,7 +85,8 @@ internal class SubmissionRepositoryImpl(
         VCLExchange(
             id = exchangeJsonObj?.optString(VCLExchange.KeyId) ?: "",
             type = exchangeJsonObj?.optString(VCLExchange.KeyType) ?: "",
-            disclosureComplete = exchangeJsonObj?.optBoolean(VCLExchange.KeyDisclosureComplete) ?: false,
+            disclosureComplete = exchangeJsonObj?.optBoolean(VCLExchange.KeyDisclosureComplete)
+                ?: false,
             exchangeComplete = exchangeJsonObj?.optBoolean(VCLExchange.KeyExchangeComplete) ?: false
         )
 }

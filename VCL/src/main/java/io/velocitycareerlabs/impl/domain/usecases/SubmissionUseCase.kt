@@ -7,6 +7,7 @@
 
 package io.velocitycareerlabs.impl.domain.usecases
 
+import io.velocitycareerlabs.api.entities.VCLAuthToken
 import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLSubmission
@@ -16,6 +17,7 @@ import io.velocitycareerlabs.api.entities.VCLToken
 internal interface SubmissionUseCase {
     fun submit(
         submission: VCLSubmission,
+        authToken: VCLAuthToken? = null,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     )
 }

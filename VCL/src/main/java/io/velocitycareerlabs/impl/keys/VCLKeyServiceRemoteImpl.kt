@@ -38,7 +38,7 @@ internal class VCLKeyServiceRemoteImpl(
             method = Request.HttpMethod.POST,
             headers = listOf(
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion),
-                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${didJwkDescriptor.remoteCryptoServicesToken?.value}")
+                Pair(HeaderKeys.Authorization, "${HeaderValues.PrefixBearer} ${didJwkDescriptor.remoteCryptoServicesToken?.value}")
             ),
             completionBlock = { didJwkResult ->
                 didJwkResult.handleResult(

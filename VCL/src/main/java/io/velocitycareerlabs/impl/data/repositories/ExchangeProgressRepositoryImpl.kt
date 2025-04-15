@@ -28,7 +28,7 @@ internal class ExchangeProgressRepositoryImpl(
             endpoint = exchangeDescriptor.processUri +
                     "?${VCLExchangeDescriptor.KeyExchangeId}=${exchangeDescriptor.exchangeId.encode()}",
             headers = listOf(
-                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${exchangeDescriptor.sessionToken.value}"),
+                Pair(HeaderKeys.Authorization, "${HeaderValues.PrefixBearer} ${exchangeDescriptor.sessionToken.value}"),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
                 ),
             method = Request.HttpMethod.GET,

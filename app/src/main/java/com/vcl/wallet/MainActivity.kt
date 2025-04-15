@@ -7,25 +7,18 @@
 package com.vcl.wallet
 
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.CalendarContract.Colors
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.vcl.wallet.databinding.ActivityMainBinding
 import io.velocitycareerlabs.api.VCL
-import io.velocitycareerlabs.api.VCLCryptoServiceType
 import io.velocitycareerlabs.api.VCLEnvironment
 import io.velocitycareerlabs.api.VCLProvider
 import io.velocitycareerlabs.api.VCLSignatureAlgorithm
-import io.velocitycareerlabs.api.VCLXVnfProtocolVersion
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
-import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescriptor
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
-import io.velocitycareerlabs.api.entities.initialization.VCLJwtServiceUrls
-import io.velocitycareerlabs.api.entities.initialization.VCLKeyServiceUrls
-import io.velocitycareerlabs.api.entities.initialization.VCLRemoteCryptoServicesUrlsDescriptor
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
@@ -34,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val environment = VCLEnvironment.Staging
+    private val environment = VCLEnvironment.Dev
 
     private lateinit var vcl: VCL
     private lateinit var didJwk: VCLDidJwk
@@ -156,24 +149,44 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "VCL Presentation request received: ${presentationRequest.jwt.payload}")
 //                Log.d(TAG, "VCL Presentation request received")
 
-                submitPresentation(presentationRequest)
+                if (presentationRequest.feed) {
+                    vcl.getAuthToken(
+                        VCLAuthTokenDescriptor(presentationRequest),
+                        successHandler = {
+                            Log.d(TAG, "auth token: ${it.payload}");
+                            submitPresentation(presentationRequest, it)
+                        },
+                        errorHandler = {
+                            Log.e(TAG, "getAuthToken failed: $it")
+                        })
+                } else {
+                    submitPresentation(presentationRequest)
+                }
             },
             errorHandler = { error ->
                 logError("VCL Presentation request failed:", error)
             })
     }
 
-    private fun submitPresentation(presentationRequest: VCLPresentationRequest) {
+    private fun submitPresentation(
+        presentationRequest: VCLPresentationRequest,
+        authToken: VCLAuthToken? = null
+    ) {
         val presentationSubmission = VCLPresentationSubmission(
             presentationRequest = presentationRequest,
             verifiableCredentials = Constants.getIdentificationList(environment)
         )
-        submitPresentation(presentationSubmission)
+        submitPresentation(presentationSubmission, authToken)
     }
 
-    private fun submitPresentation(presentationSubmission: VCLPresentationSubmission) {
+    private fun submitPresentation(
+        presentationSubmission: VCLPresentationSubmission,
+        authToken: VCLAuthToken? = null
+    ) {
+        var authTokenRefreshAmount = 0
         vcl.submitPresentation(
             presentationSubmission = presentationSubmission,
+            authToken = authToken,
             successHandler = { presentationSubmissionResult ->
                 Log.d(TAG, "VCL Presentation submission result: $presentationSubmissionResult")
                 vcl.getExchangeProgress(
@@ -181,15 +194,51 @@ class MainActivity : AppCompatActivity() {
                         presentationSubmission,
                         presentationSubmissionResult
                     ),
-                    { exchange ->
+                    successHandler = { exchange ->
                         Log.d(TAG, "VCL Presentation exchange progress $exchange")
                     },
-                    { error ->
+                    errorHandler = { error ->
                         logError("VCL Presentation exchange progress failed:", error)
                     })
             },
             errorHandler = { error ->
                 logError("VCL Presentation submission failed:", error)
+                if (error.statusCode == 401 && authTokenRefreshAmount == 0) {
+                    authTokenRefreshAmount++
+                    vcl.getAuthToken(
+                        VCLAuthTokenDescriptor(
+                            authTokenUri = authToken?.authTokenUri ?: "",
+                            refreshToken = authToken?.refreshToken?.value,
+                            walletDid = authToken?.walletDid,
+                            relyingPartyDid = authToken?.relyingPartyDid,
+                        ),
+                        successHandler = { newAuthToken ->
+                            Log.d(TAG, "auth token: ${newAuthToken.payload}");
+                            vcl.submitPresentation(
+                                presentationSubmission,
+                                newAuthToken, successHandler = {
+                                    vcl.getExchangeProgress(
+                                        VCLExchangeDescriptor(
+                                            presentationSubmission,
+                                            it
+                                        ),
+                                        { exchange ->
+                                            Log.d(
+                                                TAG,
+                                                "VCL Presentation exchange progress $exchange"
+                                            )
+                                        },
+                                        errorHandler = { error ->
+                                            logError("VCL Presentation exchange progress failed: ", error)
+                                        })
+                                }, errorHandler = {
+                                    logError("VCL Presentation submission failed:", it)
+                                })
+                        },
+                        errorHandler = {
+                            Log.e(TAG, "getAuthToken failed: $it")
+                        })
+                }
             })
     }
 
@@ -200,7 +249,7 @@ class MainActivity : AppCompatActivity() {
             else
                 Constants.OrganizationsSearchDescriptorByDidStaging
         vcl.searchForOrganizations(organizationDescriptor,
-            { organizations ->
+            successHandler = { organizations ->
                 Log.d(TAG, "VCL Organizations received: $organizations")
 //                Log.d(TAG, "VCL Organizations received")
 
@@ -210,7 +259,7 @@ class MainActivity : AppCompatActivity() {
                         getCredentialManifestByService(service)
                     } ?: Log.e(TAG, "VCL Organizations error, issuing service not found")
             },
-            { error ->
+            errorHandler = { error ->
                 logError("VCL Organizations search failed:", error)
             }
         )

@@ -285,6 +285,13 @@ internal object VclBlocksProvider {
                 )
         }
 
+        @Throws(VCLError::class)
+        fun provideAuthTokenUseCase(): AuthTokenUseCase =
+                AuthTokenUseCaseImpl(
+                        AuthTokenRepositoryImpl(NetworkServiceImpl()),
+                        ExecutorImpl.instance
+                )
+
         fun provideCredentialTypesUIFormSchemaUseCase(): CredentialTypesUIFormSchemaUseCase =
                 CredentialTypesUIFormSchemaUseCaseImpl(
                         CredentialTypesUIFormSchemaRepositoryImpl(

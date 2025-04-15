@@ -20,6 +20,7 @@ internal class SubmissionUseCaseImpl(
 ):  SubmissionUseCase {
     override fun submit(
         submission: VCLSubmission,
+        authToken: VCLAuthToken?,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     ) {
         executor.runOnBackground {
@@ -36,7 +37,8 @@ internal class SubmissionUseCaseImpl(
                         { jwt ->
                             submissionRepository.submit(
                                 submission = submission,
-                                jwt = jwt
+                                jwt = jwt,
+                                authToken = authToken
                             ) { submissionResult ->
                                 executor.runOnMain { completionBlock(submissionResult) }
                             }

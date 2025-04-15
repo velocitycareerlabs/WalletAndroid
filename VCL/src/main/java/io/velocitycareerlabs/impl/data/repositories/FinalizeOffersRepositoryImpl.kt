@@ -33,7 +33,7 @@ internal class FinalizeOffersRepositoryImpl(
         networkService.sendRequest(
             endpoint = finalizeOffersDescriptor.finalizeOffersUri,
             headers = listOf(
-                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${sessionToken.value}"),
+                Pair(HeaderKeys.Authorization, "${HeaderValues.PrefixBearer} ${sessionToken.value}"),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
             body = finalizeOffersDescriptor.generateRequestBody(proof = proof).toString(),

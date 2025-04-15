@@ -17,6 +17,7 @@ import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
 import io.velocitycareerlabs.impl.domain.models.CountriesModel
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
+import io.velocitycareerlabs.impl.domain.usecases.AuthTokenUseCase
 import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypesUIFormSchemaUseCase
 import io.velocitycareerlabs.impl.domain.usecases.ExchangeProgressUseCase
@@ -55,6 +56,8 @@ internal class VCLImpl: VCL {
     private lateinit var identificationSubmissionUseCase: IdentificationSubmissionUseCase
     private lateinit var generateOffersUseCase: GenerateOffersUseCase
     private lateinit var finalizeOffersUseCase: FinalizeOffersUseCase
+    private lateinit var authTokenUseCase: AuthTokenUseCase
+
     private lateinit var credentialTypesUIFormSchemaUseCase: CredentialTypesUIFormSchemaUseCase
     private lateinit var verifiedProfileUseCase: VerifiedProfileUseCase
     private lateinit var jwtServiceUseCase: JwtServiceUseCase
@@ -87,6 +90,7 @@ internal class VCLImpl: VCL {
 
     @Throws
     private fun initializeUseCases(context: Context) {
+        authTokenUseCase = VclBlocksProvider.provideAuthTokenUseCase()
         presentationRequestUseCase =
             VclBlocksProvider.providePresentationRequestUseCase(
                 context,
@@ -263,19 +267,20 @@ internal class VCLImpl: VCL {
 
     override fun submitPresentation(
         presentationSubmission: VCLPresentationSubmission,
+        authToken: VCLAuthToken?,
         successHandler: (VCLSubmissionResult) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
         presentationSubmissionUseCase.submit(
-            submission = presentationSubmission
+            submission = presentationSubmission,
+            authToken = authToken,
         ) { presentationSubmissionResult ->
             presentationSubmissionResult.handleResult({
                 successHandler(it)
             }, {
                 logError("submit presentation", it)
                 errorHandler(it)
-            }
-            )
+            })
         }
     }
 
@@ -435,6 +440,21 @@ internal class VCLImpl: VCL {
                     errorHandler(it)
                 }
             )
+        }
+    }
+
+    override fun getAuthToken(
+        authTokenDescriptor: VCLAuthTokenDescriptor,
+        successHandler: (VCLAuthToken) -> Unit,
+        errorHandler: (VCLError) -> Unit
+    ) {
+        authTokenUseCase.getAuthToken(authTokenDescriptor) { authTokenResult ->
+            authTokenResult.handleResult({
+                successHandler(it)
+            }, {
+                logError("getAuthToken", it)
+                errorHandler(it)
+            })
         }
     }
 

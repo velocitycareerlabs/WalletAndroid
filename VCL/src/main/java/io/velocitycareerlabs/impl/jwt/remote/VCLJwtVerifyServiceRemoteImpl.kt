@@ -37,7 +37,7 @@ internal class VCLJwtVerifyServiceRemoteImpl(
             method = Request.HttpMethod.POST,
             headers = listOf(
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion),
-                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${remoteCryptoServicesToken?.value}")
+                Pair(HeaderKeys.Authorization, "${HeaderValues.PrefixBearer} ${remoteCryptoServicesToken?.value}")
             ),
             completionBlock = { verifiedJwtResult ->
                 verifiedJwtResult.handleResult(
