@@ -9,7 +9,7 @@ package io.velocitycareerlabs.api.entities
 
 import org.json.JSONObject
 
-class VCLAuthToken(
+data class VCLAuthToken(
     val payload: JSONObject,
     var authTokenUri: String? = null,
     var walletDid: String? = null,

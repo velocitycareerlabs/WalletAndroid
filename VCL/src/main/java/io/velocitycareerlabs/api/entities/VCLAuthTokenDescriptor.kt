@@ -15,37 +15,24 @@ enum class GrantType(val value: String) {
     RefreshToken("refresh_token")
 }
 
-class VCLAuthTokenDescriptor {
-    val authTokenUri: String
-    val refreshToken: String?
-    val walletDid: String?
-    val relyingPartyDid: String?
-    val vendorOriginContext: String?
-
-    constructor(
-        authTokenUri: String,
-        refreshToken: String? = null,
-        walletDid: String? = null,
-        relyingPartyDid: String? = null,
-        vendorOriginContext: String? = null
+data class VCLAuthTokenDescriptor(
+    val authTokenUri: String,
+    val refreshToken: String? = null,
+    val walletDid: String? = null,
+    val relyingPartyDid: String? = null,
+    val vendorOriginContext: String? = null,
     ) {
-        this.authTokenUri = authTokenUri
-        this.refreshToken = refreshToken
-        this.walletDid = walletDid
-        this.relyingPartyDid = relyingPartyDid
-        this.vendorOriginContext = vendorOriginContext
-    }
 
     constructor(
         presentationRequest: VCLPresentationRequest,
         refreshToken: String? = null
-    ) {
-        this.authTokenUri = presentationRequest.authTokenUri
-        this.refreshToken = refreshToken
-        this.walletDid = presentationRequest.didJwk.did
-        this.relyingPartyDid = presentationRequest.iss
-        this.vendorOriginContext = presentationRequest.vendorOriginContext
-    }
+    ) : this(
+        authTokenUri = presentationRequest.authTokenUri,
+        refreshToken = refreshToken,
+        walletDid = presentationRequest.didJwk.did,
+        relyingPartyDid = presentationRequest.iss,
+        vendorOriginContext = presentationRequest.vendorOriginContext
+    )
 
     fun generateRequestBody(): JSONObject {
         return (if (refreshToken != null) {
