@@ -13,7 +13,7 @@ android {
         minSdk 24
         targetSdk 35
         versionName "2.7.0"
-        versionCode 159
+        versionCode 160
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
