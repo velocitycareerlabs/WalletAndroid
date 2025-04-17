@@ -153,7 +153,7 @@ class MainActivity : AppCompatActivity() {
                     vcl.getAuthToken(
                         VCLAuthTokenDescriptor(presentationRequest),
                         successHandler = {
-                            Log.d(TAG, "auth token: ${it.payload}");
+                            Log.d(TAG, "auth token: ${it.payload}")
                             submitPresentation(presentationRequest, it)
                         },
                         errorHandler = {
