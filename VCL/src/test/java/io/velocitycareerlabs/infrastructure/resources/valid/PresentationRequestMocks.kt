@@ -28,7 +28,7 @@ class PresentationRequestMocks {
         )
         val PresentationRequestFeedJwt = VCLJwt(
             encodedJwt = EncodedPresentationRequestFeed
-        );
+        )
 
         const val JWK =
             "{\"alg\":\"ES256K\",\"use\":\"sig\",\"kid\":\"uemn6l5ro6hLNrgiPRl1Dy51V9whez4tu4hlwsNOTVk\",\"crv\":\"secp256k1\",\"x\":\"oLYCa-AlnVpW8Rq9iST_1eY_XoyvGRry7y1xS4vU4qo\",\"y\":\"PUMAsawZ24WaSnRIdDb_wNbShAvfsGF71ke1DcJGxlM\",\"kty\":\"EC\"}\n"
