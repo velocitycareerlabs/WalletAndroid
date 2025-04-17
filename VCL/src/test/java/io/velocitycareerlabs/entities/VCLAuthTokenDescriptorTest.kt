@@ -31,7 +31,7 @@ class VCLAuthTokenDescriptorTest {
     }
 
     @Test
-    fun testShouldCorrectlyAssignPropertiesWhenConstructedWithPresentationRequestAndOptionalParameters() {
+    fun testInitWithPresentationRequestAndOptionalParameters() {
         val descriptor = VCLAuthTokenDescriptor(
             presentationRequest = PresentationRequestMocks.PresentationRequestFeed,
             refreshToken = refreshToken
@@ -45,7 +45,7 @@ class VCLAuthTokenDescriptorTest {
     }
 
     @Test
-    fun testShouldCorrectlyAssignPropertiesWhenConstructedWithPresentationRequestWithoutOptionalParameters() {
+    fun testInitWithPresentationRequestOnly() {
         val descriptor = VCLAuthTokenDescriptor(PresentationRequestMocks.PresentationRequestFeed)
 
         assertEquals(authTokenUri, descriptor.authTokenUri)
@@ -56,7 +56,7 @@ class VCLAuthTokenDescriptorTest {
     }
 
     @Test
-    fun testShouldCorrectlyAssignPropertiesWhenConstructedWithAuthTokenUriWalletDidRelyingPartyDidVendorOriginContextAndRefreshToken() {
+    fun testInitWithAllManualParams() {
         val descriptor = VCLAuthTokenDescriptor(
             authTokenUri,
             refreshToken,
@@ -73,7 +73,7 @@ class VCLAuthTokenDescriptorTest {
     }
 
     @Test
-    fun testShouldGenerateRequestBodyForRefreshTokenFlowWhenRefreshTokenOnlyProvided() {
+    fun testGenerateRequestBodyForRefreshTokenOnly() {
         val descriptor = VCLAuthTokenDescriptor(
             authTokenUri,
             refreshToken,
@@ -93,7 +93,7 @@ class VCLAuthTokenDescriptorTest {
     }
 
     @Test
-    fun testShouldGenerateRequestBodyForVendorOriginContextFlowWhenVendorOriginContextOnlyProvided() {
+    fun testGenerateRequestBodyForVendorOriginContextOnly() {
         val descriptor = VCLAuthTokenDescriptor(
             authTokenUri,
             null,
@@ -114,7 +114,7 @@ class VCLAuthTokenDescriptorTest {
     }
 
     @Test
-    fun testShouldGenerateRequestBodyForRefreshTokenFlowWhenBothVendorOriginContextAndRefreshTokenProvided() {
+    fun testGenerateRequestBodyWithBothRefreshTokenAndVendorOriginContext() {
         val descriptor = VCLAuthTokenDescriptor(
             authTokenUri,
             refreshToken,
