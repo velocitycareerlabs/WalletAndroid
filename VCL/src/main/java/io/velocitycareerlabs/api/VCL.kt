@@ -32,6 +32,7 @@ interface VCL {
 
     fun submitPresentation(
         presentationSubmission: VCLPresentationSubmission,
+        authToken: VCLAuthToken? = null,
         successHandler: (VCLSubmissionResult) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
@@ -71,6 +72,12 @@ interface VCL {
         finalizeOffersDescriptor: VCLFinalizeOffersDescriptor,
         sessionToken: VCLToken,
         successHandler: (VCLJwtVerifiableCredentials) -> Unit,
+        errorHandler: (VCLError) -> Unit
+    )
+
+    fun getAuthToken(
+        authTokenDescriptor: VCLAuthTokenDescriptor,
+        successHandler: (VCLAuthToken) -> Unit,
         errorHandler: (VCLError) -> Unit
     )
 

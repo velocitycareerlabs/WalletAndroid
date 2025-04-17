@@ -13,6 +13,7 @@ internal interface SubmissionRepository {
     fun submit(
         submission: VCLSubmission,
         jwt: VCLJwt,
+        authToken: VCLAuthToken? = null,
         completionBlock: (VCLResult<VCLSubmissionResult>) -> Unit
     )
 }

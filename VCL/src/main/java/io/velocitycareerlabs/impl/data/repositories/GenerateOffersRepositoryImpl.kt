@@ -27,7 +27,7 @@ internal class GenerateOffersRepositoryImpl(
         networkService.sendRequest(
             endpoint = generateOffersDescriptor.checkOffersUri,
             headers = listOf(
-                Pair(HeaderKeys.Authorization, "${HeaderKeys.Bearer} ${sessionToken.value}"),
+                Pair(HeaderKeys.Authorization, "${HeaderValues.PrefixBearer} ${sessionToken.value}"),
                 Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
             ),
             body = generateOffersDescriptor.payload.toString(),

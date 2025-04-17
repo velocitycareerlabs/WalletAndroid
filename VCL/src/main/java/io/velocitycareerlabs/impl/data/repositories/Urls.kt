@@ -42,10 +42,10 @@ class Params {
 
 object HeaderKeys {
     const val Authorization = "Authorization"
-    const val Bearer = "Bearer"
     const val XVnfProtocolVersion = "x-vnf-protocol-version"
 }
 
 object HeaderValues {
+    const val PrefixBearer = "Bearer"
     val XVnfProtocolVersion get() = GlobalConfig.XVnfProtocolVersion.value
 }

@@ -15,19 +15,19 @@ class VCLTokenTest {
 
     @Test
     fun testToken1() {
-        subject = VCLToken(value = TokenMocks.TokenStr)
+        subject = VCLToken(value = TokenMocks.TokenStr1)
 
-        assert(subject.value == TokenMocks.TokenStr)
-        assert(subject.jwtValue.encodedJwt == TokenMocks.TokenStr)
+        assert(subject.value == TokenMocks.TokenStr1)
+        assert(subject.jwtValue.encodedJwt == TokenMocks.TokenStr1)
         assert(subject.expiresIn == 1704020514L)
     }
 
     @Test
     fun testToken2() {
-        subject = VCLToken(jwtValue = TokenMocks.TokenJwt)
+        subject = VCLToken(jwtValue = TokenMocks.TokenJwt1)
 
-        assert(subject.value == TokenMocks.TokenJwt.encodedJwt)
-        assert(subject.jwtValue.encodedJwt == TokenMocks.TokenJwt.encodedJwt)
+        assert(subject.value == TokenMocks.TokenJwt1.encodedJwt)
+        assert(subject.jwtValue.encodedJwt == TokenMocks.TokenJwt1.encodedJwt)
         assert(subject.expiresIn == 1704020514L)
     }
 }

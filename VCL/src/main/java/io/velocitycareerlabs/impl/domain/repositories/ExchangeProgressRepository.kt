@@ -12,6 +12,8 @@ import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLExchangeDescriptor
 
 internal interface ExchangeProgressRepository {
-    fun getExchangeProgress(exchangeDescriptor: VCLExchangeDescriptor,
-                            completionBlock: (VCLResult<VCLExchange>) -> Unit)
+    fun getExchangeProgress(
+        exchangeDescriptor: VCLExchangeDescriptor,
+        completionBlock: (VCLResult<VCLExchange>) -> Unit
+    )
 }
