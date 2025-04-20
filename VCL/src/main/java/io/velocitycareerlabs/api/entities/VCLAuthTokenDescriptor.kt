@@ -17,7 +17,7 @@ enum class GrantType(val value: String) {
 
 data class VCLAuthTokenDescriptor(
     val authTokenUri: String,
-    val refreshToken: String? = null,
+    val refreshToken: VCLToken? = null,
     val walletDid: String? = null,
     val relyingPartyDid: String? = null,
     val vendorOriginContext: String? = null,
@@ -25,7 +25,7 @@ data class VCLAuthTokenDescriptor(
 
     constructor(
         presentationRequest: VCLPresentationRequest,
-        refreshToken: String? = null
+        refreshToken: VCLToken? = null
     ) : this(
         authTokenUri = presentationRequest.authTokenUri,
         refreshToken = refreshToken,
@@ -39,7 +39,7 @@ data class VCLAuthTokenDescriptor(
             mapOf(
                 KeyGrantType to GrantType.RefreshToken.value,
                 KeyClientId to walletDid,
-                GrantType.RefreshToken.value to refreshToken,
+                GrantType.RefreshToken.value to refreshToken.value,
                 KeyAudience to relyingPartyDid
             )
         } else {

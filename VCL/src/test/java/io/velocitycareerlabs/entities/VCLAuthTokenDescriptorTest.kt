@@ -9,8 +9,10 @@ package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.GrantType
 import io.velocitycareerlabs.api.entities.VCLAuthTokenDescriptor
+import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.TokenMocks
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import org.junit.Test
@@ -27,7 +29,7 @@ class VCLAuthTokenDescriptorTest {
         const val relyingPartyDid =
             "did:web:devregistrar.velocitynetwork.foundation:d:example-21.com-8b82ce9a"
         const val vendorOriginContext = "vendor-context"
-        const val refreshToken = "refresh-token-789"
+        val refreshToken = VCLToken(TokenMocks.TokenJwt1)
     }
 
     @Test
@@ -41,7 +43,7 @@ class VCLAuthTokenDescriptorTest {
         assertEquals(walletDid, descriptor.walletDid)
         assertEquals(relyingPartyDid, descriptor.relyingPartyDid)
         assertNull(descriptor.vendorOriginContext)
-        assertEquals(refreshToken, descriptor.refreshToken)
+        assertEquals(refreshToken.value, descriptor.refreshToken?.value)
     }
 
     @Test
@@ -69,7 +71,7 @@ class VCLAuthTokenDescriptorTest {
         assertEquals(walletDid, descriptor.walletDid)
         assertEquals(relyingPartyDid, descriptor.relyingPartyDid)
         assertEquals(vendorOriginContext, descriptor.vendorOriginContext)
-        assertEquals(refreshToken, descriptor.refreshToken)
+        assertEquals(refreshToken.value, descriptor.refreshToken?.value)
     }
 
     @Test
@@ -85,7 +87,7 @@ class VCLAuthTokenDescriptorTest {
         val expected = mapOf(
             VCLAuthTokenDescriptor.KeyGrantType to GrantType.RefreshToken.value,
             VCLAuthTokenDescriptor.KeyClientId to walletDid,
-            GrantType.RefreshToken.value to refreshToken,
+            GrantType.RefreshToken.value to refreshToken.value,
             VCLAuthTokenDescriptor.KeyAudience to relyingPartyDid
         ).toJsonObject()
 
@@ -126,7 +128,7 @@ class VCLAuthTokenDescriptorTest {
         val expected = mapOf(
             VCLAuthTokenDescriptor.KeyGrantType to GrantType.RefreshToken.value,
             VCLAuthTokenDescriptor.KeyClientId to walletDid,
-            GrantType.RefreshToken.value to refreshToken,
+            GrantType.RefreshToken.value to refreshToken.value,
             VCLAuthTokenDescriptor.KeyAudience to relyingPartyDid
         ).toJsonObject()
 
