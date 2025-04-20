@@ -208,7 +208,7 @@ class MainActivity : AppCompatActivity() {
                     vcl.getAuthToken(
                         VCLAuthTokenDescriptor(
                             authTokenUri = authToken?.authTokenUri ?: "",
-                            refreshToken = authToken?.refreshToken?.value,
+                            refreshToken = authToken?.refreshToken,
                             walletDid = authToken?.walletDid,
                             relyingPartyDid = authToken?.relyingPartyDid,
                         ),
