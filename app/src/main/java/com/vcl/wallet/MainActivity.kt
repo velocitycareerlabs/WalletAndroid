@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val environment = VCLEnvironment.Dev
+    private val environment = VCLEnvironment.Staging
 
     private lateinit var vcl: VCL
     private lateinit var didJwk: VCLDidJwk
