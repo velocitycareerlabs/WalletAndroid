@@ -54,17 +54,17 @@ internal class SubmissionRepositoryImpl(
     }
 
     private fun generateHeader(authToken: VCLAuthToken?): List<Pair<String, String>> {
-        return authToken?.let {
-            listOf(
-                Pair(
-                    HeaderKeys.XVnfProtocolVersion,
-                    HeaderValues.XVnfProtocolVersion
-                ),
+        val header =
+            mutableListOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion))
+        authToken?.let {
+            header.add(
                 Pair(
                     HeaderKeys.Authorization,
                     "${HeaderValues.PrefixBearer} ${authToken.accessToken.value}"
-                ))
-        } ?: listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion))
+                )
+            )
+        }
+        return header
     }
 
     private fun parse(
