@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val environment = VCLEnvironment.Staging
+    private val environment = VCLEnvironment.Dev
 
     private lateinit var vcl: VCL
     private lateinit var didJwk: VCLDidJwk
@@ -131,87 +131,74 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getPresentationRequest() {
-        val deepLink =
-            if (environment == VCLEnvironment.Dev)
-                VCLDeepLink(Constants.PresentationRequestDeepLinkStrDev)
-            else
-                VCLDeepLink(Constants.PresentationRequestDeepLinkStrStaging)
-        vcl.getPresentationRequest(
-            presentationRequestDescriptor = VCLPresentationRequestDescriptor(
-                deepLink = deepLink,
-                pushDelegate = VCLPushDelegate(
-                    pushUrl = "pushUrl",
-                    pushToken = "pushToken"
-                ),
-                didJwk = this.didJwk
+        val deepLink = when (environment) {
+            VCLEnvironment.Dev -> VCLDeepLink(Constants.PresentationRequestDeepLinkStrDev)
+            else -> VCLDeepLink(Constants.PresentationRequestDeepLinkStrStaging)
+        }
+
+        val descriptor = VCLPresentationRequestDescriptor(
+            deepLink = deepLink,
+            pushDelegate = VCLPushDelegate(
+                pushUrl = "pushUrl",
+                pushToken = "pushToken"
             ),
-            successHandler = { presentationRequest ->
-                Log.d(TAG, "VCL Presentation request received: ${presentationRequest.jwt.payload}")
-//                Log.d(TAG, "VCL Presentation request received")
+            didJwk = this.didJwk
+        )
 
-                val presentationSubmission = VCLPresentationSubmission(
-                    presentationRequest = presentationRequest,
-                    verifiableCredentials = Constants.getIdentificationList(environment)
-                )
+        vcl.getPresentationRequest(
+            presentationRequestDescriptor = descriptor,
+            successHandler = { handlePresentationRequest(it) },
+            errorHandler = { logError("VCL Presentation request failed:", it) }
+        )
+    }
 
-                if (presentationRequest.feed) {
-                    vcl.getAuthToken(
-                        VCLAuthTokenDescriptor(presentationRequest),
-                        successHandler = {
-                            Log.d(TAG, "auth token: ${it.payload}")
-                            submitPresentation(
-                                presentationSubmission = presentationSubmission,
-                                authToken = it,
-                                successHandler = { submissionResult ->
-                                    Log.d(TAG, "VCL Presentation submitted: $submissionResult")
+    private fun handlePresentationRequest(presentationRequest: VCLPresentationRequest) {
+        Log.d(TAG, "VCL Presentation request received: ${presentationRequest.jwt.payload}")
 
-                                    vcl.getExchangeProgress(
-                                        VCLExchangeDescriptor(
-                                            presentationSubmission,
-                                            submissionResult
-                                        ),
-                                        successHandler = {
-                                            Log.d(TAG, "VCL Exchange progress: $it")
-                                        },
-                                        errorHandler = {
-                                            Log.e(TAG, "VCL Exchange progress failed: $it")
-                                        })
-                                 },
-                                errorHandler = {
-                                    Log.e(TAG, "VCL Presentation submission failed: $it")
-                                }
-                            )
-                        },
-                        errorHandler = {
-                            Log.e(TAG, "getAuthToken failed: $it")
-                        })
-                } else {
-                    submitPresentation(
-                        presentationSubmission = presentationSubmission,
-                        successHandler = { submissionResult ->
-                            Log.d(TAG, "VCL Presentation submitted: $submissionResult")
+        val submission = VCLPresentationSubmission(
+            presentationRequest = presentationRequest,
+            verifiableCredentials = Constants.getIdentificationList(environment)
+        )
 
-                            vcl.getExchangeProgress(
-                                VCLExchangeDescriptor(
-                                    presentationSubmission,
-                                    submissionResult
-                                ),
-                                successHandler = { exchangeProgress ->
-                                    Log.d(TAG, "VCL Exchange progress: $exchangeProgress")
-                                },
-                                errorHandler = { error ->
-                                    Log.e(TAG, "VCL Exchange progress failed: ,$error")
-                                })
-                        },
-                        errorHandler = { error ->
-                            Log.e(TAG, "VCL Presentation submission failed: $error")
-                        }
-                    )
+        if (presentationRequest.feed) {
+            vcl.getAuthToken(
+                VCLAuthTokenDescriptor(presentationRequest),
+                successHandler = { authToken ->
+                    Log.d(TAG, "auth token: ${authToken.payload}")
+                    submitAndTrack(submission, authToken)
+                },
+                errorHandler = {
+                    Log.e(TAG, "getAuthToken failed: $it")
                 }
+            )
+        } else {
+            submitAndTrack(submission, null)
+        }
+    }
+
+    private fun submitAndTrack(
+        presentationSubmission: VCLPresentationSubmission,
+        authToken: VCLAuthToken?
+    ) {
+        submitPresentation(
+            presentationSubmission = presentationSubmission,
+            authToken = authToken,
+            successHandler = { submissionResult ->
+                Log.d(TAG, "VCL Presentation submitted: $submissionResult")
+                vcl.getExchangeProgress(
+                    VCLExchangeDescriptor(presentationSubmission, submissionResult),
+                    successHandler = {
+                        Log.d(TAG, "VCL Exchange progress: $it")
+                    },
+                    errorHandler = {
+                        Log.e(TAG, "VCL Exchange progress failed: $it")
+                    }
+                )
             },
-            errorHandler = { error ->
-                logError("VCL Presentation request failed:", error)
-            })
+            errorHandler = {
+                Log.e(TAG, "VCL Presentation submission failed: $it")
+            }
+        )
     }
 
     private fun submitPresentation(
@@ -220,43 +207,42 @@ class MainActivity : AppCompatActivity() {
         successHandler: (VCLSubmissionResult) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        authToken?.let {
-            if (!Utils.verifyToken(authToken.accessToken)) {
-                Log.d(TAG, "access token expired")
-                vcl.getAuthToken(
-                    VCLAuthTokenDescriptor(
-                        authTokenUri = authToken.authTokenUri ?: "",
-                        refreshToken = authToken.refreshToken,
-                        walletDid = authToken.walletDid,
-                        relyingPartyDid = authToken.relyingPartyDid,
-                    ),
-                    successHandler = { newAuthToken ->
-                        vcl.submitPresentation(
-                            presentationSubmission = presentationSubmission,
-                            authToken = newAuthToken,
-                            successHandler = successHandler,
-                            errorHandler = errorHandler
-                        )
-                    },
-                    errorHandler = { error ->
-                        Log.e(TAG, "getAuthToken failed: $error")
-                    })
-            } else {
-                vcl.submitPresentation(
-                    presentationSubmission = presentationSubmission,
-                    authToken = authToken,
-                    successHandler = successHandler,
-                    errorHandler = errorHandler
-                )
-            }
-        } ?: run {
+        fun performSubmission(token: VCLAuthToken?) {
             vcl.submitPresentation(
                 presentationSubmission = presentationSubmission,
+                authToken = token,
                 successHandler = successHandler,
                 errorHandler = errorHandler
             )
         }
+
+        if (authToken == null) {
+            performSubmission(null)
+            return
+        }
+
+        if (!Utils.verifyToken(authToken.accessToken)) {
+            Log.d(TAG, "Access token expired")
+            vcl.getAuthToken(
+                VCLAuthTokenDescriptor(
+                    authTokenUri = authToken.authTokenUri ?: "",
+                    refreshToken = authToken.refreshToken,
+                    walletDid = authToken.walletDid,
+                    relyingPartyDid = authToken.relyingPartyDid,
+                ),
+                successHandler = { newAuthToken ->
+                    performSubmission(newAuthToken)
+                },
+                errorHandler = { error ->
+                    Log.e(TAG, "getAuthToken failed: $error")
+                    errorHandler(error)  // << Important fix
+                }
+            )
+        } else {
+            performSubmission(authToken)
+        }
     }
+
 
     private fun getOrganizationsThenCredentialManifestByService() {
         val organizationDescriptor =
