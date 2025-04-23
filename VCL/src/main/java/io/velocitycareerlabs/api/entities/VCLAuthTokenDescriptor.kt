@@ -20,7 +20,7 @@ data class VCLAuthTokenDescriptor(
     val refreshToken: VCLToken? = null,
     val walletDid: String? = null,
     val relyingPartyDid: String? = null,
-    val vendorOriginContext: String? = null,
+    val authorizationCode: String? = null, // vendorOriginContext value
     ) {
 
     constructor(
@@ -31,7 +31,7 @@ data class VCLAuthTokenDescriptor(
         refreshToken = refreshToken,
         walletDid = presentationRequest.didJwk.did,
         relyingPartyDid = presentationRequest.iss,
-        vendorOriginContext = presentationRequest.vendorOriginContext
+        authorizationCode = presentationRequest.vendorOriginContext
     )
 
     fun generateRequestBody(): JSONObject {
@@ -46,7 +46,7 @@ data class VCLAuthTokenDescriptor(
             mapOf(
                 KeyGrantType to GrantType.AuthorizationCode.value,
                 KeyClientId to walletDid,
-                GrantType.AuthorizationCode.value to vendorOriginContext,
+                GrantType.AuthorizationCode.value to authorizationCode,
                 KeyAudience to relyingPartyDid,
                 KeyTokenType to KeyTokenTypeValue
             )

@@ -7,6 +7,7 @@
 package com.vcl.wallet
 
 import io.velocitycareerlabs.api.entities.VCLOffers
+import io.velocitycareerlabs.api.entities.VCLToken
 
 object Utils {
     val TAG = Utils::class.simpleName
@@ -26,4 +27,7 @@ object Utils {
         offer2?.let { rejectedOfferIds.add(it) }
         return Pair(approvedOfferIds, rejectedOfferIds)
     }
+
+    fun isTokenValid(token: VCLToken?) =
+        (token?.expiresIn ?: 0) > (System.currentTimeMillis() / 1000)
 }
