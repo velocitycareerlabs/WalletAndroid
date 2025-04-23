@@ -28,6 +28,6 @@ object Utils {
         return Pair(approvedOfferIds, rejectedOfferIds)
     }
 
-    fun verifyToken(token: VCLToken?) =
+    fun isTokenValid(token: VCLToken?) =
         (token?.expiresIn ?: 0) > (System.currentTimeMillis() / 1000)
 }

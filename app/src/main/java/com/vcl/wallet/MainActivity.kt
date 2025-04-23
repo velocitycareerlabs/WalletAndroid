@@ -221,7 +221,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        if (!Utils.verifyToken(authToken.accessToken)) {
+        if (!Utils.isTokenValid(authToken.accessToken)) {
             Log.d(TAG, "Access token expired")
             vcl.getAuthToken(
                 VCLAuthTokenDescriptor(
