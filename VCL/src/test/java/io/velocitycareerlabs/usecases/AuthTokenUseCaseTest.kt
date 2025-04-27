@@ -13,7 +13,6 @@ import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.data.repositories.AuthTokenRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.AuthTokenUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.AuthTokenUseCase
-import io.velocitycareerlabs.infrastructure.network.NetworkServiceFailure
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.TokenMocks
