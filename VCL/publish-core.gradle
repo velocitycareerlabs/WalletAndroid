@@ -31,15 +31,16 @@ ext {
 // === Fail fast in CI if required credentials are missing
 
 def isCiBuild = System.getenv("CI") == "true"
+def envDesc = isCiBuild ? "CI" : "local"
+println "ℹ️ Running in $envDesc environment."
 
 [mavenCentralTokenUsername, mavenCentralTokenPassword, signingKeyId, signingPassword, signingPrivateKey].eachWithIndex { it, idx ->
     def names = ["mavenCentralTokenUsername", "mavenCentralTokenPassword", "signingKeyId", "signingPassword", "signingPrivateKey"]
     if (!it) {
-        if (isCiBuild) {
-            throw new GradleException("❌ CI build failed: Required publishing property '${names[idx]}' is missing. Please check your GitHub Actions secrets.")
-        } else {
-            println "⚠️ Required publishing property '${names[idx]}' is missing."
-        }
+        def message = "❌️ Required publishing property '${names[idx]}' is missing."
+        message = isCiBuild ? message + " Please check your GitHub Actions secrets." : message
+        throw new GradleException(message)
+//        println "message"
     }
 }
 
