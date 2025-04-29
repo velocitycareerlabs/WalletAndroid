@@ -18,7 +18,7 @@ on:
 
 env:
   PACKAGE_TYPE: "aar"
-  GRADLE_VERSION: "8.4"
+  GRADLE_VERSION: "8.8.2"
   JAVA_VERSION: "17"
   ARTIFACT_PATH: "VCL/build/outputs"
   GLOBAL_ENV: ${{ github.event_name == 'push' && format('{0}', 'dev') || inputs.environment }}
