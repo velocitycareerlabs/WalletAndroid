@@ -40,7 +40,7 @@ jobs:
 
   build-android-sdk:
     runs-on: ubuntu-latest
-    needs: 
+    needs:
       - test-android-sdk
     steps:
       - name: Git clone repository
@@ -53,12 +53,12 @@ jobs:
       # Gradle Assemble
       - name: Gradle Assemble
         run: ./gradlew assemble${{ env.RELEASE_TAG }}
-        env: 
+        env:
           RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'Release' ) || 'Rc' }}
       # Convert artifact to lowercase
       - name: Rename artifact to lowercase
         run: mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
-        env: 
+        env:
           RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'release' ) || 'rc' }}
       # Show Me Built packages
       - name: Show Me Built packages
@@ -69,13 +69,13 @@ jobs:
       - name: Publish Prod/Rc
         if: ${{ env.GLOBAL_ENV == 'prod' || env.GLOBAL_ENV == 'rc' }}
         run: ./gradlew publish${{ env.RELEASE_TAG }}
-        env: 
+        env:
           RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'Release' ) || 'Rc' }}
-          ANDROID_NEXUS_OSSRH_TOKEN_USERNAME: ${{ secrets.ANDROID_NEXUS_OSSRH_TOKEN_USERNAME }}
-          ANDROID_NEXUS_OSSRH_TOKEN_PASSWORD: ${{ secrets.ANDROID_NEXUS_OSSRH_TOKEN_PASSWORD }}
-          ANDROID_NEXUS_SIGNING_KEY_ID: ${{ secrets.ANDROID_NEXUS_SIGNING_KEY_ID }}
-          ANDROID_NEXUS_SIGNING_PASSWORD: ${{ secrets.ANDROID_NEXUS_SIGNING_PASSWORD }}
-          ANDROID_NEXUS_STAGING_PROFILE_ID: ${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}
+          MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
+          MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
+          MAVEN_CENTRAL_SIGNING_KEY_ID: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_ID }}
+          MAVEN_CENTRAL_SIGNING_PASSWORD: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
+          MAVEN_CENTRAL_PRIVATE_KEY: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}
       # Upload Artifacts
       - name: Upload Artifact
         if: success()
@@ -85,7 +85,7 @@ jobs:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
           if-no-files-found: error
           retention-days: 1
-        env: 
+        env:
           RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'release' ) || 'rc' }}
 
 

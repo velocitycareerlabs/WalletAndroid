@@ -5,6 +5,11 @@ plugins {
     id 'signing'
 }
 
+def code = 163
+version = "2.7.3"
+
+apply from: "./publish-core.gradle"
+
 android {
     compileSdk 35
     namespace 'io.velocitycareerlabs'
@@ -12,8 +17,8 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 35
-        versionName "2.7.3"
-        versionCode 163
+        versionCode code
+        versionName version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -62,6 +67,7 @@ android {
         unitTests.includeAndroidResources = true
         unitTests.returnDefaultValues = true
     }
+
     buildFeatures {
         buildConfig true
     }
@@ -70,19 +76,6 @@ android {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-/**
- * Publish Android library ======================================================
-*/
-def getVersionName = { ->
-    return android.defaultConfig.versionName
-}
-def getArtifactId = { ->
-    return "vcl" // Must be lower case!
-}
-def getGroupId = { ->
-    return 'io.velocitycareerlabs'
 }
 
 tasks.register('androidSourcesJar', Jar) {
@@ -95,126 +88,9 @@ artifacts {
     archives tasks.named('androidSourcesJar')
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            create('rc', MavenPublication) {
-                groupId = getGroupId()
-                artifactId = getArtifactId()
-                version = getVersionName()
-
-                if (project.plugins.hasPlugin("com.android.library")) {
-                    artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
-                        builtBy tasks.named('assembleRelease')
-                    }
-                } else {
-                    artifact("$buildDir/libs/${project.name}.jar") {
-                        builtBy tasks.named('jar')
-                    }
-                }
-
-                artifact(tasks.named('androidSourcesJar'))
-
-                pom {
-                    name.set(getArtifactId())
-                    description.set('Velocity Career Labs Android library')
-                    url.set('https://github.com/velocitycareerlabs/WalletAndroid')
-                    licenses {
-                        license {
-                            name.set('Apache License 2.0')
-                            url.set('https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE')
-                        }
-                    }
-                    developers {
-                        developer {
-                            id.set('velocitycareerlabs')
-                            name.set('Michael Avoyan')
-                            email.set('michael.avoyan@velocitycareerlabs.com')
-                        }
-                    }
-                    scm {
-                        connection.set('scm:github.com/velocitycareerlabs/WalletAndroid.git')
-                        developerConnection.set('scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git')
-                        url.set('https://github.com/velocitycareerlabs/WalletAndroid')
-                    }
-                }
-            }
-            create('release', MavenPublication) {
-                groupId = getGroupId()
-                artifactId = getArtifactId()
-                version = getVersionName()
-
-                if (project.plugins.hasPlugin("com.android.library")) {
-                    artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
-                        builtBy tasks.named('assembleRelease')
-                    }
-                } else {
-                    artifact("$buildDir/libs/${project.name}.jar") {
-                        builtBy tasks.named('jar')
-                    }
-                }
-
-                artifact(tasks.named('androidSourcesJar'))
-
-                pom {
-                    name.set(getArtifactId())
-                    description.set('Velocity Career Labs Android library')
-                    url.set('https://github.com/velocitycareerlabs/WalletAndroid')
-                    licenses {
-                        license {
-                            name.set('Apache License 2.0')
-                            url.set('https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE')
-                        }
-                    }
-                    developers {
-                        developer {
-                            id.set('velocitycareerlabs')
-                            name.set('Michael Avoyan')
-                            email.set('michael.avoyan@velocitycareerlabs.com')
-                        }
-                    }
-                    scm {
-                        connection.set('scm:github.com/velocitycareerlabs/WalletAndroid.git')
-                        developerConnection.set('scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git')
-                        url.set('https://github.com/velocitycareerlabs/WalletAndroid')
-                    }
-                }
-            }
-        }
-    }
-
-    signing {
-        useInMemoryPgpKeys(
-                rootProject.ext.signingKeyId,
-                rootProject.ext.signingPrivateKey,
-                rootProject.ext.signingPassword
-        )
-        sign(publishing.publications)
-//        sign(publishing.publications['rc'])
-//        sign(publishing.publications['release'])
-    }
-
-    tasks.named('generateMetadataFileForRcPublication') {
-        dependsOn(tasks.named('androidSourcesJar'))
-    }
-
-    tasks.named("publishRcPublicationToSonatypeRepository") {
-        dependsOn(tasks.named("signRcPublication"))
-        dependsOn(tasks.named("signReleasePublication"))
-    }
-
-    tasks.named("publishReleasePublicationToSonatypeRepository") {
-        dependsOn(tasks.named("signReleasePublication"))
-        dependsOn(tasks.named("signRcPublication"))
-    }
-}
-
 repositories {
     mavenCentral()
 }
-/**
- * =================================================================================================
-*/
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.15.0'

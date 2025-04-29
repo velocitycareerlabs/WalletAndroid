@@ -23,10 +23,6 @@ plugins {
     id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
 }
 
-// Publishing scripts
-apply from: "${rootDir}/publish-core.gradle"
-
-
 allprojects {
     repositories {
         google()

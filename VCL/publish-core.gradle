@@ -1,0 +1,214 @@
+import java.text.SimpleDateFormat
+
+// === Config ===
+
+def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven2/maven2.properties'
+
+static def loadProperties(String filePath) {
+    def props = new Properties()
+    def file = new File(filePath)
+    if (file.exists()) {
+        file.withInputStream { props.load(it) }
+    }
+    return props
+}
+
+def properties = loadProperties(propertiesFilePath)
+if (properties.isEmpty()) {
+    throw new GradleException("Properties file not found: $propertiesFilePath")
+}
+
+// === Load credentials
+
+ext {
+    mavenCentralTokenUsername = System.getenv("MAVEN_CENTRAL_TOKEN_USERNAME") ?: properties.getProperty("mavenCentralTokenUsername")
+    mavenCentralTokenPassword = System.getenv("MAVEN_CENTRAL_TOKEN_PASSWORD") ?: properties.getProperty("mavenCentralTokenPassword")
+    signingKeyId = System.getenv("MAVEN_CENTRAL_SIGNING_KEY_ID") ?: properties.getProperty("signingKeyId")
+    signingPassword = System.getenv("MAVEN_CENTRAL_SIGNING_PASSWORD") ?: properties.getProperty("signingPassword")
+    signingPrivateKey = System.getenv("MAVEN_CENTRAL_PRIVATE_KEY") ?: properties.getProperty("signingPrivateKey")
+}
+
+// === Fail fast in CI if required credentials are missing
+
+def isCiBuild = System.getenv("CI") == "true"
+
+[mavenCentralTokenUsername, mavenCentralTokenPassword, signingKeyId, signingPassword, signingPrivateKey].eachWithIndex { it, idx ->
+    def names = ["mavenCentralTokenUsername", "mavenCentralTokenPassword", "signingKeyId", "signingPassword", "signingPrivateKey"]
+    if (!it) {
+        if (isCiBuild) {
+            throw new GradleException("❌ CI build failed: Required publishing property '${names[idx]}' is missing. Please check your GitHub Actions secrets.")
+        } else {
+            println "⚠️ Warning: Required publishing property '${names[idx]}' is missing."
+        }
+    }
+}
+
+// === Setup rcMode (default false)
+
+project.ext.rcMode = false
+
+// === Dynamic resolved version function
+
+def calculateResolvedVersion() {
+    def sanitizedVersion = project.version.toString().replace("-SNAPSHOT", "")
+    return project.ext.rcMode ? "${sanitizedVersion}-rc-${new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())}" : sanitizedVersion
+}
+
+// === Correct Group and Artifact IDs
+
+def myArtifactId = project.findProperty("artifactId") ?: "vcl"
+def myGroupId = project.findProperty("groupId") ?: "io.velocitycareerlabs"
+
+// === Define output paths based on mode
+
+def outputAar = layout.buildDirectory.file("outputs/aar/${project.name}-${project.ext.rcMode ? "rc" : "release"}.aar")
+def finalAar = layout.buildDirectory.file("outputs/aar/${myArtifactId}-${calculateResolvedVersion()}.aar")
+
+println "Configured build (initial):"
+println " - rcMode: ${project.ext.rcMode}"
+println " - buildType: ${project.ext.rcMode ? "rc" : "release"}"
+println " - sanitizedVersion: ${project.version}"
+println " - initial resolvedVersion: ${calculateResolvedVersion()}"
+
+// === Validate Assemble Task Exists
+
+def assembleTaskName = { project.ext.rcMode ? "assembleRc" : "assembleRelease" }
+
+afterEvaluate {
+    if (!tasks.findByName(assembleTaskName())) {
+        throw new GradleException("Expected task '${assembleTaskName()}' not found. Verify build flavors.")
+    }
+}
+
+// === Rename AAR ===
+
+tasks.register("renameAar") {
+    dependsOn(assembleTaskName())
+
+    doLast {
+        def builtAar = outputAar.get().asFile
+        def renamedAar = finalAar.get().asFile
+
+        if (builtAar.exists()) {
+            println "Renaming AAR: ${builtAar.name} → ${renamedAar.name}"
+            builtAar.renameTo(renamedAar)
+        } else {
+            throw new GradleException("Expected AAR not found: ${builtAar}")
+        }
+    }
+}
+
+// === Publishing and Signing ===
+
+afterEvaluate {
+    publishing {
+        publications {
+            create("default", MavenPublication) {
+                groupId = myGroupId
+                artifactId = myArtifactId
+                version = calculateResolvedVersion()
+
+                artifact(finalAar) {
+                    builtBy(tasks.named("renameAar"))
+                }
+                artifact(tasks.named("androidSourcesJar"))
+
+                pom {
+                    name.set(myArtifactId)
+                    description.set("Velocity Career Labs Android library")
+                    url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                    licenses {
+                        license {
+                            name.set("Apache License 2.0")
+                            url.set("https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("velocitycareerlabs")
+                            name.set("Michael Avoyan")
+                            email.set("michael.avoyan@velocitycareerlabs.com")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git")
+                        developerConnection.set("scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git")
+                        url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name = "central"
+                url = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
+                credentials {
+                    username = mavenCentralTokenUsername
+                    password = mavenCentralTokenPassword
+                }
+            }
+            maven {
+                name = "sonatypeSnapshots"
+                url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+                credentials {
+                    username = mavenCentralTokenUsername
+                    password = mavenCentralTokenPassword
+                }
+            }
+        }
+    }
+
+    signing {
+        useInMemoryPgpKeys(signingKeyId, signingPrivateKey, signingPassword)
+        sign(publishing.publications["default"])
+    }
+
+    tasks.named("publish").configure {
+        dependsOn("renameAar")
+    }
+
+    tasks.named("generateMetadataFileForDefaultPublication") {
+        dependsOn(tasks.named("androidSourcesJar"))
+    }
+}
+
+// === Publishing Tasks ===
+
+tasks.register("publishSnapshot") {
+    group = "publishing"
+    description = "Publish SNAPSHOT version to Sonatype snapshot repository"
+
+    doFirst {
+        println "Publishing SNAPSHOT version: ${project.version}"
+    }
+
+    dependsOn("assembleRelease")
+    finalizedBy("publishAllPublicationsToSonatypeSnapshotsRepository")
+}
+
+tasks.register("publishRc") {
+    group = "publishing"
+    description = "Publish RC version to Maven Central with timestamp"
+
+    doFirst {
+        project.ext.rcMode = true
+        println "Publishing RC version (rcMode=true): ${calculateResolvedVersion()}"
+    }
+
+    dependsOn(assembleTaskName())
+    finalizedBy("publish")
+}
+
+tasks.register("publishRelease") {
+    group = "publishing"
+    description = "Publish stable release to Maven Central"
+
+    doFirst {
+        project.ext.rcMode = false
+        println "Publishing Release version (rcMode=false): ${calculateResolvedVersion()}"
+    }
+
+    dependsOn(assembleTaskName())
+    finalizedBy("publish")
+}
