@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat
 
 def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven2/maven2.properties'
 
+def isCiBuild = System.getenv("CI") == "true"
+
 static def loadProperties(String filePath) {
     def props = new Properties()
     def file = new File(filePath)
@@ -14,8 +16,8 @@ static def loadProperties(String filePath) {
 }
 
 def properties = loadProperties(propertiesFilePath)
-if (properties.isEmpty()) {
-    println "⚠️ Local maven2.properties file not found at: ${propertiesFilePath}"
+if (properties.isEmpty() && !isCiBuild) {
+    throw new GradleException("❌️ Local maven2.properties file not found at: ${propertiesFilePath}")
 }
 
 // === Load credentials
@@ -30,7 +32,6 @@ ext {
 
 // === Fail fast in CI if required credentials are missing
 
-def isCiBuild = System.getenv("CI") == "true"
 def envDesc = isCiBuild ? "CI" : "local"
 println "ℹ️ Running in $envDesc environment."
 
