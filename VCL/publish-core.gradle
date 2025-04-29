@@ -23,9 +23,9 @@ if (properties.isEmpty()) {
 ext {
     mavenCentralTokenUsername = System.getenv("MAVEN_CENTRAL_TOKEN_USERNAME") ?: properties.getProperty("mavenCentralTokenUsername")
     mavenCentralTokenPassword = System.getenv("MAVEN_CENTRAL_TOKEN_PASSWORD") ?: properties.getProperty("mavenCentralTokenPassword")
-    signingKeyId = System.getenv("MAVEN_CENTRAL_SIGNING_KEY_ID") ?: properties.getProperty("signingKeyId")
-    signingPassword = System.getenv("MAVEN_CENTRAL_SIGNING_PASSWORD") ?: properties.getProperty("signingPassword")
-    signingPrivateKey = System.getenv("MAVEN_CENTRAL_PRIVATE_KEY") ?: properties.getProperty("signingPrivateKey")
+    mavenCentralSigningKeyId = System.getenv("MAVEN_CENTRAL_SIGNING_KEY_ID") ?: properties.getProperty("mavenCentralSigningKeyId")
+    mavenCentralSigningPassword = System.getenv("MAVEN_CENTRAL_SIGNING_PASSWORD") ?: properties.getProperty("mavenCentralSigningPassword")
+    mavenCentralSigningPrivateKey = System.getenv("MAVEN_CENTRAL_PRIVATE_KEY") ?: properties.getProperty("mavenCentralSigningPrivateKey")
 }
 
 // === Fail fast in CI if required credentials are missing
@@ -34,11 +34,32 @@ def isCiBuild = System.getenv("CI") == "true"
 def envDesc = isCiBuild ? "CI" : "local"
 println "ℹ️ Running in $envDesc environment."
 
-[mavenCentralTokenUsername, mavenCentralTokenPassword, signingKeyId, signingPassword, signingPrivateKey].eachWithIndex { it, idx ->
-    def names = isCiBuild ? ["MAVEN_CENTRAL_TOKEN_USERNAME", "MAVEN_CENTRAL_TOKEN_PASSWORD", "MAVEN_CENTRAL_SIGNING_KEY_ID", "MAVEN_CENTRAL_SIGNING_PASSWORD", "MAVEN_CENTRAL_PRIVATE_KEY"]
-            : ["mavenCentralTokenUsername", "mavenCentralTokenPassword", "signingKeyId", "signingPassword", "signingPrivateKey"]
+def githubSecretsNames = [
+        "MAVEN_CENTRAL_TOKEN_USERNAME",
+        "MAVEN_CENTRAL_TOKEN_PASSWORD",
+        "MAVEN_CENTRAL_SIGNING_KEY_ID",
+        "MAVEN_CENTRAL_SIGNING_PASSWORD",
+        "MAVEN_CENTRAL_PRIVATE_KEY"
+]
+
+if (!isCiBuild) {
+    githubSecretsNames = githubSecretsNames.collect { toCamelCase(it) }
+}
+
+static def toCamelCase(String input) {
+    def parts = input.toLowerCase().split('_')
+    parts[0] + parts.tail().collect { it.capitalize() }.join('')
+}
+
+[
+        mavenCentralTokenUsername,
+        mavenCentralTokenPassword,
+        mavenCentralSigningKeyId,
+        mavenCentralSigningPassword,
+        mavenCentralSigningPrivateKey
+].eachWithIndex { it, idx ->
     if (!it) {
-        def message = "❌️ Required publishing property '${names[idx]}' is missing."
+        def message = "❌️ Required publishing property '${githubSecretsNames[idx]}' is missing."
         message = isCiBuild ? message + " Please check your GitHub Actions secrets." : message
         throw new GradleException(message)
 //        println "message"
@@ -162,7 +183,7 @@ afterEvaluate {
     }
 
     signing {
-        useInMemoryPgpKeys(signingKeyId, signingPrivateKey, signingPassword)
+        useInMemoryPgpKeys(mavenCentralSigningKeyId, mavenCentralSigningPrivateKey, mavenCentralSigningPassword)
         sign(publishing.publications["default"])
     }
 
