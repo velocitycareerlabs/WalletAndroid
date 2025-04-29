@@ -15,7 +15,7 @@ static def loadProperties(String filePath) {
 
 def properties = loadProperties(propertiesFilePath)
 if (properties.isEmpty()) {
-    throw new GradleException("Properties file not found: $propertiesFilePath")
+    println "⚠️ Local maven2.properties file not found at: ${propertiesFilePath}"
 }
 
 // === Load credentials
@@ -38,7 +38,7 @@ def isCiBuild = System.getenv("CI") == "true"
         if (isCiBuild) {
             throw new GradleException("❌ CI build failed: Required publishing property '${names[idx]}' is missing. Please check your GitHub Actions secrets.")
         } else {
-            println "⚠️ Warning: Required publishing property '${names[idx]}' is missing."
+            println "⚠️ Required publishing property '${names[idx]}' is missing."
         }
     }
 }
