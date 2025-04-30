@@ -10,5 +10,5 @@ package io.velocitycareerlabs.api.entities.error
 enum class VCLStatusCode(val value: Int) {
     NetworkError(1),
     VerificationError(403),
-    Undefined(-1)
+    Undefined(-1),
 }

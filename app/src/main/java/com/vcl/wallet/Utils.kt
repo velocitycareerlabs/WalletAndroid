@@ -17,10 +17,10 @@ object Utils {
         val rejectedOfferIds = mutableListOf<String>()
         var offer1: String? = null
         var offer2: String? = null
-        if(offers.all.isNotEmpty()) {
+        if (offers.all.isNotEmpty()) {
             offer1 = offers.all[0].id
         }
-        if(offers.all.size > 1) {
+        if (offers.all.size > 1) {
             offer2 = offers.all[1].id
         }
         offer1?.let { approvedOfferIds.add(it) }
@@ -28,6 +28,5 @@ object Utils {
         return Pair(approvedOfferIds, rejectedOfferIds)
     }
 
-    fun isTokenValid(token: VCLToken?) =
-        (token?.expiresIn ?: 0) > (System.currentTimeMillis() / 1000)
+    fun isTokenValid(token: VCLToken?) = (token?.expiresIn ?: 0) > (System.currentTimeMillis() / 1000)
 }
