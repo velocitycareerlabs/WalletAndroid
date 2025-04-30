@@ -124,6 +124,29 @@ tasks.register("renameAar") {
 
 // === Publishing and Signing ===
 afterEvaluate {
+    // === Signing must come first so it's applied before any publish tasks ===
+    if (mavenCentralSigningPrivateKey?.trim()) {
+        println("✅ Configuring in-memory PGP signing")
+
+        signing {
+            required {
+                gradle.taskGraph.hasTask("publish") ||
+                        gradle.taskGraph.hasTask("publishRc") ||
+                        gradle.taskGraph.hasTask("publishRelease")
+            }
+
+            useInMemoryPgpKeys(
+                    mavenCentralSigningKeyId,
+                    mavenCentralSigningPrivateKey,
+                    mavenCentralSigningPassword
+            )
+            sign(publishing.publications["default"])
+        }
+    } else {
+        println("⚠️ Skipping signing: No PGP key configured")
+    }
+
+    // === Publishing setup ===
     publishing {
         publications {
             create("default", MavenPublication) {
@@ -174,26 +197,7 @@ afterEvaluate {
         }
     }
 
-    signing {
-        required {
-            gradle.taskGraph.hasTask("publish") ||
-                    gradle.taskGraph.hasTask("publishRc") ||
-                    gradle.taskGraph.hasTask("publishRelease")
-        }
-
-        if (mavenCentralSigningPrivateKey?.trim()) {
-            println("✅ Configuring in-memory PGP signing")
-            useInMemoryPgpKeys(
-                    mavenCentralSigningKeyId,
-                    mavenCentralSigningPrivateKey,
-                    mavenCentralSigningPassword
-            )
-            sign(publishing.publications["default"])
-        } else {
-            println("⚠️ Skipping signing: No PGP key configured")
-        }
-    }
-
+    // === Ensure proper task ordering ===
     tasks.named("publish").configure {
         dependsOn("renameAar")
     }
