@@ -104,33 +104,64 @@ afterEvaluate {
     if (!tasks.findByName(assembleTaskName())) {
         throw new GradleException("Expected task '${assembleTaskName()}' not found. Verify build flavors.")
     }
-}
 
-// === Rename AAR ===
-tasks.register("renameAar") {
-    dependsOn(assembleTaskName())
-
-    doLast {
-        def builtAar = outputAar.get().asFile
-        def renamedAar = finalAar.get().asFile
-
-        if (builtAar.exists()) {
-            println "Renaming AAR: ${builtAar.name} → ${renamedAar.name}"
-            builtAar.renameTo(renamedAar)
-        } else {
-            throw new GradleException("Expected AAR not found: ${builtAar}")
-        }
-    }
-}
-
-// === Publishing and Signing ===
-afterEvaluate {
-    // === Signing must come first so it's applied before any publish tasks ===
     if (mavenCentralSigningPrivateKeyB64?.trim()) {
         println("✅ Configuring in-memory PGP signing")
 
         def mavenCentralPrivateKeyDecoded = new String(Base64.decoder.decode(mavenCentralSigningPrivateKeyB64), "UTF-8")
 
+        // === Publishing setup ===
+        publishing {
+            publications {
+                create("default", MavenPublication) {
+                    groupId = myGroupId
+                    artifactId = myArtifactId
+                    version = calculateResolvedVersion()
+
+                    artifact(finalAar) {
+                        builtBy(tasks.named("renameAar"))
+                    }
+                    artifact(tasks.named("androidSourcesJar"))
+
+                    pom {
+                        name.set(myArtifactId)
+                        description.set("Velocity Career Labs Android library")
+                        url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                        licenses {
+                            license {
+                                name.set("Apache License 2.0")
+                                url.set("https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE")
+                            }
+                        }
+                        developers {
+                            developer {
+                                id.set("velocitycareerlabs")
+                                name.set("Michael Avoyan")
+                                email.set("michael.avoyan@velocitycareerlabs.com")
+                            }
+                        }
+                        scm {
+                            connection.set("scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git")
+                            developerConnection.set("scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git")
+                            url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                        }
+                    }
+                }
+            }
+
+            repositories {
+                maven {
+                    name = "central"
+                    url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                    credentials {
+                        username = mavenCentralTokenUsername
+                        password = mavenCentralTokenPassword
+                    }
+                }
+            }
+        }
+
+        // === Signing (must come after 'default' publication is created) ===
         signing {
             required {
                 gradle.taskGraph.hasTask("publish") ||
@@ -143,59 +174,26 @@ afterEvaluate {
                     mavenCentralPrivateKeyDecoded,
                     mavenCentralSigningPassword
             )
+
             sign(publishing.publications["default"])
         }
     } else {
         println("⚠️ Skipping signing: No PGP key configured")
     }
 
-    // === Publishing setup ===
-    publishing {
-        publications {
-            create("default", MavenPublication) {
-                groupId = myGroupId
-                artifactId = myArtifactId
-                version = calculateResolvedVersion()
+    // === Rename AAR ===
+    tasks.register("renameAar") {
+        dependsOn(assembleTaskName())
 
-                artifact(finalAar) {
-                    builtBy(tasks.named("renameAar"))
-                }
-                artifact(tasks.named("androidSourcesJar"))
+        doLast {
+            def builtAar = outputAar.get().asFile
+            def renamedAar = finalAar.get().asFile
 
-                pom {
-                    name.set(myArtifactId)
-                    description.set("Velocity Career Labs Android library")
-                    url.set("https://github.com/velocitycareerlabs/WalletAndroid")
-                    licenses {
-                        license {
-                            name.set("Apache License 2.0")
-                            url.set("https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE")
-                        }
-                    }
-                    developers {
-                        developer {
-                            id.set("velocitycareerlabs")
-                            name.set("Michael Avoyan")
-                            email.set("michael.avoyan@velocitycareerlabs.com")
-                        }
-                    }
-                    scm {
-                        connection.set("scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git")
-                        developerConnection.set("scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git")
-                        url.set("https://github.com/velocitycareerlabs/WalletAndroid")
-                    }
-                }
-            }
-        }
-
-        repositories {
-            maven {
-                name = "central"
-                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                credentials {
-                    username = mavenCentralTokenUsername
-                    password = mavenCentralTokenPassword
-                }
+            if (builtAar.exists()) {
+                println "Renaming AAR: ${builtAar.name} → ${renamedAar.name}"
+                builtAar.renameTo(renamedAar)
+            } else {
+                throw new GradleException("Expected AAR not found: ${builtAar}")
             }
         }
     }
