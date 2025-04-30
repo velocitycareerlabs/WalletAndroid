@@ -11,6 +11,10 @@ if (!isPublishTask) {
     return
 }
 
+def isPublishRc = gradle.startParameter.taskNames.contains("publishRc")
+def isPublishRelease = gradle.startParameter.taskNames.contains("publishRelease")
+project.ext.rcMode = isPublishRc
+
 // === Load credentials ===
 def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven2/maven2.properties'
 
@@ -73,9 +77,6 @@ static def toCamelCase(String input) {
         println "✅ Found required property: ${githubSecretsNames[idx]}:\n$it"
     }
 }
-
-// === Publishing setup ===
-project.ext.rcMode = false
 
 // === Dynamic resolved version function
 def calculateResolvedVersion() {
