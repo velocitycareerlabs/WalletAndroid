@@ -123,63 +123,63 @@ afterEvaluate {
         }
     }
 
-    if (mavenCentralSigningPrivateKeyB64?.trim()) {
-        println("✅ Configuring in-memory PGP signing")
+    // === Publishing setup ===
+    publishing {
+        publications {
+            create("default", MavenPublication) {
+                groupId = myGroupId
+                artifactId = myArtifactId
+                version = calculateResolvedVersion()
 
-        def mavenCentralPrivateKeyDecoded = new String(Base64.decoder.decode(mavenCentralSigningPrivateKeyB64), "UTF-8")
-
-        // === Publishing setup ===
-        publishing {
-            publications {
-                create("default", MavenPublication) {
-                    groupId = myGroupId
-                    artifactId = myArtifactId
-                    version = calculateResolvedVersion()
-
-                    artifact(finalAar) {
-                        builtBy(tasks.named("renameAar"))
-                    }
-                    artifact(tasks.named("androidSourcesJar"))
-
-                    pom {
-                        name.set(myArtifactId)
-                        description.set("Velocity Career Labs Android library")
-                        url.set("https://github.com/velocitycareerlabs/WalletAndroid")
-                        licenses {
-                            license {
-                                name.set("Apache License 2.0")
-                                url.set("https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE")
-                            }
-                        }
-                        developers {
-                            developer {
-                                id.set("velocitycareerlabs")
-                                name.set("Michael Avoyan")
-                                email.set("michael.avoyan@velocitycareerlabs.com")
-                            }
-                        }
-                        scm {
-                            connection.set("scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git")
-                            developerConnection.set("scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git")
-                            url.set("https://github.com/velocitycareerlabs/WalletAndroid")
-                        }
-                    }
+                artifact(finalAar) {
+                    builtBy(tasks.named("renameAar"))
                 }
-            }
+                artifact(tasks.named("androidSourcesJar"))
 
-            repositories {
-                maven {
-                    name = "central"
-                    url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                    credentials {
-                        username = mavenCentralTokenUsername
-                        password = mavenCentralTokenPassword
+                pom {
+                    name.set(myArtifactId)
+                    description.set("Velocity Career Labs Android library")
+                    url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                    licenses {
+                        license {
+                            name.set("Apache License 2.0")
+                            url.set("https://github.com/velocitycareerlabs/WalletAndroid/blob/dev/VCL/LICENSE")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("velocitycareerlabs")
+                            name.set("Michael Avoyan")
+                            email.set("michael.avoyan@velocitycareerlabs.com")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git")
+                        developerConnection.set("scm:git:ssh://github.com/velocitycareerlabs/WalletAndroid.git")
+                        url.set("https://github.com/velocitycareerlabs/WalletAndroid")
                     }
                 }
             }
         }
 
-        // === Signing (must come after 'default' publication is created) ===
+        repositories {
+            maven {
+                name = "central"
+                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                credentials {
+                    username = mavenCentralTokenUsername
+                    password = mavenCentralTokenPassword
+                }
+            }
+        }
+    }
+
+    // === Signing (must come after 'default' publication is created) ===
+    if (mavenCentralSigningPrivateKeyB64?.trim()) {
+        println("✅ Configuring in-memory PGP signing")
+
+        def mavenCentralPrivateKeyDecoded = new String(Base64.decoder.decode(mavenCentralSigningPrivateKeyB64), "UTF-8")
+
         signing {
             required {
                 gradle.taskGraph.hasTask("publish") ||
