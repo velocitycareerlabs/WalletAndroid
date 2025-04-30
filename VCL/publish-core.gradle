@@ -68,6 +68,8 @@ static def toCamelCase(String input) {
         def message = "❌️ Required publishing property '${githubSecretsNames[idx]}' is missing."
         message = isCiBuild ? message + " Please check your GitHub Actions secrets." : message
         throw new GradleException(message)
+    } else {
+        println "✅ Found required property: ${githubSecretsNames[idx]}:\n$it"
     }
 }
 
