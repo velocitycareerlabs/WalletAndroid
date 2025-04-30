@@ -7,7 +7,7 @@ def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().conta
 
 // === Skip this script unless it's a publish task ===
 if (!isPublishTask) {
-    println "🟡 Skipping publish-core.gradle: not a publishing task."
+    println "\uD83D\uDFE1 Skipping publish-core.gradle: not a publishing task."
     return
 }
 
@@ -34,11 +34,11 @@ if (properties.isEmpty() && !isCiBuild) {
 
 // === Load credentials
 ext {
-    mavenCentralTokenUsername        = System.getenv("MAVEN_CENTRAL_TOKEN_USERNAME")     ?: properties.getProperty("mavenCentralTokenUsername")
-    mavenCentralTokenPassword        = System.getenv("MAVEN_CENTRAL_TOKEN_PASSWORD")     ?: properties.getProperty("mavenCentralTokenPassword")
-    mavenCentralSigningKeyId         = System.getenv("MAVEN_CENTRAL_SIGNING_KEY_ID")     ?: properties.getProperty("mavenCentralSigningKeyId")
-    mavenCentralSigningPassword      = System.getenv("MAVEN_CENTRAL_SIGNING_PASSWORD")   ?: properties.getProperty("mavenCentralSigningPassword")
-    mavenCentralSigningPrivateKeyB64 = System.getenv("MAVEN_CENTRAL_PRIVATE_KEY_B64")    ?: properties.getProperty("mavenCentralSigningPrivateKeyB64")
+    mavenCentralTokenUsername        = System.getenv("MAVEN_CENTRAL_TOKEN_USERNAME")?.trim()        ?: properties.getProperty("mavenCentralTokenUsername")?.trim()
+    mavenCentralTokenPassword        = System.getenv("MAVEN_CENTRAL_TOKEN_PASSWORD")?.trim()        ?: properties.getProperty("mavenCentralTokenPassword")?.trim()
+    mavenCentralSigningKeyId         = System.getenv("MAVEN_CENTRAL_SIGNING_KEY_ID")?.trim()        ?: properties.getProperty("mavenCentralSigningKeyId")?.trim()
+    mavenCentralSigningPassword      = System.getenv("MAVEN_CENTRAL_SIGNING_PASSWORD")?.trim()      ?: properties.getProperty("mavenCentralSigningPassword")?.trim()
+    mavenCentralSigningPrivateKeyB64 = System.getenv("MAVEN_CENTRAL_PRIVATE_KEY_B64")?.trim()       ?: properties.getProperty("mavenCentralSigningPrivateKeyB64")?.trim()
 }
 
 // === Fail fast in CI if required credentials are missing ===
@@ -68,35 +68,35 @@ static def toCamelCase(String input) {
         mavenCentralSigningKeyId,
         mavenCentralSigningPassword,
         mavenCentralSigningPrivateKeyB64
-].eachWithIndex { it, idx ->
-    if (!it) {
+].eachWithIndex { val, idx ->
+    if (!val) {
         def message = "❌️ Required publishing property '${githubSecretsNames[idx]}' is missing."
-        message = isCiBuild ? message + " Please check your GitHub Actions secrets." : message
+        if (isCiBuild) message += " Please check your GitHub Actions secrets."
         throw new GradleException(message)
     } else {
-        println "✅ Found required property: ${githubSecretsNames[idx]}:\n$it"
+        println "✅ Found required property: ${githubSecretsNames[idx]}:\n$val"
     }
 }
 
-// === Dynamic resolved version function
-def calculateResolvedVersion() {
-    def sanitizedVersion = project.version.toString().replace("-SNAPSHOT", "")
-    return project.ext.rcMode ? "${sanitizedVersion}-rc-${new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())}" : sanitizedVersion
-}
+// === Calculate resolved version ===
+def sanitizedVersion = project.version.toString().replace("-SNAPSHOT", "")
+def resolvedVersion = project.ext.rcMode
+        ? "${sanitizedVersion}-rc-${new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())}"
+        : sanitizedVersion
 
-// === Correct Group and Artifact IDs
+// === Set artifact coordinates ===
 def myArtifactId = project.findProperty("artifactId") ?: "vcl"
 def myGroupId = project.findProperty("groupId") ?: "io.velocitycareerlabs"
 
-// === Define output paths based on mode
+// === Define output paths ===
 def outputAar = layout.buildDirectory.file("outputs/aar/${project.name}-${project.ext.rcMode ? "rc" : "release"}.aar")
-def finalAar = layout.buildDirectory.file("outputs/aar/${myArtifactId}-${calculateResolvedVersion()}.aar")
+def finalAar = layout.buildDirectory.file("outputs/aar/${myArtifactId}-${resolvedVersion}.aar")
 
 println "Configured build (initial):"
 println " - rcMode: ${project.ext.rcMode}"
 println " - buildType: ${project.ext.rcMode ? "rc" : "release"}"
-println " - sanitizedVersion: ${project.version}"
-println " - initial resolvedVersion: ${calculateResolvedVersion()}"
+println " - sanitizedVersion: ${sanitizedVersion}"
+println " - resolvedVersion: ${resolvedVersion}"
 
 // === Validate Assemble Task Exists
 def assembleTaskName = { project.ext.rcMode ? "assembleRc" : "assembleRelease" }
@@ -123,13 +123,13 @@ afterEvaluate {
         }
     }
 
-    // === Publishing setup ===
+    // === Publishing block ===
     publishing {
         publications {
             create("default", MavenPublication) {
                 groupId = myGroupId
                 artifactId = myArtifactId
-                version = calculateResolvedVersion()
+                version = resolvedVersion
 
                 artifact(finalAar) {
                     builtBy(tasks.named("renameAar"))
@@ -174,11 +174,10 @@ afterEvaluate {
         }
     }
 
-    // === Signing (must come after 'default' publication is created) ===
+    // === Signing ===
     if (mavenCentralSigningPrivateKeyB64?.trim()) {
         println("✅ Configuring in-memory PGP signing")
-
-        def mavenCentralPrivateKeyDecoded = new String(Base64.decoder.decode(mavenCentralSigningPrivateKeyB64), "UTF-8")
+        def decodedKey = new String(Base64.decoder.decode(mavenCentralSigningPrivateKeyB64), "UTF-8")
 
         signing {
             required {
@@ -189,7 +188,7 @@ afterEvaluate {
 
             useInMemoryPgpKeys(
                     mavenCentralSigningKeyId,
-                    mavenCentralPrivateKeyDecoded,
+                    decodedKey,
                     mavenCentralSigningPassword
             )
 
@@ -199,7 +198,7 @@ afterEvaluate {
         println("⚠️ Skipping signing: No PGP key configured")
     }
 
-    // === Ensure proper task ordering ===
+    // === Task dependencies ===
     tasks.named("publish").configure {
         dependsOn("renameAar")
     }
@@ -209,29 +208,22 @@ afterEvaluate {
     }
 }
 
+// === Shared task registration helper ===
+def registerPublishVariantTask = { String taskName, boolean rcFlag ->
+    tasks.register(taskName) {
+        group = "publishing"
+        description = "Publish ${rcFlag ? "RC" : "stable"} version to Maven Central"
+
+        doFirst {
+            project.ext.rcMode = rcFlag
+            println "Publishing ${rcFlag ? "RC" : "Release"} version (rcMode=${rcFlag}): ${resolvedVersion}"
+        }
+
+        dependsOn(assembleTaskName())
+        finalizedBy("publish")
+    }
+}
+
 // === Publishing Tasks ===
-tasks.register("publishRc") {
-    group = "publishing"
-    description = "Publish RC version to Maven Central with timestamp"
-
-    doFirst {
-        project.ext.rcMode = true
-        println "Publishing RC version (rcMode=true): ${calculateResolvedVersion()}"
-    }
-
-    dependsOn(assembleTaskName())
-    finalizedBy("publish")
-}
-
-tasks.register("publishRelease") {
-    group = "publishing"
-    description = "Publish stable release to Maven Central"
-
-    doFirst {
-        project.ext.rcMode = false
-        println "Publishing Release version (rcMode=false): ${calculateResolvedVersion()}"
-    }
-
-    dependsOn(assembleTaskName())
-    finalizedBy("publish")
-}
+registerPublishVariantTask("publishRc", true)
+registerPublishVariantTask("publishRelease", false)
