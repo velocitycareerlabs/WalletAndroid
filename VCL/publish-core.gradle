@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 def isCiBuild = System.getenv("CI") == "true"
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("publish") }
 
-// === Skip this script unless it's a publish task or CI ===
+// === Skip this script unless it's a publish task ===
 if (!isPublishTask) {
     println "🟡 Skipping publish-core.gradle: not a publishing task."
     return
@@ -165,15 +165,7 @@ afterEvaluate {
         repositories {
             maven {
                 name = "central"
-                url = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
-                credentials {
-                    username = mavenCentralTokenUsername
-                    password = mavenCentralTokenPassword
-                }
-            }
-            maven {
-                name = "sonatypeSnapshots"
-                url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
                 credentials {
                     username = mavenCentralTokenUsername
                     password = mavenCentralTokenPassword
@@ -186,8 +178,7 @@ afterEvaluate {
         required {
             gradle.taskGraph.hasTask("publish") ||
                     gradle.taskGraph.hasTask("publishRc") ||
-                    gradle.taskGraph.hasTask("publishRelease") ||
-                    gradle.taskGraph.hasTask("publishSnapshot")
+                    gradle.taskGraph.hasTask("publishRelease")
         }
 
         if (mavenCentralSigningPrivateKey?.trim()) {
@@ -213,18 +204,6 @@ afterEvaluate {
 }
 
 // === Publishing Tasks ===
-tasks.register("publishSnapshot") {
-    group = "publishing"
-    description = "Publish SNAPSHOT version to Sonatype snapshot repository"
-
-    doFirst {
-        println "Publishing SNAPSHOT version: ${project.version}"
-    }
-
-    dependsOn("assembleRelease")
-    finalizedBy("publishAllPublicationsToSonatypeSnapshotsRepository")
-}
-
 tasks.register("publishRc") {
     group = "publishing"
     description = "Publish RC version to Maven Central with timestamp"
