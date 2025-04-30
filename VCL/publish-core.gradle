@@ -105,6 +105,23 @@ afterEvaluate {
         throw new GradleException("Expected task '${assembleTaskName()}' not found. Verify build flavors.")
     }
 
+    // === Rename AAR ===
+    tasks.register("renameAar") {
+        dependsOn(assembleTaskName())
+
+        doLast {
+            def builtAar = outputAar.get().asFile
+            def renamedAar = finalAar.get().asFile
+
+            if (builtAar.exists()) {
+                println "Renaming AAR: ${builtAar.name} → ${renamedAar.name}"
+                builtAar.renameTo(renamedAar)
+            } else {
+                throw new GradleException("Expected AAR not found: ${builtAar}")
+            }
+        }
+    }
+
     if (mavenCentralSigningPrivateKeyB64?.trim()) {
         println("✅ Configuring in-memory PGP signing")
 
@@ -179,23 +196,6 @@ afterEvaluate {
         }
     } else {
         println("⚠️ Skipping signing: No PGP key configured")
-    }
-
-    // === Rename AAR ===
-    tasks.register("renameAar") {
-        dependsOn(assembleTaskName())
-
-        doLast {
-            def builtAar = outputAar.get().asFile
-            def renamedAar = finalAar.get().asFile
-
-            if (builtAar.exists()) {
-                println "Renaming AAR: ${builtAar.name} → ${renamedAar.name}"
-                builtAar.renameTo(renamedAar)
-            } else {
-                throw new GradleException("Expected AAR not found: ${builtAar}")
-            }
-        }
     }
 
     // === Ensure proper task ordering ===
