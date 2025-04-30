@@ -5,8 +5,8 @@ plugins {
     id 'signing'
 }
 
-def code = 163
-version = "2.7.3"
+def code = 164
+version = "2.7.4"
 
 apply from: "./publish-core.gradle"
 
