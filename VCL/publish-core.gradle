@@ -5,7 +5,7 @@ def isCiBuild = System.getenv("CI") == "true"
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("publish") }
 
 // === Skip this script unless it's a publish task or CI ===
-if (!isPublishTask && !isCiBuild) {
+if (!isPublishTask) {
     println "🟡 Skipping publish-core.gradle: not a publishing task."
     return
 }
