@@ -1,10 +1,17 @@
 import java.text.SimpleDateFormat
 
-// === Config ===
-
-def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven2/maven2.properties'
-
+// === Detect CI & publishing context ===
 def isCiBuild = System.getenv("CI") == "true"
+def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("publish") }
+
+// === Skip this script unless it's a publish task or CI ===
+if (!isPublishTask && !isCiBuild) {
+    println "🟡 Skipping publish-core.gradle: not a publishing task."
+    return
+}
+
+// === Load credentials ===
+def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven2/maven2.properties'
 
 static def loadProperties(String filePath) {
     def props = new Properties()
@@ -21,17 +28,15 @@ if (properties.isEmpty() && !isCiBuild) {
 }
 
 // === Load credentials
-
 ext {
-    mavenCentralTokenUsername = System.getenv("MAVEN_CENTRAL_TOKEN_USERNAME") ?: properties.getProperty("mavenCentralTokenUsername")
-    mavenCentralTokenPassword = System.getenv("MAVEN_CENTRAL_TOKEN_PASSWORD") ?: properties.getProperty("mavenCentralTokenPassword")
-    mavenCentralSigningKeyId = System.getenv("MAVEN_CENTRAL_SIGNING_KEY_ID") ?: properties.getProperty("mavenCentralSigningKeyId")
-    mavenCentralSigningPassword = System.getenv("MAVEN_CENTRAL_SIGNING_PASSWORD") ?: properties.getProperty("mavenCentralSigningPassword")
-    mavenCentralSigningPrivateKey = System.getenv("MAVEN_CENTRAL_PRIVATE_KEY") ?: properties.getProperty("mavenCentralSigningPrivateKey")
+    mavenCentralTokenUsername     = System.getenv("MAVEN_CENTRAL_TOKEN_USERNAME")     ?: properties.getProperty("mavenCentralTokenUsername")
+    mavenCentralTokenPassword     = System.getenv("MAVEN_CENTRAL_TOKEN_PASSWORD")     ?: properties.getProperty("mavenCentralTokenPassword")
+    mavenCentralSigningKeyId      = System.getenv("MAVEN_CENTRAL_SIGNING_KEY_ID")     ?: properties.getProperty("mavenCentralSigningKeyId")
+    mavenCentralSigningPassword   = System.getenv("MAVEN_CENTRAL_SIGNING_PASSWORD")   ?: properties.getProperty("mavenCentralSigningPassword")
+    mavenCentralSigningPrivateKey = System.getenv("MAVEN_CENTRAL_PRIVATE_KEY")        ?: properties.getProperty("mavenCentralSigningPrivateKey")
 }
 
-// === Fail fast in CI if required credentials are missing
-
+// === Fail fast in CI if required credentials are missing ===
 def envDesc = isCiBuild ? "CI" : "local"
 println "ℹ️ Running in $envDesc environment."
 
@@ -63,28 +68,23 @@ static def toCamelCase(String input) {
         def message = "❌️ Required publishing property '${githubSecretsNames[idx]}' is missing."
         message = isCiBuild ? message + " Please check your GitHub Actions secrets." : message
         throw new GradleException(message)
-//        println "message"
     }
 }
 
-// === Setup rcMode (default false)
-
+// === Publishing setup ===
 project.ext.rcMode = false
 
 // === Dynamic resolved version function
-
 def calculateResolvedVersion() {
     def sanitizedVersion = project.version.toString().replace("-SNAPSHOT", "")
     return project.ext.rcMode ? "${sanitizedVersion}-rc-${new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())}" : sanitizedVersion
 }
 
 // === Correct Group and Artifact IDs
-
 def myArtifactId = project.findProperty("artifactId") ?: "vcl"
 def myGroupId = project.findProperty("groupId") ?: "io.velocitycareerlabs"
 
 // === Define output paths based on mode
-
 def outputAar = layout.buildDirectory.file("outputs/aar/${project.name}-${project.ext.rcMode ? "rc" : "release"}.aar")
 def finalAar = layout.buildDirectory.file("outputs/aar/${myArtifactId}-${calculateResolvedVersion()}.aar")
 
@@ -95,7 +95,6 @@ println " - sanitizedVersion: ${project.version}"
 println " - initial resolvedVersion: ${calculateResolvedVersion()}"
 
 // === Validate Assemble Task Exists
-
 def assembleTaskName = { project.ext.rcMode ? "assembleRc" : "assembleRelease" }
 
 afterEvaluate {
@@ -105,7 +104,6 @@ afterEvaluate {
 }
 
 // === Rename AAR ===
-
 tasks.register("renameAar") {
     dependsOn(assembleTaskName())
 
@@ -123,7 +121,6 @@ tasks.register("renameAar") {
 }
 
 // === Publishing and Signing ===
-
 afterEvaluate {
     publishing {
         publications {
@@ -198,7 +195,6 @@ afterEvaluate {
 }
 
 // === Publishing Tasks ===
-
 tasks.register("publishSnapshot") {
     group = "publishing"
     description = "Publish SNAPSHOT version to Sonatype snapshot repository"
