@@ -183,8 +183,24 @@ afterEvaluate {
     }
 
     signing {
-        useInMemoryPgpKeys(mavenCentralSigningKeyId, mavenCentralSigningPrivateKey, mavenCentralSigningPassword)
-        sign(publishing.publications["default"])
+        required {
+            gradle.taskGraph.hasTask("publish") ||
+                    gradle.taskGraph.hasTask("publishRc") ||
+                    gradle.taskGraph.hasTask("publishRelease") ||
+                    gradle.taskGraph.hasTask("publishSnapshot")
+        }
+
+        if (mavenCentralSigningPrivateKey?.trim()) {
+            println("✅ Configuring in-memory PGP signing")
+            useInMemoryPgpKeys(
+                    mavenCentralSigningKeyId,
+                    mavenCentralSigningPrivateKey,
+                    mavenCentralSigningPassword
+            )
+            sign(publishing.publications["default"])
+        } else {
+            println("⚠️ Skipping signing: No PGP key configured")
+        }
     }
 
     tasks.named("publish").configure {
