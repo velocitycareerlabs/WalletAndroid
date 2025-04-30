@@ -38,7 +38,7 @@ jobs:
       - name: Run Test
         run: ./gradlew test
 
-  build-android-sdk:
+  build-and-publish-android-sdk:
     runs-on: ubuntu-latest
     needs:
       - test-android-sdk
