@@ -96,8 +96,8 @@ afterEvaluate {
             def projectVersion = getProjectVersionName()
             def resolvedVersion = resolveVersion(projectVersion, rcMode)
 
-            def outputAar = file("${buildDir}/outputs/aar/${project.name}-${variant}.aar")
-            def finalAar = file("${buildDir}/outputs/aar/${artifactId}-${resolvedVersion}.aar")
+            def outputAar = project.layout.buildDirectory.file("outputs/aar/${project.name}-${variant}.aar").get().asFile
+            def finalAar = project.layout.buildDirectory.file("outputs/aar/${artifactId}-${resolvedVersion}.aar").get().asFile
 
             doLast {
                 if (!outputAar.exists()) {
@@ -175,7 +175,9 @@ afterEvaluate {
                     mavenCentralSigningPassword
             )
 
-            sign(publishing.publications.named("default").get())
+            publishing.publications.named("default").configure {
+                signing.sign(it)
+            }
         }
     } else {
         logger.lifecycle("⚠️ Skipping signing: No PGP key configured")
@@ -194,7 +196,10 @@ afterEvaluate {
                 def projectVersion = getProjectVersionName()
                 def resolvedVersion = resolveVersion(projectVersion, rcMode)
 
-                def finalAar = file("${buildDir}/outputs/aar/${artifactId}-${resolvedVersion}.aar")
+                def finalAar = project.layout.buildDirectory
+                        .file("outputs/aar/${artifactId}-${resolvedVersion}.aar")
+                        .get()
+                        .asFile
 
                 logger.lifecycle("🚀 Publishing ${rcMode ? "RC" : "Release"} version: ${resolvedVersion}")
 
