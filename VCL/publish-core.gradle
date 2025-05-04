@@ -87,7 +87,7 @@ def groupId = getGroupId()
 def outputAar = layout.buildDirectory.file("outputs/aar/${project.name}-${project.ext.rcMode ? "rc" : "release"}.aar")
 def finalAar = layout.buildDirectory.file("outputs/aar/${artifactId}-${resolvedVersion}.aar")
 
-println "Configured build (initial):"
+println "ℹ️ Configured build (initial):"
 println " - rcMode: ${project.ext.rcMode}"
 println " - buildType: ${project.ext.rcMode ? "rc" : "release"}"
 println " - projectVersion: ${projectVersion}"
