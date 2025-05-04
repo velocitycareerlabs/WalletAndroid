@@ -14,10 +14,12 @@ def getGroupId = { ->
 // === Detect CI & publishing context ===
 def isCiBuild = System.getenv("CI") == "true"
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("publish") }
+def envDesc = isCiBuild ? "CI" : "local"
+println "ℹ️ Running in $envDesc environment."
 
 // === Skip this script unless it's a publish task ===
 if (!isPublishTask) {
-    println "\uD83D\uDFE1 Skipping publish-core.gradle: not a publishing task."
+    println "🟡 Skipping publish-core.gradle: not a publishing task."
     return
 }
 
@@ -50,26 +52,33 @@ def githubSecretsNames = [
         "MAVEN_CENTRAL_SIGNING_PASSWORD",
         "MAVEN_CENTRAL_PRIVATE_KEY_B64"
 ]
-ext {
-    mavenCentralTokenUsername = System.getenv(githubSecretsNames[0])?.trim() ?: properties.getProperty(githubSecretsNames[0])?.trim()
-    mavenCentralTokenPassword = System.getenv(githubSecretsNames[1])?.trim() ?: properties.getProperty(githubSecretsNames[1])?.trim()
-    mavenCentralSigningKeyId = System.getenv(githubSecretsNames[2])?.trim() ?: properties.getProperty(githubSecretsNames[2])?.trim()
-    mavenCentralSigningPassword = System.getenv(githubSecretsNames[3])?.trim() ?: properties.getProperty(githubSecretsNames[3])?.trim()
-    mavenCentralSigningPrivateKeyB64 = System.getenv(githubSecretsNames[4])?.trim() ?: properties.getProperty(githubSecretsNames[4])?.trim()
+def loadSecret = { name ->
+    System.getenv(name)?.trim() ?: properties.getProperty(name)?.trim()
 }
+ext {
+    mavenCentralTokenUsername = loadSecret(githubSecretsNames[0])
+    mavenCentralTokenPassword = loadSecret(githubSecretsNames[1])
+    mavenCentralSigningKeyId = loadSecret(githubSecretsNames[2])
+    mavenCentralSigningPassword = loadSecret(githubSecretsNames[3])
+    mavenCentralSigningPrivateKeyB64 = loadSecret(githubSecretsNames[4])
+}
+def githubSecretsMap = [
+        (githubSecretsNames[0]) : mavenCentralTokenUsername,
+        (githubSecretsNames[1]) : mavenCentralTokenPassword,
+        (githubSecretsNames[2]) : mavenCentralSigningKeyId,
+        (githubSecretsNames[3]) : mavenCentralSigningPassword,
+        (githubSecretsNames[4]) : mavenCentralSigningPrivateKeyB64
+]
 
-// === Fail fast in CI if required credentials are missing ===
-def envDesc = isCiBuild ? "CI" : "local"
-println "ℹ️ Running in $envDesc environment."
-
-println "Checking for required GitHub secrets:"
-githubSecretsNames.eachWithIndex { val, idx ->
+// === Validating for required GitHub secrets ===
+println "ℹ️ Validating for required GitHub secrets:"
+githubSecretsMap.eachWithIndex { val, idx ->
     if (!val) {
         def message = "❌️ Required publishing property '${githubSecretsNames[idx]}' is missing."
         if (isCiBuild) message += " Please check your GitHub Actions secrets."
         throw new GradleException(message)
     } else {
-        println "✅ ${githubSecretsNames[idx]}: $val"
+        println "✅ ${val.key.toString()}" //"✅ ${val.toString()}"
     }
 }
 
