@@ -175,7 +175,7 @@ afterEvaluate {
                     mavenCentralSigningPassword
             )
 
-            sign(publishing.publications["default"])
+            sign(publishing.publications.named("default").get())
         }
     } else {
         logger.lifecycle("⚠️ Skipping signing: No PGP key configured")
@@ -198,13 +198,14 @@ afterEvaluate {
 
                 logger.lifecycle("🚀 Publishing ${rcMode ? "RC" : "Release"} version: ${resolvedVersion}")
 
-                def publication = publishing.publications["default"]
-                publication.version = resolvedVersion
-                publication.artifacts.clear()
-                publication.artifact(finalAar) {
-                    builtBy(tasks.named(renameTaskName))
+                publishing.publications.named("default") {
+                    version = resolvedVersion
+                    artifacts.clear()
+                    artifact(finalAar) {
+                        builtBy(tasks.named(renameTaskName))
+                    }
+                    artifact(tasks.named("androidSourcesJar"))
                 }
-                publication.artifact(tasks.named("androidSourcesJar"))
             }
 
             dependsOn(assembleTaskName(rcFlag))
