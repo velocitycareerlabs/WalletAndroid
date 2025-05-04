@@ -5,14 +5,21 @@ plugins {
     id 'signing'
 }
 
-def code = 163
-version = "2.7.3"
+ext {
+    code = 163
+    publishVersion = "2.7.3"
+    artifactId = "vcl"
+    publishGroup = "io.velocitycareerlabs"
+    namespaceId = publishGroup
+}
+group = publishGroup
+version = publishVersion
 
 apply from: "./publish-core.gradle"
 
 android {
     compileSdk 35
-    namespace 'io.velocitycareerlabs'
+    namespace namespaceId
 
     defaultConfig {
         minSdk 24

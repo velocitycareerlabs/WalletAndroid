@@ -1,50 +1,46 @@
 import java.text.SimpleDateFormat
 import java.util.Base64
+import java.nio.charset.StandardCharsets
 
-def getProjectVersionName = { ->
-    return project.version.toString()
-}
-def getArtifactId = { ->
-    return "vcl" // Must be lower case!
-}
-def getGroupId = { ->
-    return "io.velocitycareerlabs"
+// === Project Info ===
+def getGroupId = { -> project.group.toString() }
+def getArtifactId = { -> project.ext.artifactId.toString() }
+def getProjectVersionName = { -> project.version.toString() }
+def resolveVersion = { baseVersion, isRc ->
+    isRc ? "${baseVersion}-rc-${new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())}" : baseVersion
 }
 
-// === Detect CI & publishing context ===
+// === Detect CI & Publishing Context ===
 def isCiBuild = System.getenv("CI") == "true"
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("publish") }
-def envDesc = isCiBuild ? "CI" : "local"
-println "ℹ️ Running in $envDesc environment."
+def isPublishRc = gradle.startParameter.taskNames.contains("publishRc")
+def isPublishRelease = gradle.startParameter.taskNames.contains("publishRelease")
 
-// === Skip this script unless it's a publish task ===
+def envDesc = isCiBuild ? "CI" : "local"
+logger.lifecycle("ℹ️ Running in $envDesc environment.")
+
 if (!isPublishTask) {
-    println "🟡 Skipping publish-core.gradle: not a publishing task."
+    logger.lifecycle("🟡 Skipping publish-core.gradle: not a publishing task.")
     return
 }
 
-def isPublishRc = gradle.startParameter.taskNames.contains("publishRc")
-def isPublishRelease = gradle.startParameter.taskNames.contains("publishRelease")
-project.ext.rcMode = isPublishRc
+if (!isCiBuild && isPublishRelease) {
+    throw new GradleException("❌️ 'publishRelease' is restricted to CI environment only.")
+}
 
-// === Load credentials ===
+// === Load Secrets ===
 def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven2/maven2.properties'
-
 static def loadProperties(String filePath) {
     def props = new Properties()
     def file = new File(filePath)
-    if (file.exists()) {
-        file.withInputStream { props.load(it) }
-    }
+    if (file.exists()) file.withInputStream { props.load(it) }
     return props
 }
-
 def properties = loadProperties(propertiesFilePath)
 if (properties.isEmpty() && !isCiBuild) {
     throw new GradleException("❌️ Local maven2.properties file not found at: ${propertiesFilePath}")
 }
 
-// === Load credentials
 def githubSecretsNames = [
         "MAVEN_CENTRAL_TOKEN_USERNAME",
         "MAVEN_CENTRAL_TOKEN_PASSWORD",
@@ -52,9 +48,8 @@ def githubSecretsNames = [
         "MAVEN_CENTRAL_SIGNING_PASSWORD",
         "MAVEN_CENTRAL_PRIVATE_KEY_B64"
 ]
-def loadSecret = { name ->
-    System.getenv(name)?.trim() ?: properties.getProperty(name)?.trim()
-}
+def loadSecret = { name -> System.getenv(name)?.trim() ?: properties.getProperty(name)?.trim() }
+
 ext {
     mavenCentralTokenUsername = loadSecret(githubSecretsNames[0])
     mavenCentralTokenPassword = loadSecret(githubSecretsNames[1])
@@ -62,80 +57,66 @@ ext {
     mavenCentralSigningPassword = loadSecret(githubSecretsNames[3])
     mavenCentralSigningPrivateKeyB64 = loadSecret(githubSecretsNames[4])
 }
+
 def githubSecretsMap = [
-        (githubSecretsNames[0]) : mavenCentralTokenUsername,
-        (githubSecretsNames[1]) : mavenCentralTokenPassword,
-        (githubSecretsNames[2]) : mavenCentralSigningKeyId,
-        (githubSecretsNames[3]) : mavenCentralSigningPassword,
-        (githubSecretsNames[4]) : mavenCentralSigningPrivateKeyB64
+        (githubSecretsNames[0]): mavenCentralTokenUsername,
+        (githubSecretsNames[1]): mavenCentralTokenPassword,
+        (githubSecretsNames[2]): mavenCentralSigningKeyId,
+        (githubSecretsNames[3]): mavenCentralSigningPassword,
+        (githubSecretsNames[4]): mavenCentralSigningPrivateKeyB64
 ]
 
-// === Validating for required GitHub secrets ===
-println "ℹ️ Validating for required GitHub secrets:"
-githubSecretsMap.eachWithIndex { val, idx ->
-    if (val.value == null || val.value.toString().trim().isEmpty()) {
-        def message = "❌️ Required publishing property '${githubSecretsNames[idx]}' is missing."
-        if (isCiBuild) message += " Please check your GitHub Actions secrets."
-        throw new GradleException(message)
+logger.lifecycle("ℹ️ Validating required secrets:")
+githubSecretsMap.each { key, val ->
+    if (!val?.trim()) {
+        def msg = "❌️ Required publishing property '${key}' is missing."
+        if (isCiBuild) msg += " Please check your GitHub Actions secrets."
+        throw new GradleException(msg)
     } else {
-        println "✅ ${val.key}"
+        logger.lifecycle("✅ $key loaded")
     }
 }
 
-// === Calculate resolved version ===
-def projectVersion = getProjectVersionName()
-def resolvedVersion = project.ext.rcMode
-        ? "${projectVersion}-rc-${new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())}"
-        : projectVersion
-
-// === Set artifact coordinates ===
-def artifactId = getArtifactId()
-def groupId = getGroupId()
-
-// === Define output paths ===
-def outputAar = layout.buildDirectory.file("outputs/aar/${project.name}-${project.ext.rcMode ? "rc" : "release"}.aar")
-def finalAar = layout.buildDirectory.file("outputs/aar/${artifactId}-${resolvedVersion}.aar")
-
-println "ℹ️ Configured build (initial):"
-println " - rcMode: ${project.ext.rcMode}"
-println " - buildType: ${project.ext.rcMode ? "rc" : "release"}"
-println " - projectVersion: ${projectVersion}"
-println " - resolvedVersion: ${resolvedVersion}"
-
-// === Validate Assemble Task Exists
-def assembleTaskName = { project.ext.rcMode ? "assembleRc" : "assembleRelease" }
-
 afterEvaluate {
-    if (!tasks.findByName(assembleTaskName())) {
-        throw new GradleException("Expected task '${assembleTaskName()}' not found. Verify build flavors.")
+    def artifactId = getArtifactId()
+    def assembleTaskName = { rc -> rc ? "assembleRc" : "assembleRelease" }
+
+    // === Ensure androidSourcesJar exists
+    if (!tasks.findByName("androidSourcesJar")) {
+        throw new GradleException("❌ Required task 'androidSourcesJar' not found. Did you forget to register it?")
     }
 
-    // === Rename AAR ===
-    tasks.register("renameAar") {
-        dependsOn(assembleTaskName())
+    // === Function to register rename task per variant
+    def registerRenameAarTask = { boolean rcFlag ->
+        def rcMode = rcFlag
+        def variant = rcMode ? "rc" : "release"
+        def taskName = "renameAar${variant.capitalize()}"
 
-        doLast {
-            def builtAar = outputAar.get().asFile
-            def renamedAar = finalAar.get().asFile
+        return tasks.register(taskName) {
+            def projectVersion = getProjectVersionName()
+            def resolvedVersion = resolveVersion(projectVersion, rcMode)
 
-            if (builtAar.exists()) {
-                println "Renaming AAR: ${builtAar.name} → ${renamedAar.name}"
-                builtAar.renameTo(renamedAar)
-            } else {
-                throw new GradleException("Expected AAR not found: ${builtAar}")
+            def outputAar = file("${buildDir}/outputs/aar/${project.name}-${variant}.aar")
+            def finalAar = file("${buildDir}/outputs/aar/${artifactId}-${resolvedVersion}.aar")
+
+            doLast {
+                if (!outputAar.exists()) {
+                    throw new GradleException("Expected AAR not found: $outputAar")
+                }
+                logger.lifecycle("🔁 Renaming AAR: ${outputAar.name} → ${finalAar.name}")
+                outputAar.renameTo(finalAar)
             }
-        }
+        }.name
     }
 
-    // === Publishing block ===
+    // === Setup publishing block once
     publishing {
         publications {
             create("default", MavenPublication) {
-                version = resolvedVersion
+                groupId = getGroupId()
+                artifactId = getArtifactId()
 
-                artifact(finalAar) {
-                    builtBy(tasks.named("renameAar"))
-                }
+                // version set dynamically later
                 artifact(tasks.named("androidSourcesJar"))
 
                 pom {
@@ -176,12 +157,10 @@ afterEvaluate {
         }
     }
 
-    // === Signing ===
+    // === Configure in-memory signing
     if (mavenCentralSigningPrivateKeyB64?.trim()) {
-        println("ℹ️ Configuring in-memory PGP signing")
-
-        def decodedKey = new String(Base64.decoder.decode(mavenCentralSigningPrivateKeyB64), "UTF-8")
-        println("Decoded signing private key: ${decodedKey}")
+        logger.lifecycle("🔏 Configuring in-memory PGP signing")
+        def decodedKey = new String(Base64.decoder.decode(mavenCentralSigningPrivateKeyB64), StandardCharsets.UTF_8)
 
         signing {
             required {
@@ -199,36 +178,41 @@ afterEvaluate {
             sign(publishing.publications["default"])
         }
     } else {
-        println("⚠️ Skipping signing: No PGP key configured")
+        logger.lifecycle("⚠️ Skipping signing: No PGP key configured")
     }
 
-    // === Task dependencies ===
-    tasks.named("publish").configure {
-        dependsOn("renameAar")
-    }
+    // === Register variant-specific publishing tasks
+    def registerPublishVariantTask = { String taskName, boolean rcFlag ->
+        def renameTaskName = registerRenameAarTask(rcFlag)
+        tasks.register(taskName) {
+            group = "publishing"
+            description = "Publish ${rcFlag ? "RC" : "stable"} version to Maven Central"
 
-    tasks.named("generateMetadataFileForDefaultPublication") {
-        dependsOn(tasks.named("androidSourcesJar"))
-    }
-}
+            doFirst {
+                project.ext.rcMode = rcFlag
+                def rcMode = rcFlag
+                def projectVersion = getProjectVersionName()
+                def resolvedVersion = resolveVersion(projectVersion, rcMode)
 
-// === Shared task registration helper ===
-def registerPublishVariantTask = { String taskName, boolean rcFlag ->
-    tasks.register(taskName) {
-        println("ℹ️ Publishing variant ${taskName}")
-        group = "publishing"
-        description = "Publish ${rcFlag ? "RC" : "stable"} version to Maven Central"
+                def finalAar = file("${buildDir}/outputs/aar/${artifactId}-${resolvedVersion}.aar")
 
-        doFirst {
-            project.ext.rcMode = rcFlag
-            println "Publishing ${rcFlag ? "RC" : "Release"} version (rcMode=${rcFlag}): ${resolvedVersion}"
+                logger.lifecycle("🚀 Publishing ${rcMode ? "RC" : "Release"} version: ${resolvedVersion}")
+
+                def publication = publishing.publications["default"]
+                publication.version = resolvedVersion
+                publication.artifacts.clear()
+                publication.artifact(finalAar) {
+                    builtBy(tasks.named(renameTaskName))
+                }
+                publication.artifact(tasks.named("androidSourcesJar"))
+            }
+
+            dependsOn(assembleTaskName(rcFlag))
+            dependsOn(renameTaskName)
+            finalizedBy("publish")
         }
-
-        dependsOn(assembleTaskName())
-        finalizedBy("publish")
     }
-}
 
-// === Publishing Tasks ===
-registerPublishVariantTask("publishRc", true)
-registerPublishVariantTask("publishRelease", false)
+    registerPublishVariantTask("publishRc", true)
+    registerPublishVariantTask("publishRelease", false)
+}
