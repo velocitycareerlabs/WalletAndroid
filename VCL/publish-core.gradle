@@ -73,12 +73,12 @@ def githubSecretsMap = [
 // === Validating for required GitHub secrets ===
 println "ℹ️ Validating for required GitHub secrets:"
 githubSecretsMap.eachWithIndex { val, idx ->
-    if (!val) {
+    if (val.value == null || val.value.toString().trim().isEmpty()) {
         def message = "❌️ Required publishing property '${githubSecretsNames[idx]}' is missing."
         if (isCiBuild) message += " Please check your GitHub Actions secrets."
         throw new GradleException(message)
     } else {
-        println /*"✅ ${val.key.toString()}"*/ "✅ ${val.toString()}"
+        println "✅ ${val.key}"
     }
 }
 
@@ -178,8 +178,10 @@ afterEvaluate {
 
     // === Signing ===
     if (mavenCentralSigningPrivateKeyB64?.trim()) {
-        println("✅ Configuring in-memory PGP signing")
+        println("ℹ️ Configuring in-memory PGP signing")
+
         def decodedKey = new String(Base64.decoder.decode(mavenCentralSigningPrivateKeyB64), "UTF-8")
+        println("Decoded signing private key: ${decodedKey}")
 
         signing {
             required {
@@ -213,6 +215,7 @@ afterEvaluate {
 // === Shared task registration helper ===
 def registerPublishVariantTask = { String taskName, boolean rcFlag ->
     tasks.register(taskName) {
+        println("ℹ️ Publishing variant ${taskName}")
         group = "publishing"
         description = "Publish ${rcFlag ? "RC" : "stable"} version to Maven Central"
 
