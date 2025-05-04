@@ -78,7 +78,7 @@ githubSecretsMap.eachWithIndex { val, idx ->
         if (isCiBuild) message += " Please check your GitHub Actions secrets."
         throw new GradleException(message)
     } else {
-        println "✅ ${val.key.toString()}" //"✅ ${val.toString()}"
+        println /*"✅ ${val.key.toString()}"*/ "✅ ${val.toString()}"
     }
 }
 
