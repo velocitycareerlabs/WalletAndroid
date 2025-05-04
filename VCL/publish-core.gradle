@@ -1,6 +1,16 @@
 import java.text.SimpleDateFormat
 import java.util.Base64
 
+def getProjectVersionName = { ->
+    return project.version.toString()
+}
+def getArtifactId = { ->
+    return "vcl" // Must be lower case!
+}
+def getGroupId = { ->
+    return "io.velocitycareerlabs"
+}
+
 // === Detect CI & publishing context ===
 def isCiBuild = System.getenv("CI") == "true"
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("publish") }
@@ -33,18 +43,6 @@ if (properties.isEmpty() && !isCiBuild) {
 }
 
 // === Load credentials
-ext {
-    mavenCentralTokenUsername        = System.getenv("MAVEN_CENTRAL_TOKEN_USERNAME")?.trim()        ?: properties.getProperty("mavenCentralTokenUsername")?.trim()
-    mavenCentralTokenPassword        = System.getenv("MAVEN_CENTRAL_TOKEN_PASSWORD")?.trim()        ?: properties.getProperty("mavenCentralTokenPassword")?.trim()
-    mavenCentralSigningKeyId         = System.getenv("MAVEN_CENTRAL_SIGNING_KEY_ID")?.trim()        ?: properties.getProperty("mavenCentralSigningKeyId")?.trim()
-    mavenCentralSigningPassword      = System.getenv("MAVEN_CENTRAL_SIGNING_PASSWORD")?.trim()      ?: properties.getProperty("mavenCentralSigningPassword")?.trim()
-    mavenCentralSigningPrivateKeyB64 = System.getenv("MAVEN_CENTRAL_PRIVATE_KEY_B64")?.trim()       ?: properties.getProperty("mavenCentralSigningPrivateKeyB64")?.trim()
-}
-
-// === Fail fast in CI if required credentials are missing ===
-def envDesc = isCiBuild ? "CI" : "local"
-println "ℹ️ Running in $envDesc environment."
-
 def githubSecretsNames = [
         "MAVEN_CENTRAL_TOKEN_USERNAME",
         "MAVEN_CENTRAL_TOKEN_PASSWORD",
@@ -52,50 +50,47 @@ def githubSecretsNames = [
         "MAVEN_CENTRAL_SIGNING_PASSWORD",
         "MAVEN_CENTRAL_PRIVATE_KEY_B64"
 ]
-
-if (!isCiBuild) {
-    githubSecretsNames = githubSecretsNames.collect { toCamelCase(it) }
+ext {
+    mavenCentralTokenUsername = System.getenv(githubSecretsNames[0])?.trim() ?: properties.getProperty(githubSecretsNames[0])?.trim()
+    mavenCentralTokenPassword = System.getenv(githubSecretsNames[1])?.trim() ?: properties.getProperty(githubSecretsNames[1])?.trim()
+    mavenCentralSigningKeyId = System.getenv(githubSecretsNames[2])?.trim() ?: properties.getProperty(githubSecretsNames[2])?.trim()
+    mavenCentralSigningPassword = System.getenv(githubSecretsNames[3])?.trim() ?: properties.getProperty(githubSecretsNames[3])?.trim()
+    mavenCentralSigningPrivateKeyB64 = System.getenv(githubSecretsNames[4])?.trim() ?: properties.getProperty(githubSecretsNames[4])?.trim()
 }
 
-static def toCamelCase(String input) {
-    def parts = input.toLowerCase().split('_')
-    parts[0] + parts.tail().collect { it.capitalize() }.join('')
-}
+// === Fail fast in CI if required credentials are missing ===
+def envDesc = isCiBuild ? "CI" : "local"
+println "ℹ️ Running in $envDesc environment."
 
-[
-        mavenCentralTokenUsername,
-        mavenCentralTokenPassword,
-        mavenCentralSigningKeyId,
-        mavenCentralSigningPassword,
-        mavenCentralSigningPrivateKeyB64
-].eachWithIndex { val, idx ->
+println "Checking for required GitHub secrets:"
+githubSecretsNames.eachWithIndex { val, idx ->
     if (!val) {
         def message = "❌️ Required publishing property '${githubSecretsNames[idx]}' is missing."
         if (isCiBuild) message += " Please check your GitHub Actions secrets."
         throw new GradleException(message)
     } else {
-        println "✅ Found required property: ${githubSecretsNames[idx]}:\n$val"
+        println "✅ ${githubSecretsNames[idx]}: $val"
     }
 }
 
 // === Calculate resolved version ===
-def sanitizedVersion = project.version.toString().replace("-SNAPSHOT", "")
+def projectVersion = getProjectVersionName()
 def resolvedVersion = project.ext.rcMode
-        ? "${sanitizedVersion}-rc-${new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())}"
-        : sanitizedVersion
+        ? "${projectVersion}-rc-${new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())}"
+        : projectVersion
 
 // === Set artifact coordinates ===
-def myArtifactId = project.findProperty("artifactId") ?: "vcl"
-def myGroupId = project.findProperty("groupId") ?: "io.velocitycareerlabs"
+def artifactId = getArtifactId()
+def groupId = getGroupId()
 
 // === Define output paths ===
 def outputAar = layout.buildDirectory.file("outputs/aar/${project.name}-${project.ext.rcMode ? "rc" : "release"}.aar")
-def finalAar = layout.buildDirectory.file("outputs/aar/${myArtifactId}-${resolvedVersion}.aar")
+def finalAar = layout.buildDirectory.file("outputs/aar/${artifactId}-${resolvedVersion}.aar")
 
 println "Configured build (initial):"
 println " - rcMode: ${project.ext.rcMode}"
 println " - buildType: ${project.ext.rcMode ? "rc" : "release"}"
-println " - sanitizedVersion: ${sanitizedVersion}"
+println " - projectVersion: ${projectVersion}"
 println " - resolvedVersion: ${resolvedVersion}"
 
 // === Validate Assemble Task Exists
@@ -127,8 +122,6 @@ afterEvaluate {
     publishing {
         publications {
             create("default", MavenPublication) {
-                groupId = myGroupId
-                artifactId = myArtifactId
                 version = resolvedVersion
 
                 artifact(finalAar) {
@@ -137,7 +130,7 @@ afterEvaluate {
                 artifact(tasks.named("androidSourcesJar"))
 
                 pom {
-                    name.set(myArtifactId)
+                    name.set(artifactId)
                     description.set("Velocity Career Labs Android library")
                     url.set("https://github.com/velocitycareerlabs/WalletAndroid")
                     licenses {
@@ -150,7 +143,7 @@ afterEvaluate {
                         developer {
                             id.set("velocitycareerlabs")
                             name.set("Michael Avoyan")
-                            email.set("michael.avoyan@velocitycareerlabs.com")
+                            email.set("michael.avoyan.dev@gmail.com")
                         }
                     }
                     scm {
