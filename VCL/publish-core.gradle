@@ -101,7 +101,7 @@ afterEvaluate {
 
             doLast {
                 if (!outputAar.exists()) {
-                    throw new GradleException("Expected AAR not found: $outputAar")
+                    throw new GradleException("❌ Expected AAR not found: $outputAar")
                 }
                 logger.lifecycle("🔁 Renaming AAR: ${outputAar.name} → ${finalAar.name}")
                 outputAar.renameTo(finalAar)
@@ -147,8 +147,8 @@ afterEvaluate {
 
         repositories {
             maven {
-                name = "central"
-                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                name = "mavenCentral"
+                url = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
                 credentials {
                     username = mavenCentralTokenUsername
                     password = mavenCentralTokenPassword
