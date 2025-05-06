@@ -6,7 +6,7 @@ plugins {
 }
 
 ext {
-    code = 163
+    publishCode = 163
     publishVersion = "2.7.3"
     artifactId = "vcl"
     publishGroup = "io.velocitycareerlabs"
@@ -14,6 +14,7 @@ ext {
 }
 group = publishGroup
 version = publishVersion
+def code = publishCode
 
 apply from: "./publish-core.gradle"
 
@@ -27,7 +28,7 @@ android {
         versionCode code
         versionName version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
+        consumerProguardFiles ["consumer-rules.pro"]
     }
 
     buildTypes {
@@ -37,8 +38,6 @@ android {
         debug {
             buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
             buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
-
-//            useProguard false
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -46,8 +45,6 @@ android {
         release {
             buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
             buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
-
-//            useProguard true
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -102,7 +99,7 @@ repositories {
 dependencies {
     implementation 'androidx.core:core-ktx:1.15.0'
 
-    implementation 'com.nimbusds:nimbus-jose-jwt:10.0.1'
+    implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
     implementation "androidx.security:security-crypto:1.1.0-alpha07"
 
     // Reflection

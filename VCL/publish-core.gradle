@@ -148,7 +148,14 @@ afterEvaluate {
         repositories {
             maven {
                 name = "mavenCentral"
-                url = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
+
+// Old legacy URL - Dead:
+//                url = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
+
+// New URL - Not supported yet:
+// See more info here: https://velocitycareerlabs.atlassian.net/browse/VL-8685?focusedCommentId=54589
+                url = "https://central.sonatype.com/api/v1/publisher/upload"
+
                 credentials {
                     username = mavenCentralTokenUsername
                     password = mavenCentralTokenPassword
