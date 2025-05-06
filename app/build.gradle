@@ -2,11 +2,12 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-kapt'
+//    id 'org.jlleitschuh.gradle.ktlint' version '12.2.0'
+//    id 'io.gitlab.arturbosch.detekt' version '1.23.8'
 }
 
 android {
     compileSdk 35
-//    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.vcl.wallet"
@@ -49,7 +50,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
 
 //--------- Must: be added:
-    implementation 'com.nimbusds:nimbus-jose-jwt:10.0.1'
+    implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
     implementation "androidx.security:security-crypto:1.1.0-alpha07"
 //-------------------------
 

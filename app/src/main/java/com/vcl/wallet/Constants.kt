@@ -7,9 +7,15 @@
 package com.vcl.wallet
 
 import io.velocitycareerlabs.api.VCLEnvironment
-import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.VCLFilter
+import io.velocitycareerlabs.api.entities.VCLJwt
+import io.velocitycareerlabs.api.entities.VCLOrganizationsSearchDescriptor
+import io.velocitycareerlabs.api.entities.VCLPage
+import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLServiceType
 import io.velocitycareerlabs.api.entities.VCLServiceTypes
+import io.velocitycareerlabs.api.entities.VCLVerifiableCredential
+import io.velocitycareerlabs.api.entities.VCLVerifiedProfileDescriptor
 import org.json.JSONObject
 
 object Constants {
@@ -33,6 +39,8 @@ object Constants {
     const val CredentialManifestDeepLinkStrStaging =
 //        "velocity-network-testnet://issue?request_uri=https%3A%2F%2Fstagingagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Aion%3AEiByBvq95tfmhl41DOxJeaa26HjSxAUoz908PITFwMRDNA%2Fissue%2Fget-credential-manifest%3Fid%3D624d65daf18484b8525288c3%26credential_types%3DEmploymentPastV1.1"
         "velocity-network-testnet://issue?request_uri=https%3A%2F%2Fstagingagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Aion%3AEiByBvq95tfmhl41DOxJeaa26HjSxAUoz908PITFwMRDNA%2Fissue%2Fget-credential-manifest%3Fid%3D624d65daf18484b8525288c3&issuerDid=did%3Aion%3AEiByBvq95tfmhl41DOxJeaa26HjSxAUoz908PITFwMRDNA"
+//        SOLO
+//        "https://stagingagent.velocitycareerlabs.io/app-redirect?request_uri=https%3A%2F%2Fstagingagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Aion%3AEiCwQylG3f76jzRXgAFoJ6lr45aJi-9jNRAslJJ-ydiiIA%2Fissue%2Fget-credential-manifest%3Fid%3D678374ce422c664a4ff735d6&issuerDid=did%3Aion%3AEiCwQylG3f76jzRXgAFoJ6lr45aJi-9jNRAslJJ-ydiiIA&exchange_type=issue"
 
     const val AdamSmithPhoneJwtDev =
         "eyJ0eXAiOiJKV1QiLCJqd2siOnsiY3J2Ijoic2VjcDI1NmsxIiwieCI6IjFtNi1ZSWtHZTA3MmxYcUNqd1RCTExhMnN6bTZ1cGtMTTNjZnY4eVF6ZEEiLCJ5IjoiNDVBWkJlU2xVOUlSSUR5MHA5RF9kaFR4MkZ4dGQtMlBGdkVma3dsZnRGZyIsImt0eSI6IkVDIiwia2lkIjoiZnV0c2VQQUNRdFVJWnRNVlRMR1RYZzFXMGlUZG1odXJBVHZpcmxES3BwZyIsImFsZyI6IkVTMjU2SyIsInVzZSI6InNpZyJ9LCJhbGciOiJFUzI1NksifQ.eyJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ0eXBlIjpbIlBob25lVjEuMCIsIlZlcmlmaWFibGVDcmVkZW50aWFsIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7InBob25lIjoiKzE1NTU2MTkyMTkxIn19LCJpc3MiOiJkaWQ6dmVsb2NpdHk6MHhiYTdkODdmOWQ1ZTQ3M2Q3ZDNhODJkMTUyOTIzYWRiNTNkZThmYzBlIiwianRpIjoiZGlkOnZlbG9jaXR5OjB4OGNlMzk4Y2VmNGY3ZWQ4ZWI1MGEyOGQyNWM4NjNlZWY5NjhiYjBlZSIsImlhdCI6MTYzNDUxMDg5NCwibmJmIjoxNjM0NTEwODk0fQ.g3YivH_Quiw95TywvTmiv2CBWsp5JrrCcbpOcTtYpMAQNQJD7Q3kmMYTBs1Zg3tKFRPSJ_XozFIXug5nsn2SGg"
@@ -55,9 +63,11 @@ object Constants {
         "did:velocity:v2:0xfef35344bca1454bbe844e13af77c92d4fbed13b:73421631052335:9368"
 
     fun getCredentialIdsToRefresh(environment: VCLEnvironment) =
-        if (environment == VCLEnvironment.Dev)
+        if (environment == VCLEnvironment.Dev) {
             listOf(CredentialId1Dev, CredentialId2Dev)
-        else listOf(CredentialId1Staging, CredentialId2Staging)
+        } else {
+            listOf(CredentialId1Staging, CredentialId2Staging)
+        }
 
     const val IssuingServiceEndPoint =
         "https://devagent.velocitycareerlabs.io/api/holder/v0.6/org/did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA/issue/get-credential-manifest"
@@ -65,75 +75,90 @@ object Constants {
     const val IssuingServiceJsonStr =
         "{\"id\":\"did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA#credential-agent-issuer-1\",\"type\":\"VelocityCredentialAgentIssuer_v1.0\",\"credentialTypes\":[\"Course\",\"EducationDegree\",\"Badge\"],\"serviceEndpoint\":\"$IssuingServiceEndPoint\"}"
 
-    private val IdentificationListListDev = listOf(
-        VCLVerifiableCredential(inputDescriptor = "PhoneV1.0", jwtVc = AdamSmithPhoneJwtDev),
-        VCLVerifiableCredential(inputDescriptor = "EmailV1.0", jwtVc = AdamSmithEmailJwtDev),
-    )
+    private val IdentificationListListDev =
+        listOf(
+            VCLVerifiableCredential(inputDescriptor = "PhoneV1.0", jwtVc = AdamSmithPhoneJwtDev),
+            VCLVerifiableCredential(inputDescriptor = "EmailV1.0", jwtVc = AdamSmithEmailJwtDev),
+        )
 
-    private val IdentificationListStaging = listOf(
-        VCLVerifiableCredential(inputDescriptor = "PhoneV1.0", jwtVc = AdamSmithPhoneJwtStaging),
-        VCLVerifiableCredential(inputDescriptor = "EmailV1.0", jwtVc = AdamSmithEmailJwtStaging),
-    )
+    private val IdentificationListStaging =
+        listOf(
+            VCLVerifiableCredential(inputDescriptor = "PhoneV1.0", jwtVc = AdamSmithPhoneJwtStaging),
+            VCLVerifiableCredential(inputDescriptor = "EmailV1.0", jwtVc = AdamSmithEmailJwtStaging),
+        )
 
     fun getIdentificationList(environment: VCLEnvironment) =
-        if (environment == VCLEnvironment.Dev)
+        if (environment == VCLEnvironment.Dev) {
             Constants.IdentificationListListDev
-        else
+        } else {
             Constants.IdentificationListStaging
+        }
 
-    val OrganizationsSearchDescriptor = VCLOrganizationsSearchDescriptor(
-        filter = VCLFilter(
+    val OrganizationsSearchDescriptor =
+        VCLOrganizationsSearchDescriptor(
+            filter =
+                VCLFilter(
 //            did: DID,
-            serviceTypes = VCLServiceTypes(serviceType = VCLServiceType.Issuer),
-            credentialTypes = listOf("EducationDegree")
-        ),
-        page = VCLPage(size = "1", skip = "1"),
-        sort = listOf(listOf("createdAt", "DESC"), listOf("pdatedAt", "ASC")),
-        query = "Bank"
-    )
+                    serviceTypes = VCLServiceTypes(serviceType = VCLServiceType.Issuer),
+                    credentialTypes = listOf("EducationDegree"),
+                ),
+            page = VCLPage(size = "1", skip = "1"),
+            sort = listOf(listOf("createdAt", "DESC"), listOf("pdatedAt", "ASC")),
+            query = "Bank",
+        )
 
     const val IssuerDidDev = "did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA"
     const val IssuerDidStaging = "did:ion:EiByBvq95tfmhl41DOxJeaa26HjSxAUoz908PITFwMRDNA"
 
-    val OrganizationsSearchDescriptorByDidDev = VCLOrganizationsSearchDescriptor(
-        filter = VCLFilter(
-            did = IssuerDidDev
+    val OrganizationsSearchDescriptorByDidDev =
+        VCLOrganizationsSearchDescriptor(
+            filter =
+                VCLFilter(
+                    did = IssuerDidDev,
+                ),
         )
-    )
-    val OrganizationsSearchDescriptorByDidStaging = VCLOrganizationsSearchDescriptor(
-        filter = VCLFilter(
-            did = IssuerDidStaging
+    val OrganizationsSearchDescriptorByDidStaging =
+        VCLOrganizationsSearchDescriptor(
+            filter =
+                VCLFilter(
+                    did = IssuerDidStaging,
+                ),
         )
-    )
 
-    val CredentialTypes = listOf(
-        "EducationDegreeRegistrationV1.0",
-        "EducationDegreeStudyV1.0",
-        "EducationDegreeGraduationV1.0",
-        "EmploymentPastV1.1",
-        "Badge",
-        "BadgeV1.1",
-        "OpenBadgeV1.0",
-        "OpenBadgeV2.0",
-        "OpenBadgeCredential"
-    )
+    val CredentialTypes =
+        listOf(
+            "EducationDegreeRegistrationV1.0",
+            "EducationDegreeStudyV1.0",
+            "EducationDegreeGraduationV1.0",
+            "EmploymentPastV1.1",
+            "Badge",
+            "BadgeV1.1",
+            "OpenBadgeV1.0",
+            "OpenBadgeV2.0",
+            "OpenBadgeCredential",
+        )
 
     const val ResidentPermitV10 = "ResidentPermitV1.0"
 
     fun getVerifiedProfileDescriptor(environment: VCLEnvironment) =
-        if (environment == VCLEnvironment.Dev)
+        if (environment == VCLEnvironment.Dev) {
             VCLVerifiedProfileDescriptor(did = IssuerDidDev)
-        else VCLVerifiedProfileDescriptor(did = IssuerDidStaging)
+        } else {
+            VCLVerifiedProfileDescriptor(did = IssuerDidStaging)
+        }
 
-    val SomeJwt = VCLJwt(
-        "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksiLCJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJzZWNwMjU2azEiLCJ4IjoiQ1JFNzc0WV8ydkctdTZka2UwSmQzYVhrd1R4WkE2TV96cDZ2TkR0Vmt5NCIsInkiOiJZLWhIdS1FSXlHSGFRRTdmamxZVVlBZ2lVanFqZFc2VXlIaHI2OVFZTS04IiwidXNlIjoic2lnIn19.eyJwMSI6InYxIiwicDIiOiJ2MTIiLCJuYmYiOjE2OTQ0MzUyMjAsImp0aSI6Ijk4YTc4MGFmLTIyZGYtNGU3ZC1iYTZjLTBmYjE0Njk2Zjg0NSIsImlzcyI6ImlzczEyMyIsInN1YiI6IlpHNXQwT1ZrT08iLCJpYXQiOjE2OTQ0MzUyMjB9.kaEGDsRFjFylIAQ1DDX0GQyWBD1y5rG7WNpFZbrL1DFPrfFgDrydXXOCaBbr8TN81kPrbkscsHUuioY-tGCxMw"
-    )
-    val SomePublicJwk = VCLPublicJwk(
-        valueStr = "{ \"kty\": \"EC\", \"crv\": \"secp256k1\", \"x\": \"CRE774Y_2vG-u6dke0Jd3aXkwTxZA6M_zp6vNDtVky4\", \"y\": \"Y-hHu-EIyGHaQE7fjlYUYAgiUjqjdW6UyHhr69QYM-8\", \"use\": \"sig\" }"
-    )
+    val SomeJwt =
+        VCLJwt(
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksiLCJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJzZWNwMjU2azEiLCJ4IjoiQ1JFNzc0WV8ydkctdTZka2UwSmQzYVhrd1R4WkE2TV96cDZ2TkR0Vmt5NCIsInkiOiJZLWhIdS1FSXlHSGFRRTdmamxZVVlBZ2lVanFqZFc2VXlIaHI2OVFZTS04IiwidXNlIjoic2lnIn19.eyJwMSI6InYxIiwicDIiOiJ2MTIiLCJuYmYiOjE2OTQ0MzUyMjAsImp0aSI6Ijk4YTc4MGFmLTIyZGYtNGU3ZC1iYTZjLTBmYjE0Njk2Zjg0NSIsImlzcyI6ImlzczEyMyIsInN1YiI6IlpHNXQwT1ZrT08iLCJpYXQiOjE2OTQ0MzUyMjB9.kaEGDsRFjFylIAQ1DDX0GQyWBD1y5rG7WNpFZbrL1DFPrfFgDrydXXOCaBbr8TN81kPrbkscsHUuioY-tGCxMw",
+        )
+    val SomePublicJwk =
+        VCLPublicJwk(
+            valueStr = "{ \"kty\": \"EC\", \"crv\": \"secp256k1\", \"x\": \"CRE774Y_2vG-u6dke0Jd3aXkwTxZA6M_zp6vNDtVky4\", \"y\": \"Y-hHu-EIyGHaQE7fjlYUYAgiUjqjdW6UyHhr69QYM-8\", \"use\": \"sig\" }",
+        )
     val SomePayload = JSONObject("{\"p1\":\"v1\", \"p2\":\"v12\"}")
 
     private const val BaseUrl = "mockvendor.velocitycareerlabs.io"
+
     private fun getServiceBaseUrl(environment: VCLEnvironment): String {
         return when (environment) {
             VCLEnvironment.Dev ->
