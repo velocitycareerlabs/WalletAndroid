@@ -22,8 +22,8 @@ signing:
   active: always
   armored: true
   command: gpg
-  keyId: {{env.GPG_KEY_ID}}
-  passphrase: {{env.GPG_PASSPHRASE}}
+  keyId: {{env.GPG_KEY_ID}}           # ✅ Consistent with GitHub Actions
+  passphrase: {{env.GPG_PASSPHRASE}}  # ✅ Consistent with GitHub Actions
 
 files:
   artifacts:
