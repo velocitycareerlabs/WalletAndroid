@@ -80,11 +80,6 @@ jobs:
             echo "JRELEASER_PRERELEASE=false" >> $GITHUB_ENV
           fi
 
-      - name: DEBUG: Print decoded GPG key (TEMPORARY ONLY)
-        run: |
-          echo "🔍 Decoded GPG key:"
-          echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}" | base64 --decode
-
       - name: Import GPG Key
         run: |
           echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}" | base64 --decode | gpg --import
