@@ -20,7 +20,7 @@ env:
   PACKAGE_TYPE: "aar"
   GRADLE_VERSION: "8.8.2"
   JAVA_VERSION: "17"
-  ARTIFACT_PATH: "VCL/build/outputs"
+  ARTIFACT_PATH: VCL/build/outputs
   GLOBAL_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'dev' }}
 
 jobs:
@@ -59,7 +59,21 @@ jobs:
         run: ./gradlew assemble${{ env.RELEASE_TAG }}
 
       - name: Rename AAR to lowercase
-        run: mv ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/VCL-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
+        run: |
+          echo "Listing contents of AAR output directory:"
+          ls -al $ARTIFACT_PATH/$PACKAGE_TYPE/
+          
+          UPPER_NAME="VCL-${RELEASE_TAG,,}.$PACKAGE_TYPE"
+          LOWER_NAME="vcl-${RELEASE_TAG}.$PACKAGE_TYPE"
+
+          echo "Looking for file: $ARTIFACT_PATH/$PACKAGE_TYPE/$UPPER_NAME"
+          if [ -f "$ARTIFACT_PATH/$PACKAGE_TYPE/$UPPER_NAME" ]; then
+            mv "$ARTIFACT_PATH/$PACKAGE_TYPE/$UPPER_NAME" "$ARTIFACT_PATH/$PACKAGE_TYPE/$LOWER_NAME"
+            echo "Renamed to: $LOWER_NAME"
+          else
+            echo "❌ File not found: $UPPER_NAME"
+            exit 1
+          fi
 
       - name: List Built Artifacts
         run: ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
