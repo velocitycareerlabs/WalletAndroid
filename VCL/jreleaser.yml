@@ -1,47 +1,60 @@
 project:
-  name: vcl
-  version: {{projectVersion}}
-  description: Velocity Credential Library
-  website: https://github.com/velocitycareerlabs
+  name: WalletAndroid
+  version: '{{projectVersion}}'
+  description: Velocity Career Labs Android library
+  links:
+    homepage: https://github.com/velocitycareerlabs
+  license: Apache-2.0
   authors:
     - Michael Avoyan
+  languages:
+    java:
+      groupId: io.velocitycareerlabs
+      artifactId: vcl
+
+environment:
+  properties:
+    PACKAGE_TYPE: aar
+    GRADLE_VERSION: 8.8.2
+    JAVA_VERSION: 17
+    ARTIFACT_PATH: VCL/build/outputs
 
 release:
   github:
     owner: velocitycareerlabs
-    name: vcl
-    tagName: v{{projectVersion}}
-    releaseName: "Release v{{projectVersion}}"
-    prerelease:
-      enabled: {{env.PRERELEASE}}  # MUST be true or false, no quotes
-    skipTag: false
+    name: WalletAndroid
+    releaseName: '{{projectVersion}}'
+    tagName: '{{projectVersion}}'
     draft: false
     sign: true
+    skipTag: false
+    prerelease:
+      enabled: '{{prerelease}}'
 
 signing:
-  active: always
+  active: ALWAYS
   armored: true
   command: gpg
-  keyId: {{env.GPG_KEY_ID}}           # ✅ Consistent with GitHub Actions
-  passphrase: {{env.GPG_PASSPHRASE}}  # ✅ Consistent with GitHub Actions
-
-files:
-  artifacts:
-    - path: ./build/outputs/aar/vcl-release.aar
-      platform: java
 
 deploy:
   maven:
     central:
-      active: always
-      url: https://oss.sonatype.org/service/local/staging/deploy/maven2/
+      active: ALWAYS
+      url: https://central.sonatype.com/api/v1/publisher/upload
       snapshotUrl: https://oss.sonatype.org/content/repositories/snapshots/
+      stagingRepositories:
+        - target/staging-deploy
+      credentials:
+        username: env.MAVEN_CENTRAL_TOKEN_USERNAME
+        password: env.MAVEN_CENTRAL_TOKEN_PASSWORD
       coordinates:
         groupId: io.velocitycareerlabs
         artifactId: vcl
-        version: {{projectVersion}}
-      credentials:
-        username: {{env.MAVEN_CENTRAL_TOKEN_USERNAME}}
-        password: {{env.MAVEN_CENTRAL_TOKEN_PASSWORD}}
-      signing:
-        active: true
+        version: '{{projectVersion}}'
+
+files:
+  artifacts:
+    - path: VCL/build/outputs/aar/vcl-{{projectVersion}}.aar
+      platform: universal
+    - path: VCL/build/libs/vcl-sources.jar
+      platform: universal
