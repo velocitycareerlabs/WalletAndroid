@@ -86,6 +86,13 @@ jobs:
             echo "JRELEASER_PRERELEASE=false" >> $GITHUB_ENV
           fi
 
+      - name: Decode and Import GPG Key
+        run: |
+          echo "$MAVEN_CENTRAL_PRIVATE_KEY_B64" | base64 --decode > private.key
+          gpg --batch --import private.key
+        env:
+          MAVEN_CENTRAL_PRIVATE_KEY_B64: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}
+
       - name: Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
         uses: jreleaser/release-action@v2
@@ -93,11 +100,11 @@ jobs:
           arguments: full-release -PprojectVersion=vcl-${{ github.run_number }} -Pprerelease=${{ env.JRELEASER_PRERELEASE }} -c VCL/jreleaser.yml
           version: latest
         env:
+          GPG_KEY_ID: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_ID }}
+          GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
-          MAVEN_CENTRAL_SIGNING_KEY_ID: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_ID }}
-          MAVEN_CENTRAL_SIGNING_PASSWORD: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
-          MAVEN_CENTRAL_PRIVATE_KEY_B64: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}
+          PRERELEASE: ${{ env.JRELEASER_PRERELEASE }}
 
       - name: Upload Built Artifact
         if: success()
