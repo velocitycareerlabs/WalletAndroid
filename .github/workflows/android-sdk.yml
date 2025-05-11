@@ -22,6 +22,7 @@ env:
   JAVA_VERSION: "17"
   ARTIFACT_PATH: "VCL/build/outputs"
   GLOBAL_ENV: ${{ github.event_name == 'push' && format('{0}', 'dev') || inputs.environment }}
+  RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && 'Release' || 'Rc' }}
 
 jobs:
   test-android-sdk:
@@ -29,13 +30,14 @@ jobs:
     steps:
       - name: Git clone repository
         uses: actions/checkout@v4
-      # Setup java
-      - uses: actions/setup-java@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-      # Run test
-      - name: Run Test
+
+      - name: Run Unit Tests
         run: ./gradlew test
 
   build-and-publish-android-sdk:
@@ -45,52 +47,40 @@ jobs:
     steps:
       - name: Git clone repository
         uses: actions/checkout@v4
-      # Setup java
-      - uses: actions/setup-java@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-      # Gradle Assemble
-      - name: Gradle Assemble
+
+      - name: Build AAR
         run: ./gradlew assemble${{ env.RELEASE_TAG }}
-        env:
-          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'Release' ) || 'Rc' }}
-      # Convert artifact to lowercase
-      - name: Rename artifact to lowercase
-        run: mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
-        env:
-          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'release' ) || 'rc' }}
-      # Show Me Built packages
-      - name: Show Me Built packages
-        run: ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
-      - name: Export Nexus Private Key
-        run: echo "signingPrivateKey=${{ secrets.ANDROID_NEXUS_PRIVATE_KEY }}" >> nexus.properties
-      # Publish Prod/Rc
-      - name: Publish Prod/Rc
+
+      - name: Rename AAR to lowercase
+        run: mv ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/VCL-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
+
+      - name: List Built Artifacts
+        run: ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
+
+      - name: Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'prod' || env.GLOBAL_ENV == 'rc' }}
-        run: ./gradlew publish${{ env.RELEASE_TAG }}
+        uses: jreleaser/release-action@v2
+        with:
+          arguments: full-release --project-version=vcl-${{ github.run_number }}
+          version: latest
         env:
-          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'Release' ) || 'Rc' }}
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
           MAVEN_CENTRAL_SIGNING_KEY_ID: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_ID }}
           MAVEN_CENTRAL_SIGNING_PASSWORD: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           MAVEN_CENTRAL_PRIVATE_KEY_B64: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}
-      # Upload Artifacts
-      - name: Upload Artifact
+
+      - name: Upload Built Artifact (for inspection only)
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
           path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
           if-no-files-found: error
-          retention-days: 1
-        env:
-          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'release' ) || 'rc' }}
-
-
-
-
-
-
-
+          retention-days: 14

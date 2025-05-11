@@ -1,0 +1,59 @@
+project:
+  name: WalletAndroid
+  version: '{{projectVersion}}'
+  description: Velocity Career Labs Android library
+  website: https://github.com/velocitycareerlabs/WalletAndroid
+  license: Apache-2.0
+  authors:
+    - Michael Avoyan
+  java:
+    groupId: io.velocitycareerlabs
+    artifactId: vcl
+
+environment:
+  properties:
+    PACKAGE_TYPE: aar
+    GRADLE_VERSION: 8.8.2
+    JAVA_VERSION: 17
+    ARTIFACT_PATH: VCL/build/outputs
+
+  secrets:
+    MAVEN_CENTRAL_TOKEN_USERNAME: MAVEN_CENTRAL_TOKEN_USERNAME
+    MAVEN_CENTRAL_TOKEN_PASSWORD: MAVEN_CENTRAL_TOKEN_PASSWORD
+    MAVEN_CENTRAL_SIGNING_KEY_ID: MAVEN_CENTRAL_SIGNING_KEY_ID
+    MAVEN_CENTRAL_SIGNING_PASSWORD: MAVEN_CENTRAL_SIGNING_PASSWORD
+    MAVEN_CENTRAL_PRIVATE_KEY_B64: MAVEN_CENTRAL_PRIVATE_KEY_B64
+
+release:
+  github:
+    owner: velocitycareerlabs
+    name: WalletAndroid
+    releaseName: '{{projectVersion}}'
+    tagName: '{{projectVersion}}'
+    draft: false
+    prerelease: '{{#startsWith projectVersion "rc-"}}true{{/startsWith}}'
+
+signing:
+  active: ALWAYS
+  armored: true
+  pgp:
+    publicKey: env.MAVEN_CENTRAL_SIGNING_KEY_ID
+    secretKey: env.MAVEN_CENTRAL_PRIVATE_KEY_B64
+    passphrase: env.MAVEN_CENTRAL_SIGNING_PASSWORD
+
+deploy:
+  maven:
+    central:
+      active: ALWAYS
+      url: https://central.sonatype.com/api/v1/publisher/upload
+      snapshotUrl: https://oss.sonatype.org/content/repositories/snapshots/
+      credentials:
+        username: env.MAVEN_CENTRAL_TOKEN_USERNAME
+        password: env.MAVEN_CENTRAL_TOKEN_PASSWORD
+
+files:
+  artifacts:
+    - path: VCL/build/outputs/aar/vcl-{{projectVersion}}.aar
+      platform: universal
+    - path: VCL/build/libs/vcl-sources.jar
+      platform: universal

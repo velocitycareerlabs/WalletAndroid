@@ -1,8 +1,6 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'maven-publish'
-    id 'signing'
 }
 
 ext {
@@ -12,11 +10,9 @@ ext {
     publishGroup = "io.velocitycareerlabs"
     namespaceId = publishGroup
 }
-group = publishGroup
-version = publishVersion
-def code = publishCode
 
-apply from: "./publish-core.gradle"
+group = publishGroup
+version = System.getenv("JRELEASER_PROJECT_VERSION") ?: publishVersion
 
 android {
     compileSdk 35
@@ -25,16 +21,13 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 35
-        versionCode code
+        versionCode publishCode
         versionName version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles ["consumer-rules.pro"]
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
-//        def BOOLEAN = "boolean"
-//        def TRUE = "true"
-//        def FALSE = "false"
         debug {
             buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
             buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
@@ -75,11 +68,6 @@ android {
     buildFeatures {
         buildConfig true
     }
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 tasks.register('androidSourcesJar', Jar) {
