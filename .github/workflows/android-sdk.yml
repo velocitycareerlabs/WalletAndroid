@@ -82,7 +82,7 @@ jobs:
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
         uses: jreleaser/release-action@v2
         with:
-          arguments: full-release --project-version=vcl-${{ github.run_number }}
+          arguments: full-release -PprojectVersion=vcl-${{ github.run_number }}
           version: latest
         env:
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
