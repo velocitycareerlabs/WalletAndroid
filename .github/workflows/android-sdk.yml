@@ -60,16 +60,10 @@ jobs:
 
       - name: Rename AAR to lowercase
         run: |
-          echo "Listing contents of AAR output directory:"
-          ls -al $ARTIFACT_PATH/$PACKAGE_TYPE/
-          
           UPPER_NAME="VCL-${RELEASE_TAG,,}.$PACKAGE_TYPE"
           LOWER_NAME="vcl-${RELEASE_TAG}.$PACKAGE_TYPE"
-
-          echo "Looking for file: $ARTIFACT_PATH/$PACKAGE_TYPE/$UPPER_NAME"
           if [ -f "$ARTIFACT_PATH/$PACKAGE_TYPE/$UPPER_NAME" ]; then
             mv "$ARTIFACT_PATH/$PACKAGE_TYPE/$UPPER_NAME" "$ARTIFACT_PATH/$PACKAGE_TYPE/$LOWER_NAME"
-            echo "Renamed to: $LOWER_NAME"
           else
             echo "❌ File not found: $UPPER_NAME"
             exit 1
@@ -85,6 +79,11 @@ jobs:
           else
             echo "JRELEASER_PRERELEASE=false" >> $GITHUB_ENV
           fi
+
+      - name: DEBUG: Print decoded GPG key (TEMPORARY ONLY)
+        run: |
+          echo "🔍 Decoded GPG key:"
+          echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}" | base64 --decode
 
       - name: Import GPG Key
         run: |
