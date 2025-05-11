@@ -1,3 +1,5 @@
+name: Android-SDK-JReleaser
+
 project:
   name: WalletAndroid
   version: '{{projectVersion}}'
