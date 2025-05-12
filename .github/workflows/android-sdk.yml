@@ -39,7 +39,7 @@ jobs:
         shell: bash {0}
         run: |
           echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > gpg.asc
-          gpg --import gpg.asc
+          gpg --no-tty --batch --yes --import gpg.asc
           status=$?
           if [ $status -ne 0 ]; then
             echo "❌ GPG key import failed (exit code $status)"

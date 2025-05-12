@@ -41,7 +41,7 @@ jobs:
           chmod 700 .gnupg_temp
           export GNUPGHOME=$(pwd)/.gnupg_temp
           echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > test_key.asc
-          gpg --batch --import test_key.asc
+          gpg --no-tty --batch --yes --import test_key.asc
           status=$?
           if [ $status -ne 0 ]; then
             echo "❌ GPG key import failed (exit code $status)"
