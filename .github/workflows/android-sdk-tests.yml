@@ -38,9 +38,13 @@ jobs:
         shell: bash {0}
         run: |
           echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > test_key.asc
-          if ! gpg --dry-run --import test_key.asc; then
-            echo "❌ Invalid or missing GPG key"
-            exit 1
+          gpg --dry-run --import test_key.asc
+          status=$?
+          if [ $status -ne 0 ]; then
+            echo "❌ Invalid or missing GPG key (exit code $status)"
+            exit $status
+          else
+            echo "✅ GPG key successfully validated"
           fi
 
       - name: Check if sources JAR exists after build

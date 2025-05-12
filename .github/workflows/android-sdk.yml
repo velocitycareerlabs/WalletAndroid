@@ -87,11 +87,15 @@ jobs:
 
       - name: Import GPG Key
         shell: bash {0}
-      run: |
+        run: |
           echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > gpg.asc
-          if ! gpg --import gpg.asc; then
-            echo "❌ GPG key import failed"
-            exit 1
+          gpg --import gpg.asc
+          status=$?
+          if [ $status -ne 0 ]; then
+            echo "❌ GPG key import failed (exit code $status)"
+            exit $status
+          else
+            echo "✅ GPG key successfully imported"
           fi
 
       - name: Validate artifacts before release
