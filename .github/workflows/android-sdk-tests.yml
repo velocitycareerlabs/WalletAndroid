@@ -33,7 +33,9 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew test
 
+      # ✅ Only runs on PRs from the same repo (not forks)
       - name: Import GPG Key (dry-run)
+        if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > test_key.asc
           gpg --dry-run --import test_key.asc || (echo "❌ Invalid or missing GPG key" && exit 1)
