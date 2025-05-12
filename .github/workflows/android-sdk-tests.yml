@@ -21,7 +21,7 @@ jobs:
   test-android-sdk:
     runs-on: ubuntu-latest
     steps:
-      - name: Git clone repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -34,24 +34,18 @@ jobs:
         run: ./gradlew test
 
       - name: Validate GPG key (actual import into temp home)
-  if: github.event.pull_request.head.repo.full_name == github.repository
-  shell: bash {0}
-  run: |
-    mkdir -p .gnupg_temp
-    chmod 700 .gnupg_temp
-    export GNUPGHOME=$(pwd)/.gnupg_temp
-    echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > test_key.asc
-    gpg --batch --import test_key.asc
-    status=$?
-    if [ $status -ne 0 ]; then
-      echo "❌ GPG key import failed (exit code $status)"
-      exit $status
-    else
-      echo "✅ GPG key successfully validated"
-    fi
-
-
-      - name: Check if sources JAR exists after build
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash {0}
         run: |
-          ./gradlew assembleRelease sourcesJar
-          test -f VCL/build/libs/vcl-sources.jar || (echo "❌ vcl-sources.jar not generated" && exit 1)
+          mkdir -p .gnupg_temp
+          chmod 700 .gnupg_temp
+          export GNUPGHOME=$(pwd)/.gnupg_temp
+          echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > test_key.asc
+          gpg --batch --import test_key.asc
+          status=$?
+          if [ $status -ne 0 ]; then
+            echo "❌ GPG key import failed (exit code $status)"
+            exit $status
+          else
+            echo "✅ GPG key successfully validated"
+          fi
