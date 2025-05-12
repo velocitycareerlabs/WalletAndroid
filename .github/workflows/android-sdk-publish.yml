@@ -1,4 +1,4 @@
-name: WalletAndroid-SDK-CI-CD
+name: Android-SDK-CI-CD
 
 on:
   push:
