@@ -127,4 +127,4 @@ jobs:
           name: vcl-${{ env.RELEASE_TAG }}
           path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
           if-no-files-found: error
-          retention-days: 15
+          retention-days: 14
