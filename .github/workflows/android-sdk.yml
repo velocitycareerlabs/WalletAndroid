@@ -85,25 +85,22 @@ jobs:
             echo "JRELEASER_PRERELEASE=false" >> $GITHUB_ENV
           fi
 
-      - name: Validate GPG key (actual import into temp home)
-  shell: bash {0}
-  run: |
-    mkdir -p .gnupg_temp
-    chmod 700 .gnupg_temp
-    export GNUPGHOME=$(pwd)/.gnupg_temp
-    echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > test_key.asc
-
-    echo "🔐 Importing GPG key into temporary keyring..."
-    gpg --batch --import test_key.asc
-    status=$?
-
-    if [ $status -ne 0 ]; then
-      echo "❌ GPG key import failed (exit code $status)"
-      exit $status
-    else
-      echo "✅ GPG key successfully validated"
-    fi
-
+      - name: Import GPG Key
+        shell: bash {0}
+        run: |
+          echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > gpg.asc
+          gpg --import gpg.asc
+          status=$?
+          if [ $status -ne 0 ]; then
+            echo "❌ GPG key import failed (exit code $status)"
+            exit $status
+          else
+            echo "✅ GPG key successfully imported"
+          fi
+          if ! gpg --import gpg.asc; then
+            echo "❌ GPG key import failed"
+            exit 1
+          fi
 
       - name: Validate artifacts before release
         run: |
