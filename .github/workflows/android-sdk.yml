@@ -97,11 +97,7 @@ jobs:
           else
             echo "✅ GPG key successfully imported"
           fi
-          if ! gpg --import gpg.asc; then
-            echo "❌ GPG key import failed"
-            exit 1
-          fi
-
+          
       - name: Validate artifacts before release
         run: |
           echo "📦 Verifying required artifacts..."
