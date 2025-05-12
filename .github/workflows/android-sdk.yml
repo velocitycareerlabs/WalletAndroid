@@ -86,7 +86,8 @@ jobs:
           fi
 
       - name: Import GPG Key
-        run: |
+        shell: bash {0}
+      run: |
           echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > gpg.asc
           if ! gpg --import gpg.asc; then
             echo "❌ GPG key import failed"
