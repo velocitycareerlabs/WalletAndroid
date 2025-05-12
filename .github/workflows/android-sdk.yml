@@ -53,7 +53,12 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Set RELEASE_TAG
-        run: echo "RELEASE_TAG=${{ env.GLOBAL_ENV == 'prod' && 'Release' || 'Rc' }}" >> $GITHUB_ENV
+        run: |
+          if [[ "${{ env.GLOBAL_ENV }}" == "prod" ]]; then
+            echo "RELEASE_TAG=Release" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=Rc" >> $GITHUB_ENV
+          fi
 
       - name: Build AAR
         run: ./gradlew assemble${{ env.RELEASE_TAG }}
@@ -82,7 +87,18 @@ jobs:
 
       - name: Import GPG Key
         run: |
-          echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}" | base64 --decode | gpg --import
+          echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode | gpg --import
+
+      - name: ✅ Verify GPG key is present
+        run: |
+          echo "🔐 Verifying GPG key import..."
+          gpg --list-secret-keys || (echo "❌ No GPG keys found" && exit 1)
+
+      - name: ✅ Validate artifacts before release
+        run: |
+          echo "📦 Verifying required artifacts..."
+          test -f $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG}.aar || (echo "❌ Missing AAR" && exit 1)
+          test -f VCL/build/libs/vcl-sources.jar || (echo "❌ Missing sources.jar" && exit 1)
 
       - name: Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
@@ -95,7 +111,7 @@ jobs:
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
           MAVEN_CENTRAL_SIGNING_KEY_ID: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_ID }}
           MAVEN_CENTRAL_SIGNING_PASSWORD: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
-          MAVEN_CENTRAL_PRIVATE_KEY_B64: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}
+          MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}
 
       - name: Upload Built Artifact
         if: success()
