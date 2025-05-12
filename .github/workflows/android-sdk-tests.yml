@@ -33,19 +33,25 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew test
 
-      - name: Import GPG Key (dry-run)
-        if: github.event.pull_request.head.repo.full_name == github.repository
-        shell: bash {0}
-        run: |
-          echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > test_key.asc
-          gpg --dry-run --import test_key.asc
-          status=$?
-          if [ $status -ne 0 ]; then
-            echo "❌ Invalid or missing GPG key (exit code $status)"
-            exit $status
-          else
-            echo "✅ GPG key successfully validated"
-          fi
+      - name: Validate GPG key (actual import into temp home)
+  shell: bash {0}
+  run: |
+    mkdir -p .gnupg_temp
+    chmod 700 .gnupg_temp
+    export GNUPGHOME=$(pwd)/.gnupg_temp
+    echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > test_key.asc
+
+    echo "🔐 Importing GPG key into temporary keyring..."
+    gpg --batch --import test_key.asc
+    status=$?
+
+    if [ $status -ne 0 ]; then
+      echo "❌ GPG key import failed (exit code $status)"
+      exit $status
+    else
+      echo "✅ GPG key successfully validated"
+    fi
+
 
       - name: Check if sources JAR exists after build
         run: |
