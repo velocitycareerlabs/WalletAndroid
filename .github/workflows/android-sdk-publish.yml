@@ -26,7 +26,7 @@ env:
 jobs:
   test-android-sdk:
     runs-on: ubuntu-latest
-    if: github.event_name != 'workflow_dispatch' || inputs.environment == 'dev'
+    if: github.event_name == 'push' || inputs.environment == 'dev'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -63,10 +63,13 @@ jobs:
       - name: Build AAR
         run: ./gradlew assemble${{ env.RELEASE_TAG }}
 
+      - name: Build sources jar
+        run: ./gradlew sourcesJar
+
       - name: Rename AAR to lowercase
         run: |
-          UPPER_NAME="VCL-${RELEASE_TAG,,}.$PACKAGE_TYPE"
-          LOWER_NAME="vcl-${RELEASE_TAG}.$PACKAGE_TYPE"
+          UPPER_NAME="VCL-${RELEASE_TAG}.$PACKAGE_TYPE"
+          LOWER_NAME="vcl-${RELEASE_TAG,,}.$PACKAGE_TYPE"
           if [ -f "$ARTIFACT_PATH/$PACKAGE_TYPE/$UPPER_NAME" ]; then
             mv "$ARTIFACT_PATH/$PACKAGE_TYPE/$UPPER_NAME" "$ARTIFACT_PATH/$PACKAGE_TYPE/$LOWER_NAME"
           else
@@ -97,16 +100,11 @@ jobs:
           else
             echo "✅ GPG key successfully imported"
           fi
-          
-          if ! gpg --import gpg.asc; then
-            echo "❌ GPG key import failed"
-            exit 1
-          fi
 
       - name: Validate artifacts before release
         run: |
           echo "📦 Verifying required artifacts..."
-          test -f $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG}.aar || (echo "❌ Missing AAR" && exit 1)
+          test -f $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG,,}.aar || (echo "❌ Missing AAR" && exit 1)
           test -f VCL/build/libs/vcl-sources.jar || (echo "❌ Missing sources.jar" && exit 1)
 
       - name: Run JReleaser
