@@ -128,4 +128,3 @@ jobs:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
           if-no-files-found: error
           retention-days: 14
-# dummy
