@@ -41,6 +41,7 @@ jobs:
         run: ./gradlew test
 
   build-and-release:
+    needs: test-android-sdk
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
