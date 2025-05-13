@@ -28,8 +28,7 @@ release:
     draft: false
     sign: true
     skipTag: false
-    prerelease:
-      enabled: {{prerelease}}
+    prerelease: {{prerelease}}
 
 signing:
   active: ALWAYS
