@@ -25,24 +25,14 @@ env:
 
 jobs:
   test-android-sdk:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || inputs.environment == 'dev'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-
-      - name: Run Unit Tests
-        run: ./gradlew test
+    uses: ./.github/workflows/android-sdk-reusable-tests.yml
+    secrets: inherit
 
   build-and-release:
     needs: test-android-sdk
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -68,7 +58,9 @@ jobs:
         run: ./gradlew sourcesJar
 
       - name: List Built Artifacts
-        run: ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/ && ls -al VCL/build/libs/
+        run: |
+          ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
+          ls -al VCL/build/libs/
 
       - name: Determine prerelease flag
         run: |
@@ -81,6 +73,7 @@ jobs:
       - name: Import GPG Key
         shell: bash {0}
         run: |
+          export GPG_TTY=$(tty)
           echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > gpg.asc
           gpg --no-tty --batch --yes --import gpg.asc
           status=$?
@@ -93,9 +86,11 @@ jobs:
 
       - name: Validate artifacts before release
         run: |
-          echo "📦 Verifying required artifacts..."
-          test -f $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG}.aar || (echo "❌ Missing AAR" && exit 1)
+          echo "📦 Verifying artifacts..."
+          test -f $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG}.aar || (echo "❌ Missing AAR file" && exit 1)
+          test -s $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG}.aar || (echo "❌ Empty AAR file" && exit 1)
           test -f VCL/build/libs/vcl-sources.jar || (echo "❌ Missing sources.jar" && exit 1)
+          test -s VCL/build/libs/vcl-sources.jar || (echo "❌ Empty sources.jar" && exit 1)
 
       - name: Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
@@ -114,7 +109,15 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: vcl-${{ env.RELEASE_TAG }}
+          name: vcl-${{ env.RELEASE_TAG }}-${{ github.run_number }}
           path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
           if-no-files-found: error
           retention-days: 14
+
+      - name: Post Success Status
+        if: success()
+        run: echo "✅ Android SDK Build and Release successful."
+
+      - name: Post Failure Status
+        if: failure()
+        run: echo "❌ Android SDK Build or Tests failed."
