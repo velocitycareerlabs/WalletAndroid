@@ -66,19 +66,10 @@ jobs:
       - name: Build sources jar
         run: ./gradlew sourcesJar
 
-      - name: Rename AAR to lowercase
+      - name: Confirm AAR Output
         run: |
-          UPPER_NAME="VCL-${RELEASE_TAG}.$PACKAGE_TYPE"
-          LOWER_NAME="vcl-${RELEASE_TAG,,}.$PACKAGE_TYPE"
-          if [ -f "$ARTIFACT_PATH/$PACKAGE_TYPE/$UPPER_NAME" ]; then
-            mv "$ARTIFACT_PATH/$PACKAGE_TYPE/$UPPER_NAME" "$ARTIFACT_PATH/$PACKAGE_TYPE/$LOWER_NAME"
-          else
-            echo "❌ File not found: $UPPER_NAME"
-            exit 1
-          fi
-
-      - name: List Built Artifacts
-        run: ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
+          echo "Listing contents of $ARTIFACT_PATH/$PACKAGE_TYPE"
+          ls -al $ARTIFACT_PATH/$PACKAGE_TYPE
 
       - name: Determine prerelease flag
         run: |

@@ -69,6 +69,12 @@ android {
     buildFeatures {
         buildConfig true
     }
+
+    libraryVariants.configureEach { variant ->
+        variant.outputs.all {
+            outputFileName = "vcl-${variant.name}.aar"
+        }
+    }
 }
 
 // Generate sources jar once — no duplication
