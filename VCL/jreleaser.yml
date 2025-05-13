@@ -29,7 +29,7 @@ release:
     sign: true
     skipTag: false
     prerelease:
-      enabled: '{{prerelease}}'
+      enabled: __PRERELEASE__
 
 signing:
   active: ALWAYS
