@@ -37,20 +37,22 @@ signing:
   command:
     executable: gpg
 
-mavenCentral:
-  app:
-    active: ALWAYS
-    url: https://central.sonatype.com/api/v1/publisher
-    snapshotUrl: https://oss.sonatype.org/content/repositories/snapshots/
-    stagingRepositories:
-      - target/staging-deploy
-    credentials:
-      username: env.MAVEN_CENTRAL_TOKEN_USERNAME
-      password: env.MAVEN_CENTRAL_TOKEN_PASSWORD
-    coordinates:
-      groupId: io.velocitycareerlabs
-      artifactId: vcl
-      version: '{{projectVersion}}'
+deploy:
+  maven:
+    mavenCentral:
+      app:
+        active: ALWAYS
+        url: https://central.sonatype.com/api/v1/publisher
+        snapshotUrl: https://oss.sonatype.org/content/repositories/snapshots/
+        stagingRepositories:
+          - target/staging-deploy
+        credentials:
+          username: env.MAVEN_CENTRAL_TOKEN_USERNAME
+          password: env.MAVEN_CENTRAL_TOKEN_PASSWORD
+        coordinates:
+          groupId: io.velocitycareerlabs
+          artifactId: vcl
+          version: '{{projectVersion}}'
 
 files:
   artifacts:
