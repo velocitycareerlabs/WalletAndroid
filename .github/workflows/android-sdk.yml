@@ -55,9 +55,9 @@ jobs:
       - name: Set RELEASE_TAG
         run: |
           if [[ "${{ env.GLOBAL_ENV }}" == "prod" ]]; then
-            echo "RELEASE_TAG=Release" >> $GITHUB_ENV
+            echo "RELEASE_TAG=release" >> $GITHUB_ENV
           else
-            echo "RELEASE_TAG=Rc" >> $GITHUB_ENV
+            echo "RELEASE_TAG=rc" >> $GITHUB_ENV
           fi
 
       - name: Build AAR
@@ -66,22 +66,16 @@ jobs:
       - name: Build sources jar
         run: ./gradlew sourcesJar
 
-      - name: Confirm AAR Output
-        run: |
-          echo "Listing contents of $ARTIFACT_PATH/$PACKAGE_TYPE"
-          ls -al $ARTIFACT_PATH/$PACKAGE_TYPE
+      - name: List Built Artifacts
+        run: ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/ && ls -al VCL/build/libs/
 
       - name: Determine prerelease flag
         run: |
-          if [[ "${{ env.RELEASE_TAG }}" == "Rc" ]]; then
+          if [[ "${{ env.RELEASE_TAG }}" == "rc" ]]; then
             echo "JRELEASER_PRERELEASE=true" >> $GITHUB_ENV
           else
             echo "JRELEASER_PRERELEASE=false" >> $GITHUB_ENV
           fi
-
-      - name: 🔧 Generate final jreleaser.yml
-        run: |
-          sed "s/enabled: __PRERELEASE__/enabled: $JRELEASER_PRERELEASE/" VCL/jreleaser.yml > VCL/jreleaser.generated.yml
 
       - name: Import GPG Key
         shell: bash {0}
@@ -99,24 +93,14 @@ jobs:
       - name: Validate artifacts before release
         run: |
           echo "📦 Verifying required artifacts..."
-          AAR_FILE="$ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG,,}.aar"
-          if [ ! -f "$AAR_FILE" ]; then
-            echo "❌ Missing AAR: $AAR_FILE"
-            exit 1
-          fi
+          test -f $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG}.aar || (echo "❌ Missing AAR" && exit 1)
+          test -f VCL/build/libs/vcl-sources.jar || (echo "❌ Missing sources.jar" && exit 1)
 
-          if ! ls VCL/build/libs/*sources.jar >/dev/null 2>&1; then
-            echo "❌ Missing sources.jar"
-            exit 1
-          else
-            echo "✅ Found sources.jar"
-          fi
-
-      - name: 🚀 Run JReleaser
+      - name: Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
         uses: jreleaser/release-action@v2
         with:
-          arguments: full-release -PprojectVersion=vcl-${{ github.run_number }} -c VCL/jreleaser.generated.yml
+          arguments: full-release -PprojectVersion=vcl-${{ github.run_number }} -Pprerelease=${{ env.JRELEASER_PRERELEASE }} -c VCL/jreleaser.yml
           version: latest
         env:
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
