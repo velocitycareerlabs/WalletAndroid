@@ -29,7 +29,7 @@ release:
     sign: true
     skipTag: false
     prerelease:
-      enabled: {{JRELEASER_PRERELEASE}}
+      enabled: {{PRERELEASE}}
 
 signing:
   active: ALWAYS

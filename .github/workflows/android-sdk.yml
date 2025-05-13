@@ -51,14 +51,6 @@ jobs:
             echo "RELEASE_TAG=rc" >> $GITHUB_ENV
           fi
 
-      - name: Determine prerelease flag
-        run: |
-          if [[ "${{ env.RELEASE_TAG }}" == "rc" ]]; then
-            echo "JRELEASER_PRERELEASE=true" >> $GITHUB_ENV
-          else
-            echo "JRELEASER_PRERELEASE=false" >> $GITHUB_ENV
-          fi
-
       - name: Build AAR
         run: ./gradlew assemble${{ env.RELEASE_TAG }}
 
@@ -92,6 +84,18 @@ jobs:
           test -f VCL/build/libs/vcl-sources.jar || (echo "❌ Missing sources.jar" && exit 1)
           test -s VCL/build/libs/vcl-sources.jar || (echo "❌ Empty sources.jar" && exit 1)
 
+      - name: Prepare jreleaser.yml from template
+        run: |
+          cp VCL/jreleaser.template.yml VCL/jreleaser.yml
+          if [[ "${{ env.RELEASE_TAG }}" == "rc" ]]; then
+            sed -i 's/{{PRERELEASE}}/true/' VCL/jreleaser.yml
+          else
+            sed -i 's/{{PRERELEASE}}/false/' VCL/jreleaser.yml
+          fi
+
+      - name: Debug jreleaser.yml
+        run: cat VCL/jreleaser.yml
+
       - name: Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
         uses: jreleaser/release-action@v2
@@ -99,7 +103,6 @@ jobs:
           arguments: full-release -PprojectVersion=vcl-${{ github.run_number }} -c VCL/jreleaser.yml
           version: latest
         env:
-          JRELEASER_PRERELEASE: ${{ env.JRELEASER_PRERELEASE }}
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
           MAVEN_CENTRAL_SIGNING_KEY_ID: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_ID }}
