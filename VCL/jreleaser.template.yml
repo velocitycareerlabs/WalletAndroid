@@ -43,7 +43,6 @@ deploy:
       app:
         active: ALWAYS
         url: https://central.sonatype.com/api/v1/publisher
-        snapshotUrl: https://oss.sonatype.org/content/repositories/snapshots/
         stagingRepositories:
           - target/staging-deploy
         credentials:
