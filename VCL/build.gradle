@@ -4,6 +4,8 @@ plugins {
     id 'maven-publish'
 }
 
+import org.gradle.api.tasks.bundling.Jar
+
 ext {
     publishCode = 163
     publishVersion = "2.7.3"
@@ -77,26 +79,25 @@ android {
     }
 }
 
-// Corrected sourcesJar task with proper name and path
+// sourcesJar for publishing sources
 tasks.register("sourcesJar", Jar) {
     archiveBaseName.set("vcl")
     archiveClassifier.set("sources")
-    destinationDirectory.set(layout.buildDirectory.dir("libs"))
     from android.sourceSets.main.java.srcDirs
     from android.sourceSets.main.kotlin.srcDirs
+    destinationDirectory.set(file("$buildDir/libs"))
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                groupId = project.group
-                artifactId = artifactId
-                version = project.version
+// Configure Maven publishing
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = project.group
+            artifactId = artifactId
+            version = project.version
 
-                artifact("$buildDir/outputs/aar/${artifactId}-${version}.aar")
-                artifact(tasks.named("sourcesJar").get())
-            }
+            artifact("$buildDir/outputs/aar/${artifactId}-${version}.aar")
+            artifact(tasks.named("sourcesJar").get())
         }
     }
 }
