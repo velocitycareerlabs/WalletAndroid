@@ -79,25 +79,71 @@ android {
     }
 }
 
-// sourcesJar for publishing sources
-tasks.register("sourcesJar", Jar) {
-    archiveBaseName.set("vcl")
-    archiveClassifier.set("sources")
-    from android.sourceSets.main.java.srcDirs
-    from android.sourceSets.main.kotlin.srcDirs
-    destinationDirectory.set(file("$buildDir/libs"))
-}
+afterEvaluate {
+    def sourcesJar = tasks.register("sourcesJar", Jar) {
+        dependsOn 'assemble'
+        archiveBaseName.set("vcl")
+        archiveVersion.set("") // REMOVE version from filename
+        archiveClassifier.set("sources")
+        destinationDirectory = file("$buildDir/libs")
 
-// Configure Maven publishing
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId = project.group
-            artifactId = artifactId
-            version = project.version
+        doFirst {
+            def mainSrcSet = android.sourceSets.findByName("main")
+            if (mainSrcSet != null && mainSrcSet.java != null && mainSrcSet.java.srcDirs != null) {
+                from(mainSrcSet.java.srcDirs)
+            }
+        }
+    }
 
-            artifact("$buildDir/outputs/aar/${artifactId}-${version}.aar")
-            artifact(tasks.named("sourcesJar").get())
+    def javadocJar = tasks.register("javadocJar", Jar) {
+        dependsOn 'assemble'
+        archiveBaseName.set("vcl")
+        archiveVersion.set("")
+        archiveClassifier.set("javadoc")
+        doFirst {
+            file("$buildDir/empty-javadoc").mkdirs()
+            if (file("$buildDir/empty-javadoc").exists()) {
+                from("$buildDir/empty-javadoc")
+            }
+        }
+        destinationDirectory = file("$buildDir/libs")
+    }
+
+    publishing {
+        publications {
+            release(MavenPublication) {
+                groupId = project.group
+                artifactId = artifactId
+                version = project.version
+
+                artifact("$buildDir/outputs/aar/${artifactId}-${version}.aar")
+                artifact(sourcesJar.get())
+                artifact(javadocJar.get())
+
+                pom {
+                    name.set("VCL")
+                    description.set("Velocity Career Labs Android SDK")
+                    url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                    licenses {
+                        license {
+                            name.set("The Apache License, Version 2.0")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("michaelavoyan")
+                            name.set("Michael Avoyan")
+                            email.set("michael.avoyan@gmail.com")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:https://github.com/velocitycareerlabs/WalletAndroid.git")
+                        developerConnection.set("scm:git:ssh://git@github.com:velocitycareerlabs/WalletAndroid.git")
+                        url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                    }
+                }
+            }
         }
     }
 }
