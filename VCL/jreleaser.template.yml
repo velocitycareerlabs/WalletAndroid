@@ -47,10 +47,6 @@ deploy:
           - target/staging-deploy
         username: env.MAVEN_CENTRAL_TOKEN_USERNAME
         password: env.MAVEN_CENTRAL_TOKEN_PASSWORD
-        coordinates:
-          groupId: io.velocitycareerlabs
-          artifactId: vcl
-          version: '{{projectVersion}}'
 
 files:
   artifacts:
