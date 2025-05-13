@@ -45,9 +45,8 @@ deploy:
         url: https://central.sonatype.com/api/v1/publisher
         stagingRepositories:
           - target/staging-deploy
-        credentials:
-          username: env.MAVEN_CENTRAL_TOKEN_USERNAME
-          password: env.MAVEN_CENTRAL_TOKEN_PASSWORD
+        username: env.MAVEN_CENTRAL_TOKEN_USERNAME
+        password: env.MAVEN_CENTRAL_TOKEN_PASSWORD
         coordinates:
           groupId: io.velocitycareerlabs
           artifactId: vcl
