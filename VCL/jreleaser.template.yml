@@ -34,7 +34,8 @@ release:
 signing:
   active: ALWAYS
   armored: true
-  command: gpg
+  command:
+    executable: gpg
 
 deploy:
   maven:
