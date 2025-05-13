@@ -55,9 +55,9 @@ jobs:
       - name: Set RELEASE_TAG
         run: |
           if [[ "${{ env.GLOBAL_ENV }}" == "prod" ]]; then
-            echo "RELEASE_TAG=Release" >> $GITHUB_ENV
+            echo "RELEASE_TAG=release" >> $GITHUB_ENV
           else
-            echo "RELEASE_TAG=Rc" >> $GITHUB_ENV
+            echo "RELEASE_TAG=rc" >> $GITHUB_ENV
           fi
 
       - name: Build AAR
@@ -68,13 +68,12 @@ jobs:
 
       - name: List Built Artifacts
         run: |
-          echo "📂 Listing artifacts..."
           ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
           ls -al VCL/build/libs/
 
       - name: Determine prerelease flag
         run: |
-          if [[ "${{ env.RELEASE_TAG }}" == "Rc" ]]; then
+          if [[ "${{ env.RELEASE_TAG }}" == "rc" ]]; then
             echo "JRELEASER_PRERELEASE=true" >> $GITHUB_ENV
           else
             echo "JRELEASER_PRERELEASE=false" >> $GITHUB_ENV
@@ -96,7 +95,8 @@ jobs:
       - name: Validate artifacts before release
         run: |
           echo "📦 Verifying required artifacts..."
-          test -f $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${{ env.RELEASE_TAG,, }}.aar || (echo "❌ Missing AAR" && exit 1)
+          LOWER_TAG=$(echo "${RELEASE_TAG}" | tr '[:upper:]' '[:lower:]')
+          test -f $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${LOWER_TAG}.aar || (echo "❌ Missing AAR" && exit 1)
           test -f VCL/build/libs/vcl-sources.jar || (echo "❌ Missing sources.jar" && exit 1)
 
       - name: Run JReleaser
