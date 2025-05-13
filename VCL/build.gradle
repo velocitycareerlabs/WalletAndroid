@@ -77,9 +77,11 @@ android {
     }
 }
 
-// Generate sources jar once — no duplication
+// Corrected sourcesJar task with proper name and path
 tasks.register("sourcesJar", Jar) {
+    archiveBaseName.set("vcl")
     archiveClassifier.set("sources")
+    destinationDirectory.set(layout.buildDirectory.dir("libs"))
     from android.sourceSets.main.java.srcDirs
     from android.sourceSets.main.kotlin.srcDirs
 }
