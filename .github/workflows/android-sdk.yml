@@ -95,8 +95,18 @@ jobs:
       - name: Validate artifacts before release
         run: |
           echo "📦 Verifying required artifacts..."
-          test -f $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG,,}.aar || (echo "❌ Missing AAR" && exit 1)
-          test -f VCL/build/libs/vcl-sources.jar || (echo "❌ Missing sources.jar" && exit 1)
+          AAR_FILE="$ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG,,}.aar"
+          if [ ! -f "$AAR_FILE" ]; then
+            echo "❌ Missing AAR: $AAR_FILE"
+            exit 1
+          fi
+
+          if ! ls VCL/build/libs/*sources.jar >/dev/null 2>&1; then
+            echo "❌ Missing sources.jar"
+            exit 1
+          else
+            echo "✅ Found sources.jar"
+          fi
 
       - name: Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
