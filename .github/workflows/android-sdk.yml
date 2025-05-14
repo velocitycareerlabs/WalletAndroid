@@ -82,6 +82,7 @@ jobs:
       - name: Prepare jreleaser.yml from template
         run: |
           cp .github/jreleaser.template.yml .github/jreleaser.yml
+          sed -i "s/{{RELEASE_VERSION}}/vcl-${{ github.run_number }}/g" .github/jreleaser.yml
           if [[ "${{ env.RELEASE_TAG }}" == "rc" ]]; then
             sed -i 's/{{PRERELEASE}}/true/' .github/jreleaser.yml
           else
