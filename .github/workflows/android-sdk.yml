@@ -86,21 +86,21 @@ jobs:
 
       - name: Prepare jreleaser.yml from template
         run: |
-          cp VCL/jreleaser.template.yml VCL/jreleaser.yml
+          cp .github/workflows/jreleaser.template.yml .github/workflows/jreleaser.yml
           if [[ "${{ env.RELEASE_TAG }}" == "rc" ]]; then
-            sed -i 's/{{PRERELEASE}}/true/' VCL/jreleaser.yml
+            sed -i 's/{{PRERELEASE}}/true/' .github/workflows/jreleaser.yml
           else
-            sed -i 's/{{PRERELEASE}}/false/' VCL/jreleaser.yml
+            sed -i 's/{{PRERELEASE}}/false/' .github/workflows/jreleaser.yml
           fi
 
       - name: Debug jreleaser.yml
-        run: cat VCL/jreleaser.yml
+        run: cat .github/workflows/jreleaser.yml
 
       - name: Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
         uses: jreleaser/release-action@v2
         with:
-          arguments: full-release -PprojectVersion=vcl-${{ github.run_number }} -c VCL/jreleaser.yml
+          arguments: full-release -PprojectVersion=vcl-${{ github.run_number }} --basedir . -c .github/workflows/jreleaser.yml
           version: latest
         env:
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
