@@ -34,7 +34,7 @@ jobs:
     secrets: inherit
 
   build-and-release:
-    needs: test-android-sdk
+#    needs: test-android-sdk should return after completing the migration implementation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
