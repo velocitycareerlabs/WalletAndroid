@@ -38,7 +38,7 @@ captures/
 local.properties
 
 # ========== JRELEASER ==========
-.github/workflows/jreleaser.yml
+.github/jreleaser.yml
 
 # ========== GPG & SECRETS ==========
 *.asc
