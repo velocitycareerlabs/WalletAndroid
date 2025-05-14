@@ -83,17 +83,23 @@ jobs:
             sed -i 's/{{PRERELEASE}}/false/' .github/workflows/jreleaser.yml
           fi
 
-      - name: Setup JReleaser CLI
-        uses: jreleaser/setup-jreleaser@v2
+      - name: Validate JReleaser config
+        if: ${{ env.GLOBAL_ENV == 'dev' }}
+        uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
-
-      - name: Validate JReleaser config
-        run: jreleaser config -c .github/workflows/jreleaser.yml
+          arguments: config -c .github/workflows/jreleaser.yml
+        env:
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Dry Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'dev' }}
-        run: jreleaser full-release --dry-run -PprojectVersion=vcl-${{ github.run_number }} -c .github/workflows/jreleaser.yml
+        uses: jreleaser/release-action@v2
+        with:
+          version: 1.18.0
+          arguments: full-release --dry-run -PprojectVersion=vcl-${{ github.run_number }} -c .github/workflows/jreleaser.yml
+        env:
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
@@ -102,6 +108,7 @@ jobs:
           version: 1.18.0
           arguments: full-release -PprojectVersion=vcl-${{ github.run_number }} -c .github/workflows/jreleaser.yml
         env:
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
           MAVEN_CENTRAL_SIGNING_KEY_ID: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_ID }}
