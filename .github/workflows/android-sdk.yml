@@ -96,17 +96,18 @@ jobs:
       - name: Debug jreleaser.yml
         run: cat .github/workflows/jreleaser.yml
 
-      - name: Setup JReleaser CLI
-        uses: jreleaser/setup-jreleaser@v2
-        with:
-          version: 1.18.0
+      - name: Download JReleaser CLI
+        run: |
+          curl -Ls https://github.com/jreleaser/jreleaser/releases/download/v1.18.0/jreleaser-standalone-1.18.0.zip -o jreleaser.zip
+          unzip jreleaser.zip -d jreleaser
+          mv jreleaser/jreleaser-standalone-1.18.0/jreleaser-cli.jar .
 
       - name: Validate JReleaser config
-        run: jreleaser config -c .github/workflows/jreleaser.yml
+        run: java -jar jreleaser-cli.jar config -c .github/workflows/jreleaser.yml
 
       - name: Dry Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'dev' }}
-        run: jreleaser full-release --dry-run -PprojectVersion=vcl-${{ github.run_number }} --basedir . -c .github/workflows/jreleaser.yml
+        run: java -jar jreleaser-cli.jar full-release --dry-run -PprojectVersion=vcl-${{ github.run_number }} --basedir . -c .github/workflows/jreleaser.yml
 
       - name: Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
