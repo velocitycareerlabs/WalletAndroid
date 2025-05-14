@@ -96,9 +96,13 @@ jobs:
       - name: Debug jreleaser.yml
         run: cat .github/workflows/jreleaser.yml
 
+      - name: Clean previous JAR (if any)
+        run: rm -f jreleaser-cli.jar
+
       - name: Download JReleaser CLI from Maven Central
         run: |
-          curl -L https://repo1.maven.org/maven2/org/jreleaser/jreleaser-cli/1.18.0/jreleaser-cli-1.18.0-standalone.jar -o jreleaser-cli.jar
+          curl -fL https://repo1.maven.org/maven2/org/jreleaser/jreleaser-cli/1.18.0/jreleaser-cli-1.18.0-standalone.jar -o jreleaser-cli.jar
+          file jreleaser-cli.jar | grep 'Zip archive data' > /dev/null || { echo '❌ Invalid JAR file downloaded'; exit 1; }
 
       - name: Validate JReleaser config
         run: java -jar jreleaser-cli.jar config -c .github/workflows/jreleaser.yml
