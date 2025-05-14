@@ -46,14 +46,19 @@ deploy:
         closeRepository: true
         releaseRepository: true
         stagingProfileId: {{ANDROID_NEXUS_STAGING_PROFILE_ID}}
+        stagingRepositories:
+          - ${baseDirectory}/build/staging-deploy
         username: env.MAVEN_CENTRAL_TOKEN_USERNAME
         password: env.MAVEN_CENTRAL_TOKEN_PASSWORD
 
 files:
   artifacts:
-    - path: VCL/build/outputs/aar/vcl-release.aar
+    - path: VCL/build/outputs/aar/vcl-{{RELEASE_TAG}}.aar
       platform: universal
+      sign: true
     - path: VCL/build/libs/vcl-sources.jar
       platform: universal
+      sign: true
     - path: VCL/build/libs/vcl-javadoc.jar
       platform: universal
+      sign: true

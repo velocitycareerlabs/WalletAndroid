@@ -18,11 +18,15 @@ permissions:
   pull-requests: write
 
 env:
-  PACKAGE_TYPE: "aar"
-  GRADLE_VERSION: "8.8.2"
-  JAVA_VERSION: "17"
+  PACKAGE_TYPE: aar
+  GRADLE_VERSION: 8.8.2
+  JAVA_VERSION: 17
   ARTIFACT_PATH: VCL/build/outputs
   GLOBAL_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'dev' }}
+  JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  JRELEASER_GPG_PASSPHRASE: ${{ secrets.JRELEASER_GPG_PASSPHRASE }}
+  JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.JRELEASER_GPG_PUBLIC_KEY }}
+  JRELEASER_GPG_SECRET_KEY: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
 
 jobs:
   test-android-sdk:
@@ -30,109 +34,81 @@ jobs:
     secrets: inherit
 
   build-and-release:
-    # needs: test-android-sdk  # ✅ re-enable once migration is complete
+    # needs: test-android-sdk  # ✅ Uncomment when ready to enforce test preconditions
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: 🛎️ Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: ☕ Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
 
-      - name: Set RELEASE_TAG
+      - name: 🏷️ Set RELEASE_TAG
         run: |
-          if [[ "${{ env.GLOBAL_ENV }}" == "prod" ]]; then
-            echo "RELEASE_TAG=release" >> $GITHUB_ENV
-          else
-            echo "RELEASE_TAG=rc" >> $GITHUB_ENV
-          fi
+          echo "RELEASE_TAG=$([[ \"${{ env.GLOBAL_ENV }}\" == \"prod\" ]] && echo release || echo rc)" >> $GITHUB_ENV
 
-      - name: Build AAR
-        run: ./gradlew assemble${{ env.RELEASE_TAG }}
+      - name: 🧹 Clean & Build AAR
+        run: ./gradlew clean assemble${{ env.RELEASE_TAG }}
 
-      - name: Build sources jar
-        run: ./gradlew sourcesJar
+      - name: 📄 Build sources & javadoc jars
+        run: ./gradlew sourcesJar javadocJar
 
-      - name: Build javadoc jar
-        run: ./gradlew javadocJar
-
-      - name: List Built Artifacts
+      - name: 📂 List Built Artifacts
         run: |
           ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
           ls -al VCL/build/libs/
 
-      - name: Import GPG Key
+      - name: 🔐 Import GPG Key
         run: |
           export GPG_TTY=$(tty)
           echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > gpg.asc
           gpg --no-tty --batch --yes --import gpg.asc
 
-      - name: Validate artifacts before release
+      - name: ✅ Validate artifacts
         run: |
-          echo "📦 Verifying artifacts..."
-          test -f $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG}.aar || (echo "❌ Missing AAR file" && exit 1)
-          test -s $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG}.aar || (echo "❌ Empty AAR file" && exit 1)
-          test -f VCL/build/libs/vcl-sources.jar || (echo "❌ Missing sources.jar" && exit 1)
-          test -s VCL/build/libs/vcl-sources.jar || (echo "❌ Empty sources.jar" && exit 1)
-          test -f VCL/build/libs/vcl-javadoc.jar || (echo "❌ Missing javadoc.jar" && exit 1)
-          test -s VCL/build/libs/vcl-javadoc.jar || (echo "❌ Empty javadoc.jar" && exit 1)
+          echo "📦 Validating artifacts..."
+          test -s $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG}.aar || (echo "❌ AAR invalid" && exit 1)
+          test -s VCL/build/libs/vcl-sources.jar || (echo "❌ sources.jar invalid" && exit 1)
+          test -s VCL/build/libs/vcl-javadoc.jar || (echo "❌ javadoc.jar invalid" && exit 1)
 
-      - name: Prepare jreleaser.yml from template
+      - name: 🧩 Prepare JReleaser config
         run: |
           VERSION=2.7.3-${{ env.RELEASE_TAG }}.${{ github.run_number }}
           echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
           cp .github/jreleaser.template.yml .github/jreleaser.yml
           sed -i "s|{{RELEASE_VERSION}}|$VERSION|g" .github/jreleaser.yml
           sed -i "s|{{ANDROID_NEXUS_STAGING_PROFILE_ID}}|${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}|g" .github/jreleaser.yml
-          if [[ "${{ env.RELEASE_TAG }}" == "rc" ]]; then
-            sed -i 's/{{PRERELEASE}}/true/' .github/jreleaser.yml
-          else
-            sed -i 's/{{PRERELEASE}}/false/' .github/jreleaser.yml
-          fi
+          sed -i "s|{{PRERELEASE}}|$([[ '${{ env.RELEASE_TAG }}' == 'rc' ]] && echo true || echo false)|" .github/jreleaser.yml
 
-      - name: Validate JReleaser config
+      - name: 🔍 JReleaser Config Validation (DEV only)
         if: ${{ env.GLOBAL_ENV == 'dev' }}
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
           arguments: config --basedir . -c .github/jreleaser.yml
-        env:
-          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          JRELEASER_GPG_PASSPHRASE: ${{ secrets.JRELEASER_GPG_PASSPHRASE }}
-          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.JRELEASER_GPG_PUBLIC_KEY }}
-          JRELEASER_GPG_SECRET_KEY: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
 
-      - name: Dry Run JReleaser
+      - name: 🧪 JReleaser Dry Run (DEV only)
         if: ${{ env.GLOBAL_ENV == 'dev' }}
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
           arguments: full-release --dry-run -PprojectVersion=${{ env.RELEASE_VERSION }} --basedir . -c .github/jreleaser.yml
-        env:
-          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          JRELEASER_GPG_PASSPHRASE: ${{ secrets.JRELEASER_GPG_PASSPHRASE }}
-          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.JRELEASER_GPG_PUBLIC_KEY }}
-          JRELEASER_GPG_SECRET_KEY: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
 
-      - name: Run JReleaser
+      - name: 🚀 JReleaser Full Release (RC/PROD)
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
           arguments: full-release -PprojectVersion=${{ env.RELEASE_VERSION }} --basedir . -c .github/jreleaser.yml
         env:
-          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
           MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}
-          JRELEASER_GPG_PASSPHRASE: ${{ secrets.JRELEASER_GPG_PASSPHRASE }}
-          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.JRELEASER_GPG_PUBLIC_KEY }}
-          JRELEASER_GPG_SECRET_KEY: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
 
-      - name: Upload Built Artifact
+      - name: 🗃️ Upload Built AAR Artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
@@ -141,10 +117,10 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Post Success Status
+      - name: ✅ Post Success Status
         if: success()
         run: echo "✅ Android SDK Build and Release successful."
 
-      - name: Post Failure Status
+      - name: ❌ Post Failure Status
         if: failure()
         run: echo "❌ Android SDK Build or Tests failed."
