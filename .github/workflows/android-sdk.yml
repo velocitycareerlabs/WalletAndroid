@@ -19,7 +19,6 @@ permissions:
 
 env:
   PACKAGE_TYPE: aar
-  GRADLE_VERSION: 8.8.2
   JAVA_VERSION: 17
   ARTIFACT_PATH: VCL/build/outputs
   JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -31,10 +30,10 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
-      - name: 🛎️ Checkout repository
+      - name: 🛎️ Checkout
         uses: actions/checkout@v4
 
-      - name: ☕ Set up Java
+      - name: ☕ Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -43,23 +42,23 @@ jobs:
       - name: 🏷️ Set GLOBAL_ENV and RELEASE_TAG
         run: |
           ENVIRONMENT="${{ github.event.inputs.environment }}"
-          if [ -z "$ENVIRONMENT" ]; then
-            ENVIRONMENT="dev"
-          fi
+          [ -z "$ENVIRONMENT" ] && ENVIRONMENT="dev"
           echo "GLOBAL_ENV=$ENVIRONMENT" >> $GITHUB_ENV
           if [ "$ENVIRONMENT" = "prod" ]; then
             echo "RELEASE_TAG=release" >> $GITHUB_ENV
-          else
+          elif [ "$ENVIRONMENT" = "rc" ]; then
             echo "RELEASE_TAG=rc" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=dev" >> $GITHUB_ENV
           fi
 
-      - name: 🧹 Clean & Build AAR
+      - name: 🧹 Build AAR
         run: ./gradlew clean assemble${{ env.RELEASE_TAG }}
 
-      - name: 📄 Build sources & javadoc jars
+      - name: 📄 Build sources and javadoc jars
         run: ./gradlew sourcesJar javadocJar
 
-      - name: 📂 List Built Artifacts
+      - name: 📂 List artifacts
         run: |
           ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
           ls -al VCL/build/libs/
@@ -70,12 +69,8 @@ jobs:
           export GPG_TTY=$(tty)
           gpg --batch --yes --import gpg.asc
 
-      - name: 🔎 Verify GPG Key
-        run: gpg --list-keys
-
       - name: ✅ Validate artifacts
         run: |
-          echo "📦 Validating artifacts..."
           test -s ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.aar || (echo "❌ AAR invalid" && exit 1)
           test -s VCL/build/libs/vcl-sources.jar || (echo "❌ sources.jar invalid" && exit 1)
           test -s VCL/build/libs/vcl-javadoc.jar || (echo "❌ javadoc.jar invalid" && exit 1)
@@ -103,7 +98,7 @@ jobs:
           version: 1.18.0
           arguments: full-release --dry-run -PprojectVersion=${{ env.RELEASE_VERSION }} --basedir . -c .github/jreleaser.yml
 
-      - name: 🚀 JReleaser Full Release (RC/PROD)
+      - name: 🚀 JReleaser Full Release (RC/PROD only)
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
         uses: jreleaser/release-action@v2
         with:
@@ -113,7 +108,7 @@ jobs:
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
 
-      - name: 🗃️ Upload Built AAR Artifact
+      - name: 📦 Upload AAR
         if: success()
         uses: actions/upload-artifact@v4
         with:
@@ -122,10 +117,10 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: ✅ Post Success Status
+      - name: ✅ Notify success
         if: success()
-        run: echo "✅ Android SDK Build and Release successful."
+        run: echo "✅ Android SDK published successfully."
 
-      - name: ❌ Post Failure Status
+      - name: ❌ Notify failure
         if: failure()
-        run: echo "❌ Android SDK Build or Tests failed."
+        run: echo "❌ Android SDK build or release failed."
