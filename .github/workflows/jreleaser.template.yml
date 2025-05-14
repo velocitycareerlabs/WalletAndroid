@@ -28,23 +28,22 @@ release:
     draft: false
     sign: true
     skipTag: false
-    prerelease:
-      enabled: {{PRERELEASE}}
+    prerelease: {{PRERELEASE}}
 
 signing:
   active: ALWAYS
   armored: true
-  command:
-    executable: gpg
+  command: gpg
 
 deploy:
   maven:
-    mavenCentral:
-      app:
+    nexus2:
+      mavenCentral:
         active: ALWAYS
-        url: https://central.sonatype.com/api/v1/publisher
-        stagingRepositories:
-          - target/staging-deploy
+        url: https://s01.oss.sonatype.org/service/local
+        closeRepository: true
+        releaseRepository: true
+        stagingRepository: build/staging-deploy
         username: env.MAVEN_CENTRAL_TOKEN_USERNAME
         password: env.MAVEN_CENTRAL_TOKEN_PASSWORD
 

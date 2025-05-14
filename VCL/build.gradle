@@ -72,6 +72,7 @@ android {
         buildConfig true
     }
 
+    // Rename output AARs to include variant name (e.g., vcl-rc.aar)
     libraryVariants.configureEach { variant ->
         variant.outputs.all {
             outputFileName = "vcl-${variant.name}.aar"
@@ -80,33 +81,44 @@ android {
 }
 
 afterEvaluate {
+    // Generate sources JAR
     def sourcesJar = tasks.register("sourcesJar", Jar) {
         dependsOn 'assemble'
         archiveBaseName.set("vcl")
-        archiveVersion.set("") // REMOVE version from filename
+        archiveVersion.set("") // no version suffix in filename
         archiveClassifier.set("sources")
         destinationDirectory = file("$buildDir/libs")
 
         doFirst {
             def mainSrcSet = android.sourceSets.findByName("main")
-            if (mainSrcSet != null && mainSrcSet.java != null && mainSrcSet.java.srcDirs != null) {
+            if (mainSrcSet != null) {
                 from(mainSrcSet.java.srcDirs)
+                if (mainSrcSet.hasProperty("kotlin")) {
+                    from(mainSrcSet.kotlin.srcDirs)
+                } else {
+                    from("src/main/kotlin") // fallback in case kotlin.srcDirs is undefined
+                }
             }
         }
     }
 
+    // Generate dummy javadoc JAR
     def javadocJar = tasks.register("javadocJar", Jar) {
         dependsOn 'assemble'
         archiveBaseName.set("vcl")
         archiveVersion.set("")
         archiveClassifier.set("javadoc")
-        doFirst {
-            file("$buildDir/empty-javadoc").mkdirs()
-            if (file("$buildDir/empty-javadoc").exists()) {
-                from("$buildDir/empty-javadoc")
-            }
-        }
         destinationDirectory = file("$buildDir/libs")
+
+        doFirst {
+            def dummyDir = file("$buildDir/empty-javadoc")
+            dummyDir.mkdirs()
+            def dummyJava = new File(dummyDir, "placeholder.java")
+            if (!dummyJava.exists()) {
+                dummyJava.text = "/** Placeholder to satisfy Maven Central javadoc requirement */"
+            }
+            from(dummyDir)
+        }
     }
 
     publishing {
@@ -116,10 +128,14 @@ afterEvaluate {
                 artifactId = artifactId
                 version = project.version
 
-                artifact("$buildDir/outputs/aar/${artifactId}-${version}.aar")
+                // AAR from renamed output
+                artifact("$buildDir/outputs/aar/vcl-release.aar")
+
+                // Sources and javadoc
                 artifact(sourcesJar.get())
                 artifact(javadocJar.get())
 
+                // Maven Central metadata
                 pom {
                     name.set("VCL")
                     description.set("Velocity Career Labs Android SDK")
@@ -143,6 +159,14 @@ afterEvaluate {
                         url.set("https://github.com/velocitycareerlabs/WalletAndroid")
                     }
                 }
+            }
+        }
+
+        // This is REQUIRED for JReleaser to pick up the artifacts
+        repositories {
+            maven {
+                name = "localStagingForJReleaser"
+                url = uri("$buildDir/staging-deploy")
             }
         }
     }
