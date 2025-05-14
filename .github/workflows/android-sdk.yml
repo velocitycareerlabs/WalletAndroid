@@ -16,6 +16,11 @@ on:
           - rc
           - prod
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
 env:
   PACKAGE_TYPE: "aar"
   GRADLE_VERSION: "8.8.2"
@@ -88,7 +93,7 @@ jobs:
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
-          arguments: config -c .github/jreleaser.yml
+          arguments: config --basedir . -c .github/jreleaser.yml
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -97,7 +102,7 @@ jobs:
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
-          arguments: full-release --dry-run -PprojectVersion=vcl-${{ github.run_number }} -c .github/jreleaser.yml
+          arguments: full-release --dry-run -PprojectVersion=vcl-${{ github.run_number }} --basedir . -c .github/jreleaser.yml
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -106,7 +111,7 @@ jobs:
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
-          arguments: full-release -PprojectVersion=vcl-${{ github.run_number }} -c .github/jreleaser.yml
+          arguments: full-release -PprojectVersion=vcl-${{ github.run_number }} --basedir . -c .github/jreleaser.yml
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
