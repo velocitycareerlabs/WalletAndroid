@@ -97,11 +97,11 @@ jobs:
         run: cat .github/workflows/jreleaser.yml
 
       - name: Validate JReleaser config
-        run: java -jar jreleaser-cli.jar config -c .github/workflows/jreleaser.yml
+        run: jreleaser config -c .github/workflows/jreleaser.yml
 
       - name: Dry Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'dev' }}
-        run: java -jar jreleaser-cli.jar full-release --dry-run -PprojectVersion=vcl-${{ github.run_number }} --basedir . -c .github/workflows/jreleaser.yml
+        run: jreleaser full-release --dry-run -PprojectVersion=vcl-${{ github.run_number }} --basedir . -c .github/workflows/jreleaser.yml
 
       - name: Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
