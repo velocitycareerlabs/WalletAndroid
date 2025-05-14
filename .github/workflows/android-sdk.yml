@@ -96,11 +96,9 @@ jobs:
       - name: Debug jreleaser.yml
         run: cat .github/workflows/jreleaser.yml
 
-      - name: Download JReleaser CLI
+      - name: Download JReleaser CLI from Maven Central
         run: |
-          curl -Ls https://github.com/jreleaser/jreleaser/releases/download/v1.18.0/jreleaser-standalone-1.18.0.zip -o jreleaser.zip
-          unzip jreleaser.zip -d jreleaser
-          mv jreleaser/jreleaser-standalone-1.18.0/jreleaser-cli.jar .
+          curl -L https://repo1.maven.org/maven2/org/jreleaser/jreleaser-cli/1.18.0/jreleaser-cli-1.18.0-standalone.jar -o jreleaser-cli.jar
 
       - name: Validate JReleaser config
         run: java -jar jreleaser-cli.jar config -c .github/workflows/jreleaser.yml
