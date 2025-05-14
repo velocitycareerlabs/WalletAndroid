@@ -22,7 +22,6 @@ env:
   GRADLE_VERSION: 8.8.2
   JAVA_VERSION: 17
   ARTIFACT_PATH: VCL/build/outputs
-  GLOBAL_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'dev' }}
   JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
   JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}
@@ -41,8 +40,18 @@ jobs:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
 
-      - name: 🏷️ Set RELEASE_TAG
-        run: echo "RELEASE_TAG=$([[ \"${{ env.GLOBAL_ENV }}\" == \"prod\" ]] && echo release || echo rc)" >> $GITHUB_ENV
+      - name: 🏷️ Set GLOBAL_ENV and RELEASE_TAG
+        run: |
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+          if [ -z "$ENVIRONMENT" ]; then
+            ENVIRONMENT="dev"
+          fi
+          echo "GLOBAL_ENV=$ENVIRONMENT" >> $GITHUB_ENV
+          if [ "$ENVIRONMENT" = "prod" ]; then
+            echo "RELEASE_TAG=release" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=rc" >> $GITHUB_ENV
+          fi
 
       - name: 🧹 Clean & Build AAR
         run: ./gradlew clean assemble${{ env.RELEASE_TAG }}
@@ -67,7 +76,7 @@ jobs:
       - name: ✅ Validate artifacts
         run: |
           echo "📦 Validating artifacts..."
-          test -s $ARTIFACT_PATH/$PACKAGE_TYPE/vcl-${RELEASE_TAG}.aar || (echo "❌ AAR invalid" && exit 1)
+          test -s ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.aar || (echo "❌ AAR invalid" && exit 1)
           test -s VCL/build/libs/vcl-sources.jar || (echo "❌ sources.jar invalid" && exit 1)
           test -s VCL/build/libs/vcl-javadoc.jar || (echo "❌ javadoc.jar invalid" && exit 1)
 
