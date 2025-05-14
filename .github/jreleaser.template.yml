@@ -1,6 +1,6 @@
 project:
   name: WalletAndroid
-  version: '{{projectVersion}}'
+  version: '{{RELEASE_VERSION}}'
   description: Velocity Career Labs Android library
   links:
     homepage: https://github.com/velocitycareerlabs
@@ -23,8 +23,8 @@ release:
   github:
     owner: velocitycareerlabs
     name: WalletAndroid
-    releaseName: '{{projectVersion}}'
-    tagName: '{{projectVersion}}'
+    releaseName: '{{RELEASE_VERSION}}'
+    tagName: '{{RELEASE_VERSION}}'
     draft: false
     sign: true
     skipTag: false
