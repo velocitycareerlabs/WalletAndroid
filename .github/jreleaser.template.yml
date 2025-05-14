@@ -2,34 +2,15 @@ project:
   name: WalletAndroid
   version: '{{RELEASE_VERSION}}'
   description: Velocity Career Labs Android library
-  links:
-    homepage: https://github.com/velocitycareerlabs
-  license: Apache-2.0
   authors:
     - Michael Avoyan
+  license: Apache-2.0
+  links:
+    homepage: https://github.com/velocitycareerlabs
   languages:
     java:
       groupId: io.velocitycareerlabs
       artifactId: vcl
-
-environment:
-  properties:
-    PACKAGE_TYPE: aar
-    GRADLE_VERSION: 8.8.2
-    JAVA_VERSION: 17
-    ARTIFACT_PATH: VCL/build/outputs
-
-release:
-  github:
-    owner: velocitycareerlabs
-    name: WalletAndroid
-    releaseName: '{{RELEASE_VERSION}}'
-    tagName: '{{RELEASE_VERSION}}'
-    draft: false
-    sign: true
-    skipTag: false
-    prerelease:
-      enabled: {{PRERELEASE}}
 
 signing:
   active: ALWAYS
@@ -37,14 +18,24 @@ signing:
   command:
     executable: gpg
 
+release:
+  github:
+    owner: velocitycareerlabs
+    name: WalletAndroid
+    tagName: '{{RELEASE_VERSION}}'
+    releaseName: '{{RELEASE_VERSION}}'
+    draft: false
+    sign: true
+    skipTag: false
+    prerelease:
+      enabled: {{PRERELEASE}}
+
 deploy:
   maven:
     nexus2:
       mavenCentral:
         active: ALWAYS
         url: https://s01.oss.sonatype.org/service/local
-        closeRepository: true
-        releaseRepository: true
         stagingProfileId: {{ANDROID_NEXUS_STAGING_PROFILE_ID}}
         stagingRepositories:
           - ${baseDirectory}/build/staging-deploy
