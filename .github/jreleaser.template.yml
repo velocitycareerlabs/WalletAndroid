@@ -45,6 +45,7 @@ deploy:
         url: https://s01.oss.sonatype.org/service/local
         closeRepository: true
         releaseRepository: true
+        stagingProfileId: {{ANDROID_NEXUS_STAGING_PROFILE_ID}}
         username: env.MAVEN_CENTRAL_TOKEN_USERNAME
         password: env.MAVEN_CENTRAL_TOKEN_PASSWORD
 
