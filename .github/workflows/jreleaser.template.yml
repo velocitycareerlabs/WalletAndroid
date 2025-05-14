@@ -28,7 +28,8 @@ release:
     draft: false
     sign: true
     skipTag: false
-    prerelease: {{PRERELEASE}}
+    prerelease:
+      enabled: {{PRERELEASE}}
 
 signing:
   active: ALWAYS
@@ -49,7 +50,9 @@ deploy:
 
 files:
   artifacts:
-    - path: VCL/build/outputs/aar/vcl-{{projectVersion}}.aar
+    - path: VCL/build/outputs/aar/vcl-release.aar
       platform: universal
     - path: VCL/build/libs/vcl-sources.jar
+      platform: universal
+    - path: VCL/build/libs/vcl-javadoc.jar
       platform: universal

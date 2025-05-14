@@ -31,8 +31,6 @@ jobs:
   build-and-release:
     needs: test-android-sdk
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -63,18 +61,10 @@ jobs:
           ls -al VCL/build/libs/
 
       - name: Import GPG Key
-        shell: bash {0}
         run: |
           export GPG_TTY=$(tty)
           echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_GPG_B64 }}" | base64 --decode > gpg.asc
           gpg --no-tty --batch --yes --import gpg.asc
-          status=$?
-          if [ $status -ne 0 ]; then
-            echo "❌ GPG key import failed (exit code $status)"
-            exit $status
-          else
-            echo "✅ GPG key successfully imported"
-          fi
 
       - name: Validate artifacts before release
         run: |
@@ -93,30 +83,24 @@ jobs:
             sed -i 's/{{PRERELEASE}}/false/' .github/workflows/jreleaser.yml
           fi
 
-      - name: Debug jreleaser.yml
-        run: cat .github/workflows/jreleaser.yml
-
-      - name: Clean previous JAR (if any)
-        run: rm -f jreleaser-cli.jar
-
-      - name: Download JReleaser CLI from Maven Central
-        run: |
-          curl -fL https://repo1.maven.org/maven2/org/jreleaser/jreleaser-cli/1.18.0/jreleaser-cli-1.18.0-standalone.jar -o jreleaser-cli.jar
-          file jreleaser-cli.jar | grep 'Zip archive data' > /dev/null || { echo '❌ Invalid JAR file downloaded'; exit 1; }
+      - name: Setup JReleaser CLI
+        uses: jreleaser/setup-jreleaser@v2
+        with:
+          version: 1.18.0
 
       - name: Validate JReleaser config
-        run: java -jar jreleaser-cli.jar config -c .github/workflows/jreleaser.yml
+        run: jreleaser config -c .github/workflows/jreleaser.yml
 
       - name: Dry Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'dev' }}
-        run: java -jar jreleaser-cli.jar full-release --dry-run -PprojectVersion=vcl-${{ github.run_number }} --basedir . -c .github/workflows/jreleaser.yml
+        run: jreleaser full-release --dry-run -PprojectVersion=vcl-${{ github.run_number }} -c .github/workflows/jreleaser.yml
 
       - name: Run JReleaser
         if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
         uses: jreleaser/release-action@v2
         with:
-          arguments: full-release -PprojectVersion=vcl-${{ github.run_number }} --basedir . -c .github/workflows/jreleaser.yml
-          version: latest
+          version: 1.18.0
+          arguments: full-release -PprojectVersion=vcl-${{ github.run_number }} -c .github/workflows/jreleaser.yml
         env:
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
