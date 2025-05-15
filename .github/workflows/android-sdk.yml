@@ -1,96 +1,129 @@
-name: WalletAndroid-SDK
+name: WalletAndroid-SDK-Publish
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       environment:
-        description: Configuration environment
+        description: "Deployment environment"
         required: true
-        default: 'dev'
         type: choice
-        options:
-          - dev
-          - rc
-          - prod
+        options: [rc, prod]
+
+permissions:
+  contents: write
 
 env:
-  PACKAGE_TYPE: "aar"
-  GRADLE_VERSION: "8.8.2"
-  JAVA_VERSION: "17"
-  ARTIFACT_PATH: "VCL/build/outputs"
-  GLOBAL_ENV: ${{ github.event_name == 'push' && format('{0}', 'dev') || inputs.environment }}
+  PACKAGE_TYPE: aar
+  JAVA_VERSION: 17
+  ARTIFACT_PATH: VCL/build/outputs
+  JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
+  JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}
+  JRELEASER_GPG_SECRET_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}
 
 jobs:
-  test-android-sdk:
+  verify-gpg-keys:
+    name: 🔍 Debug GPG Keys
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.environment == 'rc' }}  # Optional: only on RC releases
     steps:
-      - name: Git clone repository
-        uses: actions/checkout@v4
-      # Setup java
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-      # Run test
-      - name: Run Test
-        run: ./gradlew test
+      - name: 🔐 Decode and Import Secret GPG Key
+        run: |
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > private.asc
+          export GNUPGHOME=$(mktemp -d)
+          export GPG_TTY=$(tty)
+          gpg --batch --yes --import private.asc || { echo "❌ Failed to import private key"; exit 1; }
+          echo "✅ Secret key imported"
 
-  build-and-publish-android-sdk:
+      - name: 🔍 List Secret Keys
+        run: |
+          export GPG_TTY=$(tty)
+          gpg --list-secret-keys --keyid-format LONG || { echo "❌ No secret keys found"; exit 1; }
+
+      - name: 🔓 Decode and Import Public GPG Key
+        run: |
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode > public.asc
+          gpg --batch --yes --import public.asc || { echo "❌ Failed to import public key"; exit 1; }
+          echo "✅ Public key imported"
+
+      - name: 🧪 Verify Matching Key Pair
+        run: |
+          echo "🔗 Matching secret and public keys:"
+          gpg --check-trustdb
+          gpg --list-keys --with-subkey-fingerprint
+
+  build-and-release:
+    needs: verify-gpg-keys
     runs-on: ubuntu-latest
-    needs:
-      - test-android-sdk
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.environment }}
     steps:
-      - name: Git clone repository
+      - name: Checkout
         uses: actions/checkout@v4
-      # Setup java
-      - uses: actions/setup-java@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-      # Gradle Assemble
-      - name: Gradle Assemble
-        run: ./gradlew assemble${{ env.RELEASE_TAG }}
+
+      - name: Build AAR
+        run: RELEASE_TAG=${{ env.RELEASE_TAG }} ./gradlew clean assemble${{ env.RELEASE_TAG }}
+
+      - name: Build sources and javadoc jars
+        run: ./gradlew sourcesJar javadocJar
+
+      - name: List artifacts
+        run: |
+          ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
+          ls -al VCL/build/libs/
+
+      - name: 🔐 Import GPG keys for JReleaser
+        run: |
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > private.asc
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode > public.asc
+          export GPG_TTY=$(tty)
+          gpg --batch --yes --import private.asc || { echo "❌ Failed to import private key"; exit 1; }
+          gpg --batch --yes --import public.asc || { echo "❌ Failed to import public key"; exit 1; }
+          echo "✅ GPG keys imported successfully in build job"
+
+      - name: Validate artifacts
+        run: |
+          test -s ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.aar || exit 1
+          test -s VCL/build/libs/vcl-sources.jar || exit 1
+          test -s VCL/build/libs/vcl-javadoc.jar || exit 1
+
+      - name: Prepare JReleaser config
+        run: |
+          VERSION=$(./gradlew -q printVersion).${{ github.run_number }}
+          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+          cp .github/jreleaser.template.yml .github/jreleaser.yml
+          sed -i "s|{{RELEASE_VERSION}}|$VERSION|g" .github/jreleaser.yml
+          sed -i "s|{{ANDROID_NEXUS_STAGING_PROFILE_ID}}|${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}|g" .github/jreleaser.yml
+          sed -i "s|{{PRERELEASE}}|$([[ '${{ env.RELEASE_TAG }}' == 'rc' ]] && echo true || echo false)|" .github/jreleaser.yml
+          sed -i "s|{{RELEASE_TAG}}|${{ env.RELEASE_TAG }}|g" .github/jreleaser.yml
+
+      - name: Release with JReleaser
+        uses: jreleaser/release-action@v2
+        with:
+          version: 1.18.0
+          arguments: full-release -PprojectVersion=${{ env.RELEASE_VERSION }} --basedir . -c .github/jreleaser.yml
         env:
-          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'Release' ) || 'Rc' }}
-      # Convert artifact to lowercase
-      - name: Rename artifact to lowercase
-        run: mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
-        env:
-          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'release' ) || 'rc' }}
-      # Show Me Built packages
-      - name: Show Me Built packages
-        run: ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
-      - name: Export Nexus Private Key
-        run: echo "signingPrivateKey=${{ secrets.ANDROID_NEXUS_PRIVATE_KEY }}" >> nexus.properties
-      # Publish Prod/Rc
-      - name: Publish Prod/Rc
-        if: ${{ env.GLOBAL_ENV == 'prod' || env.GLOBAL_ENV == 'rc' }}
-        run: ./gradlew publish${{ env.RELEASE_TAG }}
-        env:
-          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'Release' ) || 'Rc' }}
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
-          MAVEN_CENTRAL_SIGNING_KEY_ID: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_ID }}
-          MAVEN_CENTRAL_SIGNING_PASSWORD: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
-          MAVEN_CENTRAL_PRIVATE_KEY_B64: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}
-      # Upload Artifacts
-      - name: Upload Artifact
-        if: success()
+
+      - name: Upload AAR
         uses: actions/upload-artifact@v4
         with:
-          name: vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
+          name: vcl-${{ env.RELEASE_TAG }}-${{ github.run_number }}
           path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
           if-no-files-found: error
-          retention-days: 1
-        env:
-          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'release' ) || 'rc' }}
+          retention-days: 14
 
+      - name: ✅ Notify success
+        if: success()
+        run: echo "✅ Android SDK published successfully."
 
-
-
-
-
-
+      - name: ❌ Notify failure
+        if: failure()
+        run: echo "❌ Android SDK build or release failed."

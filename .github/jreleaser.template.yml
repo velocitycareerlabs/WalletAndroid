@@ -1,0 +1,55 @@
+project:
+  name: WalletAndroid
+  version: '{{RELEASE_VERSION}}'
+  description: Velocity Career Labs Android library
+  authors:
+    - Michael Avoyan
+  license: Apache-2.0
+  links:
+    homepage: https://github.com/velocitycareerlabs
+  languages:
+    java:
+      groupId: io.velocitycareerlabs
+      artifactId: vcl
+
+signing:
+  active: ALWAYS
+  armored: true
+  command:
+    executable: gpg
+  publicKey: env.JRELEASER_GPG_PUBLIC_KEY
+  secretKey: env.JRELEASER_GPG_SECRET_KEY
+  passphrase: env.JRELEASER_GPG_PASSPHRASE
+
+release:
+  github:
+    owner: velocitycareerlabs
+    name: WalletAndroid
+    tagName: '{{RELEASE_VERSION}}'
+    releaseName: '{{RELEASE_VERSION}}'
+    draft: false
+    sign: true
+    skipTag: false
+    prerelease:
+      enabled: {{PRERELEASE}}
+
+deploy:
+  maven:
+    nexus2:
+      mavenCentral:
+        active: ALWAYS
+        url: https://s01.oss.sonatype.org/service/local
+        stagingProfileId: {{ANDROID_NEXUS_STAGING_PROFILE_ID}}
+        stagingRepositories:
+          - ${baseDirectory}/build/staging-deploy
+        username: env.MAVEN_CENTRAL_TOKEN_USERNAME
+        password: env.MAVEN_CENTRAL_TOKEN_PASSWORD
+
+files:
+  artifacts:
+    - path: VCL/build/outputs/aar/vcl-{{RELEASE_TAG}}.aar
+      platform: universal
+    - path: VCL/build/libs/vcl-sources.jar
+      platform: universal
+    - path: VCL/build/libs/vcl-javadoc.jar
+      platform: universal
