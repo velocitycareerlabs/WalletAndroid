@@ -18,11 +18,42 @@ env:
   ARTIFACT_PATH: VCL/build/outputs
   JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
-  JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}
-  JRELEASER_GPG_SECRET_KEY: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}
+  JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}
+  JRELEASER_GPG_SECRET_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}
 
 jobs:
+  verify-gpg-keys:
+    name: 🔍 Debug GPG Keys
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.environment == 'rc' }}  # Optional: only on RC releases
+    steps:
+      - name: 🔐 Decode and Import Secret GPG Key
+        run: |
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > private.asc
+          export GNUPGHOME=$(mktemp -d)
+          export GPG_TTY=$(tty)
+          gpg --batch --yes --import private.asc || { echo "❌ Failed to import private key"; exit 1; }
+          echo "✅ Secret key imported"
+
+      - name: 🔍 List Secret Keys
+        run: |
+          export GPG_TTY=$(tty)
+          gpg --list-secret-keys --keyid-format LONG || { echo "❌ No secret keys found"; exit 1; }
+
+      - name: 🔓 Decode and Import Public GPG Key
+        run: |
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode > public.asc
+          gpg --batch --yes --import public.asc || { echo "❌ Failed to import public key"; exit 1; }
+          echo "✅ Public key imported"
+
+      - name: 🧪 Verify Matching Key Pair
+        run: |
+          echo "🔗 Matching secret and public keys:"
+          gpg --check-trustdb
+          gpg --list-keys --with-subkey-fingerprint
+
   build-and-release:
+    needs: verify-gpg-keys
     runs-on: ubuntu-latest
     env:
       RELEASE_TAG: ${{ github.event.inputs.environment }}
@@ -46,15 +77,6 @@ jobs:
         run: |
           ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
           ls -al VCL/build/libs/
-
-      - name: 🔐 Import and Verify GPG Key
-        run: |
-          echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}" | base64 --decode > gpg.asc
-          export GPG_TTY=$(tty)
-          gpg --batch --yes --import gpg.asc || { echo "❌ Failed to import GPG key"; exit 1; }
-          echo "🔍 Verifying secret key..."
-          gpg --list-secret-keys --keyid-format LONG || { echo "❌ No valid secret key found"; exit 1; }
-          echo "✅ GPG key is valid and importable."
 
       - name: Validate artifacts
         run: |
