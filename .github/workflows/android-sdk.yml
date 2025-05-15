@@ -30,7 +30,7 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
-      - name: 🛎️ Checkout
+      - name: 📬 Checkout
         uses: actions/checkout@v4
 
       - name: ☕ Setup Java
@@ -41,19 +41,22 @@ jobs:
 
       - name: 🏷️ Set GLOBAL_ENV and RELEASE_TAG
         run: |
-          ENVIRONMENT="${{ github.event.inputs.environment }}"
-          [ -z "$ENVIRONMENT" ] && ENVIRONMENT="dev"
-          echo "GLOBAL_ENV=$ENVIRONMENT" >> $GITHUB_ENV
-          if [ "$ENVIRONMENT" = "prod" ]; then
+          ENV="${{ github.event.inputs.environment }}"
+          [ -z "$ENV" ] && ENV="dev"
+          echo "GLOBAL_ENV=$ENV" >> $GITHUB_ENV
+
+          if [ "$ENV" = "prod" ]; then
             echo "RELEASE_TAG=release" >> $GITHUB_ENV
-          elif [ "$ENVIRONMENT" = "rc" ]; then
+          elif [ "$ENV" = "rc" ]; then
             echo "RELEASE_TAG=rc" >> $GITHUB_ENV
           else
             echo "RELEASE_TAG=dev" >> $GITHUB_ENV
           fi
 
-      - name: 🧹 Build AAR
-        run: ./gradlew clean assemble${{ env.RELEASE_TAG }}
+      - name: 🪹 Build AAR
+        run: ./gradlew clean assemble${RELEASE_TAG}
+        env:
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
 
       - name: 📄 Build sources and javadoc jars
         run: ./gradlew sourcesJar javadocJar
@@ -62,6 +65,8 @@ jobs:
         run: |
           ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
           ls -al VCL/build/libs/
+        env:
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
 
       - name: 🔐 Import GPG Key
         run: |
@@ -71,18 +76,23 @@ jobs:
 
       - name: ✅ Validate artifacts
         run: |
-          test -s ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.aar || (echo "❌ AAR invalid" && exit 1)
+          test -s ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${RELEASE_TAG}.aar || (echo "❌ AAR invalid" && exit 1)
           test -s VCL/build/libs/vcl-sources.jar || (echo "❌ sources.jar invalid" && exit 1)
           test -s VCL/build/libs/vcl-javadoc.jar || (echo "❌ javadoc.jar invalid" && exit 1)
+        env:
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
 
-      - name: 🧩 Prepare JReleaser config
+      - name: 🧽 Prepare JReleaser config
         run: |
-          VERSION=2.7.3-${{ env.RELEASE_TAG }}.${{ github.run_number }}
+          VERSION=$(./gradlew -q printVersion)
+          VERSION="$VERSION-${RELEASE_TAG}.${{ github.run_number }}"
           echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
           cp .github/jreleaser.template.yml .github/jreleaser.yml
           sed -i "s|{{RELEASE_VERSION}}|$VERSION|g" .github/jreleaser.yml
           sed -i "s|{{ANDROID_NEXUS_STAGING_PROFILE_ID}}|${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}|g" .github/jreleaser.yml
-          sed -i "s|{{PRERELEASE}}|$([[ '${{ env.RELEASE_TAG }}' == 'rc' ]] && echo true || echo false)|" .github/jreleaser.yml
+          sed -i "s|{{PRERELEASE}}|$([[ \"$RELEASE_TAG\" == \"rc\" ]] && echo true || echo false)|" .github/jreleaser.yml
+        env:
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
 
       - name: 🔍 JReleaser Config Validation (DEV only)
         if: ${{ env.GLOBAL_ENV == 'dev' }}
@@ -108,7 +118,7 @@ jobs:
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
 
-      - name: 📦 Upload AAR
+      - name: 📆 Upload AAR
         if: success()
         uses: actions/upload-artifact@v4
         with:
