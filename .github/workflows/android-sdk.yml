@@ -24,6 +24,8 @@ env:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,10 +35,6 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-
-      - name: Set RELEASE_TAG
-        run: |
-          echo "RELEASE_TAG=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
 
       - name: Build AAR
         run: ./gradlew clean assemble${{ env.RELEASE_TAG }}
@@ -63,7 +61,7 @@ jobs:
 
       - name: Prepare JReleaser config
         run: |
-          VERSION=$(./gradlew -q printVersion).${{ github.run_number }}
+          VERSION=$(RELEASE_TAG=${{ env.RELEASE_TAG }} ./gradlew -q printVersion).${{ github.run_number }}
           echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
           cp .github/jreleaser.template.yml .github/jreleaser.yml
           sed -i "s|{{RELEASE_VERSION}}|$VERSION|g" .github/jreleaser.yml
