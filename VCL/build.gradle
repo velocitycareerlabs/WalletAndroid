@@ -18,7 +18,6 @@ group = publishGroup
 
 def releaseTag = System.getenv("RELEASE_TAG") ?: "rc"
 version = releaseTag == "release" ? baseVersion : "${baseVersion}-${releaseTag}"
-println "🔖 Building VCL version: ${version} (RELEASE_TAG=$releaseTag)"
 
 android {
     compileSdk 35

@@ -1,21 +1,16 @@
 name: WalletAndroid-SDK-Publish
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       environment:
         description: "Deployment environment"
         required: true
-        default: "dev"
         type: choice
-        options: [dev, rc, prod]
+        options: [rc, prod]
 
 permissions:
   contents: write
-  issues: write
-  pull-requests: write
 
 env:
   PACKAGE_TYPE: aar
@@ -30,86 +25,52 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
-      - name: 📬 Checkout
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: ☕ Setup Java
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
 
-      - name: 🏷️ Set GLOBAL_ENV and RELEASE_TAG
+      - name: Set RELEASE_TAG
         run: |
-          ENV="${{ github.event.inputs.environment }}"
-          [ -z "$ENV" ] && ENV="dev"
-          echo "GLOBAL_ENV=$ENV" >> $GITHUB_ENV
+          echo "RELEASE_TAG=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
 
-          if [ "$ENV" = "prod" ]; then
-            echo "RELEASE_TAG=release" >> $GITHUB_ENV
-          elif [ "$ENV" = "rc" ]; then
-            echo "RELEASE_TAG=rc" >> $GITHUB_ENV
-          else
-            echo "RELEASE_TAG=dev" >> $GITHUB_ENV
-          fi
+      - name: Build AAR
+        run: ./gradlew clean assemble${{ env.RELEASE_TAG }}
 
-      - name: 🪹 Build AAR
-        run: ./gradlew clean assemble${RELEASE_TAG}
-        env:
-          RELEASE_TAG: ${{ env.RELEASE_TAG }}
-
-      - name: 📄 Build sources and javadoc jars
+      - name: Build sources and javadoc jars
         run: ./gradlew sourcesJar javadocJar
 
-      - name: 📂 List artifacts
+      - name: List artifacts
         run: |
           ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
           ls -al VCL/build/libs/
-        env:
-          RELEASE_TAG: ${{ env.RELEASE_TAG }}
 
-      - name: 🔐 Import GPG Key
+      - name: Import GPG key
         run: |
           echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}" | base64 --decode > gpg.asc
           export GPG_TTY=$(tty)
           gpg --batch --yes --import gpg.asc
 
-      - name: ✅ Validate artifacts
+      - name: Validate artifacts
         run: |
-          test -s ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${RELEASE_TAG}.aar || (echo "❌ AAR invalid" && exit 1)
-          test -s VCL/build/libs/vcl-sources.jar || (echo "❌ sources.jar invalid" && exit 1)
-          test -s VCL/build/libs/vcl-javadoc.jar || (echo "❌ javadoc.jar invalid" && exit 1)
-        env:
-          RELEASE_TAG: ${{ env.RELEASE_TAG }}
+          test -s ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.aar || exit 1
+          test -s VCL/build/libs/vcl-sources.jar || exit 1
+          test -s VCL/build/libs/vcl-javadoc.jar || exit 1
 
-      - name: 🧽 Prepare JReleaser config
+      - name: Prepare JReleaser config
         run: |
-          RAW_VERSION=$(./gradlew -q printVersion)
-          VERSION="${RAW_VERSION}.${{ github.run_number }}"
+          VERSION=$(./gradlew -q printVersion).${{ github.run_number }}
           echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
           cp .github/jreleaser.template.yml .github/jreleaser.yml
-          sed -i.bak "s|{{RELEASE_VERSION}}|$(printf '%s\n' "$VERSION" | sed 's/[&/\]/\\&/g')|g" .github/jreleaser.yml
+          sed -i "s|{{RELEASE_VERSION}}|$VERSION|g" .github/jreleaser.yml
           sed -i "s|{{ANDROID_NEXUS_STAGING_PROFILE_ID}}|${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}|g" .github/jreleaser.yml
-          sed -i "s|{{PRERELEASE}}|$([[ \"$RELEASE_TAG\" == \"rc\" ]] && echo true || echo false)|" .github/jreleaser.yml
-        env:
-          RELEASE_TAG: ${{ env.RELEASE_TAG }}
+          sed -i "s|{{PRERELEASE}}|$([[ '${{ env.RELEASE_TAG }}' == 'rc' ]] && echo true || echo false)|" .github/jreleaser.yml
 
-      - name: 🔍 JReleaser Config Validation (DEV only)
-        if: ${{ env.GLOBAL_ENV == 'dev' }}
-        uses: jreleaser/release-action@v2
-        with:
-          version: 1.18.0
-          arguments: config --basedir . -c .github/jreleaser.yml
-
-      - name: 🧪 JReleaser Dry Run (DEV only)
-        if: ${{ env.GLOBAL_ENV == 'dev' }}
-        uses: jreleaser/release-action@v2
-        with:
-          version: 1.18.0
-          arguments: full-release --dry-run -PprojectVersion=${{ env.RELEASE_VERSION }} --basedir . -c .github/jreleaser.yml
-
-      - name: 🚀 JReleaser Full Release (RC/PROD only)
-        if: ${{ env.GLOBAL_ENV == 'rc' || env.GLOBAL_ENV == 'prod' }}
+      - name: Release with JReleaser
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
@@ -118,8 +79,7 @@ jobs:
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
 
-      - name: 📆 Upload AAR
-        if: success()
+      - name: Upload AAR
         uses: actions/upload-artifact@v4
         with:
           name: vcl-${{ env.RELEASE_TAG }}-${{ github.run_number }}
