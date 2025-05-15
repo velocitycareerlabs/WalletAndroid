@@ -17,6 +17,9 @@ ext {
 group = publishGroup
 
 def releaseTag = System.getenv("RELEASE_TAG") ?: "rc"
+if (!(releaseTag in ['release', 'rc'])) {
+    throw new GradleException("Invalid RELEASE_TAG: $releaseTag. Must be 'release' or 'rc'")
+}
 version = releaseTag == "release" ? baseVersion : "${baseVersion}-${releaseTag}"
 
 android {
