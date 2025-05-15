@@ -47,11 +47,14 @@ jobs:
           ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
           ls -al VCL/build/libs/
 
-      - name: Import GPG key
+      - name: 🔐 Import and Verify GPG Key
         run: |
           echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}" | base64 --decode > gpg.asc
           export GPG_TTY=$(tty)
-          gpg --batch --yes --import gpg.asc
+          gpg --batch --yes --import gpg.asc || { echo "❌ Failed to import GPG key"; exit 1; }
+          echo "🔍 Verifying secret key..."
+          gpg --list-secret-keys --keyid-format LONG || { echo "❌ No valid secret key found"; exit 1; }
+          echo "✅ GPG key is valid and importable."
 
       - name: Validate artifacts
         run: |
