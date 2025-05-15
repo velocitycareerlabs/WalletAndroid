@@ -17,7 +17,8 @@ ext {
 group = publishGroup
 
 def releaseTag = System.getenv("RELEASE_TAG") ?: "rc"
-version = releaseTag == "release" ? baseVersion : "${baseVersion}-rc"
+version = releaseTag == "release" ? baseVersion : "${baseVersion}-${releaseTag}"
+println "🔖 Building VCL version: ${version} (RELEASE_TAG=$releaseTag)"
 
 android {
     compileSdk 35
@@ -152,6 +153,13 @@ afterEvaluate {
                 url = uri("$buildDir/staging-deploy")
             }
         }
+    }
+}
+
+// Task to expose resolved version for GitHub Actions
+tasks.register("printVersion") {
+    doLast {
+        println project.version
     }
 }
 
