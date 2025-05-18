@@ -16,10 +16,15 @@ jobs:
   verify-gpg-keys:
     name: 🔍 Debug GPG Keys
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.environment == 'rc' && secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 != '' && secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 != '' }}
+    if: ${{ github.event.inputs.environment == 'rc' || github.event.inputs.environment == 'prod' }}
     steps:
       - name: 🔐 Decode and Import Secret GPG Key
         run: |
+          if [[ -z "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" || -z "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" ]]; then
+            echo "❌ Required GPG secrets are missing. Skipping GPG verification steps."
+            exit 0
+          fi
+  
           echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > private.asc
           export GNUPGHOME=$(mktemp -d)
           export GPG_TTY=$(tty)
