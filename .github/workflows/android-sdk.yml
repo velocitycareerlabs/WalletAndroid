@@ -72,17 +72,12 @@ jobs:
           sed -i "s|{{ANDROID_NEXUS_STAGING_PROFILE_ID}}|${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}|g" .github/jreleaser.yml
           sed -i "s|{{PRERELEASE}}|$([[ '${{ env.RELEASE_TAG }}' == 'rc' ]] && echo true || echo false)|" .github/jreleaser.yml
           sed -i "s|{{RELEASE_TAG}}|${{ env.RELEASE_TAG }}|g" .github/jreleaser.yml
-          sed -i "s|{{JRELEASER_GPG_PASSPHRASE}}|${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}|g" .github/jreleaser.yml
 
-      - name: 🔐 Inject GPG key strings to env
+      - name: 🔐 Decode GPG keys to env for MEMORY mode
         run: |
-          echo "JRELEASER_GPG_PUBLIC_KEY<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          
-          echo "JRELEASER_GPG_SECRET_KEY<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          printf "JRELEASER_GPG_PUBLIC_KEY<<EOF\n%s\nEOF\n" "$(echo '${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}' | base64 --decode)" >> $GITHUB_ENV
+          printf "JRELEASER_GPG_SECRET_KEY<<EOF\n%s\nEOF\n" "$(echo '${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}' | base64 --decode)" >> $GITHUB_ENV
+          echo "JRELEASER_GPG_PASSPHRASE=${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}" >> $GITHUB_ENV
 
       - name: 🚀 Release with JReleaser
         uses: jreleaser/release-action@v2
@@ -91,7 +86,7 @@ jobs:
           arguments: full-release -PprojectVersion=${{ env.RELEASE_VERSION }} --basedir . -c .github/jreleaser.yml
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
+          JRELEASER_GPG_PASSPHRASE: ${{ env.JRELEASER_GPG_PASSPHRASE }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ env.JRELEASER_GPG_PUBLIC_KEY }}
           JRELEASER_GPG_SECRET_KEY: ${{ env.JRELEASER_GPG_SECRET_KEY }}
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
