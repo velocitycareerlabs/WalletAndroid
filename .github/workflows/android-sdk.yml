@@ -76,7 +76,6 @@ jobs:
         run: |
           echo "Cleaned PRIVATE length: ${#CLEANED_PRIVATE}"
           echo "Cleaned PUBLIC length: ${#CLEANED_PUBLIC}"
-
           echo "$CLEANED_PRIVATE" | base64 -d > /dev/null && echo "✅ Private key decodes successfully" || echo "❌ Private key decode failed"
           echo "$CLEANED_PUBLIC" | base64 -d > /dev/null && echo "✅ Public key decodes successfully" || echo "❌ Public key decode failed"
         env:
@@ -87,7 +86,7 @@ jobs:
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
-          arguments: full-release -S -d -PprojectVersion=${{ env.RELEASE_VERSION }} -b . -c .github/jreleaser.yml
+          arguments: full-release -S -d -P projectVersion=${{ env.RELEASE_VERSION }} -b . -c .github/jreleaser.yml
         env:
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ env.CLEANED_PUBLIC }}
