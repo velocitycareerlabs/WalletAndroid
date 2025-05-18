@@ -16,10 +16,6 @@ env:
   PACKAGE_TYPE: aar
   JAVA_VERSION: 17
   ARTIFACT_PATH: VCL/build/outputs
-  JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
-  JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}
-  JRELEASER_GPG_SECRET_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}
 
 jobs:
   verify-gpg-keys:
@@ -78,15 +74,6 @@ jobs:
           ls -al ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/
           ls -al VCL/build/libs/
 
-      - name: 🔐 Import GPG keys for JReleaser
-        run: |
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > private.asc
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode > public.asc
-          export GPG_TTY=$(tty)
-          gpg --batch --yes --import private.asc || { echo "❌ Failed to import private key"; exit 1; }
-          gpg --batch --yes --import public.asc || { echo "❌ Failed to import public key"; exit 1; }
-          echo "✅ GPG keys imported successfully in build job"
-
       - name: Validate artifacts
         run: |
           test -s ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.aar || exit 1
@@ -114,6 +101,9 @@ jobs:
         env:
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
+          JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
+          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}
+          JRELEASER_GPG_SECRET_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}
 
       - name: Upload AAR
         uses: actions/upload-artifact@v4
