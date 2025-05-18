@@ -40,6 +40,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: 🔐 Show imported GPG key ID (debug)
+        run: |
+          echo "🔎 Imported secret key fingerprints:"
+          gpg --list-secret-keys --with-subkey-fingerprint
+        env:
+          GNUPGHOME: ${{ runner.temp }}/.gnupg
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
