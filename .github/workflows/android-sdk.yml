@@ -21,6 +21,7 @@ jobs:
       ARTIFACT_PATH: VCL/build/outputs
       RELEASE_TAG: ${{ github.event.inputs.environment }}
       PRERELEASE: ${{ github.event.inputs.environment == 'rc' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,22 +49,10 @@ jobs:
           test -s VCL/build/libs/vcl-sources.jar || exit 1
           test -s VCL/build/libs/vcl-javadoc.jar || exit 1
 
-      - name: 🔍 Check Gradle version output
-        run: |
-          RAW_VERSION=$(./gradlew -q printVersion)
-          echo "Raw Gradle version: '$RAW_VERSION'"
-          if [[ -z "$RAW_VERSION" ]]; then
-            echo "❌ ERROR: Gradle version is empty. Check printVersion task."
-            exit 1
-          fi
-
-      - name: Prepare JReleaser config
+      - name: 🔍 Extract and set release version
         run: |
           VERSION=$(./gradlew -q printVersion).${{ github.run_number }}
           echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
-          cp .github/jreleaser.template.yml .github/jreleaser.yml
-          sed -i "s|{{RELEASE_VERSION}}|$VERSION|g" .github/jreleaser.yml
-          sed -i "s|{{RELEASE_TAG}}|${{ env.RELEASE_TAG }}|g" .github/jreleaser.yml
 
       - name: 🔧 Sanitize GPG base64 secrets
         run: |
@@ -82,14 +71,26 @@ jobs:
           CLEANED_PRIVATE: ${{ env.CLEANED_PRIVATE }}
           CLEANED_PUBLIC: ${{ env.CLEANED_PUBLIC }}
 
-      - name: 🚀 Release with JReleaser (GitHub Action)
+      - name: 📄 Prepare JReleaser config
+        run: |
+          cp .github/jreleaser.template.yml .github/jreleaser.yml
+          sed -i "s|{{RELEASE_VERSION}}|${{ env.RELEASE_VERSION }}|g" .github/jreleaser.yml
+          sed -i "s|{{RELEASE_TAG}}|${{ env.RELEASE_TAG }}|g" .github/jreleaser.yml
+          
+          if [ "$RELEASE_TAG" = "rc" ]; then
+            sed -i "s|{{PRERELEASE}}|true|g" .github/jreleaser.yml
+          else
+            sed -i "s|{{PRERELEASE}}|false|g" .github/jreleaser.yml
+          fi
+        env:
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
+
+      - name: 🚀 Release with JReleaser
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
           arguments: full-release -P projectVersion=${{ env.RELEASE_VERSION }} --basedir . -c .github/jreleaser.yml
         env:
-          RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
-          PRERELEASE: ${{ env.PRERELEASE }}
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ env.CLEANED_PUBLIC }}
           JRELEASER_GPG_SECRET_KEY: ${{ env.CLEANED_PRIVATE }}
