@@ -63,6 +63,17 @@ jobs:
           echo "CLEANED_PRIVATE=$(cat cleaned_private.b64)" >> $GITHUB_ENV
           echo "CLEANED_PUBLIC=$(cat cleaned_public.b64)" >> $GITHUB_ENV
 
+      - name: 🧪 Inspect sanitized base64 inputs
+        run: |
+          echo "Cleaned PRIVATE length: ${#CLEANED_PRIVATE}"
+          echo "Cleaned PUBLIC length: ${#CLEANED_PUBLIC}"
+
+          echo "$CLEANED_PRIVATE" | base64 -d > /dev/null && echo "✅ Private key decodes successfully" || echo "❌ Private key decode failed"
+          echo "$CLEANED_PUBLIC" | base64 -d > /dev/null && echo "✅ Public key decodes successfully" || echo "❌ Public key decode failed"
+        env:
+          CLEANED_PRIVATE: ${{ env.CLEANED_PRIVATE }}
+          CLEANED_PUBLIC: ${{ env.CLEANED_PUBLIC }}
+
       - name: 🚀 Release with JReleaser
         uses: jreleaser/release-action@v2
         with:
