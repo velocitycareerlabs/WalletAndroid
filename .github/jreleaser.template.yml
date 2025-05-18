@@ -13,12 +13,12 @@ project:
       artifactId: vcl
 
 signing:
-  active: RELEASE
+  active: ALWAYS
   armored: true
   mode: MEMORY
-  publicKey: {{JRELEASER_GPG_PUBLIC_KEY}}
-  secretKey: {{JRELEASER_GPG_SECRET_KEY}}
-  passphrase: {{JRELEASER_GPG_PASSPHRASE}}
+  publicKey: env.JRELEASER_GPG_PUBLIC_KEY
+  secretKey: env.JRELEASER_GPG_SECRET_KEY
+  passphrase: env.JRELEASER_GPG_PASSPHRASE
 
 release:
   github:

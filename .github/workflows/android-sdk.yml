@@ -1,3 +1,5 @@
+# File: .github/workflows/android-sdk.yml
+
 name: WalletAndroid-SDK-Publish
 
 on:
@@ -72,21 +74,11 @@ jobs:
           sed -i "s|{{ANDROID_NEXUS_STAGING_PROFILE_ID}}|${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}|g" .github/jreleaser.yml
           sed -i "s|{{PRERELEASE}}|$([[ '${{ env.RELEASE_TAG }}' == 'rc' ]] && echo true || echo false)|" .github/jreleaser.yml
           sed -i "s|{{RELEASE_TAG}}|${{ env.RELEASE_TAG }}|g" .github/jreleaser.yml
-          sed -i "s|{{JRELEASER_GPG_PASSPHRASE}}|${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}|g" .github/jreleaser.yml
 
-      - name: 🔐 Decode GPG keys for JReleaser (MEMORY mode)
+      - name: 🔐 Decode GPG keys to env for MEMORY mode
         run: |
-          echo "Decoding public key"
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode | sed 's/$/\\n/' | tr -d '\n' > decoded_pub.key
-          PUB_KEY=$(cat decoded_pub.key)
-          echo "::add-mask::$PUB_KEY"
-          echo "JRELEASER_GPG_PUBLIC_KEY=$PUB_KEY" >> $GITHUB_ENV
-
-          echo "Decoding secret key"
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode | sed 's/$/\\n/' | tr -d '\n' > decoded_sec.key
-          SEC_KEY=$(cat decoded_sec.key)
-          echo "::add-mask::$SEC_KEY"
-          echo "JRELEASER_GPG_SECRET_KEY=$SEC_KEY" >> $GITHUB_ENV
+          echo "JRELEASER_GPG_PUBLIC_KEY=$(echo '${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}' | base64 --decode | tr -d '\n')" >> $GITHUB_ENV
+          echo "JRELEASER_GPG_SECRET_KEY=$(echo '${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}' | base64 --decode | tr -d '\n')" >> $GITHUB_ENV
 
       - name: 🚀 Release with JReleaser
         uses: jreleaser/release-action@v2
