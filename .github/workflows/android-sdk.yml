@@ -82,15 +82,29 @@ jobs:
           CLEANED_PRIVATE: ${{ env.CLEANED_PRIVATE }}
           CLEANED_PUBLIC: ${{ env.CLEANED_PUBLIC }}
 
+      - name: 📦 Cache JReleaser CLI
+        uses: actions/cache@v3
+        with:
+          path: jreleaser
+          key: jreleaser-1.18.0
+
       - name: 🚀 Run JReleaser (direct CLI)
         run: |
-          curl -sL -o jreleaser.zip \
-            -H "Accept: application/octet-stream" \
-            "https://github.com/jreleaser/jreleaser/releases/download/v1.18.0/jreleaser-tool-1.18.0.zip"
-          
-          unzip -q jreleaser.zip -d jreleaser
-          chmod +x jreleaser/bin/jreleaser
-          
+          if [[ ! -x jreleaser/bin/jreleaser ]]; then
+            echo "📥 Downloading JReleaser..."
+            curl -sL -o jreleaser.zip \
+              -H "Accept: application/octet-stream" \
+              "https://github.com/jreleaser/jreleaser/releases/download/v1.18.0/jreleaser-tool-1.18.0.zip"
+
+            file jreleaser.zip | grep -q 'Zip archive data' || {
+              echo "❌ Failed to download a valid JReleaser ZIP file"
+              exit 1
+            }
+
+            unzip -q jreleaser.zip -d jreleaser
+            chmod +x jreleaser/bin/jreleaser
+          fi
+
           echo "🔁 Releasing version: $RELEASE_VERSION"
           if [[ "${{ env.RELEASE_TAG }}" == "rc" ]]; then
             echo "Running in DRY RUN mode (RC release)"
