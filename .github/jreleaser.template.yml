@@ -30,7 +30,7 @@ release:
     sign: true
     skipTag: false
     prerelease:
-      enabled: env.PRERELEASE
+      enabled: {{env.PRERELEASE}}
 
 deploy:
   maven:
