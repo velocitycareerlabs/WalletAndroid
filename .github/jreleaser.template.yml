@@ -38,11 +38,11 @@ deploy:
       mavenCentral:
         active: ALWAYS
         url: https://s01.oss.sonatype.org/service/local
-        stagingProfileId: {{ANDROID_NEXUS_STAGING_PROFILE_ID}}
+        stagingProfileId: env.JRELEASER_NEXUS_STAGING_PROFILE_ID
         stagingRepositories:
           - ${baseDirectory}/build/staging-deploy
-        username: env.MAVEN_CENTRAL_TOKEN_USERNAME
-        password: env.MAVEN_CENTRAL_TOKEN_PASSWORD
+        username: env.JRELEASER_TOKEN_USERNAME
+        password: env.JRELEASER_TOKEN_PASSWORD
 
 files:
   artifacts:
