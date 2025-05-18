@@ -47,6 +47,15 @@ jobs:
           test -s VCL/build/libs/vcl-sources.jar || exit 1
           test -s VCL/build/libs/vcl-javadoc.jar || exit 1
 
+      - name: 🔍 Check Gradle version output
+        run: |
+          RAW_VERSION=$(./gradlew -q printVersion)
+          echo "Raw Gradle version: '$RAW_VERSION'"
+          if [[ -z "$RAW_VERSION" ]]; then
+            echo "❌ ERROR: Gradle version is empty. Check printVersion task."
+            exit 1
+          fi
+
       - name: Prepare JReleaser config
         run: |
           VERSION=$(./gradlew -q printVersion).${{ github.run_number }}
@@ -74,11 +83,11 @@ jobs:
           CLEANED_PRIVATE: ${{ env.CLEANED_PRIVATE }}
           CLEANED_PUBLIC: ${{ env.CLEANED_PUBLIC }}
 
-      - name: 🚀 Release with JReleaser
+      - name: 🚀 Release with JReleaser (debug)
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
-          arguments: full-release -PprojectVersion=${{ env.RELEASE_VERSION }} --basedir . -c .github/jreleaser.yml
+          arguments: full-release -PprojectVersion=${{ env.RELEASE_VERSION }} -S -d --basedir . -c .github/jreleaser.yml
         env:
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ env.CLEANED_PUBLIC }}
