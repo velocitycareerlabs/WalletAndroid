@@ -16,6 +16,7 @@ signing:
   active: ALWAYS
   armored: true
   mode: MEMORY
+  inMemory: true
   publicKey: {{JRELEASER_GPG_PUBLIC_KEY}}
   secretKey: {{JRELEASER_GPG_SECRET_KEY}}
   passphrase: {{JRELEASER_GPG_PASSPHRASE}}
