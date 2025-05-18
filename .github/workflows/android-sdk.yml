@@ -12,16 +12,11 @@ on:
 permissions:
   contents: write
 
-env:
-  PACKAGE_TYPE: aar
-  JAVA_VERSION: 17
-  ARTIFACT_PATH: VCL/build/outputs
-
 jobs:
   verify-gpg-keys:
     name: 🔍 Debug GPG Keys
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.environment == 'rc' }}  # Optional: only on RC releases
+    if: ${{ github.event.inputs.environment == 'rc' && secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 != '' && secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 != '' }}
     steps:
       - name: 🔐 Decode and Import Secret GPG Key
         run: |
@@ -42,7 +37,7 @@ jobs:
           gpg --batch --yes --import public.asc || { echo "❌ Failed to import public key"; exit 1; }
           echo "✅ Public key imported"
 
-      - name: 🧪 Verify Matching Key Pair
+      - name: 🧚 Verify Matching Key Pair
         run: |
           echo "🔗 Matching secret and public keys:"
           gpg --check-trustdb
@@ -52,6 +47,9 @@ jobs:
     needs: verify-gpg-keys
     runs-on: ubuntu-latest
     env:
+      PACKAGE_TYPE: aar
+      JAVA_VERSION: 17
+      ARTIFACT_PATH: VCL/build/outputs
       RELEASE_TAG: ${{ github.event.inputs.environment }}
     steps:
       - name: Checkout
@@ -99,6 +97,7 @@ jobs:
           version: 1.18.0
           arguments: full-release -PprojectVersion=${{ env.RELEASE_VERSION }} --basedir . -c .github/jreleaser.yml
         env:
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
