@@ -102,6 +102,9 @@ jobs:
           sed -i "s|{{ANDROID_NEXUS_STAGING_PROFILE_ID}}|${{ secrets.ANDROID_NEXUS_STAGING_PROFILE_ID }}|g" .github/jreleaser.yml
           sed -i "s|{{PRERELEASE}}|$([[ '${{ env.RELEASE_TAG }}' == 'rc' ]] && echo true || echo false)|" .github/jreleaser.yml
           sed -i "s|{{RELEASE_TAG}}|${{ env.RELEASE_TAG }}|g" .github/jreleaser.yml
+          sed -i "s|{{JRELEASER_GPG_PUBLIC_KEY}}|${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}|g" .github/jreleaser.yml
+          sed -i "s|{{JRELEASER_GPG_SECRET_KEY}}|${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}|g" .github/jreleaser.yml
+          sed -i "s|{{JRELEASER_GPG_PASSPHRASE}}|${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}|g" .github/jreleaser.yml
 
       - name: Release with JReleaser
         uses: jreleaser/release-action@v2
