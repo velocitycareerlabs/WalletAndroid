@@ -83,11 +83,11 @@ jobs:
           CLEANED_PRIVATE: ${{ env.CLEANED_PRIVATE }}
           CLEANED_PUBLIC: ${{ env.CLEANED_PUBLIC }}
 
-      - name: 🚀 Release with JReleaser (debug)
+      - name: 🚀 Release with JReleaser
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
-          arguments: full-release -PprojectVersion=${{ env.RELEASE_VERSION }} -S -d --basedir . -c .github/jreleaser.yml
+          arguments: full-release -S -d -PprojectVersion=${{ env.RELEASE_VERSION }} -b . -c .github/jreleaser.yml
         env:
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ env.CLEANED_PUBLIC }}
