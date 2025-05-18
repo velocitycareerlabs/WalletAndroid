@@ -84,12 +84,17 @@ jobs:
 
       - name: 🚀 Run JReleaser (direct CLI)
         run: |
-          curl -sL https://github.com/jreleaser/jreleaser/releases/download/v1.18.0/jreleaser-cli-1.18.0.jar -o jreleaser-cli.jar
-
+          curl -sL -o jreleaser.zip \
+            -H "Accept: application/octet-stream" \
+            "https://github.com/jreleaser/jreleaser/releases/download/v1.18.0/jreleaser-tool-1.18.0.zip"
+          
+          unzip -q jreleaser.zip -d jreleaser
+          chmod +x jreleaser/bin/jreleaser
+          
           echo "🔁 Releasing version: $RELEASE_VERSION"
           if [[ "${{ env.RELEASE_TAG }}" == "rc" ]]; then
             echo "Running in DRY RUN mode (RC release)"
-            java -jar jreleaser-cli.jar full-release \
+            ./jreleaser/bin/jreleaser full-release \
               --project-version="$RELEASE_VERSION" \
               --basedir . \
               --config-file .github/jreleaser.yml \
@@ -97,7 +102,7 @@ jobs:
               --debug
           else
             echo "Running in FULL RELEASE mode (Prod release)"
-            java -jar jreleaser-cli.jar full-release \
+            ./jreleaser/bin/jreleaser full-release \
               --project-version="$RELEASE_VERSION" \
               --basedir . \
               --config-file .github/jreleaser.yml \
