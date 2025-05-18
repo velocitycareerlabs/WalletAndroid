@@ -62,7 +62,6 @@ jobs:
           echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
           cp .github/jreleaser.template.yml .github/jreleaser.yml
           sed -i "s|{{RELEASE_VERSION}}|$VERSION|g" .github/jreleaser.yml
-          sed -i "s|{{PRERELEASE}}|$([[ '${{ env.RELEASE_TAG }}' == 'rc' ]] && echo true || echo false)|" .github/jreleaser.yml
           sed -i "s|{{RELEASE_TAG}}|${{ env.RELEASE_TAG }}|g" .github/jreleaser.yml
 
       - name: 🔧 Sanitize GPG base64 secrets
@@ -82,48 +81,17 @@ jobs:
           CLEANED_PRIVATE: ${{ env.CLEANED_PRIVATE }}
           CLEANED_PUBLIC: ${{ env.CLEANED_PUBLIC }}
 
-      - name: 📦 Cache JReleaser CLI
-        uses: actions/cache@v3
+      - name: 🚀 Release with JReleaser (GitHub Action)
+        uses: jreleaser/release-action@v2
         with:
-          path: jreleaser
-          key: jreleaser-1.18.0
-
-      - name: 🚀 Run JReleaser (direct CLI)
-        run: |
-          if [[ ! -x jreleaser/bin/jreleaser ]]; then
-            echo "📥 Downloading JReleaser..."
-            curl -sL -o jreleaser.zip \
-              -H "Accept: application/octet-stream" \
-              "https://github.com/jreleaser/jreleaser/releases/download/v1.18.0/jreleaser-tool-1.18.0.zip"
-
-            file jreleaser.zip | grep -q 'Zip archive data' || {
-              echo "❌ Failed to download a valid JReleaser ZIP file"
-              exit 1
-            }
-
-            unzip -q jreleaser.zip -d jreleaser
-            chmod +x jreleaser/bin/jreleaser
-          fi
-
-          echo "🔁 Releasing version: $RELEASE_VERSION"
-          if [[ "${{ env.RELEASE_TAG }}" == "rc" ]]; then
-            echo "Running in DRY RUN mode (RC release)"
-            ./jreleaser/bin/jreleaser full-release \
-              --project-version="$RELEASE_VERSION" \
-              --basedir . \
-              --config-file .github/jreleaser.yml \
-              --dry-run \
-              --debug
-          else
-            echo "Running in FULL RELEASE mode (Prod release)"
-            ./jreleaser/bin/jreleaser full-release \
-              --project-version="$RELEASE_VERSION" \
-              --basedir . \
-              --config-file .github/jreleaser.yml \
-              --debug
-          fi
+          version: 1.18.0
+          arguments: >
+            full-release
+            -P projectVersion=${{ env.RELEASE_VERSION }}
+            -P isPrerelease=${{ env.RELEASE_TAG == 'rc' }}
+            --basedir .
+            -c .github/jreleaser.yml
         env:
-          RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ env.CLEANED_PUBLIC }}
           JRELEASER_GPG_SECRET_KEY: ${{ env.CLEANED_PRIVATE }}
