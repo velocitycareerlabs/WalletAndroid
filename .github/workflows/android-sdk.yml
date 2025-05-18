@@ -82,13 +82,29 @@ jobs:
           CLEANED_PRIVATE: ${{ env.CLEANED_PRIVATE }}
           CLEANED_PUBLIC: ${{ env.CLEANED_PUBLIC }}
 
-      - name: 🚀 Release with JReleaser
-        uses: jreleaser/release-action@v2
-        with:
-          version: 1.18.0
-          arguments: >
-            full-release -S -d "-PprojectVersion=${{ env.RELEASE_VERSION }}" -b . -c .github/jreleaser.yml
+      - name: 🚀 Run JReleaser (direct CLI)
+        run: |
+          curl -sL https://github.com/jreleaser/jreleaser/releases/download/v1.18.0/jreleaser-cli-1.18.0.jar -o jreleaser-cli.jar
+
+          echo "🔁 Releasing version: $RELEASE_VERSION"
+          if [[ "${{ env.RELEASE_TAG }}" == "rc" ]]; then
+            echo "Running in DRY RUN mode (RC release)"
+            java -jar jreleaser-cli.jar full-release \
+              --project-version="$RELEASE_VERSION" \
+              --basedir . \
+              --config-file .github/jreleaser.yml \
+              --dry-run \
+              --debug
+          else
+            echo "Running in FULL RELEASE mode (Prod release)"
+            java -jar jreleaser-cli.jar full-release \
+              --project-version="$RELEASE_VERSION" \
+              --basedir . \
+              --config-file .github/jreleaser.yml \
+              --debug
+          fi
         env:
+          RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ env.CLEANED_PUBLIC }}
           JRELEASER_GPG_SECRET_KEY: ${{ env.CLEANED_PRIVATE }}
