@@ -19,10 +19,19 @@ signing:
   publicKey: JRELEASER_GPG_PUBLIC_KEY
   secretKey: JRELEASER_GPG_SECRET_KEY
   passphrase: JRELEASER_GPG_PASSPHRASE
-  artifacts:
-    - VCL/build/outputs/aar/vcl-{{RELEASE_TAG}}.aar
-    - VCL/build/libs/vcl-sources.jar
-    - VCL/build/libs/vcl-javadoc.jar
+  artifacts: true
+
+distributions:
+  vcl:
+    type: JAVA_BINARY
+    artifacts:
+      - path: VCL/build/outputs/aar/vcl-{{RELEASE_TAG}}.aar
+      - path: VCL/build/libs/vcl-sources.jar
+      - path: VCL/build/libs/vcl-javadoc.jar
+    extraProperties:
+      groupId: io.velocitycareerlabs
+      artifactId: vcl
+      version: '{{RELEASE_VERSION}}'
 
 release:
   github:
@@ -43,8 +52,6 @@ deploy:
         active: ALWAYS
         url: https://s01.oss.sonatype.org/service/local
         stagingProfileId: JRELEASER_NEXUS_STAGING_PROFILE_ID
-        stagingRepositories:
-          - ${baseDirectory}/build/staging-deploy
         username: JRELEASER_TOKEN_USERNAME
         password: JRELEASER_TOKEN_PASSWORD
 
