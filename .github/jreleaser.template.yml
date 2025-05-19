@@ -29,7 +29,8 @@ release:
     draft: false
     sign: true
     skipTag: false
-    prerelease: {{PRERELEASE}}
+    prerelease:
+      enabled: {{PRERELEASE}}
 
 deploy:
   maven:
