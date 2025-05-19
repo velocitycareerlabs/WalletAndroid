@@ -33,7 +33,12 @@ android {
         debug {
             minifyEnabled false
             shrinkResources false
+            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
+            buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        rc {
+            initWith debug
         }
         release {
             initWith debug
