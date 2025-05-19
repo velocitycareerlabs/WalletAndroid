@@ -8,23 +8,17 @@ import org.gradle.api.tasks.bundling.Jar
 
 ext {
     publishCode = 163
-    baseVersion = "2.7.3"
+    versionName = System.getenv("RELEASE_VERSION") ?: "2.7.3"
     artifactId = "vcl"
-    publishGroup = "io.velocitycareerlabs"
-    namespaceId = publishGroup
+    groupId = "io.velocitycareerlabs"
 }
 
-group = publishGroup
-
-def releaseTag = System.getenv("RELEASE_TAG") ?: "rc"
-if (!(releaseTag in ['release', 'rc'])) {
-    throw new GradleException("Invalid RELEASE_TAG: $releaseTag. Must be 'release' or 'rc'")
-}
-version = releaseTag == "release" ? baseVersion : "${baseVersion}-${releaseTag}"
+group = groupId
+version = versionName
 
 android {
+    namespace groupId
     compileSdk 35
-    namespace namespaceId
 
     defaultConfig {
         minSdk 24
@@ -37,16 +31,11 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
-            buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
-            initWith debug
-        }
-        rc {
             initWith debug
         }
     }
@@ -60,77 +49,33 @@ android {
         jvmTarget = '1.8'
     }
 
-    testOptions {
-        unitTests.includeAndroidResources = true
-        unitTests.returnDefaultValues = true
-    }
-
     buildFeatures {
         buildConfig true
     }
 
     libraryVariants.configureEach { variant ->
         variant.outputs.all {
-            outputFileName = "vcl-${variant.name}.aar"
+            outputFileName = "vcl-${project.version}.aar"
         }
     }
 }
 
 afterEvaluate {
     def sourcesJar = tasks.register("sourcesJar", Jar) {
-        dependsOn 'assemble'
-        archiveBaseName.set("vcl")
-        archiveVersion.set("")
         archiveClassifier.set("sources")
+        from(android.sourceSets.main.java.srcDirs + android.sourceSets.main.kotlin.srcDirs)
         destinationDirectory = file("$buildDir/libs")
-        doFirst {
-            def mainSrcSet = android.sourceSets.main
-            from(mainSrcSet.java.srcDirs)
-            from(mainSrcSet.kotlin?.srcDirs ?: ["src/main/kotlin"])
-        }
     }
 
     def javadocJar = tasks.register("javadocJar", Jar) {
-        dependsOn 'assemble'
-        archiveBaseName.set("vcl")
-        archiveVersion.set("")
         archiveClassifier.set("javadoc")
-        destinationDirectory = file("$buildDir/libs")
+        def dummyDir = file("$buildDir/empty-javadoc")
         doFirst {
-            def dummyDir = file("$buildDir/empty-javadoc")
             dummyDir.mkdirs()
-            def dummyJava = new File(dummyDir, "placeholder.java")
-            if (!dummyJava.exists()) {
-                dummyJava.text = "/** Placeholder to satisfy Maven Central javadoc requirement */"
-            }
-            from(dummyDir)
+            new File(dummyDir, "placeholder.java").text = "/** Placeholder for javadoc */"
         }
-    }
-
-    def commonPom = { MavenPublication pub ->
-        pub.pom {
-            name.set("VCL")
-            description.set("Velocity Career Labs Android SDK")
-            url.set("https://github.com/velocitycareerlabs/WalletAndroid")
-            licenses {
-                license {
-                    name.set("The Apache License, Version 2.0")
-                    url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                }
-            }
-            developers {
-                developer {
-                    id.set("michaelavoyan")
-                    name.set("Michael Avoyan")
-                    email.set("michael.avoyan@gmail.com")
-                }
-            }
-            scm {
-                connection.set("scm:git:https://github.com/velocitycareerlabs/WalletAndroid.git")
-                developerConnection.set("scm:git:ssh://git@github.com:velocitycareerlabs/WalletAndroid.git")
-                url.set("https://github.com/velocitycareerlabs/WalletAndroid")
-            }
-        }
+        from(dummyDir)
+        destinationDirectory = file("$buildDir/libs")
     }
 
     publishing {
@@ -140,12 +85,33 @@ afterEvaluate {
                 artifactId = artifactId
                 version = project.version
 
-                def aarFile = file("$buildDir/outputs/aar/vcl-${releaseTag}.aar")
-                artifact(aarFile)
+                artifact(file("$buildDir/outputs/aar/vcl-${project.version}.aar"))
                 artifact(sourcesJar.get())
                 artifact(javadocJar.get())
 
-                commonPom(delegate)
+                pom {
+                    name.set("VCL")
+                    description.set("Velocity Career Labs Android SDK")
+                    url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                    licenses {
+                        license {
+                            name.set("The Apache License, Version 2.0")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("michaelavoyan")
+                            name.set("Michael Avoyan")
+                            email.set("michael.avoyan@gmail.com")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:https://github.com/velocitycareerlabs/WalletAndroid.git")
+                        developerConnection.set("scm:git:ssh://git@github.com:velocitycareerlabs/WalletAndroid.git")
+                        url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                    }
+                }
             }
         }
 
@@ -155,13 +121,6 @@ afterEvaluate {
                 url = uri("$buildDir/staging-deploy")
             }
         }
-    }
-}
-
-// Task to expose resolved version for GitHub Actions
-tasks.register("printVersion") {
-    doLast {
-        println project.version
     }
 }
 

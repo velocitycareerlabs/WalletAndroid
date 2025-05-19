@@ -16,7 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_VERSION: ${{ github.event.inputs.release_tag }}
-      RELEASE_TAG: ${{ github.event.inputs.release_tag }}
       PRERELEASE: ${{ github.event.inputs.prerelease }}
 
     steps:
@@ -38,11 +37,11 @@ jobs:
 
       - name: 📂 Verify built artifacts
         run: |
-          echo "🔍 Checking AAR and JAR files..."
+          echo "🔍 Listing built AAR and JAR files..."
           ls -lh VCL/build/outputs/aar/
           ls -lh VCL/build/libs/
 
-      - name: 🔐 Decode GPG keys and export to env
+      - name: 🔐 Decode GPG keys and export to environment
         run: |
           echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > private.gpg
           echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode > public.gpg
