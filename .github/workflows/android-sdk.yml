@@ -12,7 +12,7 @@ on:
         default: 'false'
 
 jobs:
-  release:
+  release-android-sdk:
     runs-on: ubuntu-latest
     env:
       RELEASE_VERSION: ${{ github.event.inputs.release_tag }}
