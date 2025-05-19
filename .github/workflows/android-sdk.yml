@@ -55,23 +55,22 @@ jobs:
 
       - name: 🔧 Decode and export GPG secrets
         run: |
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 -d > cleaned_private.key
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 -d > cleaned_public.key
+          echo "Decoding GPG keys and exporting to environment..."
 
           echo "JRELEASER_GPG_SECRET_KEY<<EOF" >> $GITHUB_ENV
-          cat cleaned_private.key >> $GITHUB_ENV
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
           echo "JRELEASER_GPG_PUBLIC_KEY<<EOF" >> $GITHUB_ENV
-          cat cleaned_public.key >> $GITHUB_ENV
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - name: 🧪 Confirm GPG key format
+      - name: 🧚 Confirm GPG key format
         run: |
-          echo "🔒 PRIVATE KEY starts with:"
-          head -n 1 cleaned_private.key
-          echo "🔓 PUBLIC KEY starts with:"
-          head -n 1 cleaned_public.key
+          echo "🔒 PRIVATE KEY preview:"
+          echo "${{ env.JRELEASER_GPG_SECRET_KEY }}" | head -n 5
+          echo "🔓 PUBLIC KEY preview:"
+          echo "${{ env.JRELEASER_GPG_PUBLIC_KEY }}" | head -n 5
 
       - name: 📄 Prepare JReleaser config
         run: |
@@ -88,7 +87,7 @@ jobs:
           RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
 
-      - name: 🧾 Dump JReleaser config (for debug)
+      - name: 🗓️ Dump JReleaser config (for debug)
         run: cat .github/jreleaser.yml
 
       - name: 🚀 Release with JReleaser
