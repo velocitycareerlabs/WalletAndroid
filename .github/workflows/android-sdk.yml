@@ -74,15 +74,16 @@ jobs:
       - name: 📄 Prepare JReleaser config
         run: |
           cp .github/jreleaser.template.yml .github/jreleaser.yml
-          sed -i "s|{{RELEASE_VERSION}}|${{ env.RELEASE_VERSION }}|g" .github/jreleaser.yml
-          sed -i "s|{{RELEASE_TAG}}|${{ env.RELEASE_TAG }}|g" .github/jreleaser.yml
-          
-          if [ "$RELEASE_TAG" = "rc" ]; then
+          sed -i "s|{{RELEASE_VERSION}}|${RELEASE_VERSION}|g" .github/jreleaser.yml
+          sed -i "s|{{RELEASE_TAG}}|${RELEASE_TAG}|g" .github/jreleaser.yml
+
+          if [ "${RELEASE_TAG}" = "rc" ]; then
             sed -i "s|{{PRERELEASE}}|true|g" .github/jreleaser.yml
           else
             sed -i "s|{{PRERELEASE}}|false|g" .github/jreleaser.yml
           fi
         env:
+          RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
 
       - name: 🚀 Release with JReleaser
