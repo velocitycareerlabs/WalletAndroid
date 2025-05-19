@@ -17,37 +17,37 @@ group = groupId
 version = versionName
 
 android {
-    namespace groupId
-    compileSdk 35
+    namespace = groupId
+    compileSdk = 35
 
     defaultConfig {
-        minSdk 24
-        targetSdk 35
-        versionCode publishCode
-        versionName version
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
+        minSdk = 24
+        targetSdk = 35
+        versionCode = publishCode
+        versionName = version
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
         debug {
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled = false
+            shrinkResources = false
             buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
             buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles(getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro')
         }
         rc {
-            initWith debug
+            initWith(debug)
         }
         release {
-            initWith debug
+            initWith(debug)
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
@@ -55,7 +55,7 @@ android {
     }
 
     buildFeatures {
-        buildConfig true
+        buildConfig = true
     }
 
     libraryVariants.configureEach { variant ->
@@ -66,23 +66,29 @@ android {
 }
 
 afterEvaluate {
-    def sourcesJar = tasks.register("sourcesJar", Jar) {
+    // Generate sources JAR
+    tasks.register("generateSourcesJar", Jar) {
         archiveClassifier.set("sources")
-        from(android.sourceSets.main.java.srcDirs + android.sourceSets.main.kotlin.srcDirs)
-        destinationDirectory = file("$buildDir/libs")
+        from(android.sourceSets.main.kotlin.srcDirs + android.sourceSets.main.java.srcDirs)
+        destinationDirectory.set(file("$buildDir/libs"))
     }
 
-    def javadocJar = tasks.register("javadocJar", Jar) {
+    // Generate javadoc JAR (placeholder only)
+    tasks.register("generateJavadocJar", Jar) {
         archiveClassifier.set("javadoc")
-        def dummyDir = file("$buildDir/empty-javadoc")
+        destinationDirectory.set(file("$buildDir/libs"))
         doFirst {
+            def dummyDir = file("$buildDir/empty-javadoc")
             dummyDir.mkdirs()
-            new File(dummyDir, "placeholder.java").text = "/** Placeholder for javadoc */"
+            def dummyJava = new File(dummyDir, "placeholder.java")
+            if (!dummyJava.exists()) {
+                dummyJava.text = "/** Placeholder for javadoc */"
+            }
+            from(dummyDir)
         }
-        from(dummyDir)
-        destinationDirectory = file("$buildDir/libs")
     }
 
+    // Maven publication for JReleaser
     publishing {
         publications {
             create("library", MavenPublication) {
@@ -91,8 +97,8 @@ afterEvaluate {
                 version = project.version
 
                 artifact(file("$buildDir/outputs/aar/vcl-${project.version}.aar"))
-                artifact(sourcesJar.get())
-                artifact(javadocJar.get())
+                artifact(tasks.named("generateSourcesJar").get())
+                artifact(tasks.named("generateJavadocJar").get())
 
                 pom {
                     name.set("VCL")
@@ -130,6 +136,7 @@ afterEvaluate {
 }
 
 repositories {
+    google()
     mavenCentral()
 }
 
@@ -137,7 +144,7 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.15.0'
 
     implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
-    implementation "androidx.security:security-crypto:1.1.0-alpha07"
+    implementation 'androidx.security:security-crypto:1.1.0-alpha07'
 
     // Reflection
 //    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
