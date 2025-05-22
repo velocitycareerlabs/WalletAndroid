@@ -64,11 +64,17 @@ jobs:
         run: |
           rm -f private.gpg public.gpg
 
+      - name: 🛑 Fail if artifacts are missing
+        run: |
+          test -f VCL/build/outputs/aar/vcl-${{ env.RELEASE_VERSION }}.aar
+          test -f VCL/build/libs/vcl-sources.jar
+          test -f VCL/build/libs/vcl-javadoc.jar
+
       - name: 🚀 Run JReleaser full-release
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
-          arguments: full-release --config-file=jreleaser.yml -PprojectVersion=${{ env.RELEASE_VERSION }}
+          arguments: full-release --config-file=jreleaser.template.yml -PprojectVersion=${{ env.RELEASE_VERSION }} --strict
         env:
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           JRELEASER_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
