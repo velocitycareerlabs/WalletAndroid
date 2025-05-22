@@ -38,17 +38,27 @@ jobs:
       - name: 🔐 Decode and export GPG keys to environment
         shell: bash
         run: |
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode | {
-            echo 'JRELEASER_GPG_SECRET_KEY<<EOF'
-            cat
-            echo 'EOF'
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > private.gpg
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode > public.gpg
+          
+          {
+            printf "JRELEASER_GPG_SECRET_KEY<<EOF\n"
+            cat private.gpg
+            printf "\nEOF\n"
           } >> $GITHUB_ENV
+          
+          {
+            printf "JRELEASER_GPG_PUBLIC_KEY<<EOF\n"
+            cat public.gpg
+            printf "\nEOF\n"
+          } >> $GITHUB_ENV
+        # DO NOT add `echo`, DO NOT print contents
+        env:
+          # Optional: hide secrets from command output
+          ACTIONS_STEP_DEBUG: false
 
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode | {
-            echo 'JRELEASER_GPG_PUBLIC_KEY<<EOF'
-            cat
-            echo 'EOF'
-          } >> $GITHUB_ENV
+      - name: 🧹 Clean up temporary GPG files
+        run: rm -f private.gpg public.gpg
 
       - name: 🛑 Fail if artifacts are missing
         run: |
