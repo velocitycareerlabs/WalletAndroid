@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_VERSION: ${{ github.event.inputs.release_tag }}
-      PRERELEASE: ${{ github.event.inputs.prerelease }}
+      PRERELEASE: ${{ github.event.inputs.prerelease == 'true' }}
 
     steps:
       - name: 🧾 Checkout code
@@ -47,7 +47,7 @@ jobs:
           test -f VCL/build/libs/vcl-${RELEASE_VERSION}-sources.jar || (echo "❌ Sources JAR missing" && exit 1)
           test -f VCL/build/libs/vcl-${RELEASE_VERSION}-javadoc.jar || (echo "❌ Javadoc JAR missing" && exit 1)
 
-      - name: 🔐 Load GPG keys (safely as files)
+      - name: 🔐 Load GPG keys (as temp files)
         run: |
           echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > private.gpg
           echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode > public.gpg
