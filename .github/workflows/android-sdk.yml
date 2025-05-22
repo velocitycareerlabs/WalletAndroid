@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Release version (e.g., 2.7.3)'
+        description: 'Release version (e.g., 2.7.3 or 2.7.3-rc)'
         required: true
       prerelease:
         description: 'Is this a pre-release?'
@@ -31,30 +31,42 @@ jobs:
       - name: 🛠️ Set up Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: 🔍 Determine build type
+        id: build-type
+        run: |
+          if [[ "${{ env.RELEASE_VERSION }}" == *"-rc"* ]]; then
+            echo "build_task=assembleRc" >> $GITHUB_OUTPUT
+          else
+            echo "build_task=assembleRelease" >> $GITHUB_OUTPUT
+          fi
+
       - name: 🧪 Build AAR + Sources + Javadoc
         run: |
-          ./gradlew clean :VCL:assembleRelease :VCL:generateSourcesJar :VCL:generateJavadocJar --stacktrace
+          ./gradlew clean :VCL:${{ steps.build-type.outputs.build_task }} :VCL:generateSourcesJar :VCL:generateJavadocJar --stacktrace
 
-      - name: 📂 Check built artifacts
+      - name: 🔐 Decode and export GPG keys to environment
+        shell: bash
         run: |
-          echo "::group::Listing AARs"
-          ls -lh VCL/build/outputs/aar/
-          echo "::endgroup::"
-          echo "::group::Listing JARs"
-          ls -lh VCL/build/libs/
-          echo "::endgroup::"
-
-      - name: 🔐 Decode GPG keys to temporary files (no print!)
-        run: |
+          set +x
           echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > private.gpg
           echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode > public.gpg
 
-          echo "JRELEASER_GPG_SECRET_KEY_FILE=private.gpg" >> $GITHUB_ENV
-          echo "JRELEASER_GPG_PUBLIC_KEY_FILE=public.gpg" >> $GITHUB_ENV
-        shell: bash
+          {
+            echo "JRELEASER_GPG_SECRET_KEY<<EOF"
+            cat private.gpg
+            echo "EOF"
+          } >> $GITHUB_ENV
 
-      - name: 🧹 Clean up old GPG values from memory
-        run: echo "✅ GPG keys registered as file references only (not printed)"
+          {
+            echo "JRELEASER_GPG_PUBLIC_KEY<<EOF"
+            cat public.gpg
+            echo "EOF"
+          } >> $GITHUB_ENV
+        env:
+          ACTIONS_STEP_DEBUG: false
+
+      - name: 🧹 Clean up GPG files
+        run: rm -f private.gpg public.gpg
 
       - name: ✅ Verify artifacts exist
         run: |
