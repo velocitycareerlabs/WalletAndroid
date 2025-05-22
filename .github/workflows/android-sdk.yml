@@ -33,18 +33,18 @@ jobs:
 
       - name: 🧪 Build AAR + Sources + Javadoc
         run: |
-          ./gradlew clean :VCL:assembleRelease :VCL:generateSourcesJar :VCL:generateJavadocJar
+          ./gradlew clean :VCL:assembleRelease :VCL:generateSourcesJar :VCL:generateJavadocJar --stacktrace
 
-      - name: 🔐 Export GPG keys as masked environment variables
-        run: |
-          echo "JRELEASER_GPG_SECRET_KEY<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-          echo "JRELEASER_GPG_PUBLIC_KEY<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+      - name: 🔐 Decode and export GPG keys to environment
         shell: bash
+        run: |
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode | sed 's/^/::add-mask::/' > /dev/null
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode | sed 's/^/::add-mask::/' > /dev/null
+
+          echo "JRELEASER_GPG_SECRET_KEY=${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" >> $GITHUB_ENV
+          echo "JRELEASER_GPG_PUBLIC_KEY=${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" >> $GITHUB_ENV
+        env:
+          ACTIONS_STEP_DEBUG: false
 
       - name: 🛑 Fail if artifacts are missing
         run: |
@@ -56,7 +56,7 @@ jobs:
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
-          arguments: full-release --config-file=jreleaser.template.yml -PprojectVersion=${{ env.RELEASE_VERSION }} --strict
+          arguments: full-release -PprojectVersion=${{ env.RELEASE_VERSION }} --strict
         env:
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           JRELEASER_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
