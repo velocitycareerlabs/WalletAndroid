@@ -45,16 +45,22 @@ jobs:
           test -f VCL/build/libs/vcl-sources.jar || (echo "❌ Sources JAR missing" && exit 1)
           test -f VCL/build/libs/vcl-javadoc.jar || (echo "❌ Javadoc JAR missing" && exit 1)
 
-      - name: 🔐 Set GPG keys as environment variables (safely)
-        run: |
-          echo "JRELEASER_GPG_SECRET_KEY<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          
-          echo "JRELEASER_GPG_PUBLIC_KEY<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+      - name: 🔐 Decode GPG keys into environment (secure, no printing)
         shell: bash
+        run: |
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode | {
+            echo 'JRELEASER_GPG_SECRET_KEY<<EOF'
+            cat
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
+
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode | {
+            echo 'JRELEASER_GPG_PUBLIC_KEY<<EOF'
+            cat
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
+        env:
+          ACTIONS_STEP_DEBUG: false
 
       - name: 🚀 Run JReleaser full-release
         uses: jreleaser/release-action@v2
