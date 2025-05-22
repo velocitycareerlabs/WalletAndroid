@@ -17,6 +17,7 @@ jobs:
     env:
       RELEASE_VERSION: ${{ github.event.inputs.release_tag }}
       PRERELEASE: ${{ github.event.inputs.prerelease }}
+      CI: true
 
     steps:
       - name: 🧾 Checkout code
@@ -40,36 +41,34 @@ jobs:
           echo "::group::Listing AARs"
           ls -lh VCL/build/outputs/aar/
           echo "::endgroup::"
-
           echo "::group::Listing JARs"
           ls -lh VCL/build/libs/
           echo "::endgroup::"
 
-      - name: 🔐 Decode and securely export GPG keys to environment
+      - name: 🔐 Decode and export GPG keys securely
         shell: bash
         run: |
-          set +x  # Disable command echoing
+          set +x  # Disable command echo
 
-          echo "::add-mask::$GPG_PRIVATE"
-          echo "::add-mask::$GPG_PUBLIC"
+          echo "::add-mask::${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}"
+          echo "::add-mask::${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}"
 
-          echo "$GPG_PRIVATE" | base64 --decode > private.gpg
-          echo "$GPG_PUBLIC" | base64 --decode > public.gpg
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > private.gpg
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode > public.gpg
 
           {
-            echo "JRELEASER_GPG_SECRET_KEY<<EOF"
+            echo 'JRELEASER_GPG_SECRET_KEY<<EOF'
             cat private.gpg
-            echo "EOF"
-          } >> $GITHUB_ENV
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
 
           {
-            echo "JRELEASER_GPG_PUBLIC_KEY<<EOF"
+            echo 'JRELEASER_GPG_PUBLIC_KEY<<EOF'
             cat public.gpg
-            echo "EOF"
-          } >> $GITHUB_ENV
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
         env:
-          GPG_PRIVATE: ${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}
-          GPG_PUBLIC: ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}
+          ACTIONS_STEP_DEBUG: false
 
       - name: 🧹 Clean up temporary GPG files
         run: rm -f private.gpg public.gpg

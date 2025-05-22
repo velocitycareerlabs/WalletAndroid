@@ -60,11 +60,9 @@ android {
         buildConfig = true
     }
 
-    libraryVariants.all { variant ->
-        if (variant.buildType.name == "release") {
-            variant.outputs.all { output ->
-                output.outputFileName = "vcl-${version}.aar"
-            }
+    libraryVariants.configureEach { variant ->
+        variant.outputs.all {
+            outputFileName = "vcl-${project.version}.aar"
         }
     }
 }
@@ -74,11 +72,15 @@ afterEvaluate {
         archiveClassifier.set("sources")
         from(android.sourceSets.main.kotlin.srcDirs + android.sourceSets.main.java.srcDirs)
         destinationDirectory.set(file("$buildDir/libs"))
+        preserveFileTimestamps = false
+        reproducibleFileOrder = true
     }
 
     tasks.register("generateJavadocJar", Jar) {
         archiveClassifier.set("javadoc")
         destinationDirectory.set(file("$buildDir/libs"))
+        preserveFileTimestamps = false
+        reproducibleFileOrder = true
         doFirst {
             def dummyDir = file("$buildDir/empty-javadoc")
             dummyDir.mkdirs()
@@ -139,6 +141,7 @@ afterEvaluate {
 repositories {
     google()
     mavenCentral()
+    mavenLocal() // optional: for testing local publishing
 }
 
 dependencies {
