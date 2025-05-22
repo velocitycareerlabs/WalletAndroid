@@ -33,29 +33,18 @@ jobs:
 
       - name: 🧪 Build AAR + Sources + Javadoc
         run: |
-          ./gradlew clean :VCL:assembleRelease :VCL:generateSourcesJar :VCL:generateJavadocJar --stacktrace
+          ./gradlew clean :VCL:assembleRelease :VCL:generateSourcesJar :VCL:generateJavadocJar
 
-      - name: 🔐 Decode and inject GPG keys into environment (masked)
-        shell: bash
+      - name: 🔐 Export GPG keys as masked environment variables
         run: |
-          mkdir -p secrets
-          
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > secrets/private.gpg
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode > secrets/public.gpg
-
-          echo "::add-mask::$(cat secrets/private.gpg)"
-          echo "::add-mask::$(cat secrets/public.gpg)"
-
           echo "JRELEASER_GPG_SECRET_KEY<<EOF" >> $GITHUB_ENV
-          cat secrets/private.gpg >> $GITHUB_ENV
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
           echo "JRELEASER_GPG_PUBLIC_KEY<<EOF" >> $GITHUB_ENV
-          cat secrets/public.gpg >> $GITHUB_ENV
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-
-      - name: 🧹 Clean up temporary GPG files
-        run: rm -rf secrets
+        shell: bash
 
       - name: 🛑 Fail if artifacts are missing
         run: |
