@@ -45,7 +45,7 @@ release:
     sign: true
     skipTag: false
     prerelease:
-      enabled: {{PRERELEASE}}
+      enabled: '{{prerelease}}'
 
 deploy:
   maven:
