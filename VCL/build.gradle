@@ -8,13 +8,15 @@ import org.gradle.api.tasks.bundling.Jar
 
 ext {
     publishCode = 163
-    versionName = System.getenv("RELEASE_VERSION") ?: "2.7.3"
+    def resolvedVersion = project.hasProperty('projectVersion') ? project.property('projectVersion') : (System.getenv("RELEASE_VERSION") ?: "2.7.3")
+    versionName = resolvedVersion
     artifactId = "vcl"
     groupId = "io.velocitycareerlabs"
 }
 
 group = groupId
 version = versionName
+println "👉 Final version is: ${project.version}"
 
 android {
     namespace = groupId
@@ -66,14 +68,12 @@ android {
 }
 
 afterEvaluate {
-    // Generate sources JAR
     tasks.register("generateSourcesJar", Jar) {
         archiveClassifier.set("sources")
         from(android.sourceSets.main.kotlin.srcDirs + android.sourceSets.main.java.srcDirs)
         destinationDirectory.set(file("$buildDir/libs"))
     }
 
-    // Generate javadoc JAR (placeholder only)
     tasks.register("generateJavadocJar", Jar) {
         archiveClassifier.set("javadoc")
         destinationDirectory.set(file("$buildDir/libs"))
@@ -88,7 +88,6 @@ afterEvaluate {
         }
     }
 
-    // Maven publication for JReleaser
     publishing {
         publications {
             create("library", MavenPublication) {
