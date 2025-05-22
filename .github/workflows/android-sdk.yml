@@ -57,10 +57,7 @@ jobs:
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
-          arguments: full-release \
-            --config-file=jreleaser.template.yml \
-            -PprojectVersion=${{ env.RELEASE_VERSION }} \
-            --strict
+          arguments: full-release --config-file=jreleaser.template.yml -PprojectVersion=${{ env.RELEASE_VERSION }} --strict
         env:
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           JRELEASER_GPG_SECRET_KEY_FILE: private.gpg
