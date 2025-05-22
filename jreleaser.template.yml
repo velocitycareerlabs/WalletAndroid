@@ -28,8 +28,8 @@ distributions:
     type: JAVA_BINARY
     artifacts:
       - path: VCL/build/outputs/aar/vcl-{{RELEASE_VERSION}}.aar
-      - path: VCL/build/libs/vcl-sources.jar
-      - path: VCL/build/libs/vcl-javadoc.jar
+      - path: VCL/build/libs/vcl-{{RELEASE_VERSION}}-sources.jar
+      - path: VCL/build/libs/vcl-{{RELEASE_VERSION}}-javadoc.jar
     extraProperties:
       groupId: io.velocitycareerlabs
       artifactId: vcl
@@ -44,8 +44,7 @@ release:
     draft: false
     sign: true
     skipTag: false
-    prerelease:
-      enabled: {{PRERELEASE}}
+    prerelease: {{PRERELEASE}}
 
 deploy:
   maven:
@@ -66,14 +65,14 @@ files:
         artifactId: vcl
         version: '{{RELEASE_VERSION}}'
 
-    - path: VCL/build/libs/vcl-sources.jar
+    - path: VCL/build/libs/vcl-{{RELEASE_VERSION}}-sources.jar
       platform: universal
       extraProperties:
         groupId: io.velocitycareerlabs
         artifactId: vcl
         version: '{{RELEASE_VERSION}}'
 
-    - path: VCL/build/libs/vcl-javadoc.jar
+    - path: VCL/build/libs/vcl-{{RELEASE_VERSION}}-javadoc.jar
       platform: universal
       extraProperties:
         groupId: io.velocitycareerlabs
