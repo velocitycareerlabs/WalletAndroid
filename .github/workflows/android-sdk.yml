@@ -37,39 +37,38 @@ jobs:
             :VCL:assembleRelease \
             :VCL:generateSourcesJar \
             :VCL:generateJavadocJar \
+            -PprojectVersion=${RELEASE_VERSION} \
             --stacktrace
 
       - name: ✅ Verify expected artifacts exist
         run: |
-          test -f VCL/build/outputs/aar/vcl-${{ env.RELEASE_VERSION }}.aar || (echo "❌ AAR not found" && exit 1)
-          test -f VCL/build/libs/vcl-sources.jar || (echo "❌ Sources JAR missing" && exit 1)
-          test -f VCL/build/libs/vcl-javadoc.jar || (echo "❌ Javadoc JAR missing" && exit 1)
+          echo "Checking artifacts for version ${RELEASE_VERSION}..."
+          test -f VCL/build/outputs/aar/vcl-${RELEASE_VERSION}.aar || (echo "❌ AAR not found" && exit 1)
+          test -f VCL/build/libs/vcl-${RELEASE_VERSION}-sources.jar || (echo "❌ Sources JAR missing" && exit 1)
+          test -f VCL/build/libs/vcl-${RELEASE_VERSION}-javadoc.jar || (echo "❌ Javadoc JAR missing" && exit 1)
 
-      - name: 🔐 Decode GPG keys into environment (secure, no printing)
-        shell: bash
+      - name: 🔐 Load GPG keys (safely as files)
         run: |
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode | {
-            echo 'JRELEASER_GPG_SECRET_KEY<<EOF'
-            cat
-            echo 'EOF'
-          } >> "$GITHUB_ENV"
-
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode | {
-            echo 'JRELEASER_GPG_PUBLIC_KEY<<EOF'
-            cat
-            echo 'EOF'
-          } >> "$GITHUB_ENV"
-        env:
-          ACTIONS_STEP_DEBUG: false
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > private.gpg
+          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode > public.gpg
+        shell: bash
 
       - name: 🚀 Run JReleaser full-release
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
-          arguments: full-release --config-file=jreleaser.template.yml -PprojectVersion=${{ env.RELEASE_VERSION }} --strict
+          arguments: full-release \
+            --config-file=jreleaser.template.yml \
+            -PprojectVersion=${{ env.RELEASE_VERSION }} \
+            --strict
         env:
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
+          JRELEASER_GPG_SECRET_KEY_FILE: private.gpg
+          JRELEASER_GPG_PUBLIC_KEY_FILE: public.gpg
           JRELEASER_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
           JRELEASER_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
           JRELEASER_NEXUS_STAGING_PROFILE_ID: ${{ secrets.MAVEN_CENTRAL_STAGING_PROFILE_ID }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🧹 Clean up GPG files
+        run: rm -f private.gpg public.gpg

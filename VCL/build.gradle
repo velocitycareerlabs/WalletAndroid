@@ -69,7 +69,9 @@ android {
 
 afterEvaluate {
     tasks.register("generateSourcesJar", Jar) {
+        archiveBaseName.set(artifactId)
         archiveClassifier.set("sources")
+        archiveVersion.set(version)
         from(android.sourceSets.main.kotlin.srcDirs + android.sourceSets.main.java.srcDirs)
         destinationDirectory.set(file("$buildDir/libs"))
         preserveFileTimestamps = false
@@ -77,7 +79,9 @@ afterEvaluate {
     }
 
     tasks.register("generateJavadocJar", Jar) {
+        archiveBaseName.set(artifactId)
         archiveClassifier.set("javadoc")
+        archiveVersion.set(version)
         destinationDirectory.set(file("$buildDir/libs"))
         preserveFileTimestamps = false
         reproducibleFileOrder = true
