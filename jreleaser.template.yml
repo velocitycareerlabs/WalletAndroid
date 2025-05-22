@@ -1,7 +1,7 @@
 project:
   name: WalletAndroid
   version: '{{RELEASE_VERSION}}'
-  description: Velocity Career Labs Android library
+  description: Velocity Career Labs Android SDK
   authors:
     - Michael Avoyan
   license: Apache-2.0
@@ -80,9 +80,11 @@ files:
         artifactId: vcl
         version: '{{RELEASE_VERSION}}'
 
+# Disable packaging logic (used only if you need Maven wrapper format)
 packagers:
   maven:
     enabled: false
 
+# Enable publishing of metadata (optional)
 catalog:
   enabled: true

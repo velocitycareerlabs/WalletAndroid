@@ -35,18 +35,46 @@ jobs:
         run: |
           ./gradlew clean :VCL:assembleRelease :VCL:generateSourcesJar :VCL:generateJavadocJar --stacktrace
 
-      - name: 🔐 Decode and export GPG keys to environment
+      - name: 📂 Check built artifacts
+        run: |
+          echo "::group::Listing AARs"
+          ls -lh VCL/build/outputs/aar/
+          echo "::endgroup::"
+
+          echo "::group::Listing JARs"
+          ls -lh VCL/build/libs/
+          echo "::endgroup::"
+
+      - name: 🔐 Decode and securely export GPG keys to environment
         shell: bash
         run: |
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode | sed 's/^/::add-mask::/' > /dev/null
-          echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode | sed 's/^/::add-mask::/' > /dev/null
+          set +x  # Disable command echoing
 
-          echo "JRELEASER_GPG_SECRET_KEY=${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" >> $GITHUB_ENV
-          echo "JRELEASER_GPG_PUBLIC_KEY=${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" >> $GITHUB_ENV
+          echo "::add-mask::$GPG_PRIVATE"
+          echo "::add-mask::$GPG_PUBLIC"
+
+          echo "$GPG_PRIVATE" | base64 --decode > private.gpg
+          echo "$GPG_PUBLIC" | base64 --decode > public.gpg
+
+          {
+            echo "JRELEASER_GPG_SECRET_KEY<<EOF"
+            cat private.gpg
+            echo "EOF"
+          } >> $GITHUB_ENV
+
+          {
+            echo "JRELEASER_GPG_PUBLIC_KEY<<EOF"
+            cat public.gpg
+            echo "EOF"
+          } >> $GITHUB_ENV
         env:
-          ACTIONS_STEP_DEBUG: false
+          GPG_PRIVATE: ${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}
+          GPG_PUBLIC: ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}
 
-      - name: 🛑 Fail if artifacts are missing
+      - name: 🧹 Clean up temporary GPG files
+        run: rm -f private.gpg public.gpg
+
+      - name: ✅ Verify artifacts exist
         run: |
           test -f VCL/build/outputs/aar/vcl-${{ env.RELEASE_VERSION }}.aar
           test -f VCL/build/libs/vcl-sources.jar
@@ -56,7 +84,7 @@ jobs:
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
-          arguments: full-release -PprojectVersion=${{ env.RELEASE_VERSION }} --strict
+          arguments: full-release --config-file=jreleaser.template.yml -PprojectVersion=${{ env.RELEASE_VERSION }} --strict
         env:
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           JRELEASER_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
