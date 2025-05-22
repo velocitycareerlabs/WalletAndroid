@@ -2,105 +2,157 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'maven-publish'
-    id 'signing'
 }
+
+import org.gradle.api.tasks.bundling.Jar
 
 ext {
     publishCode = 163
-    publishVersion = "2.7.3"
+    def resolvedVersion = project.hasProperty('projectVersion') ? project.property('projectVersion') : (System.getenv("RELEASE_VERSION") ?: "2.7.3")
+    versionName = resolvedVersion
     artifactId = "vcl"
-    publishGroup = "io.velocitycareerlabs"
-    namespaceId = publishGroup
+    groupId = "io.velocitycareerlabs"
 }
-group = publishGroup
-version = publishVersion
-def code = publishCode
 
-apply from: "./publish-core.gradle"
+group = groupId
+version = versionName
+println "👉 Final version is: ${project.version}"
 
 android {
-    compileSdk 35
-    namespace namespaceId
+    namespace = groupId
+    compileSdk = 35
 
     defaultConfig {
-        minSdk 24
-        targetSdk 35
-        versionCode code
-        versionName version
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles ["consumer-rules.pro"]
+        minSdk = 24
+        targetSdk = 35
+        versionCode = publishCode
+        versionName = version
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
-//        def BOOLEAN = "boolean"
-//        def TRUE = "true"
-//        def FALSE = "false"
         debug {
+            minifyEnabled = false
+            shrinkResources = false
             buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
             buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
-            minifyEnabled false
-            shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-        release {
-            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
-            buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
-            minifyEnabled false
-            shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles(getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro')
         }
         rc {
-            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}-rc\""
-            buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
-            minifyEnabled false
-            shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            initWith(debug)
+        }
+        release {
+            initWith(debug)
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
         jvmTarget = '1.8'
     }
 
-    testOptions {
-        unitTests.includeAndroidResources = true
-        unitTests.returnDefaultValues = true
-    }
-
     buildFeatures {
-        buildConfig true
+        buildConfig = true
+    }
+
+    libraryVariants.configureEach { variant ->
+        variant.outputs.all {
+            outputFileName = "vcl-${project.version}.aar"
+        }
     }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
+afterEvaluate {
+    tasks.register("generateSourcesJar", Jar) {
+        archiveBaseName.set(artifactId)
+        archiveClassifier.set("sources")
+        archiveVersion.set(version)
+        from(android.sourceSets.main.kotlin.srcDirs + android.sourceSets.main.java.srcDirs)
+        destinationDirectory.set(file("$buildDir/libs"))
+        preserveFileTimestamps = false
+        reproducibleFileOrder = true
+    }
 
-tasks.register('androidSourcesJar', Jar) {
-    archiveClassifier.set('sources')
-    from android.sourceSets.main.java.srcDirs
-    from android.sourceSets.main.kotlin.srcDirs
-}
+    tasks.register("generateJavadocJar", Jar) {
+        archiveBaseName.set(artifactId)
+        archiveClassifier.set("javadoc")
+        archiveVersion.set(version)
+        destinationDirectory.set(file("$buildDir/libs"))
+        preserveFileTimestamps = false
+        reproducibleFileOrder = true
+        doFirst {
+            def dummyDir = file("$buildDir/empty-javadoc")
+            dummyDir.mkdirs()
+            def dummyJava = new File(dummyDir, "placeholder.java")
+            if (!dummyJava.exists()) {
+                dummyJava.text = "/** Placeholder for javadoc */"
+            }
+            from(dummyDir)
+        }
+    }
 
-artifacts {
-    archives tasks.named('androidSourcesJar')
+    publishing {
+        publications {
+            create("library", MavenPublication) {
+                groupId = project.group
+                artifactId = artifactId
+                version = project.version
+
+                artifact(file("$buildDir/outputs/aar/vcl-${project.version}.aar"))
+                artifact(tasks.named("generateSourcesJar").get())
+                artifact(tasks.named("generateJavadocJar").get())
+
+                pom {
+                    name.set("VCL")
+                    description.set("Velocity Career Labs Android SDK")
+                    url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                    licenses {
+                        license {
+                            name.set("The Apache License, Version 2.0")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("michaelavoyan")
+                            name.set("Michael Avoyan")
+                            email.set("michael.avoyan@gmail.com")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:https://github.com/velocitycareerlabs/WalletAndroid.git")
+                        developerConnection.set("scm:git:ssh://git@github.com:velocitycareerlabs/WalletAndroid.git")
+                        url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name = "localStagingForJReleaser"
+                url = uri("$buildDir/staging-deploy")
+            }
+        }
+    }
 }
 
 repositories {
+    google()
     mavenCentral()
+    mavenLocal() // optional: for testing local publishing
 }
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.15.0'
 
     implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
-    implementation "androidx.security:security-crypto:1.1.0-alpha07"
+    implementation 'androidx.security:security-crypto:1.1.0-alpha07'
 
     // Reflection
 //    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"

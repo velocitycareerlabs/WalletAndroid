@@ -1,0 +1,88 @@
+project:
+  name: WalletAndroid
+  version: '{{RELEASE_VERSION}}'
+  description: Velocity Career Labs Android SDK
+  authors:
+    - Michael Avoyan
+  license: Apache-2.0
+  links:
+    homepage: https://github.com/velocitycareerlabs
+  languages:
+    java:
+      groupId: io.velocitycareerlabs
+      artifactId: vcl
+  extraProperties:
+    displayName: Velocity Career Labs Android SDK
+
+signing:
+  active: ALWAYS
+  armored: true
+  mode: FILE
+  publicKey: ${JRELEASER_GPG_PUBLIC_KEY_FILE}
+  secretKey: ${JRELEASER_GPG_SECRET_KEY_FILE}
+  passphrase: JRELEASER_GPG_PASSPHRASE
+  artifacts: true
+
+distributions:
+  vcl:
+    type: JAVA_BINARY
+    artifacts:
+      - path: VCL/build/outputs/aar/vcl-{{RELEASE_VERSION}}.aar
+      - path: VCL/build/libs/vcl-{{RELEASE_VERSION}}-sources.jar
+      - path: VCL/build/libs/vcl-{{RELEASE_VERSION}}-javadoc.jar
+    extraProperties:
+      groupId: io.velocitycareerlabs
+      artifactId: vcl
+      version: '{{RELEASE_VERSION}}'
+
+release:
+  github:
+    owner: velocitycareerlabs
+    name: WalletAndroid
+    tagName: '{{RELEASE_VERSION}}'
+    releaseName: '{{RELEASE_VERSION}}'
+    draft: false
+    sign: true
+    skipTag: false
+    prerelease:
+      enabled: '{{prerelease}}'
+
+deploy:
+  maven:
+    nexus2:
+      mavenCentral:
+        active: ALWAYS
+        url: https://s01.oss.sonatype.org/service/local
+        stagingProfileId: JRELEASER_NEXUS_STAGING_PROFILE_ID
+        username: JRELEASER_TOKEN_USERNAME
+        password: JRELEASER_TOKEN_PASSWORD
+
+files:
+  artifacts:
+    - path: VCL/build/outputs/aar/vcl-{{RELEASE_VERSION}}.aar
+      platform: universal
+      extraProperties:
+        groupId: io.velocitycareerlabs
+        artifactId: vcl
+        version: '{{RELEASE_VERSION}}'
+
+    - path: VCL/build/libs/vcl-{{RELEASE_VERSION}}-sources.jar
+      platform: universal
+      extraProperties:
+        groupId: io.velocitycareerlabs
+        artifactId: vcl
+        version: '{{RELEASE_VERSION}}'
+
+    - path: VCL/build/libs/vcl-{{RELEASE_VERSION}}-javadoc.jar
+      platform: universal
+      extraProperties:
+        groupId: io.velocitycareerlabs
+        artifactId: vcl
+        version: '{{RELEASE_VERSION}}'
+
+packagers:
+  maven:
+    enabled: false
+
+catalog:
+  enabled: true
