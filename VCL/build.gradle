@@ -60,9 +60,11 @@ android {
         buildConfig = true
     }
 
-    libraryVariants.configureEach { variant ->
-        variant.outputs.all {
-            outputFileName = "vcl-${project.version}.aar"
+    libraryVariants.all { variant ->
+        if (variant.buildType.name == "release") {
+            variant.outputs.all { output ->
+                output.outputFileName = "vcl-${version}.aar"
+            }
         }
     }
 }

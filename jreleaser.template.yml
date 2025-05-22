@@ -11,6 +11,8 @@ project:
     java:
       groupId: io.velocitycareerlabs
       artifactId: vcl
+  extraProperties:
+    displayName: Velocity Career Labs Android SDK
 
 signing:
   active: ALWAYS
@@ -77,3 +79,10 @@ files:
         groupId: io.velocitycareerlabs
         artifactId: vcl
         version: '{{RELEASE_VERSION}}'
+
+packagers:
+  maven:
+    enabled: false
+
+catalog:
+  enabled: true
