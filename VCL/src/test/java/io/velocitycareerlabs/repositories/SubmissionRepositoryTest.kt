@@ -1,41 +1,39 @@
 /**
- * Created by Michael Avoyan on 5/1/21.
+ * Created by Michael Avoyan on 26/05/2025.
  *
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.usecases
+package io.velocitycareerlabs.repositories
 
-import android.os.Build
 import io.velocitycareerlabs.api.VCLSignatureAlgorithm
-import io.velocitycareerlabs.api.entities.*
-import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
-import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
+import io.velocitycareerlabs.api.entities.VCLDeepLink
+import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
+import io.velocitycareerlabs.api.entities.VCLPresentationRequest
+import io.velocitycareerlabs.api.entities.VCLPresentationSubmission
+import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
+import io.velocitycareerlabs.api.entities.handleResult
+import io.velocitycareerlabs.impl.data.repositories.HeaderKeys
+import io.velocitycareerlabs.impl.data.repositories.HeaderValues
 import io.velocitycareerlabs.impl.data.repositories.PresentationSubmissionRepositoryImpl
-import io.velocitycareerlabs.impl.data.usecases.PresentationSubmissionUseCaseImpl
-import io.velocitycareerlabs.impl.domain.usecases.PresentationSubmissionUseCase
+import io.velocitycareerlabs.impl.data.repositories.SubmissionRepositoryImpl
 import io.velocitycareerlabs.impl.extensions.toJsonObject
-import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
-import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
+import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CommonMocks
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationSubmissionMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.TokenMocks
 import io.velocitycareerlabs.utils.expectedPresentationSubmissionResult
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
+import io.mockk.verify
+import io.mockk.spyk
 
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.O_MR1])
-internal class PresentationSubmissionUseCaseTest {
-
-    private lateinit var subject: PresentationSubmissionUseCase
+class SubmissionRepositoryTest {
+    private lateinit var subject: SubmissionRepositoryImpl
 
     private val authToken = TokenMocks.AuthToken
     private lateinit var didJwk: VCLDidJwk
@@ -53,15 +51,10 @@ internal class PresentationSubmissionUseCaseTest {
             })
         }
 
-        subject = PresentationSubmissionUseCaseImpl(
+        subject = spyk(
             PresentationSubmissionRepositoryImpl(
                 NetworkServiceSuccess(validResponse = PresentationSubmissionMocks.PresentationSubmissionResultJson)
-            ),
-            JwtServiceRepositoryImpl(
-                VCLJwtSignServiceLocalImpl(keyService),
-                VCLJwtVerifyServiceLocalImpl()
-            ),
-            EmptyExecutor()
+            )
         )
     }
 
@@ -83,7 +76,8 @@ internal class PresentationSubmissionUseCaseTest {
             )
 
         subject.submit(
-            submission = presentationSubmission
+            submission = presentationSubmission,
+            jwt = CommonMocks.JWT
         ) {
             it.handleResult(
                 { presentationSubmissionResult ->
@@ -96,6 +90,10 @@ internal class PresentationSubmissionUseCaseTest {
                     assert(false) { "$it" }
                 }
             )
+        }
+
+        verify(exactly = 1) {
+            subject.generateHeader()
         }
     }
 
@@ -119,6 +117,7 @@ internal class PresentationSubmissionUseCaseTest {
 
         subject.submit(
             submission = presentationSubmission,
+            jwt = CommonMocks.JWT,
             authToken = authToken
         ) {
             it.handleResult(
@@ -133,5 +132,32 @@ internal class PresentationSubmissionUseCaseTest {
                 }
             )
         }
+
+        verify(exactly = 1) {
+            subject.generateHeader(authToken)
+        }
+    }
+
+    @Test
+    fun generateHeaderWithAuthToken() {
+        val header = subject.generateHeader(authToken)
+
+        assert(header.size == 2)
+
+        assert(header.get(0).first == HeaderKeys.XVnfProtocolVersion)
+        assert(header.get(0).second == HeaderValues.XVnfProtocolVersion)
+
+        assert(header.get(1).first == HeaderKeys.Authorization)
+        assert(header.get(1).second == "${HeaderValues.PrefixBearer} ${authToken.accessToken.value}")
+    }
+
+    @Test
+    fun generateHeaderWithoutAuthToken() {
+        val header = subject.generateHeader()
+
+        assert(header.size == 1)
+
+        assert(header.get(0).first == HeaderKeys.XVnfProtocolVersion)
+        assert(header.get(0).second == HeaderValues.XVnfProtocolVersion)
     }
 }
