@@ -18,7 +18,7 @@ import io.velocitycareerlabs.impl.data.usecases.KeyServiceUseCaseImpl
 import io.velocitycareerlabs.impl.domain.usecases.KeyServiceUseCase
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
-import io.velocitycareerlabs.utils.ErrorUtils
+import io.velocitycareerlabs.infrastructure.utils.ErrorUtils
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

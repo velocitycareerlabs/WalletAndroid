@@ -26,7 +26,7 @@ import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CommonMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationSubmissionMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.TokenMocks
-import io.velocitycareerlabs.utils.expectedPresentationSubmissionResult
+import io.velocitycareerlabs.infrastructure.utils.expectedSubmissionResult
 import org.junit.Before
 import org.junit.Test
 import io.mockk.verify
@@ -69,8 +69,8 @@ class SubmissionRepositoryTest {
             ),
             verifiableCredentials = listOf()
         )
-        val expectedPresentationSubmissionResult =
-            expectedPresentationSubmissionResult(
+        val expectedSubmissionResult =
+            expectedSubmissionResult(
                 PresentationSubmissionMocks.PresentationSubmissionResultJson.toJsonObject()!!,
                 presentationSubmission.jti, submissionId = presentationSubmission.submissionId
             )
@@ -80,11 +80,11 @@ class SubmissionRepositoryTest {
             jwt = CommonMocks.JWT
         ) {
             it.handleResult(
-                { presentationSubmissionResult ->
-                    assert(presentationSubmissionResult.sessionToken.value == expectedPresentationSubmissionResult.sessionToken.value)
-                    assert(presentationSubmissionResult.exchange.id == expectedPresentationSubmissionResult.exchange.id)
-                    assert(presentationSubmissionResult.jti == expectedPresentationSubmissionResult.jti)
-                    assert(presentationSubmissionResult.submissionId == expectedPresentationSubmissionResult.submissionId)
+                { submissionResult ->
+                    assert(submissionResult.sessionToken.value == expectedSubmissionResult.sessionToken.value)
+                    assert(submissionResult.exchange.id == expectedSubmissionResult.exchange.id)
+                    assert(submissionResult.jti == expectedSubmissionResult.jti)
+                    assert(submissionResult.submissionId == expectedSubmissionResult.submissionId)
                 },
                 {
                     assert(false) { "$it" }
@@ -109,7 +109,7 @@ class SubmissionRepositoryTest {
             verifiableCredentials = listOf()
         )
 
-        val expectedPresentationSubmissionResult = expectedPresentationSubmissionResult(
+        val expectedSubmissionResult = expectedSubmissionResult(
             PresentationSubmissionMocks.PresentationSubmissionResultJson.toJsonObject()!!,
             presentationSubmission.jti,
             submissionId = presentationSubmission.submissionId
@@ -121,11 +121,11 @@ class SubmissionRepositoryTest {
             authToken = authToken
         ) {
             it.handleResult(
-                { presentationSubmissionResult ->
-                    assert(presentationSubmissionResult.sessionToken.value == expectedPresentationSubmissionResult.sessionToken.value)
-                    assert(presentationSubmissionResult.exchange.id == expectedPresentationSubmissionResult.exchange.id)
-                    assert(presentationSubmissionResult.jti == expectedPresentationSubmissionResult.jti)
-                    assert(presentationSubmissionResult.submissionId == expectedPresentationSubmissionResult.submissionId)
+                { submissionResult ->
+                    assert(submissionResult.sessionToken.value == expectedSubmissionResult.sessionToken.value)
+                    assert(submissionResult.exchange.id == expectedSubmissionResult.exchange.id)
+                    assert(submissionResult.jti == expectedSubmissionResult.jti)
+                    assert(submissionResult.submissionId == expectedSubmissionResult.submissionId)
                 },
                 {
                     assert(false) { "$it" }
@@ -139,25 +139,25 @@ class SubmissionRepositoryTest {
     }
 
     @Test
-    fun generateHeaderWithAuthToken() {
+    fun testGenerateHeaderWithAuthToken() {
         val header = subject.generateHeader(authToken)
 
         assert(header.size == 2)
 
-        assert(header.get(0).first == HeaderKeys.XVnfProtocolVersion)
-        assert(header.get(0).second == HeaderValues.XVnfProtocolVersion)
+        assert(header[0].first == HeaderKeys.XVnfProtocolVersion)
+        assert(header[0].second == HeaderValues.XVnfProtocolVersion)
 
-        assert(header.get(1).first == HeaderKeys.Authorization)
-        assert(header.get(1).second == "${HeaderValues.PrefixBearer} ${authToken.accessToken.value}")
+        assert(header[1].first == HeaderKeys.Authorization)
+        assert(header[1].second == "${HeaderValues.PrefixBearer} ${authToken.accessToken.value}")
     }
 
     @Test
-    fun generateHeaderWithoutAuthToken() {
+    fun testGenerateHeaderWithoutAuthToken() {
         val header = subject.generateHeader()
 
         assert(header.size == 1)
 
-        assert(header.get(0).first == HeaderKeys.XVnfProtocolVersion)
-        assert(header.get(0).second == HeaderValues.XVnfProtocolVersion)
+        assert(header[0].first == HeaderKeys.XVnfProtocolVersion)
+        assert(header[0].second == HeaderValues.XVnfProtocolVersion)
     }
 }

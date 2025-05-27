@@ -5,14 +5,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.utils
+package io.velocitycareerlabs.infrastructure.utils
 
 import io.velocitycareerlabs.api.entities.VCLExchange
 import io.velocitycareerlabs.api.entities.VCLSubmissionResult
 import io.velocitycareerlabs.api.entities.VCLToken
 import org.json.JSONObject
 
-internal fun expectedPresentationSubmissionResult(
+internal fun expectedSubmissionResult(
     jsonObj: JSONObject,
     jti: String,
     submissionId: String
