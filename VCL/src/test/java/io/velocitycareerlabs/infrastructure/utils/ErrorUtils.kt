@@ -1,4 +1,4 @@
-package io.velocitycareerlabs.utils
+package io.velocitycareerlabs.infrastructure.utils
 
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode

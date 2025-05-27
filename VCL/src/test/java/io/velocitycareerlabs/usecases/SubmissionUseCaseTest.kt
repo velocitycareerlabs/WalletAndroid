@@ -14,7 +14,7 @@ import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.PresentationSubmissionRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.PresentationSubmissionUseCaseImpl
-import io.velocitycareerlabs.impl.domain.usecases.PresentationSubmissionUseCase
+import io.velocitycareerlabs.impl.domain.usecases.SubmissionUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
@@ -23,7 +23,8 @@ import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CommonMocks
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationSubmissionMocks
-import org.json.JSONObject
+import io.velocitycareerlabs.infrastructure.resources.valid.TokenMocks
+import io.velocitycareerlabs.infrastructure.utils.expectedSubmissionResult
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,9 +33,11 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
-internal class PresentationSubmissionUseCaseTest {
+internal class SubmissionUseCaseTest {
 
-    lateinit var subject: PresentationSubmissionUseCase
+    private lateinit var subject: SubmissionUseCase
+
+    private val authToken = TokenMocks.AuthToken
     private lateinit var didJwk: VCLDidJwk
     private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
 
@@ -45,7 +48,7 @@ internal class PresentationSubmissionUseCaseTest {
         ) { jwkResult ->
             jwkResult.handleResult({
                 didJwk = it
-            } ,{
+            }, {
                 assert(false) { "Failed to generate did:jwk $it" }
             })
         }
@@ -73,8 +76,8 @@ internal class PresentationSubmissionUseCaseTest {
             ),
             verifiableCredentials = listOf()
         )
-        val expectedPresentationSubmissionResult =
-            expectedPresentationSubmissionResult(
+        val expectedSubmissionResult =
+            expectedSubmissionResult(
                 PresentationSubmissionMocks.PresentationSubmissionResultJson.toJsonObject()!!,
                 presentationSubmission.jti, submissionId = presentationSubmission.submissionId
             )
@@ -84,10 +87,10 @@ internal class PresentationSubmissionUseCaseTest {
         ) {
             it.handleResult(
                 { presentationSubmissionResult ->
-                    assert(presentationSubmissionResult.sessionToken.value == expectedPresentationSubmissionResult.sessionToken.value)
-                    assert(presentationSubmissionResult.exchange.id == expectedPresentationSubmissionResult.exchange.id)
-                    assert(presentationSubmissionResult.jti == expectedPresentationSubmissionResult.jti)
-                    assert(presentationSubmissionResult.submissionId == expectedPresentationSubmissionResult.submissionId)
+                    assert(presentationSubmissionResult.sessionToken.value == expectedSubmissionResult.sessionToken.value)
+                    assert(presentationSubmissionResult.exchange.id == expectedSubmissionResult.exchange.id)
+                    assert(presentationSubmissionResult.jti == expectedSubmissionResult.jti)
+                    assert(presentationSubmissionResult.submissionId == expectedSubmissionResult.submissionId)
                 },
                 {
                     assert(false) { "$it" }
@@ -96,26 +99,39 @@ internal class PresentationSubmissionUseCaseTest {
         }
     }
 
-    private fun expectedPresentationSubmissionResult(
-        jsonObj: JSONObject,
-        jti: String,
-        submissionId: String
-    ): VCLSubmissionResult {
-        val exchangeJsonObj = jsonObj.optJSONObject(VCLSubmissionResult.CodingKeys.KeyExchange)!!
-        return VCLSubmissionResult(
-            sessionToken = VCLToken(value = (jsonObj[VCLSubmissionResult.CodingKeys.KeyToken] as String)),
-            exchange = expectedExchange(exchangeJsonObj),
-            jti = jti,
-            submissionId = submissionId
+    @Test
+    fun testSubmitPresentationTypeFeedSuccess() {
+        val presentationSubmission = VCLPresentationSubmission(
+            presentationRequest = VCLPresentationRequest(
+                jwt = CommonMocks.JWT,
+                verifiedProfile = VCLVerifiedProfile("{}".toJsonObject()!!),
+                deepLink = VCLDeepLink(value = ""),
+                didJwk = didJwk
+            ),
+            verifiableCredentials = listOf()
         )
-    }
 
-    private fun expectedExchange(exchangeJsonObj: JSONObject): VCLExchange {
-        return VCLExchange(
-            id = (exchangeJsonObj.optString(VCLExchange.CodingKeys.KeyId)),
-            type = (exchangeJsonObj.optString(VCLExchange.CodingKeys.KeyType)),
-            disclosureComplete = (exchangeJsonObj[VCLExchange.CodingKeys.KeyDisclosureComplete] as Boolean),
-            exchangeComplete = (exchangeJsonObj[VCLExchange.CodingKeys.KeyExchangeComplete] as Boolean)
+        val expectedSubmissionResult = expectedSubmissionResult(
+            PresentationSubmissionMocks.PresentationSubmissionResultJson.toJsonObject()!!,
+            presentationSubmission.jti,
+            submissionId = presentationSubmission.submissionId
         )
+
+        subject.submit(
+            submission = presentationSubmission,
+            authToken = authToken
+        ) {
+            it.handleResult(
+                { presentationSubmissionResult ->
+                    assert(presentationSubmissionResult.sessionToken.value == expectedSubmissionResult.sessionToken.value)
+                    assert(presentationSubmissionResult.exchange.id == expectedSubmissionResult.exchange.id)
+                    assert(presentationSubmissionResult.jti == expectedSubmissionResult.jti)
+                    assert(presentationSubmissionResult.submissionId == expectedSubmissionResult.submissionId)
+                },
+                {
+                    assert(false) { "$it" }
+                }
+            )
+        }
     }
 }
