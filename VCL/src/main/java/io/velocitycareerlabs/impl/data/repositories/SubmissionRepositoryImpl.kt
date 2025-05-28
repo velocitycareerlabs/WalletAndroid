@@ -31,7 +31,7 @@ internal class SubmissionRepositoryImpl(
             endpoint = submission.submitUri,
             body = submission.generateRequestBody(jwt).toString(),
             method = Request.HttpMethod.POST,
-            headers = generateHeader(authToken),
+            headers = generateHeader(authToken?.accessToken),
             contentType = Request.ContentTypeApplicationJson,
             completionBlock = { result ->
                 result.handleResult(
@@ -53,14 +53,14 @@ internal class SubmissionRepositoryImpl(
         )
     }
 
-    internal fun generateHeader(authToken: VCLAuthToken? = null): List<Pair<String, String>> {
+    internal fun generateHeader(accessToken: VCLToken? = null): List<Pair<String, String>> {
         val header =
             mutableListOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion))
-        authToken?.let {
+        accessToken?.let {
             header.add(
                 Pair(
                     HeaderKeys.Authorization,
-                    "${HeaderValues.PrefixBearer} ${authToken.accessToken.value}"
+                    "${HeaderValues.PrefixBearer} ${it.value}"
                 )
             )
         }
@@ -85,8 +85,7 @@ internal class SubmissionRepositoryImpl(
         VCLExchange(
             id = exchangeJsonObj?.optString(VCLExchange.KeyId) ?: "",
             type = exchangeJsonObj?.optString(VCLExchange.KeyType) ?: "",
-            disclosureComplete = exchangeJsonObj?.optBoolean(VCLExchange.KeyDisclosureComplete)
-                ?: false,
-            exchangeComplete = exchangeJsonObj?.optBoolean(VCLExchange.KeyExchangeComplete) ?: false
+            disclosureComplete = exchangeJsonObj?.optBoolean(VCLExchange.KeyDisclosureComplete) == true,
+            exchangeComplete = exchangeJsonObj?.optBoolean(VCLExchange.KeyExchangeComplete) == true
         )
 }
