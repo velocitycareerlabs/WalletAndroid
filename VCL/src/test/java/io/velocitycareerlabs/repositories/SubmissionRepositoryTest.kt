@@ -134,13 +134,13 @@ class SubmissionRepositoryTest {
         }
 
         verify(exactly = 1) {
-            subject.generateHeader(authToken)
+            subject.generateHeader(authToken.accessToken)
         }
     }
 
     @Test
     fun testGenerateHeaderWithAuthToken() {
-        val header = subject.generateHeader(authToken)
+        val header = subject.generateHeader(authToken.accessToken)
 
         assert(header.size == 2)
 
