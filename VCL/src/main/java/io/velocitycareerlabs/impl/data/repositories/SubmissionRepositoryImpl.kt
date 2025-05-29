@@ -53,7 +53,7 @@ internal class SubmissionRepositoryImpl(
         )
     }
 
-    internal fun generateHeader(accessToken: VCLToken? = null): List<Pair<String, String>> {
+    private fun generateHeader(accessToken: VCLToken? = null): List<Pair<String, String>> {
         val header =
             mutableListOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion))
         accessToken?.let {

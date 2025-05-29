@@ -8,8 +8,12 @@
 package io.velocitycareerlabs.usecases
 
 import android.os.Build
+import io.mockk.spyk
+import io.mockk.verify
 import io.velocitycareerlabs.api.VCLSignatureAlgorithm
 import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.impl.data.repositories.HeaderKeys
+import io.velocitycareerlabs.impl.data.repositories.HeaderValues
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.PresentationSubmissionRepositoryImpl
@@ -40,6 +44,24 @@ internal class SubmissionUseCaseTest {
     private val authToken = TokenMocks.AuthToken
     private lateinit var didJwk: VCLDidJwk
     private val keyService = VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)
+    private val networkServiceSuccessSpy = spyk(
+        NetworkServiceSuccess(
+            validResponse = PresentationSubmissionMocks.PresentationSubmissionResultJson
+        )
+    )
+
+    private val expectedHeadersWithAccessToken =
+        listOf(
+            Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion),
+            Pair(
+                HeaderKeys.Authorization,
+                "${HeaderValues.PrefixBearer} ${authToken.accessToken.value}"
+            )
+        )
+    private val expectedHeadersWithoutAccessToken =
+        listOf(
+            Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion),
+        )
 
     @Before
     fun setUp() {
@@ -55,7 +77,7 @@ internal class SubmissionUseCaseTest {
 
         subject = PresentationSubmissionUseCaseImpl(
             PresentationSubmissionRepositoryImpl(
-                NetworkServiceSuccess(validResponse = PresentationSubmissionMocks.PresentationSubmissionResultJson)
+                networkServiceSuccessSpy
             ),
             JwtServiceRepositoryImpl(
                 VCLJwtSignServiceLocalImpl(keyService),
@@ -97,6 +119,18 @@ internal class SubmissionUseCaseTest {
                 }
             )
         }
+
+        verify(exactly = 1) {
+            networkServiceSuccessSpy.sendRequest(
+                endpoint = any(),
+                body = any(),
+                contentType = any(),
+                method = any(),
+                headers = expectedHeadersWithoutAccessToken,
+                useCaches = any(),
+                completionBlock = any()
+            )
+        }
     }
 
     @Test
@@ -131,6 +165,18 @@ internal class SubmissionUseCaseTest {
                 {
                     assert(false) { "$it" }
                 }
+            )
+        }
+
+        verify(exactly = 1) {
+            networkServiceSuccessSpy.sendRequest(
+                endpoint = any(),
+                body = any(),
+                contentType = any(),
+                method = any(),
+                headers = expectedHeadersWithAccessToken,
+                useCaches = any(),
+                completionBlock = any()
             )
         }
     }
