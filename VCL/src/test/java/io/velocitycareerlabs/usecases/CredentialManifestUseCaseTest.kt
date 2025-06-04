@@ -13,6 +13,7 @@ import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.CredentialManifestRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
+import io.velocitycareerlabs.impl.data.repositories.ResolveDidDocumentRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.ResolveKidRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialManifestUseCaseImpl
 import io.velocitycareerlabs.impl.data.verifiers.CredentialManifestByDeepLinkVerifierImpl
@@ -25,6 +26,7 @@ import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidDocumentMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.After
@@ -114,7 +116,11 @@ internal class CredentialManifestUseCaseTest {
                 VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)),
                 VCLJwtVerifyServiceLocalImpl()
             ),
-            CredentialManifestByDeepLinkVerifierImpl(),
+            CredentialManifestByDeepLinkVerifierImpl(
+                ResolveDidDocumentRepositoryImpl(
+                    NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
+                )
+            ),
             EmptyExecutor()
         )
 

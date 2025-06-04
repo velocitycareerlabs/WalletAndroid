@@ -174,7 +174,11 @@ internal object VclBlocksProvider {
                                 chooseJwtSignService(context, cryptoServicesDescriptor),
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
-                        PresentationRequestByDeepLinkVerifierImpl(),
+                        PresentationRequestByDeepLinkVerifierImpl(
+                                ResolveDidDocumentRepositoryImpl(
+                                        NetworkServiceImpl()
+                                )
+                        ),
                         ExecutorImpl.instance
                 )
 
@@ -218,7 +222,11 @@ internal object VclBlocksProvider {
                                 chooseJwtSignService(context, cryptoServicesDescriptor),
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
-                        CredentialManifestByDeepLinkVerifierImpl(),
+                        CredentialManifestByDeepLinkVerifierImpl(
+                                ResolveDidDocumentRepositoryImpl(
+                                        NetworkServiceImpl()
+                                )
+                        ),
                         ExecutorImpl.instance
                 )
 
@@ -251,7 +259,11 @@ internal object VclBlocksProvider {
                         GenerateOffersRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
-                        OffersByDeepLinkVerifierImpl(),
+                        OffersByDeepLinkVerifierImpl(
+                                ResolveDidDocumentRepositoryImpl(
+                                        NetworkServiceImpl()
+                                )
+                        ),
                         ExecutorImpl.instance
                 )
 
@@ -280,7 +292,11 @@ internal object VclBlocksProvider {
                         ),
                         credentialIssuerVerifier,
                         CredentialDidVerifierImpl(),
-                        CredentialsByDeepLinkVerifierImpl(),
+                        CredentialsByDeepLinkVerifierImpl(
+                                ResolveDidDocumentRepositoryImpl(
+                                        NetworkServiceImpl()
+                                )
+                        ),
                         ExecutorImpl.instance
                 )
         }

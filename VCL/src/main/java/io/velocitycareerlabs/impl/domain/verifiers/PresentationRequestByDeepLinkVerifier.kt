@@ -10,7 +10,7 @@ import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.api.entities.VCLPresentationRequest
 import io.velocitycareerlabs.api.entities.VCLResult
 
-interface PresentationRequestByDeepLinkVerifier {
+internal interface PresentationRequestByDeepLinkVerifier {
     fun verifyPresentationRequest(
         presentationRequest: VCLPresentationRequest,
         deepLink: VCLDeepLink,
