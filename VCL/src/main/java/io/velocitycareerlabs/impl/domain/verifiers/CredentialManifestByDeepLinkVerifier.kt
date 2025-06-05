@@ -10,7 +10,7 @@ import io.velocitycareerlabs.api.entities.VCLCredentialManifest
 import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.api.entities.VCLResult
 
-interface CredentialManifestByDeepLinkVerifier {
+internal interface CredentialManifestByDeepLinkVerifier {
     fun verifyCredentialManifest(
         credentialManifest: VCLCredentialManifest,
         deepLink: VCLDeepLink,

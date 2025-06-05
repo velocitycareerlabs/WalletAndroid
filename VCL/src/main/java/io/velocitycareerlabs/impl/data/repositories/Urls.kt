@@ -28,6 +28,7 @@ internal class Urls {
         val Countries get() = "$BaseUrlRegistrar/reference/countries"
         val Organizations get() = "$BaseUrlRegistrar/api/v0.6/organizations/search-profiles"
         val ResolveKid get() = "$BaseUrlRegistrar/api/v0.6/resolve-kid/"
+        val ResolveDid get() = "$BaseUrlRegistrar/api/v0.6/resolve-did/"
         val CredentialTypesFormSchema get() = "$BaseUrlRegistrar/api/v0.6/form-schemas?credentialType=$CredentialType"
         val VerifiedProfile get() = "$BaseUrlRegistrar/api/v0.6/organizations/$Did/verified-profile"
     }

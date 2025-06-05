@@ -7,6 +7,20 @@
 
 package io.velocitycareerlabs.api.entities
 
+import io.velocitycareerlabs.impl.extensions.toJsonObject
+import io.velocitycareerlabs.impl.extensions.toList
 import org.json.JSONObject
 
-data class VCLDidDocument(val document: JSONObject)
+data class VCLDidDocument(val payload: JSONObject) {
+    val id: String
+        get() = payload.optString(KeyId)
+    val alsoKnownAs: List<String>
+        get() =payload.optJSONArray(KeyAlsoKnownAs)?.toList() as? List<String> ?: emptyList()
+
+    constructor(payloadStr: String) : this(payloadStr.toJsonObject() ?: JSONObject())
+
+    companion object CodingKeys {
+        const val KeyId = "id"
+        const val KeyAlsoKnownAs = "alsoKnownAs"
+    }
+}

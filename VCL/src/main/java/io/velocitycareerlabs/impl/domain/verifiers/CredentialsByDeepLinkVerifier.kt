@@ -10,7 +10,7 @@ import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLResult
 
-interface CredentialsByDeepLinkVerifier {
+internal interface CredentialsByDeepLinkVerifier {
     fun verifyCredentials(
         jwtCredentials: List<VCLJwt>,
         deepLink: VCLDeepLink,
