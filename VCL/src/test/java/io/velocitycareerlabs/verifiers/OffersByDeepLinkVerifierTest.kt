@@ -38,7 +38,7 @@ class OffersByDeepLinkVerifierTest {
     private val deepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet
 
     @Test
-    fun verifyOffersSuccess() {
+    fun testVerifyOffersSuccess() {
         subject = OffersByDeepLinkVerifierImpl(
             ResolveDidDocumentRepositoryImpl(
                 NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
@@ -58,7 +58,7 @@ class OffersByDeepLinkVerifierTest {
     }
 
     @Test
-    fun verifyOffersError() {
+    fun testVerifyOffersError() {
         subject = OffersByDeepLinkVerifierImpl(
             ResolveDidDocumentRepositoryImpl(
                 NetworkServiceSuccess(DidDocumentMocks.DidDocumentWithWrongDidMockStr)

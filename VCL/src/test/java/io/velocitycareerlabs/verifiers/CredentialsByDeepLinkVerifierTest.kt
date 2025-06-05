@@ -6,7 +6,6 @@
  */
 package io.velocitycareerlabs.verifiers
 
-import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.api.entities.handleResult
