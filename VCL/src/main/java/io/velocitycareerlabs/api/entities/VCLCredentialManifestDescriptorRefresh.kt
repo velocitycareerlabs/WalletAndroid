@@ -25,9 +25,6 @@ data class VCLCredentialManifestDescriptorRefresh(
     override val deepLink: VCLDeepLink? = null
 ) : VCLCredentialManifestDescriptor {
 
-    override val did: String?
-        get() = retrieveDid()
-
     override val endpoint = retrieveEndpoint()
 
     override fun retrieveEndpoint() =

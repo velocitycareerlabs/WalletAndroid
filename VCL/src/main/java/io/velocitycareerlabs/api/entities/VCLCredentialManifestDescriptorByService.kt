@@ -24,9 +24,6 @@ data class VCLCredentialManifestDescriptorByService(
     override var vendorOriginContext: String? = null
     override var deepLink: VCLDeepLink? = null
 
-    override val did: String?
-        get() = retrieveDid()
-
     override val endpoint: String?
         get() = retrieveEndpoint()
 

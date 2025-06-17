@@ -16,13 +16,16 @@ interface VCLCredentialManifestDescriptor {
     val issuingType: VCLIssuingType
     val credentialTypes: List<String>?
     val pushDelegate: VCLPushDelegate?
-    val did: String?
     val vendorOriginContext: String?
     val deepLink: VCLDeepLink?
     val didJwk: VCLDidJwk
     val remoteCryptoServicesToken: VCLToken?
 
     val endpoint: String?
+
+    val did get(): String? {
+        return deepLink?.did ?: retrieveDid()
+    }
 
     fun retrieveDid(): String? {
         return uri?.getUrlSubPath(CredentialManifestDescriptorCodingKeys.KeyDidPrefix)
