@@ -3,24 +3,25 @@ name: WalletAndroid-SDK-Publish
 on:
   workflow_dispatch:
     inputs:
-      release_tag:
-        description: 'Release version (e.g., 2.7.3)'
+      environment:
+        description: 'Environment to deploy to'
         required: true
-      prerelease:
-        description: 'Is this a pre-release?'
-        required: true
-        default: 'false'
+        type: choice
+        options:
+          - dev
+          - rc
+          - prod
 
 jobs:
   release-android-sdk:
     runs-on: ubuntu-latest
-    env:
-      RELEASE_VERSION: ${{ github.event.inputs.release_tag }}
-      PRERELEASE: ${{ github.event.inputs.prerelease == 'true' }}
-
+    
     steps:
       - name: 🧾 Checkout code
         uses: actions/checkout@v4
+
+      - name: ✅ Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v2
 
       - name: ☕ Set up Java 17
         uses: actions/setup-java@v4
@@ -31,6 +32,12 @@ jobs:
       - name: 🛠️ Set up Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: 📝 Get version from build.gradle
+        run: |
+          VERSION=$(grep "def resolvedVersion = .*" VCL/build.gradle | sed -n 's/.*?: "\([^"]*\)".*/\1/p')
+          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Found version: $VERSION"
+
       - name: 🧪 Build AAR + Sources + Javadoc
         run: |
           ./gradlew clean \
@@ -38,7 +45,7 @@ jobs:
             :VCL:generateSourcesJar \
             :VCL:generateJavadocJar \
             -PprojectVersion=${RELEASE_VERSION} \
-            -Pprerelease=${PRERELEASE} \
+            -Pprerelease=${{ github.event.inputs.environment == 'rc' }} \
             --stacktrace
 
       - name: ✅ Verify expected artifacts exist
@@ -49,12 +56,14 @@ jobs:
           test -f VCL/build/libs/vcl-${RELEASE_VERSION}-javadoc.jar || (echo "❌ Javadoc JAR missing" && exit 1)
 
       - name: 🔐 Load GPG keys (as temp files)
+        if: github.event.inputs.environment != 'dev'
         run: |
           echo "${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}" | base64 --decode > private.gpg
           echo "${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}" | base64 --decode > public.gpg
         shell: bash
 
       - name: 🚀 Run JReleaser full-release
+        if: github.event.inputs.environment != 'dev'
         uses: jreleaser/release-action@v2
         with:
           version: 1.18.0
@@ -62,16 +71,17 @@ jobs:
             full-release
             --config-file=jreleaser.template.yml
             -PprojectVersion=${{ env.RELEASE_VERSION }}
-            -Pprerelease=${{ env.PRERELEASE }}
+            -Pprerelease=${{ github.event.inputs.environment == 'rc' }}
+            --set gpgPublicKeyFile=public.gpg
+            --set gpgSecretKeyFile=private.gpg
             --strict
         env:
-          JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
-          JRELEASER_GPG_SECRET_KEY_FILE: private.gpg
-          JRELEASER_GPG_PUBLIC_KEY_FILE: public.gpg
-          JRELEASER_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
-          JRELEASER_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
-          JRELEASER_NEXUS_STAGING_PROFILE_ID: ${{ secrets.MAVEN_CENTRAL_STAGING_PROFILE_ID }}
+          MAVEN_CENTRAL_SIGNING_PASSWORD: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
+          MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
+          MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
+          MAVEN_CENTRAL_STAGING_PROFILE_ID: ${{ secrets.MAVEN_CENTRAL_STAGING_PROFILE_ID }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧹 Clean up GPG files
+        if: github.event.inputs.environment != 'dev' && always()
         run: rm -f private.gpg public.gpg
