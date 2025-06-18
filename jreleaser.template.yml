@@ -34,7 +34,7 @@ distributions:
       groupId: io.velocitycareerlabs
       artifactId: vcl
       version: '{{env.RELEASE_VERSION}}'
-      prerelease: '{{prerelease}}'
+      prerelease: {{prerelease}}
 
 release:
   github:
@@ -46,7 +46,7 @@ release:
     sign: true
     skipTag: false
     prerelease:
-      enabled: '{{prerelease}}'
+      enabled: {{prerelease}}
 
 deploy:
   maven:
