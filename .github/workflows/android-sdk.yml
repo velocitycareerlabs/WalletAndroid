@@ -67,7 +67,7 @@ jobs:
           arguments: >
             full-release
             --config-file=jreleaser.template.yml
-            -prerelease=${{ github.event.inputs.environment == 'rc' }}
+            -D=prerelease=${{ github.event.inputs.environment == 'rc' }}
             --strict
         env:
           MAVEN_CENTRAL_SIGNING_PASSWORD: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
