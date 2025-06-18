@@ -1,6 +1,6 @@
 project:
   name: WalletAndroid
-  version: '{{RELEASE_VERSION}}'
+  version: '{{env.RELEASE_VERSION}}'
   description: Velocity Career Labs Android SDK
   authors:
     - Michael Avoyan
@@ -27,21 +27,21 @@ distributions:
   vcl:
     type: JAVA_BINARY
     artifacts:
-      - path: VCL/build/outputs/aar/vcl-{{RELEASE_VERSION}}.aar
-      - path: VCL/build/libs/vcl-{{RELEASE_VERSION}}-sources.jar
-      - path: VCL/build/libs/vcl-{{RELEASE_VERSION}}-javadoc.jar
+      - path: VCL/build/outputs/aar/vcl-{{env.RELEASE_VERSION}}.aar
+      - path: VCL/build/libs/vcl-{{env.RELEASE_VERSION}}-sources.jar
+      - path: VCL/build/libs/vcl-{{env.RELEASE_VERSION}}-javadoc.jar
     extraProperties:
       groupId: io.velocitycareerlabs
       artifactId: vcl
-      version: '{{RELEASE_VERSION}}'
+      version: '{{env.RELEASE_VERSION}}'
       prerelease: '{{prerelease}}'
 
 release:
   github:
     owner: velocitycareerlabs
     name: WalletAndroid
-    tagName: '{{#prerelease}}rc-{{/prerelease}}{{RELEASE_VERSION}}'
-    releaseName: '{{#prerelease}}Release Candidate {{/prerelease}}{{RELEASE_VERSION}}'
+    tagName: '{{#prerelease}}rc-{{/prerelease}}{{env.RELEASE_VERSION}}'
+    releaseName: '{{#prerelease}}Release Candidate {{/prerelease}}{{env.RELEASE_VERSION}}'
     draft: false
     sign: true
     skipTag: false
@@ -60,26 +60,26 @@ deploy:
 
 files:
   artifacts:
-    - path: VCL/build/outputs/aar/vcl-{{RELEASE_VERSION}}.aar
+    - path: VCL/build/outputs/aar/vcl-{{env.RELEASE_VERSION}}.aar
       platform: universal
       extraProperties:
         groupId: io.velocitycareerlabs
         artifactId: vcl
-        version: '{{RELEASE_VERSION}}'
+        version: '{{env.RELEASE_VERSION}}'
 
-    - path: VCL/build/libs/vcl-{{RELEASE_VERSION}}-sources.jar
+    - path: VCL/build/libs/vcl-{{env.RELEASE_VERSION}}-sources.jar
       platform: universal
       extraProperties:
         groupId: io.velocitycareerlabs
         artifactId: vcl
-        version: '{{RELEASE_VERSION}}'
+        version: '{{env.RELEASE_VERSION}}'
 
-    - path: VCL/build/libs/vcl-{{RELEASE_VERSION}}-javadoc.jar
+    - path: VCL/build/libs/vcl-{{env.RELEASE_VERSION}}-javadoc.jar
       platform: universal
       extraProperties:
         groupId: io.velocitycareerlabs
         artifactId: vcl
-        version: '{{RELEASE_VERSION}}'
+        version: '{{env.RELEASE_VERSION}}'
 
 packagers:
   maven:

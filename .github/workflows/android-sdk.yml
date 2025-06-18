@@ -41,8 +41,8 @@ jobs:
             :VCL:assembleRelease \
             :VCL:generateSourcesJar \
             :VCL:generateJavadocJar \
-            -PprojectVersion=${RELEASE_VERSION} \
-            -Pprerelease=${{ github.event.inputs.environment == 'rc' }} \
+            -projectVersion=${RELEASE_VERSION} \
+            -prerelease=${{ github.event.inputs.environment == 'rc' }} \
             --stacktrace
 
       - name: ✅ Verify expected artifacts exist
@@ -67,8 +67,7 @@ jobs:
           arguments: >
             full-release
             --config-file=jreleaser.template.yml
-            -PprojectVersion=${{ env.RELEASE_VERSION }}
-            -Pprerelease=${{ github.event.inputs.environment == 'rc' }}
+            -prerelease=${{ github.event.inputs.environment == 'rc' }}
             --strict
         env:
           MAVEN_CENTRAL_SIGNING_PASSWORD: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
