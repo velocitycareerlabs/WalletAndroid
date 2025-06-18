@@ -18,8 +18,8 @@ signing:
   active: ALWAYS
   armored: true
   mode: FILE
-  publicKey: '{{gpgPublicKeyFile}}'
-  secretKey: '{{gpgSecretKeyFile}}'
+  publicKey: '{{env.GPG_PUBLIC_KEY_FILE}}'
+  secretKey: '{{env.GPG_SECRET_KEY_FILE}}'
   passphrase: '{{env.MAVEN_CENTRAL_SIGNING_PASSWORD}}'
   artifacts: true
 
