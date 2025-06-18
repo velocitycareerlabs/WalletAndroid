@@ -41,8 +41,8 @@ jobs:
             :VCL:assembleRelease \
             :VCL:generateSourcesJar \
             :VCL:generateJavadocJar \
-            -projectVersion=${RELEASE_VERSION} \
-            -prerelease=${{ github.event.inputs.environment == 'rc' }} \
+            -PprojectVersion=${RELEASE_VERSION} \
+            -Pprerelease=${{ github.event.inputs.environment == 'rc' }} \
             --stacktrace
 
       - name: ✅ Verify expected artifacts exist
