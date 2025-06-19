@@ -13,15 +13,16 @@ import org.json.JSONObject
 import java.util.HashMap
 
 data class VCLDidDocument(val payload: JSONObject) {
+    constructor(payloadStr: String) : this(payloadStr.toJsonObject() ?: JSONObject())
+
     val id: String
         get() = payload.optString(KeyId)
+
     val alsoKnownAs: List<String>
         get() = payload.optJSONArray(KeyAlsoKnownAs)
             ?.toList()
             ?.filterIsInstance<String>()
             ?: emptyList()
-
-    constructor(payloadStr: String) : this(payloadStr.toJsonObject() ?: JSONObject())
 
     fun getPublicJwk(kid: String): VCLPublicJwk? {
         if (!kid.contains("#")) return null
