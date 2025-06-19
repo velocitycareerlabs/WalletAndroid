@@ -17,7 +17,7 @@ import io.velocitycareerlabs.impl.utils.VCLLog
 
 internal class PresentationRequestUseCaseImpl(
     private val presentationRequestRepository: PresentationRequestRepository,
-    private val resolveKidRepository: ResolveKidRepository,
+    private val resolveDidDocumentRepository: ResolveDidDocumentRepository,
     private val jwtServiceRepository: JwtServiceRepository,
     private val presentationRequestByDeepLinkVerifier: PresentationRequestByDeepLinkVerifier,
     private val executor: Executor
@@ -36,7 +36,7 @@ internal class PresentationRequestUseCaseImpl(
             ) { encodedJwtStrResult ->
                 encodedJwtStrResult.handleResult(
                     { encodedJwtStr ->
-                        onGetPresentationRequestSuccess(
+                        resolveDidDocument(
                             VCLPresentationRequest(
                                 jwt = VCLJwt(encodedJwtStr),
                                 verifiedProfile = verifiedProfile,
@@ -56,18 +56,21 @@ internal class PresentationRequestUseCaseImpl(
         }
     }
 
-    private fun onGetPresentationRequestSuccess(
+    private fun resolveDidDocument(
         presentationRequest: VCLPresentationRequest,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
-        presentationRequest.jwt.kid?.replace("#", "#".encode())?.let { keyID ->
-            resolveKidRepository.getPublicKey(keyID) { publicKeyResult ->
-                publicKeyResult.handleResult({ publicKey ->
-                    onResolvePublicKeySuccess(
-                        publicKey,
-                        presentationRequest,
-                        completionBlock
-                    )
+        presentationRequest.jwt.kid?.let { kid ->
+            resolveDidDocumentRepository.resolveDidDocument(presentationRequest.iss) { didDocumentResult ->
+                didDocumentResult.handleResult({ didDocument ->
+                    didDocument.getPublicJwk(kid)?.let { publicJwk ->
+                        verifyPresentationRequest(
+                            publicJwk,
+                            presentationRequest,
+                            didDocument,
+                            completionBlock
+                        )
+                    } ?: onError(VCLError("public jwk not found for kid: $kid"), completionBlock)
                 }, { error ->
                     onError(error, completionBlock)
                 })
@@ -77,9 +80,10 @@ internal class PresentationRequestUseCaseImpl(
         }
     }
 
-    private fun onResolvePublicKeySuccess(
+    private fun verifyPresentationRequest(
         publicJwk: VCLPublicJwk,
         presentationRequest: VCLPresentationRequest,
+        didDocument: VCLDidDocument,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
         jwtServiceRepository.verifyJwt(
@@ -90,7 +94,8 @@ internal class PresentationRequestUseCaseImpl(
             jwtVerificationRes.handleResult({
                 presentationRequestByDeepLinkVerifier.verifyPresentationRequest(
                     presentationRequest,
-                    presentationRequest.deepLink
+                    presentationRequest.deepLink,
+                    didDocument
                 ) { byDeepLinkVerificationRes ->
                     byDeepLinkVerificationRes.handleResult({ isVerified ->
                         VCLLog.d(TAG, "Presentation request by deep link verification result: $isVerified")

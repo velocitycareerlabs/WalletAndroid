@@ -12,15 +12,14 @@ import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.CredentialManifestRepository
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
-import io.velocitycareerlabs.impl.domain.repositories.ResolveKidRepository
+import io.velocitycareerlabs.impl.domain.repositories.ResolveDidDocumentRepository
 import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialManifestByDeepLinkVerifier
-import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.utils.VCLLog
 
 internal class CredentialManifestUseCaseImpl(
     private val credentialManifestRepository: CredentialManifestRepository,
-    private val resolveKidRepository: ResolveKidRepository,
+    private val resolveDidDocumentRepository: ResolveDidDocumentRepository,
     private val jwtServiceRepository: JwtServiceRepository,
     private val credentialManifestByDeepLinkVerifier: CredentialManifestByDeepLinkVerifier,
     private val executor: Executor
@@ -40,7 +39,7 @@ internal class CredentialManifestUseCaseImpl(
                 jwtStrResult.handleResult(
                     { jwtStr ->
                         try {
-                            onGetCredentialManifestSuccess(
+                            resolveDidDocument(
                                 VCLCredentialManifest(
                                     jwt = VCLJwt(jwtStr),
                                     vendorOriginContext = credentialManifestDescriptor.vendorOriginContext,
@@ -63,16 +62,81 @@ internal class CredentialManifestUseCaseImpl(
         }
     }
 
-    private fun onGetCredentialManifestSuccess(
+    private fun resolveDidDocument(
         credentialManifest: VCLCredentialManifest,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
+        credentialManifest.jwt.kid?.let { kid ->
+            resolveDidDocumentRepository.resolveDidDocument(credentialManifest.iss) { didDocumentResult ->
+                didDocumentResult.handleResult({ didDocument ->
+                    didDocument.getPublicJwk(kid)?.let { publicJwk ->
+                        verifyCredentialManifestJwt(
+                            publicJwk,
+                            credentialManifest,
+                            didDocument,
+                            completionBlock
+                        )
+                    } ?: onError(
+                        VCLError("public jwk not found for kid: $kid"),
+                        completionBlock
+                    )
+                }, { error ->
+                    onError(error, completionBlock)
+                })
+            }
+        } ?: run {
+            onError(
+                VCLError("Empty credentialManifest.jwt.kid in jwt: ${credentialManifest.jwt}"),
+                completionBlock
+            )
+        }
+    }
+
+    private fun verifyCredentialManifestJwt(
+        publicJwk: VCLPublicJwk,
+        credentialManifest: VCLCredentialManifest,
+        didDocument: VCLDidDocument,
+        completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
+    ) {
+        jwtServiceRepository.verifyJwt(
+            credentialManifest.jwt,
+            publicJwk,
+            credentialManifest.remoteCryptoServicesToken
+        ) { verificationResult ->
+            verificationResult.handleResult(
+                { isVerified ->
+                    verifyCredentialManifestByDeepLink(
+                        credentialManifest,
+                        didDocument,
+                        completionBlock
+                    )
+                },
+                { error ->
+                    onError(error, completionBlock)
+                }
+            )
+        }
+    }
+
+    private fun verifyCredentialManifestByDeepLink(
+        credentialManifest: VCLCredentialManifest,
+        didDocument: VCLDidDocument,
+        completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
+    ) {
         credentialManifest.deepLink?.let { deepLink ->
-            credentialManifestByDeepLinkVerifier.verifyCredentialManifest(credentialManifest, deepLink) {
+            credentialManifestByDeepLinkVerifier.verifyCredentialManifest(
+                credentialManifest,
+                deepLink,
+                didDocument
+            ) {
                 it.handleResult(
                     { isVerified ->
-                        VCLLog.d(TAG, "Credential manifest deep link verification result: $isVerified")
-                        onCredentialManifestDidVerificationSuccess(
+                        VCLLog.d(
+                            TAG,
+                            "Credential manifest deep link verification result: $isVerified"
+                        )
+                        onVerificationSuccess(
+                            isVerified,
                             credentialManifest,
                             completionBlock
                         )
@@ -84,60 +148,9 @@ internal class CredentialManifestUseCaseImpl(
             }
         } ?: run {
             VCLLog.d(TAG, "Deep link was not provided => nothing to verify")
-            onCredentialManifestDidVerificationSuccess(
-                credentialManifest,
-                completionBlock
-            )
-        }
-    }
-
-    private fun onCredentialManifestDidVerificationSuccess(
-        credentialManifest: VCLCredentialManifest,
-        completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
-    ) {
-        credentialManifest.jwt.kid?.replace("#", "#".encode())?.let { kid ->
-            resolveKidRepository.getPublicKey(kid) { publicKeyResult ->
-                publicKeyResult.handleResult(
-                    { publicKey ->
-                        onResolvePublicKeySuccess(
-                            publicKey,
-                            credentialManifest,
-                            completionBlock
-                        )
-                    },
-                    { error ->
-                        onError(error, completionBlock)
-                    }
-                )
+            executor.runOnMain {
+                completionBlock(VCLResult.Success(credentialManifest))
             }
-        } ?: run {
-            onError(VCLError("Empty KeyID"), completionBlock)
-        }
-    }
-
-    private fun onResolvePublicKeySuccess(
-        publicJwk: VCLPublicJwk,
-        credentialManifest: VCLCredentialManifest,
-        completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
-    ) {
-        jwtServiceRepository.verifyJwt(
-            credentialManifest.jwt,
-            publicJwk,
-            credentialManifest.remoteCryptoServicesToken
-        )
-        { verificationResult ->
-            verificationResult.handleResult(
-                { isVerified ->
-                    onVerificationSuccess(
-                        isVerified,
-                        credentialManifest,
-                        completionBlock
-                    )
-                },
-                { error ->
-                    onError(error, completionBlock)
-                }
-            )
         }
     }
 

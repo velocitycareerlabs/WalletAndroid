@@ -167,18 +167,14 @@ internal object VclBlocksProvider {
                         PresentationRequestRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
-                        ResolveKidRepositoryImpl(
+                        ResolveDidDocumentRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
                         JwtServiceRepositoryImpl(
                                 chooseJwtSignService(context, cryptoServicesDescriptor),
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
-                        PresentationRequestByDeepLinkVerifierImpl(
-                                ResolveDidDocumentRepositoryImpl(
-                                        NetworkServiceImpl()
-                                )
-                        ),
+                        PresentationRequestByDeepLinkVerifierImpl(),
                         ExecutorImpl.instance
                 )
 
@@ -215,18 +211,14 @@ internal object VclBlocksProvider {
                         CredentialManifestRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
-                        ResolveKidRepositoryImpl(
+                        ResolveDidDocumentRepositoryImpl(
                                 NetworkServiceImpl()
                         ),
                         JwtServiceRepositoryImpl(
                                 chooseJwtSignService(context, cryptoServicesDescriptor),
                                 chooseJwtVerifyService(cryptoServicesDescriptor)
                         ),
-                        CredentialManifestByDeepLinkVerifierImpl(
-                                ResolveDidDocumentRepositoryImpl(
-                                        NetworkServiceImpl()
-                                )
-                        ),
+                        CredentialManifestByDeepLinkVerifierImpl(),
                         ExecutorImpl.instance
                 )
 

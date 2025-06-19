@@ -109,18 +109,14 @@ internal class CredentialManifestUseCaseTest {
             CredentialManifestRepositoryImpl(
                 NetworkServiceSuccess("wrong payload")
             ),
-            ResolveKidRepositoryImpl(
+            ResolveDidDocumentRepositoryImpl(
                 NetworkServiceSuccess(CredentialManifestMocks.JWK)
             ),
             JwtServiceRepositoryImpl(
                 VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)),
                 VCLJwtVerifyServiceLocalImpl()
             ),
-            CredentialManifestByDeepLinkVerifierImpl(
-                ResolveDidDocumentRepositoryImpl(
-                    NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
-                )
-            ),
+            CredentialManifestByDeepLinkVerifierImpl(),
             EmptyExecutor()
         )
 

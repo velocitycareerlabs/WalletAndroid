@@ -31,19 +31,15 @@ class CredentialManifestByDeepLinkVerifierTest {
         verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfRegularIssuer.toJsonObject()!!),
         didJwk = DidJwkMocks.DidJwk
     )
-    private val deepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet
 
     @Test
     fun testVerifyCredentialManifestSuccess() {
-        subject = CredentialManifestByDeepLinkVerifierImpl(
-            ResolveDidDocumentRepositoryImpl(
-                NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
-            )
-        )
+        subject = CredentialManifestByDeepLinkVerifierImpl()
 
         subject.verifyCredentialManifest(
             credentialManifest,
-            deepLink
+            DeepLinkMocks.CredentialManifestDeepLinkDevNet,
+            DidDocumentMocks.DidDocumentMock
         ) {
             it.handleResult({ isVerified ->
                 assert(isVerified)
@@ -55,15 +51,12 @@ class CredentialManifestByDeepLinkVerifierTest {
 
     @Test
     fun testVerifyCredentialManifestError() {
-        subject = CredentialManifestByDeepLinkVerifierImpl(
-            ResolveDidDocumentRepositoryImpl(
-                NetworkServiceSuccess(DidDocumentMocks.DidDocumentWithWrongDidMockStr)
-            )
-        )
+        subject = CredentialManifestByDeepLinkVerifierImpl()
 
         subject.verifyCredentialManifest(
             credentialManifest,
-            deepLink
+            DeepLinkMocks.CredentialManifestDeepLinkMainNet,
+            DidDocumentMocks.DidDocumentWithWrongDidMock
         ) {
             it.handleResult({
                 assert(false) { "${VCLErrorCode.MismatchedRequestIssuerDid.value} error code is expected" }

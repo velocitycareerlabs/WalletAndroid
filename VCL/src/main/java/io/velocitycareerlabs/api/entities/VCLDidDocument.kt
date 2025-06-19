@@ -10,17 +10,37 @@ package io.velocitycareerlabs.api.entities
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.extensions.toList
 import org.json.JSONObject
+import java.util.HashMap
 
 data class VCLDidDocument(val payload: JSONObject) {
     val id: String
         get() = payload.optString(KeyId)
     val alsoKnownAs: List<String>
-        get() =payload.optJSONArray(KeyAlsoKnownAs)?.toList() as? List<String> ?: emptyList()
+        get() = payload.optJSONArray(KeyAlsoKnownAs)
+            ?.toList()
+            ?.filterIsInstance<String>()
+            ?: emptyList()
 
     constructor(payloadStr: String) : this(payloadStr.toJsonObject() ?: JSONObject())
+
+    fun getPublicJwk(kid: String): VCLPublicJwk? {
+        if (!kid.contains("#")) return null
+
+        val publicJwkId = "#${kid.substringAfter("#")}"
+        val verificationMethods = payload.optJSONArray(KeyVerificationMethod)?.toList().orEmpty()
+
+        val publicJwkPayload = verificationMethods
+            .filterIsInstance<Map<*, *>>()
+            .find { it[KeyId] == publicJwkId }
+
+        val publicJwk = publicJwkPayload?.get(KeyPublicKeyJwk) as? Map<*, *>
+        return publicJwk?.let { VCLPublicJwk(it.toJsonObject()) }
+    }
 
     companion object CodingKeys {
         const val KeyId = "id"
         const val KeyAlsoKnownAs = "alsoKnownAs"
+        const val KeyVerificationMethod = "verificationMethod"
+        const val KeyPublicKeyJwk = "publicKeyJwk"
     }
 }

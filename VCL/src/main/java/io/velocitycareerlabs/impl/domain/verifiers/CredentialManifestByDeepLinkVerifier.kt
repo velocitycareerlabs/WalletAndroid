@@ -8,12 +8,14 @@ package io.velocitycareerlabs.impl.domain.verifiers
 
 import io.velocitycareerlabs.api.entities.VCLCredentialManifest
 import io.velocitycareerlabs.api.entities.VCLDeepLink
+import io.velocitycareerlabs.api.entities.VCLDidDocument
 import io.velocitycareerlabs.api.entities.VCLResult
 
 internal interface CredentialManifestByDeepLinkVerifier {
     fun verifyCredentialManifest(
         credentialManifest: VCLCredentialManifest,
-        deepLink: VCLDeepLink,
+        deepLink: VCLDeepLink?,
+        didDocument: VCLDidDocument,
         completionBlock: (VCLResult<Boolean>) -> Unit
     )
 }

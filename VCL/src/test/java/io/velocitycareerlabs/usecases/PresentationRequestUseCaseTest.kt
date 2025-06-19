@@ -40,20 +40,16 @@ internal class PresentationRequestUseCaseTest {
         val pushToken = "push_token"
         subject1 = PresentationRequestUseCaseImpl(
             PresentationRequestRepositoryImpl(
-                NetworkServiceSuccess(validResponse = PresentationRequestMocks.EncodedPresentationRequestResponse)
+                NetworkServiceSuccess(PresentationRequestMocks.EncodedPresentationRequestResponse)
             ),
-            ResolveKidRepositoryImpl(
-                NetworkServiceSuccess(validResponse = PresentationRequestMocks.JWK)
+            ResolveDidDocumentRepositoryImpl(
+                NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
             ),
             JwtServiceRepositoryImpl(
                 VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)),
                 VCLJwtVerifyServiceLocalImpl()
             ),
-            PresentationRequestByDeepLinkVerifierImpl(
-                ResolveDidDocumentRepositoryImpl(
-                    NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
-                )
-            ),
+            PresentationRequestByDeepLinkVerifierImpl(),
             EmptyExecutor()
         )
 
@@ -98,18 +94,14 @@ internal class PresentationRequestUseCaseTest {
             PresentationRequestRepositoryImpl(
                 NetworkServiceSuccess(validResponse = "wrong payload")
             ),
-            ResolveKidRepositoryImpl(
-                NetworkServiceSuccess(validResponse = PresentationRequestMocks.JWK)
+            ResolveDidDocumentRepositoryImpl(
+                NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
             ),
             JwtServiceRepositoryImpl(
                 VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)),
                 VCLJwtVerifyServiceLocalImpl()
             ),
-            PresentationRequestByDeepLinkVerifierImpl(
-                ResolveDidDocumentRepositoryImpl(
-                    NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
-                )
-            ),
+            PresentationRequestByDeepLinkVerifierImpl(),
             EmptyExecutor()
         )
 

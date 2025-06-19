@@ -40,7 +40,7 @@ internal class OffersByDeepLinkVerifierImpl(
                         )
                     })
             }
-        } ?: {
+        } ?: run {
             onError(
                 errorMessage = "DID not found in deep link: ${deepLink.value}",
                 completionBlock = completionBlock

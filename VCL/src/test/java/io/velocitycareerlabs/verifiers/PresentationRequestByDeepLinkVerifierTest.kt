@@ -16,19 +16,14 @@ class PresentationRequestByDeepLinkVerifierTest {
 
     private val presentationRequest = PresentationRequestMocks.PresentationRequest
 
-    private val deepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet
-
     @Test
     fun testVerifyPresentationRequestSuccess() {
-        subject = PresentationRequestByDeepLinkVerifierImpl(
-            ResolveDidDocumentRepositoryImpl(
-                NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
-            )
-        )
+        subject = PresentationRequestByDeepLinkVerifierImpl()
 
         subject.verifyPresentationRequest(
             presentationRequest,
-            deepLink
+            DeepLinkMocks.PresentationRequestDeepLinkDevNet,
+            DidDocumentMocks.DidDocumentMock
         ) {
             it.handleResult({ isVerified ->
                 assert(isVerified)
@@ -40,15 +35,12 @@ class PresentationRequestByDeepLinkVerifierTest {
 
     @Test
     fun testVerifyPresentationRequestError() {
-        subject = PresentationRequestByDeepLinkVerifierImpl(
-            ResolveDidDocumentRepositoryImpl(
-                NetworkServiceSuccess(DidDocumentMocks.DidDocumentWithWrongDidMockStr)
-            )
-        )
+        subject = PresentationRequestByDeepLinkVerifierImpl()
 
         subject.verifyPresentationRequest(
             presentationRequest,
-            deepLink
+            DeepLinkMocks.CredentialManifestDeepLinkMainNet,
+            DidDocumentMocks.DidDocumentWithWrongDidMock
         ) {
             it.handleResult({
                 assert(false) { "${VCLErrorCode.MismatchedPresentationRequestInspectorDid.value} error code is expected" }
