@@ -36,47 +36,44 @@ internal class PresentationRequestUseCaseImpl(
             ) { encodedJwtStrResult ->
                 encodedJwtStrResult.handleResult(
                     { encodedJwtStr ->
-                        resolveDidDocument(
-                            VCLPresentationRequest(
-                                jwt = VCLJwt(encodedJwtStr),
-                                verifiedProfile = verifiedProfile,
-                                deepLink = presentationRequestDescriptor.deepLink,
-                                pushDelegate = presentationRequestDescriptor.pushDelegate,
-                                didJwk = presentationRequestDescriptor.didJwk,
-                                remoteCryptoServicesToken = presentationRequestDescriptor.remoteCryptoServicesToken
-                            ),
-                            completionBlock
+                        val presentationRequest = VCLPresentationRequest(
+                            jwt = VCLJwt(encodedJwtStr),
+                            verifiedProfile = verifiedProfile,
+                            deepLink = presentationRequestDescriptor.deepLink,
+                            pushDelegate = presentationRequestDescriptor.pushDelegate,
+                            didJwk = presentationRequestDescriptor.didJwk,
+                            remoteCryptoServicesToken = presentationRequestDescriptor.remoteCryptoServicesToken
                         )
+                        resolveDidDocumentRepository.resolveDidDocument(
+                            did = presentationRequest.iss
+                        ) { didDocumentResult ->
+                            didDocumentResult.handleResult(
+                                { didDocument ->
+                                    didDocument.getPublicJwk(kid = presentationRequest.jwt.kid ?: "")?.let { publicJwk ->
+                                        verifyPresentationRequest(
+                                            publicJwk,
+                                            presentationRequest,
+                                            didDocument,
+                                            completionBlock
+                                        )
+                                    } ?: run {
+                                        onError(
+                                            VCLError("public jwk not found for kid: ${presentationRequest.jwt.kid}"),
+                                            completionBlock
+                                        )
+                                    }
+                                },
+                                { error ->
+                                    onError(error, completionBlock)
+                                }
+                            )
+                        }
                     },
                     { error ->
                         onError(error, completionBlock)
                     }
                 )
             }
-        }
-    }
-
-    private fun resolveDidDocument(
-        presentationRequest: VCLPresentationRequest,
-        completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
-    ) {
-        presentationRequest.jwt.kid?.let { kid ->
-            resolveDidDocumentRepository.resolveDidDocument(presentationRequest.iss) { didDocumentResult ->
-                didDocumentResult.handleResult({ didDocument ->
-                    didDocument.getPublicJwk(kid)?.let { publicJwk ->
-                        verifyPresentationRequest(
-                            publicJwk,
-                            presentationRequest,
-                            didDocument,
-                            completionBlock
-                        )
-                    } ?: onError(VCLError("public jwk not found for kid: $kid"), completionBlock)
-                }, { error ->
-                    onError(error, completionBlock)
-                })
-            }
-        } ?: run {
-            onError(VCLError("Empty KeyID"), completionBlock)
         }
     }
 

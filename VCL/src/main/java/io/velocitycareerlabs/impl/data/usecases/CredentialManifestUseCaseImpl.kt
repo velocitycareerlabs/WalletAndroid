@@ -39,17 +39,37 @@ internal class CredentialManifestUseCaseImpl(
                 jwtStrResult.handleResult(
                     { jwtStr ->
                         try {
-                            resolveDidDocument(
-                                VCLCredentialManifest(
-                                    jwt = VCLJwt(jwtStr),
-                                    vendorOriginContext = credentialManifestDescriptor.vendorOriginContext,
-                                    verifiedProfile = verifiedProfile,
-                                    deepLink = credentialManifestDescriptor.deepLink,
-                                    didJwk = credentialManifestDescriptor.didJwk,
-                                    remoteCryptoServicesToken = credentialManifestDescriptor.remoteCryptoServicesToken
-                                ),
-                                completionBlock
+                            val credentialManifest = VCLCredentialManifest(
+                                jwt = VCLJwt(jwtStr),
+                                vendorOriginContext = credentialManifestDescriptor.vendorOriginContext,
+                                verifiedProfile = verifiedProfile,
+                                deepLink = credentialManifestDescriptor.deepLink,
+                                didJwk = credentialManifestDescriptor.didJwk,
+                                remoteCryptoServicesToken = credentialManifestDescriptor.remoteCryptoServicesToken
                             )
+                            resolveDidDocumentRepository.resolveDidDocument(
+                                credentialManifest.iss
+                            ) { didDocumentResult ->
+                                didDocumentResult.handleResult({ didDocument ->
+                                    didDocument.getPublicJwk(credentialManifest.jwt.kid ?: "")
+                                        ?.let { publicJwk ->
+                                            verifyCredentialManifestJwt(
+                                                publicJwk,
+                                                credentialManifest,
+                                                didDocument,
+                                                completionBlock
+                                            )
+                                        } ?: run {
+                                        onError(
+                                            VCLError("public jwk not found for kid: ${credentialManifest.jwt.kid}"),
+                                            completionBlock
+                                        )
+                                    }
+
+                                }, { error ->
+                                    onError(error, completionBlock);
+                                })
+                            }
                         } catch (ex: Exception) {
                             this.onError(VCLError(ex), completionBlock)
                         }
@@ -59,36 +79,6 @@ internal class CredentialManifestUseCaseImpl(
                     }
                 )
             }
-        }
-    }
-
-    private fun resolveDidDocument(
-        credentialManifest: VCLCredentialManifest,
-        completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
-    ) {
-        credentialManifest.jwt.kid?.let { kid ->
-            resolveDidDocumentRepository.resolveDidDocument(credentialManifest.iss) { didDocumentResult ->
-                didDocumentResult.handleResult({ didDocument ->
-                    didDocument.getPublicJwk(kid)?.let { publicJwk ->
-                        verifyCredentialManifestJwt(
-                            publicJwk,
-                            credentialManifest,
-                            didDocument,
-                            completionBlock
-                        )
-                    } ?: onError(
-                        VCLError("public jwk not found for kid: $kid"),
-                        completionBlock
-                    )
-                }, { error ->
-                    onError(error, completionBlock)
-                })
-            }
-        } ?: run {
-            onError(
-                VCLError("Empty credentialManifest.jwt.kid in jwt: ${credentialManifest.jwt}"),
-                completionBlock
-            )
         }
     }
 

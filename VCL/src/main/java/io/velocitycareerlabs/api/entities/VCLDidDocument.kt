@@ -28,9 +28,9 @@ data class VCLDidDocument(val payload: JSONObject) {
         if (!kid.contains("#")) return null
 
         val publicJwkId = "#${kid.substringAfter("#")}"
-        val verificationMethods = payload.optJSONArray(KeyVerificationMethod)?.toList().orEmpty()
+        val verificationMethod = payload.optJSONArray(KeyVerificationMethod)?.toList().orEmpty()
 
-        val publicJwkPayload = verificationMethods
+        val publicJwkPayload = verificationMethod
             .filterIsInstance<Map<*, *>>()
             .find { it[KeyId] == publicJwkId }
 
