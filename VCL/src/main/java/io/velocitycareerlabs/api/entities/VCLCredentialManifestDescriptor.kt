@@ -24,11 +24,7 @@ interface VCLCredentialManifestDescriptor {
     val endpoint: String?
 
     val did get(): String? {
-        return deepLink?.did ?: retrieveDid()
-    }
-
-    fun retrieveDid(): String? {
-        return uri?.getUrlSubPath(CredentialManifestDescriptorCodingKeys.KeyDidPrefix)
+        return deepLink?.did
     }
 
     fun retrieveEndpoint(): String? {

@@ -7,6 +7,7 @@
 
 package io.velocitycareerlabs.api.entities
 
+import io.velocitycareerlabs.impl.extensions.toList
 import io.velocitycareerlabs.impl.utils.VCLLog
 import org.json.JSONObject
 import java.lang.Exception
@@ -17,6 +18,10 @@ data class VCLOrganization(val payload: JSONObject) {
 
     val serviceCredentialAgentIssuers: List<VCLService>
         get() = parseServiceCredentialAgentIssuers()
+
+    val did: String
+        get() = payload.optJSONArray(KeyAlsoKnownAs)?.toList()?.filterIsInstance<String>()?.get(0)
+            ?: payload.optString(CodingKeys.KeyId)
 
     private fun parseServiceCredentialAgentIssuers(): List<VCLService> {
         val retVal = mutableListOf<VCLService>()
@@ -35,5 +40,7 @@ data class VCLOrganization(val payload: JSONObject) {
 
     companion object CodingKeys {
         const val KeyService = "service"
+        const val KeyId = "id"
+        const val KeyAlsoKnownAs = "alsoKnownAs"
     }
 }
