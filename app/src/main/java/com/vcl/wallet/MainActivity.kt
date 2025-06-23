@@ -307,6 +307,7 @@ class MainActivity : AppCompatActivity() {
                 service = service,
                 credentialIds = Constants.getCredentialIdsToRefresh(environment),
                 didJwk = this.didJwk,
+                did = "some did"
             )
         vcl.getCredentialManifest(
             credentialManifestDescriptorRefresh,
