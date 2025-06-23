@@ -1,6 +1,6 @@
 project:
   name: WalletAndroid
-  version: '{{env.RELEASE_VERSION}}'
+  # version: from JRELEASER_PROJECT_VERSION
   description: Velocity Career Labs Android SDK
   authors:
     - Michael Avoyan
@@ -18,72 +18,38 @@ signing:
   active: ALWAYS
   armored: true
   mode: FILE
-  publicKey: '{{env.GPG_PUBLIC_KEY_FILE}}'
-  secretKey: '{{env.GPG_SECRET_KEY_FILE}}'
-  passphrase: '{{env.MAVEN_CENTRAL_SIGNING_PASSWORD}}'
+  # publicKey: from JRELEASER_GPG_PUBLIC_KEY
+  # secretKey: from JRELEASER_GPG_SECRET_KEY
+  # passphrase: JRELEASER_GPG_PASSPHRASE
   artifacts: true
 
 distributions:
   vcl:
     type: JAVA_BINARY
     artifacts:
-      - path: VCL/build/outputs/aar/vcl-{{env.RELEASE_VERSION}}.aar
-      - path: VCL/build/libs/vcl-{{env.RELEASE_VERSION}}-sources.jar
-      - path: VCL/build/libs/vcl-{{env.RELEASE_VERSION}}-javadoc.jar
-    extraProperties:
-      groupId: io.velocitycareerlabs
-      artifactId: vcl
-      version: '{{env.RELEASE_VERSION}}'
-      prerelease: {{prerelease}}
+      - path: VCL/build/outputs/aar/vcl-{{projectVersion}}.aar
+      - path: VCL/build/libs/vcl-{{projectVersion}}-sources.jar
+      - path: VCL/build/libs/vcl-{{projectVersion}}-javadoc.jar
 
 release:
   github:
     owner: velocitycareerlabs
     name: WalletAndroid
-    tagName: '{{#prerelease}}rc-{{/prerelease}}{{env.RELEASE_VERSION}}'
-    releaseName: '{{#prerelease}}Release Candidate {{/prerelease}}{{env.RELEASE_VERSION}}'
+    tagName: "{{#prerelease}}rc-{{/prerelease}}{{projectVersion}}"
+    releaseName: "{{#prerelease}}Release Candidate {{/prerelease}}{{projectVersion}}"
     draft: false
     sign: true
     skipTag: false
     prerelease:
-      enabled: {{prerelease}}
+      enabled: { { prerelease } }
 
 deploy:
   maven:
-    nexus2:
-      mavenCentral:
+    mavenCentral:
+      vcl:
         active: ALWAYS
         url: https://s01.oss.sonatype.org/service/local
-        stagingProfileId: '{{env.MAVEN_CENTRAL_STAGING_PROFILE_ID}}'
-        username: '{{env.MAVEN_CENTRAL_TOKEN_USERNAME}}'
-        password: '{{env.MAVEN_CENTRAL_TOKEN_PASSWORD}}'
-
-files:
-  artifacts:
-    - path: VCL/build/outputs/aar/vcl-{{env.RELEASE_VERSION}}.aar
-      platform: universal
-      extraProperties:
-        groupId: io.velocitycareerlabs
-        artifactId: vcl
-        version: '{{env.RELEASE_VERSION}}'
-
-    - path: VCL/build/libs/vcl-{{env.RELEASE_VERSION}}-sources.jar
-      platform: universal
-      extraProperties:
-        groupId: io.velocitycareerlabs
-        artifactId: vcl
-        version: '{{env.RELEASE_VERSION}}'
-
-    - path: VCL/build/libs/vcl-{{env.RELEASE_VERSION}}-javadoc.jar
-      platform: universal
-      extraProperties:
-        groupId: io.velocitycareerlabs
-        artifactId: vcl
-        version: '{{env.RELEASE_VERSION}}'
-
-packagers:
-  maven:
-    enabled: false
-
-catalog:
-  enabled: true
+        # username: from JRELEASER_MAVENCENTRAL_USERNAME
+        # password: from JRELEASER_MAVENCENTRAL_PASSWORD
+        # stage: from JRELEASER_MAVENCENTRAL_STAGE
+        sign: true
