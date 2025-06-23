@@ -17,6 +17,7 @@ data class VCLCredentialManifestDescriptorRefresh(
     private val service: VCLService, // for log
     override val issuingType: VCLIssuingType = VCLIssuingType.Refresh,
     override val didJwk: VCLDidJwk,
+    override val did: String,
     override val remoteCryptoServicesToken: VCLToken? = null,
     override val uri: String = service.serviceEndpoint,
     override val credentialTypes: List<String>? = null,
@@ -24,9 +25,6 @@ data class VCLCredentialManifestDescriptorRefresh(
     override val vendorOriginContext: String? = null,
     override val deepLink: VCLDeepLink? = null
 ) : VCLCredentialManifestDescriptor {
-
-    override val did: String?
-        get() = retrieveDid()
 
     override val endpoint = retrieveEndpoint()
 

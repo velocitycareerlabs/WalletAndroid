@@ -41,7 +41,8 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
                 CredentialManifestDescriptorMocks.CredentialId1,
                 CredentialManifestDescriptorMocks.CredentialId2
             ),
-            didJwk = DidJwkMocks.DidJwk
+            didJwk = DidJwkMocks.DidJwk,
+            did = "123"
         )
 
         val credentialTypesQuery = "${CredentialManifestDescriptorCodingKeys.KeyRefresh}=${true}" +
@@ -50,7 +51,7 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
         assert(subject.endpoint.isUrlEquivalentTo(mockEndpoint))
-        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
+        assert(subject.did == "123")
     }
 
     @Test
@@ -62,7 +63,8 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         subject = VCLCredentialManifestDescriptorRefresh(
             service = service,
             credentialIds = listOf(CredentialManifestDescriptorMocks.CredentialId1),
-            didJwk = DidJwkMocks.DidJwk
+            didJwk = DidJwkMocks.DidJwk,
+            did = "123"
         )
 
         val credentialTypesQuery = "${CredentialManifestDescriptorCodingKeys.KeyRefresh}=${true}" +
@@ -70,7 +72,7 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
         assert(subject.endpoint.isUrlEquivalentTo(mockEndpoint))
-        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
+        assert(subject.did == "123")
     }
 
     @Test
@@ -82,14 +84,15 @@ internal class VCLCredentialManifestDescriptorRefreshTest {
         subject = VCLCredentialManifestDescriptorRefresh(
             service = service,
             credentialIds = listOf(),
-            didJwk = DidJwkMocks.DidJwk
+            didJwk = DidJwkMocks.DidJwk,
+            did = "123"
         )
 
         val credentialTypesQuery = "${CredentialManifestDescriptorCodingKeys.KeyRefresh}=${true}"
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
         assert(subject.endpoint.isUrlEquivalentTo(mockEndpoint))
-        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
+        assert(subject.did == "123")
     }
 
     @After

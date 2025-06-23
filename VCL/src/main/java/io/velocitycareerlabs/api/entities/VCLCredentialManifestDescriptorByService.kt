@@ -7,25 +7,19 @@
 
 package io.velocitycareerlabs.api.entities
 
-import io.velocitycareerlabs.impl.extensions.appendQueryParams
-import io.velocitycareerlabs.impl.extensions.encode
-import java.lang.StringBuilder
-
 data class VCLCredentialManifestDescriptorByService(
     private val service: VCLService,
     override var issuingType: VCLIssuingType = VCLIssuingType.Career,
     override var credentialTypes: List<String>? = null,
     override var pushDelegate: VCLPushDelegate? = null,
     override var didJwk: VCLDidJwk,
-    override var remoteCryptoServicesToken: VCLToken? = null
+    override val did: String,
+    override var remoteCryptoServicesToken: VCLToken? = null,
 ) : VCLCredentialManifestDescriptor {
 
     override var uri: String? = service.serviceEndpoint
     override var vendorOriginContext: String? = null
     override var deepLink: VCLDeepLink? = null
-
-    override val did: String?
-        get() = retrieveDid()
 
     override val endpoint: String?
         get() = retrieveEndpoint()
