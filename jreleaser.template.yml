@@ -35,13 +35,10 @@ release:
   github:
     owner: velocitycareerlabs
     name: WalletAndroid
-    tagName: "{{#prerelease}}rc-{{/prerelease}}{{projectVersion}}"
-    releaseName: "{{#prerelease}}Release Candidate {{/prerelease}}{{projectVersion}}"
-    draft: false
+    # token: from JRELEASER_GITHUB_TOKEN
+    # tagName: from JRELEASER_TAG_NAME
+    # releaseName: from JRELEASER_RELEASE_NAME
     sign: true
-    skipTag: false
-    prerelease:
-      enabled: ({{prerelease}})
 
 deploy:
   maven:
