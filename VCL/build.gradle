@@ -6,8 +6,8 @@ plugins {
 }
 
 ext {
-    publishCode = 163
-    publishVersion = "2.7.3"
+    publishCode = 164
+    publishVersion = "2.7.4"
     artifactId = "vcl"
     publishGroup = "io.velocitycareerlabs"
     namespaceId = publishGroup
@@ -100,7 +100,7 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.15.0'
 
     implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
-    implementation "androidx.security:security-crypto:1.1.0-alpha07"
+    implementation "androidx.security:security-crypto:1.1.0-beta01"
 
     // Reflection
 //    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
