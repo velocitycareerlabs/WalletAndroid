@@ -55,10 +55,10 @@ jobs:
       - name: 🔐 Load GPG keys (as env vars)
         if: github.event.inputs.environment != 'dev'
         run: |
-          echo "::add-mask::$(echo \"${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}\" | base64 --decode)"
-          echo "PRIVATE_GPG_KEY=$(echo \"${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }}\" | base64 --decode)" >> $GITHUB_ENV
-          echo "::add-mask::$(echo \"${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}\" | base64 --decode)"
-          echo "PUBLIC_GPG_KEY=$(echo \"${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }}\" | base64 --decode)" >> $GITHUB_ENV
+          echo "::add-mask::$(echo ${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }} | base64 --decode)"
+          echo "PRIVATE_GPG_KEY=$(echo ${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }} | base64 --decode)" >> $GITHUB_ENV
+          echo "::add-mask::$(echo ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }} | base64 --decode)"
+          echo "PUBLIC_GPG_KEY=$(echo ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }} | base64 --decode)" >> $GITHUB_ENV
         shell: bash
 
       - name: 🚀 Run JReleaser full-release
