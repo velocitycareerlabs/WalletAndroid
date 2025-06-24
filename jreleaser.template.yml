@@ -39,6 +39,9 @@ release:
     # tagName: from JRELEASER_TAG_NAME
     # releaseName: from JRELEASER_RELEASE_NAME
     sign: true
+    prerelease:
+      enabled: true
+      # pattern: from JRELEASER_PRERELEASE_PATTERN
 
 deploy:
   maven:
