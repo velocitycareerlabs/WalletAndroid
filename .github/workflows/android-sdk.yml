@@ -60,7 +60,6 @@ jobs:
           arguments: >
             full-release
             --config-file=jreleaser.template.yml
-            -D=prerelease=${{ github.event.inputs.environment == 'rc' }}
             -D=projectVersion=${{ env.RELEASE_VERSION }}
             --strict
         env:
