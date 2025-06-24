@@ -4,6 +4,7 @@ project:
   description: Velocity Career Labs Android SDK
   authors:
     - Michael Avoyan
+  inceptionYear: 2025
   license: Apache-2.0
   links:
     homepage: https://github.com/velocitycareerlabs
@@ -52,4 +53,5 @@ deploy:
         # username: from JRELEASER_MAVENCENTRAL_USERNAME
         # password: from JRELEASER_MAVENCENTRAL_PASSWORD
         # stage: from JRELEASER_MAVENCENTRAL_STAGE
+        authorization: BASIC
         sign: true
