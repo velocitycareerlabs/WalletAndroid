@@ -52,15 +52,6 @@ jobs:
           test -f VCL/build/libs/vcl-${RELEASE_VERSION}-sources.jar || (echo "❌ Sources JAR missing" && exit 1)
           test -f VCL/build/libs/vcl-${RELEASE_VERSION}-javadoc.jar || (echo "❌ Javadoc JAR missing" && exit 1)
 
-      - name: 🔐 Load GPG keys (as env vars)
-        if: github.event.inputs.environment != 'dev'
-        run: |
-          echo "::add-mask::$(echo ${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }} | base64 --decode)"
-          echo "PRIVATE_GPG_KEY=$(echo ${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64 }} | base64 --decode)" >> $GITHUB_ENV
-          echo "::add-mask::$(echo ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }} | base64 --decode)"
-          echo "PUBLIC_GPG_KEY=$(echo ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64 }} | base64 --decode)" >> $GITHUB_ENV
-        shell: bash
-
       - name: 🚀 Run JReleaser full-release
         if: github.event.inputs.environment != 'dev'
         uses: jreleaser/release-action@v2
@@ -78,8 +69,8 @@ jobs:
           JRELEASER_MAVENCENTRAL_STAGE: ${{ secrets.MAVEN_CENTRAL_STAGING_PROFILE_ID }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JRELEASER_PROJECT_VERSION: ${{ env.RELEASE_VERSION }}
-          JRELEASER_GPG_PUBLIC_KEY: ${{ env.PUBLIC_GPG_KEY }}
-          JRELEASER_GPG_SECRET_KEY: ${{ env.PRIVATE_GPG_KEY }}
+          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY }}
+          JRELEASER_GPG_SECRET_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY }}
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           JRELEASER_TAG_NAME: ${{ github.event.inputs.environment == 'rc' && 'rc-' || '' }}${{ env.RELEASE_VERSION }}
           JRELEASER_RELEASE_NAME: ${{ github.event.inputs.environment == 'rc' && 'Release Candidate ' || '' }}${{ env.RELEASE_VERSION }}
