@@ -37,17 +37,14 @@ ext {
     mavenCentralTokenPassword = loadSecret(githubSecretsNames[1])
     mavenCentralSigningKeyId = loadSecret(githubSecretsNames[2])
     mavenCentralSigningPassword = loadSecret(githubSecretsNames[3])
-    mavenCentralSigningGpgPublicKeyB64 = loadSecret(githubSecretsNames[4])
     mavenCentralSigningGpgPrivateKeyB64 = loadSecret(githubSecretsNames[5])
+    mavenCentralSigningGpgPrivateKey = mavenCentralSigningGpgPrivateKeyB64 ?
+            new String(Base64.decoder.decode(mavenCentralSigningGpgPrivateKeyB64)) : null
 }
 
 println "🧪 Debug Secrets:"
 githubSecretsNames.each {
     println "$it = ${loadSecret(it) ? '✅' : '❌'}"
-}
-
-if (!mavenCentralTokenUsername || !mavenCentralSigningPassword || !mavenCentralSigningGpgPrivateKeyB64) {
-    throw new GradleException("❌ Required secrets are missing — check env or maven2.properties.")
 }
 
 group = publishGroupId
@@ -104,47 +101,40 @@ android {
 }
 
 // === Artifact Tasks ===
-tasks.register("generateSourcesJar", Jar) {
-    archiveBaseName.set(publishArtifactId)
+tasks.register("sourcesJar", Jar) {
     archiveClassifier.set("sources")
-    archiveVersion.set(version)
-    from(android.sourceSets.main.kotlin.srcDirs + android.sourceSets.main.java.srcDirs)
-    destinationDirectory.set(file("$buildDir/libs"))
-    preserveFileTimestamps = false
-    reproducibleFileOrder = true
+    from(android.sourceSets.main.java.srcDirs + android.sourceSets.main.kotlin.srcDirs)
+    destinationDirectory.set(file("$buildDir/publication-artifacts"))
 }
 
-tasks.register("generateJavadocJar", Jar) {
-    archiveBaseName.set(publishArtifactId)
+tasks.register("javadocJar", Jar) {
     archiveClassifier.set("javadoc")
-    archiveVersion.set(version)
-    destinationDirectory.set(file("$buildDir/libs"))
-    preserveFileTimestamps = false
-    reproducibleFileOrder = true
+    destinationDirectory.set(file("$buildDir/publication-artifacts"))
     doFirst {
         def dummyDir = file("$buildDir/empty-javadoc")
         dummyDir.mkdirs()
         def dummyJava = new File(dummyDir, "placeholder.java")
-        if (!dummyJava.exists()) {
-            dummyJava.text = "/** Placeholder for javadoc */"
-        }
+        if (!dummyJava.exists()) dummyJava.text = "/** Placeholder for javadoc */"
         from(dummyDir)
     }
 }
 
-// === Publishing Configuration ===
 afterEvaluate {
+    def aarFile = file("$buildDir/outputs/aar/${publishArtifactId}-${publishVersion}.aar")
+
     publishing {
         publications {
-            release(MavenPublication) {
+            create("release", MavenPublication) {
                 groupId = publishGroupId
                 artifactId = publishArtifactId
                 version = publishVersion
 
-                from components.release
+                artifact(aarFile) {
+                    builtBy(tasks.named("assembleRelease")) // ensures .aar exists before signing
+                }
 
-                artifact tasks.named("generateSourcesJar").get()
-                artifact tasks.named("generateJavadocJar").get()
+                artifact tasks.named("sourcesJar").get()
+                artifact tasks.named("javadocJar").get()
 
                 pom {
                     packaging = 'aar'
@@ -175,8 +165,8 @@ afterEvaluate {
 
         repositories {
             maven {
-                name = "OSSRH"
-                url = uri("https://s01.oss.sonatype.org/content/repositories/releases/")
+                name = "CentralPortal"
+                url = uri("https://central.sonatype.com/api/v1/publish/")
                 credentials {
                     username = mavenCentralTokenUsername
                     password = mavenCentralTokenPassword
@@ -185,18 +175,25 @@ afterEvaluate {
         }
     }
 
-    tasks.matching { it.name == "generateMetadataFileForReleasePublication" }.configureEach {
-        dependsOn tasks.named("generateSourcesJar")
-        dependsOn tasks.named("generateJavadocJar")
-    }
-
     signing {
         useInMemoryPgpKeys(
                 mavenCentralSigningKeyId,
-                new String(Base64.decoder.decode(mavenCentralSigningGpgPrivateKeyB64)),
+                mavenCentralSigningGpgPrivateKey,
                 mavenCentralSigningPassword
         )
         sign publishing.publications.release
+    }
+
+    // Log artifacts for debugging
+    tasks.matching { it.name == "publishReleasePublicationToCentralPortalRepository" }.configureEach {
+        dependsOn("assembleRelease")
+        doFirst {
+            println "📦 Artifacts in 'release' publication:"
+            def artifacts = publishing.publications.release.artifacts
+            artifacts.each {
+                println " - file: ${it.file?.name}, classifier: ${it.classifier}, extension: ${it.extension}"
+            }
+        }
     }
 }
 
