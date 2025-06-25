@@ -7,7 +7,6 @@ plugins {
 
 import org.gradle.api.tasks.bundling.Jar
 
-// === Load Secrets ===
 def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven2/maven2.properties'
 static def loadProperties(String filePath) {
     def props = new Properties()
@@ -42,14 +41,8 @@ ext {
             new String(Base64.decoder.decode(mavenCentralSigningGpgPrivateKeyB64)) : null
 }
 
-println "🧪 Debug Secrets:"
-githubSecretsNames.each {
-    println "$it = ${loadSecret(it) ? '✅' : '❌'}"
-}
-
 group = publishGroupId
 version = publishVersion
-println "👉 Final version is: ${project.version}"
 
 android {
     namespace = publishGroupId
@@ -60,23 +53,25 @@ android {
         targetSdk = 35
         versionCode = publishCode
         versionName = version
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        buildConfigField "String", "VERSION_NAME", "\"${versionName}\""
+        buildConfigField "int", "VERSION_CODE", "${versionCode}"
     }
 
     buildTypes {
         debug {
             minifyEnabled = false
             shrinkResources = false
-            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
-            buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
-            proguardFiles(getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro')
         }
         rc {
             initWith(debug)
+            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}-rc\""
+            buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
         }
         release {
             initWith(debug)
+            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
+            buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
         }
     }
 
@@ -95,7 +90,11 @@ android {
 
     libraryVariants.configureEach { variant ->
         variant.outputs.all {
-            outputFileName = "${publishArtifactId}-${project.version}.aar"
+            if (variant.name == "release") {
+                outputFileName = "${publishArtifactId}-${publishVersion}.aar"
+            } else if (variant.name == "rc") {
+                outputFileName = "${publishArtifactId}-${publishVersion}-rc.aar"
+            }
         }
     }
 }
@@ -104,12 +103,10 @@ android {
 tasks.register("sourcesJar", Jar) {
     archiveClassifier.set("sources")
     from(android.sourceSets.main.java.srcDirs + android.sourceSets.main.kotlin.srcDirs)
-    destinationDirectory.set(file("$buildDir/publication-artifacts"))
 }
 
 tasks.register("javadocJar", Jar) {
     archiveClassifier.set("javadoc")
-    destinationDirectory.set(file("$buildDir/publication-artifacts"))
     doFirst {
         def dummyDir = file("$buildDir/empty-javadoc")
         dummyDir.mkdirs()
@@ -120,7 +117,8 @@ tasks.register("javadocJar", Jar) {
 }
 
 afterEvaluate {
-    def aarFile = file("$buildDir/outputs/aar/${publishArtifactId}-${publishVersion}.aar")
+    def releaseAar = file("$buildDir/outputs/aar/${publishArtifactId}-${publishVersion}.aar")
+    def rcAar = file("$buildDir/outputs/aar/${publishArtifactId}-${publishVersion}-rc.aar")
 
     publishing {
         publications {
@@ -129,17 +127,49 @@ afterEvaluate {
                 artifactId = publishArtifactId
                 version = publishVersion
 
-                artifact(aarFile) {
-                    builtBy(tasks.named("assembleRelease")) // ensures .aar exists before signing
-                }
-
-                artifact tasks.named("sourcesJar").get()
-                artifact tasks.named("javadocJar").get()
+                artifact(releaseAar) { builtBy tasks.named("assembleRelease") }
+                artifact(tasks.named("sourcesJar").get()) { classifier = "sources" }
+                artifact(tasks.named("javadocJar").get()) { classifier = "javadoc" }
 
                 pom {
-                    packaging = 'aar'
                     name = 'vcl'
+                    packaging = 'aar'
                     description = 'Velocity Career Labs Android SDK consumer app.'
+                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'velocitycareerlabs'
+                            name = 'Michael Avoyán'
+                            email = 'michael.avoyan@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git'
+                        developerConnection = 'scm:git:ssh://[email protected]/velocitycareerlabs/WalletAndroid'
+                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    }
+                }
+            }
+
+            create("rc", MavenPublication) {
+                groupId = publishGroupId
+                artifactId = publishArtifactId
+                version = "${publishVersion}-rc"
+
+                artifact(rcAar) { builtBy tasks.named("assembleRc") }
+                artifact(tasks.named("sourcesJar").get()) { classifier = "sources" }
+                artifact(tasks.named("javadocJar").get()) { classifier = "javadoc" }
+
+                pom {
+                    name = 'vcl'
+                    packaging = 'aar'
+                    description = 'Velocity Career Labs Android SDK RC build.'
                     url = 'https://github.com/velocitycareerlabs/WalletAndroid'
                     licenses {
                         license {
@@ -182,18 +212,14 @@ afterEvaluate {
                 mavenCentralSigningPassword
         )
         sign publishing.publications.release
+        sign publishing.publications.rc
     }
 
-    // Log artifacts for debugging
-    tasks.matching { it.name == "publishReleasePublicationToCentralPortalRepository" }.configureEach {
-        dependsOn("assembleRelease")
-        doFirst {
-            println "📦 Artifacts in 'release' publication:"
-            def artifacts = publishing.publications.release.artifacts
-            artifacts.each {
-                println " - file: ${it.file?.name}, classifier: ${it.classifier}, extension: ${it.extension}"
-            }
-        }
+    tasks.register("publishRelease") {
+        dependsOn("publishReleasePublicationToCentralPortalRepository")
+    }
+    tasks.register("publishRc") {
+        dependsOn("publishRcPublicationToCentralPortalRepository")
     }
 }
 
