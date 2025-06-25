@@ -88,6 +88,11 @@ android {
         buildConfig = true
     }
 
+    testOptions {
+        unitTests.includeAndroidResources = true
+        unitTests.returnDefaultValues = true
+    }
+
     libraryVariants.configureEach { variant ->
         variant.outputs.all {
             if (variant.name == "release") {
