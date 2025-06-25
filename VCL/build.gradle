@@ -40,13 +40,11 @@ ext {
     mavenCentralSigningGpgPublicKeyB64 = loadSecret(githubSecretsNames[4])
     mavenCentralSigningGpgPrivateKeyB64 = loadSecret(githubSecretsNames[5])
 }
+
 println "🧪 Debug Secrets:"
-println "${githubSecretsNames[0]} = ${mavenCentralTokenUsername ? '✅' : '❌'}"
-println "${githubSecretsNames[1]} = ${mavenCentralTokenPassword ? '✅' : '❌'}"
-println "${githubSecretsNames[2]} = ${mavenCentralSigningKeyId ? '✅' : '❌'}"
-println "${githubSecretsNames[3]} = ${mavenCentralSigningPassword ? '✅' : '❌'}"
-println "${githubSecretsNames[4]} = ${mavenCentralSigningGpgPublicKeyB64 ? '✅' : '❌'}"
-println "${githubSecretsNames[5]} = ${mavenCentralSigningGpgPrivateKeyB64 ? '✅' : '❌'}"
+githubSecretsNames.each {
+    println "$it = ${loadSecret(it) ? '✅' : '❌'}"
+}
 
 if (!mavenCentralTokenUsername || !mavenCentralSigningPassword || !mavenCentralSigningGpgPrivateKeyB64) {
     throw new GradleException("❌ Required secrets are missing — check env or maven2.properties.")
@@ -145,8 +143,8 @@ afterEvaluate {
 
                 from components.release
 
-                artifact tasks.named("generateSourcesJar")
-                artifact tasks.named("generateJavadocJar")
+                artifact tasks.named("generateSourcesJar").get()
+                artifact tasks.named("generateJavadocJar").get()
 
                 pom {
                     packaging = 'aar'
@@ -185,6 +183,11 @@ afterEvaluate {
                 }
             }
         }
+    }
+
+    tasks.matching { it.name == "generateMetadataFileForReleasePublication" }.configureEach {
+        dependsOn tasks.named("generateSourcesJar")
+        dependsOn tasks.named("generateJavadocJar")
     }
 
     signing {
