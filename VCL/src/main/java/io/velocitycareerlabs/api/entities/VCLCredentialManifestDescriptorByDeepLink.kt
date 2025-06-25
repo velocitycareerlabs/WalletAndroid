@@ -19,9 +19,6 @@ data class VCLCredentialManifestDescriptorByDeepLink(
     override val credentialTypes: List<String>? = null
     override val vendorOriginContext: String? = deepLink.vendorOriginContext
 
-    override val did: String?
-        get() = retrieveDid()
-
     override val endpoint: String?
         get() = retrieveEndpoint()
 }

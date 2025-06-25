@@ -11,7 +11,7 @@ import io.velocitycareerlabs.api.entities.VCLDidJwkDescriptor
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
-import io.velocitycareerlabs.utils.ErrorUtils
+import io.velocitycareerlabs.infrastructure.utils.ErrorUtils
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -9,6 +9,7 @@ package io.velocitycareerlabs.usecases
 
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
+import io.velocitycareerlabs.impl.data.repositories.ResolveDidDocumentRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.GenerateOffersUseCaseImpl
 import io.velocitycareerlabs.impl.data.verifiers.OffersByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.domain.usecases.GenerateOffersUseCase
@@ -17,6 +18,7 @@ import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.CommonMocks
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
+import io.velocitycareerlabs.infrastructure.resources.valid.DidDocumentMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.GenerateOffersMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
@@ -36,7 +38,11 @@ internal class GenerateOffersUseCaseTest {
             GenerateOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffers)
             ),
-            OffersByDeepLinkVerifierImpl(),
+            OffersByDeepLinkVerifierImpl(
+                ResolveDidDocumentRepositoryImpl(
+                    NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
+                )
+            ),
             EmptyExecutor()
         )
 
@@ -75,7 +81,11 @@ internal class GenerateOffersUseCaseTest {
             GenerateOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffersEmptyJsonObj)
             ),
-            OffersByDeepLinkVerifierImpl(),
+            OffersByDeepLinkVerifierImpl(
+                ResolveDidDocumentRepositoryImpl(
+                    NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
+                )
+            ),
             EmptyExecutor()
         )
 
@@ -109,7 +119,11 @@ internal class GenerateOffersUseCaseTest {
             GenerateOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffersEmptyJsonArr)
             ),
-            OffersByDeepLinkVerifierImpl(),
+            OffersByDeepLinkVerifierImpl(
+                ResolveDidDocumentRepositoryImpl(
+                    NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
+                )
+            ),
             EmptyExecutor()
         )
 

@@ -12,6 +12,7 @@ import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.PresentationRequestRepositoryImpl
+import io.velocitycareerlabs.impl.data.repositories.ResolveDidDocumentRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.ResolveKidRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.PresentationRequestUseCaseImpl
 import io.velocitycareerlabs.impl.data.verifiers.PresentationRequestByDeepLinkVerifierImpl
@@ -23,6 +24,7 @@ import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.network.NetworkServiceSuccess
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidDocumentMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestMocks
 import org.junit.Test
@@ -38,10 +40,10 @@ internal class PresentationRequestUseCaseTest {
         val pushToken = "push_token"
         subject1 = PresentationRequestUseCaseImpl(
             PresentationRequestRepositoryImpl(
-                NetworkServiceSuccess(validResponse = PresentationRequestMocks.EncodedPresentationRequestResponse)
+                NetworkServiceSuccess(PresentationRequestMocks.EncodedPresentationRequestResponse)
             ),
-            ResolveKidRepositoryImpl(
-                NetworkServiceSuccess(validResponse = PresentationRequestMocks.JWK)
+            ResolveDidDocumentRepositoryImpl(
+                NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
             ),
             JwtServiceRepositoryImpl(
                 VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)),
@@ -92,8 +94,8 @@ internal class PresentationRequestUseCaseTest {
             PresentationRequestRepositoryImpl(
                 NetworkServiceSuccess(validResponse = "wrong payload")
             ),
-            ResolveKidRepositoryImpl(
-                NetworkServiceSuccess(validResponse = PresentationRequestMocks.JWK)
+            ResolveDidDocumentRepositoryImpl(
+                NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
             ),
             JwtServiceRepositoryImpl(
                 VCLJwtSignServiceLocalImpl(VCLKeyServiceLocalImpl(SecretStoreServiceMock.Instance)),

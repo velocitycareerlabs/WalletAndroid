@@ -11,6 +11,7 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.impl.extensions.decode
 import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
+import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.DidJwkMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestDescriptorMocks
 import org.junit.After
@@ -88,6 +89,20 @@ class VCLPresentationRequestDescriptorTest {
             (PresentationRequestDescriptorMocks.RequestUri.decode() + "&" + PresentationRequestDescriptorMocks.QParams)
 
         assert(subject.endpoint?.decode()?.isUrlEquivalentTo(mockEndpoint.decode()) == true)
+        assert(subject.pushDelegate == null)
+        assert(subject.did == PresentationRequestDescriptorMocks.InspectorDid)
+    }
+
+    @Test
+    fun testPresentationRequestDescriptorWithInspectorIdSuccess() {
+        subject = VCLPresentationRequestDescriptor(
+            deepLink = DeepLinkMocks.PresentationRequestDeepLinkMainNetWithId,
+            didJwk = DidJwkMocks.DidJwk
+        )
+
+        val mockEndpoint = DeepLinkMocks.PresentationRequestRequestDecodedUriWithIdStr
+
+        assert(subject.endpoint?.decode()?.isUrlEquivalentTo(mockEndpoint) == true)
         assert(subject.pushDelegate == null)
         assert(subject.did == PresentationRequestDescriptorMocks.InspectorDid)
     }

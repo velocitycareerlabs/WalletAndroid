@@ -21,7 +21,7 @@ import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.JwtServiceMocks
-import io.velocitycareerlabs.utils.ErrorUtils
+import io.velocitycareerlabs.infrastructure.utils.ErrorUtils
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

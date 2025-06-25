@@ -7,9 +7,8 @@ plugins {
 import org.gradle.api.tasks.bundling.Jar
 
 ext {
-    publishCode = 163
-    def resolvedVersion = project.hasProperty('projectVersion') ? project.property('projectVersion') : (System.getenv("RELEASE_VERSION") ?: "2.7.3")
-    versionName = resolvedVersion
+    publishCode = 164
+    publishVersion = "2.7.4"
     artifactId = "vcl"
     groupId = "io.velocitycareerlabs"
 }
@@ -152,7 +151,7 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.15.0'
 
     implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
-    implementation 'androidx.security:security-crypto:1.1.0-alpha07'
+    implementation "androidx.security:security-crypto:1.1.0-beta01"
 
     // Reflection
 //    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
@@ -171,6 +170,8 @@ dependencies {
     testImplementation 'org.json:json:20240303'
     // json assert
     testImplementation 'org.skyscreamer:jsonassert:1.5.3'
+
+    testImplementation 'io.mockk:mockk:1.14.2'
 
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'

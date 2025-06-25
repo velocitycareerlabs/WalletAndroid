@@ -8,25 +8,51 @@ package io.velocitycareerlabs.impl.data.verifiers
 
 import io.velocitycareerlabs.api.entities.VCLCredentialManifest
 import io.velocitycareerlabs.api.entities.VCLDeepLink
+import io.velocitycareerlabs.api.entities.VCLDidDocument
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialManifestByDeepLinkVerifier
 import io.velocitycareerlabs.impl.utils.VCLLog
 
-class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDeepLinkVerifier {
+internal class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDeepLinkVerifier {
     private val TAG = CredentialManifestByDeepLinkVerifierImpl::class.simpleName
 
     override fun verifyCredentialManifest(
         credentialManifest: VCLCredentialManifest,
-        deepLink: VCLDeepLink,
+        deepLink: VCLDeepLink?,
+        didDocument: VCLDidDocument,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        if (credentialManifest.issuerId == deepLink.did) {
-            completionBlock(VCLResult.Success(true))
-        } else {
-            VCLLog.e(TAG, "credential manifest: ${credentialManifest.jwt.encodedJwt} \ndeepLink: ${deepLink.value}")
-            completionBlock((VCLResult.Failure(VCLError(errorCode = VCLErrorCode.MismatchedRequestIssuerDid.value))))
+        deepLink?.did?.let { deepLinkDid ->
+            if (didDocument.id == credentialManifest.issuerId && didDocument.id == deepLinkDid ||
+                didDocument.alsoKnownAs.contains(credentialManifest.issuerId) && didDocument.alsoKnownAs.contains(deepLinkDid)
+            ) {
+                completionBlock(VCLResult.Success(true))
+            } else {
+                onError(
+                    errorCode = VCLErrorCode.MismatchedRequestIssuerDid,
+                    errorMessage = "credential manifest: ${credentialManifest.jwt.encodedJwt} \ndidDocument: $didDocument",
+                    completionBlock = completionBlock
+                )
+            }
+        }  ?: run {
+            onError(
+                errorMessage = "DID not found in deep link: ${deepLink?.value}",
+                completionBlock = completionBlock
+            )
         }
+    }
+
+    private fun onError(
+        errorCode: VCLErrorCode = VCLErrorCode.SdkError,
+        errorMessage: String,
+        completionBlock: (VCLResult<Boolean>) -> Unit
+
+    ) {
+        VCLLog.e(TAG, errorMessage)
+        completionBlock(
+            (VCLResult.Failure(VCLError(errorCode = errorCode.value, message = errorMessage)))
+        )
     }
 }

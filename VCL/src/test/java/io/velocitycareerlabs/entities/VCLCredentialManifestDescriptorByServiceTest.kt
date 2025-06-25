@@ -37,7 +37,8 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
             issuingType = VCLIssuingType.Career,
             credentialTypes = CredentialManifestDescriptorMocks.CredentialTypesList,
             pushDelegate = CredentialManifestDescriptorMocks.PushDelegate,
-            didJwk = DidJwkMocks.DidJwk
+            didJwk = DidJwkMocks.DidJwk,
+            did = "123"
         )
 
         val credentialTypesQuery =
@@ -49,7 +50,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
             (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
         assert(subject.endpoint == mockEndpoint)
-        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
+        assert(subject.did == "123")
     }
 
     @Test
@@ -61,7 +62,8 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
             issuingType = VCLIssuingType.Identity,
             credentialTypes = CredentialManifestDescriptorMocks.CredentialTypesList,
             pushDelegate = CredentialManifestDescriptorMocks.PushDelegate,
-            didJwk = DidJwkMocks.DidJwk
+            didJwk = DidJwkMocks.DidJwk,
+            did = "123"
         )
 
         val credentialTypesQuery =
@@ -73,7 +75,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
             (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
         assert(subject.endpoint == mockEndpoint)
-        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
+        assert(subject.did == "123")
     }
 
     @Test
@@ -84,7 +86,8 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
             service = service,
             issuingType = VCLIssuingType.Career,
             pushDelegate = CredentialManifestDescriptorMocks.PushDelegate,
-            didJwk = DidJwkMocks.DidJwk
+            didJwk = DidJwkMocks.DidJwk,
+            did = "123"
         )
 
         val credentialTypesQuery =
@@ -94,7 +97,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
             (CredentialManifestDescriptorMocks.IssuingServiceEndPoint + "?" + credentialTypesQuery)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
-        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
+        assert(subject.did == "123")
     }
 
     @Test
@@ -105,7 +108,8 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
             service = service,
             issuingType = VCLIssuingType.Career,
             credentialTypes = CredentialManifestDescriptorMocks.CredentialTypesList,
-            didJwk = DidJwkMocks.DidJwk
+            didJwk = DidJwkMocks.DidJwk,
+            did = "123"
         )
 
         val credentialTypesQuery =
@@ -115,7 +119,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
             (CredentialManifestDescriptorMocks.IssuingServiceWithParamEndPoint + "&" + credentialTypesQuery)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
-        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
+        assert(subject.did == "123")
     }
 
     @Test
@@ -126,7 +130,8 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
             service = service,
             issuingType = VCLIssuingType.Career,
             pushDelegate = CredentialManifestDescriptorMocks.PushDelegate,
-            didJwk = DidJwkMocks.DidJwk
+            didJwk = DidJwkMocks.DidJwk,
+            did = "123"
         )
 
         val credentialTypesQuery =
@@ -136,7 +141,7 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
             (CredentialManifestDescriptorMocks.IssuingServiceWithParamEndPoint + "&" + credentialTypesQuery)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
-        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
+        assert(subject.did == "123")
     }
 
     @Test
@@ -146,12 +151,13 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
         subject = VCLCredentialManifestDescriptorByService(
             service = service,
             issuingType = VCLIssuingType.Career,
-            didJwk = DidJwkMocks.DidJwk
+            didJwk = DidJwkMocks.DidJwk,
+            did = "123"
         )
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceWithParamEndPoint)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
-        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
+        assert(subject.did == "123")
     }
 
     @Test
@@ -160,12 +166,13 @@ internal class VCLCredentialManifestDescriptorByServiceTest {
             VCLService(JSONObject(CredentialManifestDescriptorMocks.IssuingServiceJsonStr))
         subject = VCLCredentialManifestDescriptorByService(
             service = service,
-            didJwk = DidJwkMocks.DidJwk
+            didJwk = DidJwkMocks.DidJwk,
+            did = "123"
         )
         val mockEndpoint = (CredentialManifestDescriptorMocks.IssuingServiceEndPoint)
 
         assert(subject.endpoint?.isUrlEquivalentTo(mockEndpoint)!!)
-        assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)
+        assert(subject.did == "123")
     }
 
     @After

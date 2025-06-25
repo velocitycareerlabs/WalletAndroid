@@ -7,6 +7,7 @@
 package io.velocitycareerlabs.impl.data.verifiers
 
 import io.velocitycareerlabs.api.entities.VCLDeepLink
+import io.velocitycareerlabs.api.entities.VCLDidDocument
 import io.velocitycareerlabs.api.entities.VCLPresentationRequest
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.error.VCLError
@@ -14,21 +15,38 @@ import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.domain.verifiers.PresentationRequestByDeepLinkVerifier
 import io.velocitycareerlabs.impl.utils.VCLLog
 
-class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByDeepLinkVerifier {
+internal class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByDeepLinkVerifier {
     private val TAG = PresentationRequestByDeepLinkVerifierImpl::class.simpleName
 
     override fun verifyPresentationRequest(
         presentationRequest: VCLPresentationRequest,
         deepLink: VCLDeepLink,
+        didDocument: VCLDidDocument,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        if (presentationRequest.iss == deepLink.did) {
-            completionBlock(VCLResult.Success(true))
-        } else {
-            VCLLog.e(TAG, "presentation request: ${presentationRequest.jwt.encodedJwt} \ndeepLink: ${deepLink.value}")
-            completionBlock(VCLResult.Failure(
-                VCLError(errorCode = VCLErrorCode.MismatchedPresentationRequestInspectorDid.value)
-            ))
+        deepLink.did?.let { deepLinkDid ->
+            if (didDocument.id == presentationRequest.iss && didDocument.id == deepLinkDid ||
+                didDocument.alsoKnownAs.contains(presentationRequest.iss) && didDocument.alsoKnownAs.contains(deepLinkDid)) {
+                completionBlock(VCLResult.Success(true))
+            } else {
+                onError(
+                    errorCode = VCLErrorCode.MismatchedPresentationRequestInspectorDid,
+                    errorMessage = "presentation request: ${presentationRequest.jwt.encodedJwt} \ndid document: $didDocument",
+                    completionBlock = completionBlock
+                )
+            }
         }
+    }
+
+    private fun onError(
+        errorCode: VCLErrorCode = VCLErrorCode.SdkError,
+        errorMessage: String,
+        completionBlock: (VCLResult<Boolean>) -> Unit
+
+    ) {
+        VCLLog.e(TAG, errorMessage)
+        completionBlock(
+            (VCLResult.Failure(VCLError(errorCode = errorCode.value, message = errorMessage)))
+        )
     }
 }

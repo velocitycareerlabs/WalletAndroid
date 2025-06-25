@@ -14,6 +14,7 @@ import io.velocitycareerlabs.impl.keys.VCLKeyServiceLocalImpl
 import io.velocitycareerlabs.impl.data.repositories.FinalizeOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.GenerateOffersRepositoryImpl
 import io.velocitycareerlabs.impl.data.repositories.JwtServiceRepositoryImpl
+import io.velocitycareerlabs.impl.data.repositories.ResolveDidDocumentRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.FinalizeOffersUseCaseImpl
 import io.velocitycareerlabs.impl.data.usecases.GenerateOffersUseCaseImpl
 import io.velocitycareerlabs.impl.data.verifiers.CredentialDidVerifierImpl
@@ -32,6 +33,7 @@ import io.velocitycareerlabs.infrastructure.resources.CredentialTypesModelMock
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.DidDocumentMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.GenerateOffersMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.JsonLdMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
@@ -84,7 +86,11 @@ internal class FinalizeOffersUseCaseTest {
             GenerateOffersRepositoryImpl(
                 NetworkServiceSuccess(validResponse = GenerateOffersMocks.GeneratedOffers)
             ),
-            OffersByDeepLinkVerifierImpl(),
+            OffersByDeepLinkVerifierImpl(
+                ResolveDidDocumentRepositoryImpl(
+                    NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
+                )
+            ),
             EmptyExecutor()
         ).generateOffers(
             sessionToken = VCLToken(value = ""),
@@ -145,7 +151,11 @@ internal class FinalizeOffersUseCaseTest {
                 NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
             ),
             CredentialDidVerifierImpl(),
-            CredentialsByDeepLinkVerifierImpl(),
+            CredentialsByDeepLinkVerifierImpl(
+                ResolveDidDocumentRepositoryImpl(
+                    NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
+                )
+            ),
             EmptyExecutor()
         )
 
@@ -192,7 +202,11 @@ internal class FinalizeOffersUseCaseTest {
                 NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
             ),
             CredentialDidVerifierImpl(),
-            CredentialsByDeepLinkVerifierImpl(),
+            CredentialsByDeepLinkVerifierImpl(
+                ResolveDidDocumentRepositoryImpl(
+                    NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
+                )
+            ),
             EmptyExecutor()
         )
 
@@ -240,7 +254,11 @@ internal class FinalizeOffersUseCaseTest {
                 NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
             ),
             CredentialDidVerifierImpl(),
-            CredentialsByDeepLinkVerifierImpl(),
+            CredentialsByDeepLinkVerifierImpl(
+                ResolveDidDocumentRepositoryImpl(
+                    NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
+                )
+            ),
             EmptyExecutor()
         )
 
@@ -277,7 +295,11 @@ internal class FinalizeOffersUseCaseTest {
                 NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
             ),
             CredentialDidVerifierImpl(),
-            CredentialsByDeepLinkVerifierImpl(),
+            CredentialsByDeepLinkVerifierImpl(
+                ResolveDidDocumentRepositoryImpl(
+                    NetworkServiceSuccess(DidDocumentMocks.DidDocumentMockStr)
+                )
+            ),
             EmptyExecutor()
         )
 

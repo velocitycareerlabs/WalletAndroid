@@ -19,7 +19,7 @@ internal interface NetworkService {
         contentType: String = Request.ContentTypeApplicationJson,
         method: Request.HttpMethod,
         headers: List<Pair<String, String>>? = null,
-        useCaches: Boolean = false,
+        useCaches: Boolean = true,
         completionBlock: (VCLResult<Response>) -> Unit
     )
 }

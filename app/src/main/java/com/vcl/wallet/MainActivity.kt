@@ -33,6 +33,7 @@ import io.velocitycareerlabs.api.entities.VCLGenerateOffersDescriptor
 import io.velocitycareerlabs.api.entities.VCLIssuingType
 import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.VCLOffers
+import io.velocitycareerlabs.api.entities.VCLOrganization
 import io.velocitycareerlabs.api.entities.VCLPresentationRequest
 import io.velocitycareerlabs.api.entities.VCLPresentationRequestDescriptor
 import io.velocitycareerlabs.api.entities.VCLPresentationSubmission
@@ -284,9 +285,8 @@ class MainActivity : AppCompatActivity() {
 //                Log.d(TAG, "VCL Organizations received")
 
                 // choosing services[0] for testing purposes
-                organizations.all.getOrNull(0)?.serviceCredentialAgentIssuers?.getOrNull(0)
-                    ?.let { service ->
-                        getCredentialManifestByService(service)
+                organizations.all.getOrNull(0)?.let { org ->
+                        getCredentialManifestByService(org)
                     } ?: Log.e(TAG, "VCL Organizations error, issuing service not found")
             },
             errorHandler = { error ->
@@ -307,6 +307,7 @@ class MainActivity : AppCompatActivity() {
                 service = service,
                 credentialIds = Constants.getCredentialIdsToRefresh(environment),
                 didJwk = this.didJwk,
+                did = "some did"
             )
         vcl.getCredentialManifest(
             credentialManifestDescriptorRefresh,
@@ -322,26 +323,33 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun getCredentialManifestByService(serviceCredentialAgentIssuer: VCLService) {
-        val credentialManifestDescriptorByOrganization =
-            VCLCredentialManifestDescriptorByService(
-                service = serviceCredentialAgentIssuer,
-                issuingType = VCLIssuingType.Career,
-                credentialTypes = serviceCredentialAgentIssuer.credentialTypes, // Can come from any where
-                didJwk = this.didJwk,
-            )
-        vcl.getCredentialManifest(
-            credentialManifestDescriptorByOrganization,
-            successHandler = { credentialManifest ->
-                Log.d(TAG, "VCL Credential Manifest received: ${credentialManifest.jwt.payload}")
+    private fun getCredentialManifestByService(organization: VCLOrganization) {
+        organization.serviceCredentialAgentIssuers.getOrNull(0)
+            ?.let { serviceCredentialAgentIssuer ->
+                val credentialManifestDescriptorByOrganization =
+                    VCLCredentialManifestDescriptorByService(
+                        service = serviceCredentialAgentIssuer,
+                        issuingType = VCLIssuingType.Career,
+                        credentialTypes = serviceCredentialAgentIssuer.credentialTypes, // Can come from any where
+                        didJwk = this.didJwk,
+                        did = organization.did
+                    )
+                vcl.getCredentialManifest(
+                    credentialManifestDescriptorByOrganization,
+                    successHandler = { credentialManifest ->
+                        Log.d(
+                            TAG,
+                            "VCL Credential Manifest received: ${credentialManifest.jwt.payload}"
+                        )
 //                Log.d(TAG, "VCL Credential Manifest received")
 
-                generateOffers(credentialManifest)
-            },
-            errorHandler = { error ->
-                logError("VCL Credential Manifest failed:", error)
-            },
-        )
+                        generateOffers(credentialManifest)
+                    },
+                    errorHandler = { error ->
+                        logError("VCL Credential Manifest failed:", error)
+                    },
+                )
+            } ?: Log.e(TAG, "VCL Service not found in organization: $organization")
     }
 
     private fun getCredentialManifestByDeepLink() {
