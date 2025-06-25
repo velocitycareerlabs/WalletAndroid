@@ -100,12 +100,12 @@ android {
 }
 
 // === Artifact Tasks ===
-tasks.register("sourcesJar", Jar) {
+tasks.register("generateSourcesJar", Jar) {
     archiveClassifier.set("sources")
     from(android.sourceSets.main.java.srcDirs + android.sourceSets.main.kotlin.srcDirs)
 }
 
-tasks.register("javadocJar", Jar) {
+tasks.register("generateJavadocJar", Jar) {
     archiveClassifier.set("javadoc")
     doFirst {
         def dummyDir = file("$buildDir/empty-javadoc")
@@ -128,8 +128,8 @@ afterEvaluate {
                 version = publishVersion
 
                 artifact(releaseAar) { builtBy tasks.named("assembleRelease") }
-                artifact(tasks.named("sourcesJar").get()) { classifier = "sources" }
-                artifact(tasks.named("javadocJar").get()) { classifier = "javadoc" }
+                artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
+                artifact(tasks.named("generateJavadocJar").get()) { classifier = "javadoc" }
 
                 pom {
                     name = 'vcl'
@@ -163,8 +163,8 @@ afterEvaluate {
                 version = "${publishVersion}-rc"
 
                 artifact(rcAar) { builtBy tasks.named("assembleRc") }
-                artifact(tasks.named("sourcesJar").get()) { classifier = "sources" }
-                artifact(tasks.named("javadocJar").get()) { classifier = "javadoc" }
+                artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
+                artifact(tasks.named("generateJavadocJar").get()) { classifier = "javadoc" }
 
                 pom {
                     name = 'vcl'
