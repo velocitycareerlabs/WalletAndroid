@@ -2,23 +2,62 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'maven-publish'
+    id 'signing'
 }
 
 import org.gradle.api.tasks.bundling.Jar
 
+// === Load Secrets ===
+def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven2/maven2.properties'
+static def loadProperties(String filePath) {
+    def props = new Properties()
+    def file = new File(filePath)
+    if (file.exists()) file.withInputStream { props.load(it) }
+    return props
+}
+def properties = loadProperties(propertiesFilePath)
+
+def githubSecretsNames = [
+        "MAVEN_CENTRAL_TOKEN_USERNAME",
+        "MAVEN_CENTRAL_TOKEN_PASSWORD",
+        "MAVEN_CENTRAL_SIGNING_KEY_ID",
+        "MAVEN_CENTRAL_SIGNING_PASSWORD",
+        "MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64",
+        "MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64"
+]
+def loadSecret = { name -> System.getenv(name)?.trim() ?: properties.getProperty(name)?.trim() }
+
 ext {
     publishCode = 164
     publishVersion = "2.7.4"
-    artifactId = "vcl"
-    groupId = "io.velocitycareerlabs"
+    publishArtifactId = "vcl"
+    publishGroupId = "io.velocitycareerlabs"
+
+    mavenCentralTokenUsername = loadSecret(githubSecretsNames[0])
+    mavenCentralTokenPassword = loadSecret(githubSecretsNames[1])
+    mavenCentralSigningKeyId = loadSecret(githubSecretsNames[2])
+    mavenCentralSigningPassword = loadSecret(githubSecretsNames[3])
+    mavenCentralSigningGpgPublicKeyB64 = loadSecret(githubSecretsNames[4])
+    mavenCentralSigningGpgPrivateKeyB64 = loadSecret(githubSecretsNames[5])
+}
+println "🧪 Debug Secrets:"
+println "${githubSecretsNames[0]} = ${mavenCentralTokenUsername ? '✅' : '❌'}"
+println "${githubSecretsNames[1]} = ${mavenCentralTokenPassword ? '✅' : '❌'}"
+println "${githubSecretsNames[2]} = ${mavenCentralSigningKeyId ? '✅' : '❌'}"
+println "${githubSecretsNames[3]} = ${mavenCentralSigningPassword ? '✅' : '❌'}"
+println "${githubSecretsNames[4]} = ${mavenCentralSigningGpgPublicKeyB64 ? '✅' : '❌'}"
+println "${githubSecretsNames[5]} = ${mavenCentralSigningGpgPrivateKeyB64 ? '✅' : '❌'}"
+
+if (!mavenCentralTokenUsername || !mavenCentralSigningPassword || !mavenCentralSigningGpgPrivateKeyB64) {
+    throw new GradleException("❌ Required secrets are missing — check env or maven2.properties.")
 }
 
-group = groupId
+group = publishGroupId
 version = publishVersion
 println "👉 Final version is: ${project.version}"
 
 android {
-    namespace = groupId
+    namespace = publishGroupId
     compileSdk = 35
 
     defaultConfig {
@@ -61,72 +100,76 @@ android {
 
     libraryVariants.configureEach { variant ->
         variant.outputs.all {
-            outputFileName = "vcl-${project.version}.aar"
+            outputFileName = "${publishArtifactId}-${project.version}.aar"
         }
     }
 }
 
-afterEvaluate {
-    tasks.register("generateSourcesJar", Jar) {
-        archiveBaseName.set(artifactId)
-        archiveClassifier.set("sources")
-        archiveVersion.set(version)
-        from(android.sourceSets.main.kotlin.srcDirs + android.sourceSets.main.java.srcDirs)
-        destinationDirectory.set(file("$buildDir/libs"))
-        preserveFileTimestamps = false
-        reproducibleFileOrder = true
-    }
+// === Artifact Tasks ===
+tasks.register("generateSourcesJar", Jar) {
+    archiveBaseName.set(publishArtifactId)
+    archiveClassifier.set("sources")
+    archiveVersion.set(version)
+    from(android.sourceSets.main.kotlin.srcDirs + android.sourceSets.main.java.srcDirs)
+    destinationDirectory.set(file("$buildDir/libs"))
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
 
-    tasks.register("generateJavadocJar", Jar) {
-        archiveBaseName.set(artifactId)
-        archiveClassifier.set("javadoc")
-        archiveVersion.set(version)
-        destinationDirectory.set(file("$buildDir/libs"))
-        preserveFileTimestamps = false
-        reproducibleFileOrder = true
-        doFirst {
-            def dummyDir = file("$buildDir/empty-javadoc")
-            dummyDir.mkdirs()
-            def dummyJava = new File(dummyDir, "placeholder.java")
-            if (!dummyJava.exists()) {
-                dummyJava.text = "/** Placeholder for javadoc */"
-            }
-            from(dummyDir)
+tasks.register("generateJavadocJar", Jar) {
+    archiveBaseName.set(publishArtifactId)
+    archiveClassifier.set("javadoc")
+    archiveVersion.set(version)
+    destinationDirectory.set(file("$buildDir/libs"))
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+    doFirst {
+        def dummyDir = file("$buildDir/empty-javadoc")
+        dummyDir.mkdirs()
+        def dummyJava = new File(dummyDir, "placeholder.java")
+        if (!dummyJava.exists()) {
+            dummyJava.text = "/** Placeholder for javadoc */"
         }
+        from(dummyDir)
     }
+}
 
+// === Publishing Configuration ===
+afterEvaluate {
     publishing {
         publications {
-            create("library", MavenPublication) {
-                groupId = project.group
-                artifactId = artifactId
-                version = project.version
+            release(MavenPublication) {
+                groupId = publishGroupId
+                artifactId = publishArtifactId
+                version = publishVersion
 
-                artifact(file("$buildDir/outputs/aar/vcl-${project.version}.aar"))
-                artifact(tasks.named("generateSourcesJar").get())
-                artifact(tasks.named("generateJavadocJar").get())
+                from components.release
+
+                artifact tasks.named("generateSourcesJar")
+                artifact tasks.named("generateJavadocJar")
 
                 pom {
-                    name.set("VCL")
-                    description.set("Velocity Career Labs Android SDK")
-                    url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                    packaging = 'aar'
+                    name = 'vcl'
+                    description = 'Velocity Career Labs Android SDK consumer app.'
+                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
                     licenses {
                         license {
-                            name.set("The Apache License, Version 2.0")
-                            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                         }
                     }
                     developers {
                         developer {
-                            id.set("michaelavoyan")
-                            name.set("Michael Avoyan")
-                            email.set("michael.avoyan@gmail.com")
+                            id = 'velocitycareerlabs'
+                            name = 'Michael Avoyán'
+                            email = 'michael.avoyan@gmail.com'
                         }
                     }
                     scm {
-                        connection.set("scm:git:https://github.com/velocitycareerlabs/WalletAndroid.git")
-                        developerConnection.set("scm:git:ssh://git@github.com:velocitycareerlabs/WalletAndroid.git")
-                        url.set("https://github.com/velocitycareerlabs/WalletAndroid")
+                        connection = 'scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git'
+                        developerConnection = 'scm:git:ssh://[email protected]/velocitycareerlabs/WalletAndroid'
+                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
                     }
                 }
             }
@@ -134,43 +177,45 @@ afterEvaluate {
 
         repositories {
             maven {
-                name = "localStagingForJReleaser"
-                url = uri("$buildDir/staging-deploy")
+                name = "OSSRH"
+                url = uri("https://s01.oss.sonatype.org/content/repositories/releases/")
+                credentials {
+                    username = mavenCentralTokenUsername
+                    password = mavenCentralTokenPassword
+                }
             }
         }
+    }
+
+    signing {
+        useInMemoryPgpKeys(
+                mavenCentralSigningKeyId,
+                new String(Base64.decoder.decode(mavenCentralSigningGpgPrivateKeyB64)),
+                mavenCentralSigningPassword
+        )
+        sign publishing.publications.release
     }
 }
 
 repositories {
     google()
     mavenCentral()
-    mavenLocal() // optional: for testing local publishing
+    mavenLocal()
 }
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.15.0'
-
     implementation 'com.nimbusds:nimbus-jose-jwt:10.3'
     implementation "androidx.security:security-crypto:1.1.0-beta01"
 
-    // Reflection
-//    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
-
-    // Required -- JUnit 4 framework
     testImplementation 'junit:junit:4.13.2'
-    // Optional -- Robolectric environment
     testImplementation 'androidx.test:core:1.6.1'
     testImplementation 'org.robolectric:robolectric:4.15.1'
-    // Optional -- Mockito framework
     testImplementation "org.mockito:mockito-core:5.18.0"
     testImplementation "org.mockito:mockito-inline:5.2.0"
-    // Required -- JSON framework
     testImplementation 'org.json:json:20250517'
-    // json assert
     testImplementation 'org.skyscreamer:jsonassert:1.5.3'
-
     testImplementation 'io.mockk:mockk:1.14.4'
 
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
