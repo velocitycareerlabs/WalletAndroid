@@ -23,11 +23,10 @@ if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
     throw new GradleException("❌ Missing required Maven Central credentials or signing keys. Check your environment or properties file.")
 }
 
-// Lazily resolve version at execution time
+// Lazily resolve version
 def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
         .orElse(providers.provider { publishVersion })
 
-// DO NOT .get() resolvedVersionProvider during config phase!
 def artifactBaseProvider = resolvedVersionProvider.map { version -> "${publishArtifactId}-$version" }
 
 jreleaser {
@@ -75,7 +74,6 @@ jreleaser {
                     version.set(resolvedVersionProvider)
                 }
 
-                // 'files' assignment deferred to afterEvaluate
                 pom {
                     name = 'vcl'
                     packaging = 'aar'
@@ -112,7 +110,7 @@ jreleaser {
     }
 }
 
-// Defer file resolution to execution phase
+// Defer file resolution
 afterEvaluate {
     def artifactBase = artifactBaseProvider.get()
     jreleaser.deploy.maven.mavenCentral.files = [
@@ -122,7 +120,7 @@ afterEvaluate {
     ]
 }
 
-// Task: publish RELEASE version
+// Publish RELEASE
 tasks.register("jreleaserRelease") {
     group = "publishing"
     description = "Publishes release AAR using JReleaser"
@@ -136,7 +134,7 @@ tasks.register("jreleaserRelease") {
     }
 }
 
-// Task: publish RC version
+// Publish RC
 tasks.register("jreleaserRc") {
     group = "publishing"
     description = "Publishes RC AAR using JReleaser"
@@ -151,6 +149,7 @@ tasks.register("jreleaserRc") {
     }
 }
 
+// Dry Run
 tasks.register("jreleaserDryRun") {
     group = "publishing"
     description = "Runs JReleaser dry-run to validate setup"
