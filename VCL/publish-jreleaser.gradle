@@ -1,10 +1,7 @@
 apply plugin: 'org.jreleaser'
 
-import org.gradle.api.tasks.bundling.Jar
-
 apply from: 'load-maven-keys.gradle'
 
-// Skip if not a publish task
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("jreleaser") }
 if (!isPublishTask) {
     logger.lifecycle("🟡 Skipping JReleaser config: not a jreleaser-related task.")
@@ -20,10 +17,9 @@ def requiredSecrets = [
 ]
 
 if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
-    throw new GradleException("❌ Missing required Maven Central credentials or signing keys. Check your environment or properties file.")
+    throw new GradleException("❌ Missing required Maven Central credentials or signing keys.")
 }
 
-// Lazily resolve version
 def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
         .orElse(providers.provider { publishVersion })
 
@@ -67,12 +63,9 @@ jreleaser {
         maven {
             mavenCentral {
                 active = 'ALWAYS'
-
-                coordinates {
-                    groupId = publishGroupId
-                    artifactId = publishArtifactId
-                    version.set(resolvedVersionProvider)
-                }
+                groupId = publishGroupId
+                artifactId = publishArtifactId
+                version.set(resolvedVersionProvider)
 
                 pom {
                     name = 'vcl'
@@ -110,7 +103,6 @@ jreleaser {
     }
 }
 
-// Defer file resolution
 afterEvaluate {
     def artifactBase = artifactBaseProvider.get()
     jreleaser.deploy.maven.mavenCentral.files = [
@@ -120,7 +112,7 @@ afterEvaluate {
     ]
 }
 
-// Publish RELEASE
+// ========== TASKS ==========
 tasks.register("jreleaserRelease") {
     group = "publishing"
     description = "Publishes release AAR using JReleaser"
@@ -134,7 +126,6 @@ tasks.register("jreleaserRelease") {
     }
 }
 
-// Publish RC
 tasks.register("jreleaserRc") {
     group = "publishing"
     description = "Publishes RC AAR using JReleaser"
@@ -149,7 +140,6 @@ tasks.register("jreleaserRc") {
     }
 }
 
-// Dry Run
 tasks.register("jreleaserDryRun") {
     group = "publishing"
     description = "Runs JReleaser dry-run to validate setup"
