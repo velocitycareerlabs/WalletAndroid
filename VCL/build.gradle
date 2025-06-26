@@ -3,7 +3,11 @@ plugins {
     id 'kotlin-android'
     id 'maven-publish'
     id 'signing'
-    id 'org.jreleaser' version '1.18.0' apply false
+    id 'org.jreleaser'
+}
+
+if (project.hasProperty("enableJreleaser") && project.property("enableJreleaser") == "true") {
+    apply from: "$rootDir/VCL/publish-jreleaser.gradle"
 }
 
 ext {
@@ -98,58 +102,39 @@ tasks.register("generateJavadocJar", Jar) {
 tasks.register("generateSourcesAndJavadocJar") {
     group = "assemble"
     description = "Generates sources.jar and javadoc.jar"
-
-    dependsOn(
-            ":VCL:generateSourcesJar",
-            ":VCL:generateJavadocJar",
-    )
+    dependsOn("generateSourcesJar", "generateJavadocJar")
 }
+
 tasks.register("assembleAllRelease") {
     group = "assemble"
     description = "Generates AAR, sources.jar and javadoc.jar for release"
-
-    dependsOn(
-            ":VCL:assembleRelease",
-            ":VCL:generateSourcesAndJavadocJar"
-    )
+    dependsOn("assembleRelease", "generateSourcesAndJavadocJar")
 }
 
 tasks.register("assembleAllRc") {
     group = "assemble"
     description = "Generates AAR, sources.jar and javadoc.jar for rc"
-
-    dependsOn(
-            ":VCL:assembleRc",
-            ":VCL:generateSourcesAndJavadocJar"
-    )
-}
-
-def printBuildArtifacts() {
-    def printDirContents = { title, dirPath ->
-        println "📂 Contents of ${dirPath}/"
-        def dir = file(dirPath)
-        if (dir.exists() && dir.isDirectory()) {
-            dir.listFiles()?.each { println " - ${it.name}" }
-        } else {
-            println "❌ Directory does not exist: ${dirPath}"
-        }
-    }
-
-    printDirContents("AAR", "build/outputs/aar")
-    printDirContents("LIBS", "build/libs")
+    dependsOn("assembleRc", "generateSourcesAndJavadocJar")
 }
 
 tasks.register("verifyExpectedArtifactsExist") {
     group = "verification"
     description = "Prints the contents of key artifact directories"
-
     doLast {
-        printBuildArtifacts()
+        def printDirContents = { title, dirPath ->
+            println "📂 Contents of ${dirPath}/"
+            def dir = file(dirPath)
+            if (dir.exists() && dir.isDirectory()) {
+                dir.listFiles()?.each { println " - ${it.name}" }
+            } else {
+                println "❌ Directory does not exist: ${dirPath}"
+            }
+        }
+
+        printDirContents("AAR", "build/outputs/aar")
+        printDirContents("LIBS", "build/libs")
     }
 }
-
-//apply from: 'publish-pure.gradle'
-apply from: 'publish-jreleaser.gradle'
 
 repositories {
     google()
@@ -162,9 +147,6 @@ dependencies {
 
     implementation 'com.nimbusds:nimbus-jose-jwt:10.3'
     implementation "androidx.security:security-crypto:1.1.0-beta01"
-
-    // Reflection
-//    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
 

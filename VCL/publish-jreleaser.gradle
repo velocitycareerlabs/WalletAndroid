@@ -1,12 +1,13 @@
-apply plugin: 'org.jreleaser'
 apply from: 'load-maven-keys.gradle'
 
+// Only apply when running jreleaser-related tasks
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("jreleaser") }
 if (!isPublishTask) {
     logger.lifecycle("🟡 Skipping JReleaser config: not a jreleaser-related task.")
     return
 }
 
+// Ensure required Maven Central keys are defined
 def requiredSecrets = [
         mavenCentralTokenUsername,
         mavenCentralTokenPassword,
@@ -18,9 +19,16 @@ if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
     throw new GradleException("❌ Missing required Maven Central credentials or signing keys.")
 }
 
+// Resolve version and artifact base name
 def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
         .orElse(providers.provider { publishVersion })
 def artifactBaseProvider = resolvedVersionProvider.map { version -> "${publishArtifactId}-$version" }
+
+// Optional dry run mode from extra properties
+def isDryRun = project.hasProperty("dryrun") && project.property("dryrun").toString().toBoolean()
+if (isDryRun) {
+    logger.lifecycle("ℹ️ JReleaser dry-run mode ENABLED")
+}
 
 jreleaser {
     enabled = true
@@ -117,11 +125,6 @@ tasks.register("jreleaserPublishRelease") {
     dependsOn("assembleRelease", "generateSourcesJar", "generateJavadocJar")
     doFirst {
         project.extensions.extraProperties.set("jreleaserVersionOverride", publishVersion)
-        tasks.named("jreleaserFullRelease").configure {
-            dryrun.set(false)
-            gitRootSearch.set(true)
-            strict.set(true)
-        }
     }
     finalizedBy("jreleaserFullRelease")
 }
@@ -133,11 +136,6 @@ tasks.register("jreleaserPublishRc") {
     doFirst {
         def rcVersion = "${publishVersion}-rc"
         project.extensions.extraProperties.set("jreleaserVersionOverride", rcVersion)
-        tasks.named("jreleaserFullRelease").configure {
-            dryrun.set(false)
-            gitRootSearch.set(true)
-            strict.set(true)
-        }
     }
     finalizedBy("jreleaserFullRelease")
 }
@@ -148,11 +146,18 @@ tasks.register("jreleaserPublishDry") {
     dependsOn("assembleRelease", "generateSourcesJar", "generateJavadocJar")
     doFirst {
         project.extensions.extraProperties.set("jreleaserVersionOverride", publishVersion)
-        tasks.named("jreleaserFullRelease").configure {
-            dryrun.set(true)
-            gitRootSearch.set(true)
-            strict.set(true)
-        }
+        project.extensions.extraProperties.set("dryrun", true)
     }
     finalizedBy("jreleaserFullRelease")
+}
+
+// ========== GRADLE 8.x+ STRICT CONFIGURATION ==========
+gradle.taskGraph.whenReady { graph ->
+    if (graph.hasTask(":${project.name}:jreleaserFullRelease")) {
+        tasks.named("jreleaserFullRelease").configure { task ->
+            task.dryrun.set(isDryRun)
+            task.gitRootSearch.set(true)
+            task.strict.set(true)
+        }
+    }
 }
