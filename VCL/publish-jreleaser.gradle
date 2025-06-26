@@ -1,14 +1,12 @@
 apply plugin: 'org.jreleaser'
 apply from: 'load-maven-keys.gradle'
 
-// Skip if not a publish-related task
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("jreleaser") }
 if (!isPublishTask) {
     logger.lifecycle("🟡 Skipping JReleaser config: not a jreleaser-related task.")
     return
 }
 
-// Validate required secrets
 def requiredSecrets = [
         mavenCentralTokenUsername,
         mavenCentralTokenPassword,
@@ -20,7 +18,6 @@ if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
     throw new GradleException("❌ Missing required Maven Central credentials or signing keys.")
 }
 
-// Dynamically resolve version
 def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
         .orElse(providers.provider { publishVersion })
 def artifactBaseProvider = resolvedVersionProvider.map { version -> "${publishArtifactId}-$version" }
@@ -100,7 +97,6 @@ jreleaser {
     distributions {
         vcl {
             active = 'ALWAYS'
-
             artifact {
                 path = file("${buildDir}/outputs/aar/${artifactBaseProvider.get()}.aar")
             }
@@ -114,42 +110,49 @@ jreleaser {
     }
 }
 
-// ========== TASKS ==========
-tasks.register("jreleaserRelease") {
+// ========== TASK ALIASES ==========
+tasks.register("jreleaserPublishRelease") {
     group = "publishing"
-    description = "Publishes release AAR using JReleaser"
+    description = "Runs jreleaserFullRelease for the release build"
     dependsOn("assembleRelease", "generateSourcesJar", "generateJavadocJar")
     doFirst {
-        logger.lifecycle("📦 Releasing version: ${publishVersion}")
         project.extensions.extraProperties.set("jreleaserVersionOverride", publishVersion)
+        tasks.named("jreleaserFullRelease").configure {
+            dryrun.set(false)
+            gitRootSearch.set(true)
+            strict.set(true)
+        }
     }
-    doLast {
-        jreleaser.fullRelease()
-    }
+    finalizedBy("jreleaserFullRelease")
 }
 
-tasks.register("jreleaserRc") {
+tasks.register("jreleaserPublishRc") {
     group = "publishing"
-    description = "Publishes RC AAR using JReleaser"
+    description = "Runs jreleaserFullRelease for RC build"
     dependsOn("assembleRc", "generateSourcesJar", "generateJavadocJar")
     doFirst {
         def rcVersion = "${publishVersion}-rc"
-        logger.lifecycle("📦 Releasing RC version: ${rcVersion}")
         project.extensions.extraProperties.set("jreleaserVersionOverride", rcVersion)
+        tasks.named("jreleaserFullRelease").configure {
+            dryrun.set(false)
+            gitRootSearch.set(true)
+            strict.set(true)
+        }
     }
-    doLast {
-        jreleaser.fullRelease()
-    }
+    finalizedBy("jreleaserFullRelease")
 }
 
-tasks.register("jreleaserDryRun") {
+tasks.register("jreleaserPublishDry") {
     group = "publishing"
-    description = "Runs JReleaser dry-run to validate setup"
+    description = "Dry-run JReleaser publish (no deployment)"
     dependsOn("assembleRelease", "generateSourcesJar", "generateJavadocJar")
     doFirst {
         project.extensions.extraProperties.set("jreleaserVersionOverride", publishVersion)
+        tasks.named("jreleaserFullRelease").configure {
+            dryrun.set(true)
+            gitRootSearch.set(true)
+            strict.set(true)
+        }
     }
-    doLast {
-        jreleaser.dryRun()
-    }
+    finalizedBy("jreleaserFullRelease")
 }
