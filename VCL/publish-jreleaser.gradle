@@ -1,3 +1,5 @@
+apply plugin: 'org.jreleaser'
+
 import org.gradle.api.tasks.bundling.Jar
 
 apply from: 'load-maven-keys.gradle'
@@ -9,14 +11,24 @@ if (!isPublishTask) {
     return
 }
 
-apply plugin: 'org.jreleaser'
+def requiredSecrets = [
+        mavenCentralTokenUsername,
+        mavenCentralTokenPassword,
+        mavenCentralSigningGpgPublicKey,
+        mavenCentralSigningGpgPrivateKey,
+        mavenCentralSigningPassword
+]
+
+if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
+    throw new GradleException("❌ Missing required Maven Central credentials or signing keys. Check your environment or properties file.")
+}
 
 // Lazily resolve version at execution time
 def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
         .orElse(providers.provider { publishVersion })
 
-def resolvedVersion = resolvedVersionProvider.get()
-def artifactBase = "${publishArtifactId}-${resolvedVersion}"
+// DO NOT .get() resolvedVersionProvider during config phase!
+def artifactBaseProvider = resolvedVersionProvider.map { version -> "${publishArtifactId}-$version" }
 
 jreleaser {
     enabled = true
@@ -36,9 +48,9 @@ jreleaser {
         github {
             repoOwner = 'velocitycareerlabs'
             name = 'WalletAndroid'
-            tagName.set(providers.provider { "release-${resolvedVersionProvider.get()}" })
+            tagName.set(resolvedVersionProvider.map { "release-$it" })
             releaseName.set(resolvedVersionProvider)
-            prerelease.enabled = resolvedVersion.contains("rc")
+            prerelease.enabled.set(resolvedVersionProvider.map { it.contains("rc") })
             sign = true
         }
     }
@@ -56,10 +68,6 @@ jreleaser {
         maven {
             mavenCentral {
                 active = 'ALWAYS'
-                url = 'https://central.sonatype.com/api/v1/publisher'
-                stagingRepository = ''
-                username = mavenCentralTokenUsername
-                password = mavenCentralTokenPassword
 
                 coordinates {
                     groupId = publishGroupId
@@ -67,12 +75,7 @@ jreleaser {
                     version.set(resolvedVersionProvider)
                 }
 
-                files = [
-                        [path: "${buildDir}/outputs/aar/${artifactBase}.aar",     type: "aar"],
-                        [path: "${buildDir}/libs/${artifactBase}-sources.jar",    type: "jar", classifier: "sources"],
-                        [path: "${buildDir}/libs/${artifactBase}-javadoc.jar",    type: "jar", classifier: "javadoc"]
-                ]
-
+                // 'files' assignment deferred to afterEvaluate
                 pom {
                     name = 'vcl'
                     packaging = 'aar'
@@ -109,6 +112,16 @@ jreleaser {
     }
 }
 
+// Defer file resolution to execution phase
+afterEvaluate {
+    def artifactBase = artifactBaseProvider.get()
+    jreleaser.deploy.maven.mavenCentral.files = [
+            [ path: "${buildDir}/outputs/aar/${artifactBase}.aar", type: "aar" ],
+            [ path: "${buildDir}/libs/${artifactBase}-sources.jar", type: "jar", classifier: "sources" ],
+            [ path: "${buildDir}/libs/${artifactBase}-javadoc.jar", type: "jar", classifier: "javadoc" ]
+    ]
+}
+
 // Task: publish RELEASE version
 tasks.register("jreleaserRelease") {
     group = "publishing"
@@ -135,5 +148,17 @@ tasks.register("jreleaserRc") {
     }
     doLast {
         jreleaser.fullRelease()
+    }
+}
+
+tasks.register("jreleaserDryRun") {
+    group = "publishing"
+    description = "Runs JReleaser dry-run to validate setup"
+    dependsOn("assembleRelease", "generateSourcesJar", "generateJavadocJar")
+    doFirst {
+        project.extensions.extraProperties.set("jreleaserVersionOverride", publishVersion)
+    }
+    doLast {
+        jreleaser.dryRun()
     }
 }

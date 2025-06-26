@@ -3,7 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'maven-publish'
     id 'signing'
-    id 'org.jreleaser' version '1.18.0'
+    id 'org.jreleaser' version '1.18.0' apply false
 }
 
 ext {
