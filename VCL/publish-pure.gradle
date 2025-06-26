@@ -1,33 +1,6 @@
 import org.gradle.api.tasks.bundling.Jar
 
-def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven2/maven2.properties'
-static def loadProperties(String filePath) {
-    def props = new Properties()
-    def file = new File(filePath)
-    if (file.exists()) file.withInputStream { props.load(it) }
-    return props
-}
-def properties = loadProperties(propertiesFilePath)
-
-def githubSecretsNames = [
-        "MAVEN_CENTRAL_TOKEN_USERNAME",
-        "MAVEN_CENTRAL_TOKEN_PASSWORD",
-        "MAVEN_CENTRAL_SIGNING_KEY_ID",
-        "MAVEN_CENTRAL_SIGNING_PASSWORD",
-        "MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64",
-        "MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64"
-]
-def loadSecret = { name -> System.getenv(name)?.trim() ?: properties.getProperty(name)?.trim() }
-
-ext {
-    mavenCentralTokenUsername = loadSecret(githubSecretsNames[0])
-    mavenCentralTokenPassword = loadSecret(githubSecretsNames[1])
-    mavenCentralSigningKeyId = loadSecret(githubSecretsNames[2])
-    mavenCentralSigningPassword = loadSecret(githubSecretsNames[3])
-    mavenCentralSigningGpgPrivateKeyB64 = loadSecret(githubSecretsNames[5])
-    mavenCentralSigningGpgPrivateKey = mavenCentralSigningGpgPrivateKeyB64 ?
-            new String(Base64.decoder.decode(mavenCentralSigningGpgPrivateKeyB64)) : null
-}
+apply from: 'load-maven-keys.gradle'
 
 def isPublishTask = gradle.startParameter.taskNames.any { taskName ->
     taskName.toLowerCase().contains("publish")
