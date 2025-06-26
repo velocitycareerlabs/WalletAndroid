@@ -34,16 +34,18 @@ if (!isPublishTask) {
 
 apply plugin: 'org.jreleaser'
 
-// 🔁 Lazily resolve version at execution time
-def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
-        .orElse(providers.provider { publishVersion })
+// 🔁 Lazily resolve version
+def resolvedVersionProvider = providers.provider {
+    project.hasProperty("jreleaserVersionOverride") ?
+            project.property("jreleaserVersionOverride") : publishVersion
+}
 
 jreleaser {
     enabled = true
 
     project {
         name = 'vcl'
-        version = resolvedVersionProvider.get()
+        version = resolvedVersionProvider
         description = 'Velocity Career Labs Android SDK consumer app.'
         website = 'https://github.com/velocitycareerlabs/WalletAndroid'
         authors = ['Michael Avoyán']
@@ -56,9 +58,9 @@ jreleaser {
         github {
             owner = 'velocitycareerlabs'
             repo = 'WalletAndroid'
-            tagName = "release-${resolvedVersionProvider.get()}"
-            releaseName = resolvedVersionProvider.get()
-            prerelease = resolvedVersionProvider.get().contains("rc")
+            tagName = providers.provider { "release-${resolvedVersionProvider.get()}" }
+            releaseName = resolvedVersionProvider
+            prerelease = providers.provider { resolvedVersionProvider.get().contains("rc") }
             sign = true
         }
     }
@@ -84,13 +86,13 @@ jreleaser {
                 coordinates {
                     groupId = publishGroupId
                     artifactId = publishArtifactId
-                    version = resolvedVersionProvider.get()
+                    version = resolvedVersionProvider
                 }
 
                 files = [
-                        [path: "${buildDir}/outputs/aar/${publishArtifactId}-${resolvedVersionProvider.get()}.aar",     type: "aar"],
-                        [path: "${buildDir}/libs/${publishArtifactId}-${resolvedVersionProvider.get()}-sources.jar",    type: "jar", classifier: "sources"],
-                        [path: "${buildDir}/libs/${publishArtifactId}-${resolvedVersionProvider.get()}-javadoc.jar",    type: "jar", classifier: "javadoc"]
+                        [path: providers.provider { "${buildDir}/outputs/aar/${publishArtifactId}-${resolvedVersionProvider.get()}.aar" }, type: "aar"],
+                        [path: providers.provider { "${buildDir}/libs/${publishArtifactId}-${resolvedVersionProvider.get()}-sources.jar" }, type: "jar", classifier: "sources"],
+                        [path: providers.provider { "${buildDir}/libs/${publishArtifactId}-${resolvedVersionProvider.get()}-javadoc.jar" }, type: "jar", classifier: "javadoc"]
                 ]
 
                 pom {
