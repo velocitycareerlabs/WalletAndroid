@@ -15,12 +15,15 @@ apply plugin: 'org.jreleaser'
 def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
         .orElse(providers.provider { publishVersion })
 
+def resolvedVersion = resolvedVersionProvider.get()
+def artifactBase = "${publishArtifactId}-${resolvedVersion}"
+
 jreleaser {
     enabled = true
 
     project {
         name = 'vcl'
-        version = resolvedVersionProvider.get()
+        version.set(resolvedVersionProvider)
         description = 'Velocity Career Labs Android SDK consumer app.'
         website = 'https://github.com/velocitycareerlabs/WalletAndroid'
         authors = ['Michael Avoyán']
@@ -33,9 +36,9 @@ jreleaser {
         github {
             repoOwner = 'velocitycareerlabs'
             name = 'WalletAndroid'
-            tagName = "release-${resolvedVersionProvider.get()}"
-            releaseName = resolvedVersionProvider.get()
-            prerelease.enabled = resolvedVersionProvider.get().contains("rc")
+            tagName.set(providers.provider { "release-${resolvedVersionProvider.get()}" })
+            releaseName.set(resolvedVersionProvider)
+            prerelease.enabled = resolvedVersion.contains("rc")
             sign = true
         }
     }
@@ -44,8 +47,8 @@ jreleaser {
         active = 'ALWAYS'
         armored = true
         mode = 'MEMORY'
-        publicKey = mavenCentralSigning
-        secretKey = mavenCentralSigningGpgPrivateKeyB64
+        publicKey = mavenCentralSigningGpgPublicKey
+        secretKey = mavenCentralSigningGpgPrivateKey
         passphrase = mavenCentralSigningPassword
     }
 
@@ -53,7 +56,7 @@ jreleaser {
         maven {
             mavenCentral {
                 active = 'ALWAYS'
-                url = 'https://central.sonatype.com/api/v1/publish/'
+                url = 'https://central.sonatype.com/api/v1/publisher'
                 stagingRepository = ''
                 username = mavenCentralTokenUsername
                 password = mavenCentralTokenPassword
@@ -61,13 +64,13 @@ jreleaser {
                 coordinates {
                     groupId = publishGroupId
                     artifactId = publishArtifactId
-                    version = resolvedVersionProvider.get()
+                    version.set(resolvedVersionProvider)
                 }
 
                 files = [
-                        [path: "${buildDir}/outputs/aar/${publishArtifactId}-${resolvedVersionProvider.get()}.aar",     type: "aar"],
-                        [path: "${buildDir}/libs/${publishArtifactId}-${resolvedVersionProvider.get()}-sources.jar",    type: "jar", classifier: "sources"],
-                        [path: "${buildDir}/libs/${publishArtifactId}-${resolvedVersionProvider.get()}-javadoc.jar",    type: "jar", classifier: "javadoc"]
+                        [path: "${buildDir}/outputs/aar/${artifactBase}.aar",     type: "aar"],
+                        [path: "${buildDir}/libs/${artifactBase}-sources.jar",    type: "jar", classifier: "sources"],
+                        [path: "${buildDir}/libs/${artifactBase}-javadoc.jar",    type: "jar", classifier: "javadoc"]
                 ]
 
                 pom {
@@ -106,7 +109,7 @@ jreleaser {
     }
 }
 
-// ✅ Task: publish RELEASE version
+// Task: publish RELEASE version
 tasks.register("jreleaserRelease") {
     group = "publishing"
     description = "Publishes release AAR using JReleaser"
@@ -120,7 +123,7 @@ tasks.register("jreleaserRelease") {
     }
 }
 
-// ✅ Task: publish RC version
+// Task: publish RC version
 tasks.register("jreleaserRc") {
     group = "publishing"
     description = "Publishes RC AAR using JReleaser"
