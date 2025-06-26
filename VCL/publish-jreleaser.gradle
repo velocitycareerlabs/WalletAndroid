@@ -100,19 +100,15 @@ jreleaser {
     distributions {
         vcl {
             active = 'ALWAYS'
+
             artifact {
-                path = "${buildDir}/outputs/aar/${artifactBaseProvider.get()}.aar"
-                type = 'aar'
+                path = file("${buildDir}/outputs/aar/${artifactBaseProvider.get()}.aar")
             }
             artifact {
-                path = "${buildDir}/libs/${artifactBaseProvider.get()}-sources.jar"
-                type = 'jar'
-                classifier = 'sources'
+                path = file("${buildDir}/libs/${artifactBaseProvider.get()}-sources.jar")
             }
             artifact {
-                path = "${buildDir}/libs/${artifactBaseProvider.get()}-javadoc.jar"
-                type = 'jar'
-                classifier = 'javadoc'
+                path = file("${buildDir}/libs/${artifactBaseProvider.get()}-javadoc.jar")
             }
         }
     }
