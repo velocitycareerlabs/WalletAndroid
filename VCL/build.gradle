@@ -123,6 +123,30 @@ tasks.register("assembleAllRc") {
     )
 }
 
+def printBuildArtifacts() {
+    def printDirContents = { title, dirPath ->
+        println "📂 Contents of ${dirPath}/"
+        def dir = file(dirPath)
+        if (dir.exists() && dir.isDirectory()) {
+            dir.listFiles()?.each { println " - ${it.name}" }
+        } else {
+            println "❌ Directory does not exist: ${dirPath}"
+        }
+    }
+
+    printDirContents("AAR", "build/outputs/aar")
+    printDirContents("LIBS", "build/libs")
+}
+
+tasks.register("verifyExpectedArtifactsExist") {
+    group = "verification"
+    description = "Prints the contents of key artifact directories"
+
+    doLast {
+        printBuildArtifacts()
+    }
+}
+
 apply from: 'publish-core.gradle'
 
 repositories {
