@@ -31,7 +31,7 @@ jobs:
 
       - name: 📝 Get version from build.gradle
         run: |
-          VERSION=$(grep "def resolvedVersion = .*" VCL/build.gradle | sed -n 's/.*?: "\([^"]*\)".*/\1/p')
+          VERSION=$(grep 'publishVersion *= *".*"' VCL/build.gradle | sed -n 's/.*publishVersion *= *"\([^"]*\)".*/\1/p')
           echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
           echo "Found version: $VERSION"
 
