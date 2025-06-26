@@ -1,14 +1,14 @@
 apply plugin: 'org.jreleaser'
 apply from: 'load-maven-keys.gradle'
 
-// Only apply JReleaser logic when publishing
+// Skip if not a publish-related task
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("jreleaser") }
 if (!isPublishTask) {
     logger.lifecycle("🟡 Skipping JReleaser config: not a jreleaser-related task.")
     return
 }
 
-// Ensure all required credentials are available
+// Validate required secrets
 def requiredSecrets = [
         mavenCentralTokenUsername,
         mavenCentralTokenPassword,
@@ -20,7 +20,7 @@ if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
     throw new GradleException("❌ Missing required Maven Central credentials or signing keys.")
 }
 
-// Determine version dynamically
+// Dynamically resolve version
 def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
         .orElse(providers.provider { publishVersion })
 def artifactBaseProvider = resolvedVersionProvider.map { version -> "${publishArtifactId}-$version" }
@@ -36,7 +36,7 @@ jreleaser {
         authors = ['Michael Avoyán']
         license = 'Apache-2.0'
         inceptionYear = '2024'
-        tags = ['android', 'sdk', 'aar', 'velocity', 'career']
+        tags = ['android', 'sdk', 'aar', 'velocity', 'vcl']
     }
 
     release {
@@ -52,11 +52,15 @@ jreleaser {
 
     signing {
         active = 'ALWAYS'
-        armored = true
         mode = 'MEMORY'
+        armored = true
+        verify = false
         publicKey = mavenCentralSigningGpgPublicKey
         secretKey = mavenCentralSigningGpgPrivateKey
         passphrase = mavenCentralSigningPassword
+        files = true
+        artifacts = true
+        checksums = true
     }
 
     deploy {
@@ -65,6 +69,7 @@ jreleaser {
                 app {
                     active = 'ALWAYS'
                     url = 'https://central.sonatype.com/api/v1/publisher'
+                    authorization = 'BEARER'
                     username = mavenCentralTokenUsername
                     password = mavenCentralTokenPassword
                     namespace = 'velocitycareerlabs'
@@ -74,9 +79,15 @@ jreleaser {
                         artifactId = publishArtifactId
                         sourceJar = true
                         javadocJar = true
+                        verifyPom = false
                     }
 
-                    // Files injected after evaluation
+                    applyMavenCentralRules = false
+                    sign = true
+                    checksums = true
+                    sourceJar = true
+                    javadocJar = true
+                    verifyPom = false
                 }
             }
         }
@@ -87,7 +98,6 @@ jreleaser {
     }
 }
 
-// Attach files after evaluation
 afterEvaluate {
     def artifactBase = artifactBaseProvider.get()
     jreleaser.deploy.maven.mavenCentral.app.files = [
@@ -97,7 +107,6 @@ afterEvaluate {
     ]
 }
 
-// ========== TASKS ==========
 tasks.register("jreleaserRelease") {
     group = "publishing"
     description = "Publishes release AAR using JReleaser"
