@@ -96,17 +96,29 @@ jreleaser {
     assemble {
         enabled = false
     }
+
+    distributions {
+        vcl {
+            active = 'ALWAYS'
+            artifact {
+                path = "${buildDir}/outputs/aar/${artifactBaseProvider.get()}.aar"
+                type = 'aar'
+            }
+            artifact {
+                path = "${buildDir}/libs/${artifactBaseProvider.get()}-sources.jar"
+                type = 'jar'
+                classifier = 'sources'
+            }
+            artifact {
+                path = "${buildDir}/libs/${artifactBaseProvider.get()}-javadoc.jar"
+                type = 'jar'
+                classifier = 'javadoc'
+            }
+        }
+    }
 }
 
-afterEvaluate {
-    def artifactBase = artifactBaseProvider.get()
-    jreleaser.deploy.maven.mavenCentral.app.files = [
-            [path: "${buildDir}/outputs/aar/${artifactBase}.aar", type: "aar"],
-            [path: "${buildDir}/libs/${artifactBase}-sources.jar", type: "jar", classifier: "sources"],
-            [path: "${buildDir}/libs/${artifactBase}-javadoc.jar", type: "jar", classifier: "javadoc"]
-    ]
-}
-
+// ========== TASKS ==========
 tasks.register("jreleaserRelease") {
     group = "publishing"
     description = "Publishes release AAR using JReleaser"
