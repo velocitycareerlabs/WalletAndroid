@@ -1,0 +1,160 @@
+import org.gradle.api.tasks.bundling.Jar
+
+def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven2/maven2.properties'
+static def loadProperties(String filePath) {
+    def props = new Properties()
+    def file = new File(filePath)
+    if (file.exists()) file.withInputStream { props.load(it) }
+    return props
+}
+def properties = loadProperties(propertiesFilePath)
+
+def githubSecretsNames = [
+        "MAVEN_CENTRAL_TOKEN_USERNAME",
+        "MAVEN_CENTRAL_TOKEN_PASSWORD",
+        "MAVEN_CENTRAL_SIGNING_KEY_ID",
+        "MAVEN_CENTRAL_SIGNING_PASSWORD",
+        "MAVEN_CENTRAL_GPG_PUBLIC_KEY_B64",
+        "MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64"
+]
+def loadSecret = { name -> System.getenv(name)?.trim() ?: properties.getProperty(name)?.trim() }
+
+ext {
+    mavenCentralTokenUsername = loadSecret(githubSecretsNames[0])
+    mavenCentralTokenPassword = loadSecret(githubSecretsNames[1])
+    mavenCentralSigningKeyId = loadSecret(githubSecretsNames[2])
+    mavenCentralSigningPassword = loadSecret(githubSecretsNames[3])
+    mavenCentralSigningGpgPrivateKeyB64 = loadSecret(githubSecretsNames[5])
+    mavenCentralSigningGpgPrivateKey = mavenCentralSigningGpgPrivateKeyB64 ?
+            new String(Base64.decoder.decode(mavenCentralSigningGpgPrivateKeyB64)) : null
+}
+
+def isPublishTask = gradle.startParameter.taskNames.any { taskName ->
+    taskName.toLowerCase().contains("publish")
+}
+if (!isPublishTask) {
+    logger.lifecycle("🟡 Skipping publish-core.gradle: not a publishing task.")
+    return
+}
+
+afterEvaluate {
+    def releaseAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${publishVersion}.aar")
+    def rcAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${publishVersion}-rc.aar")
+
+    publishing {
+        publications {
+            create("release", MavenPublication) {
+                groupId = publishGroupId
+                artifactId = publishArtifactId
+                version = publishVersion
+
+                artifact(releaseAar) { builtBy(tasks.named("assembleRelease")) }
+                artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
+                artifact(tasks.named("generateJavadocJar").get()) { classifier = "javadoc" }
+
+                pom {
+                    name = 'vcl'
+                    packaging = 'aar'
+                    description = 'Velocity Career Labs Android SDK consumer app.'
+                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'velocitycareerlabs'
+                            name = 'Michael Avoyán'
+                            email = 'michael.avoyan@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git'
+                        developerConnection = 'scm:git:ssh://[email protected]/velocitycareerlabs/WalletAndroid'
+                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    }
+                }
+            }
+
+            create("rc", MavenPublication) {
+                groupId = publishGroupId
+                artifactId = publishArtifactId
+                version = "${publishVersion}-rc"
+
+                artifact(rcAar) { builtBy(tasks.named("assembleRc")) }
+                artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
+                artifact(tasks.named("generateJavadocJar").get()) { classifier = "javadoc" }
+
+                pom {
+                    name = 'vcl'
+                    packaging = 'aar'
+                    description = 'Velocity Career Labs Android SDK RC build.'
+                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'velocitycareerlabs'
+                            name = 'Michael Avoyán'
+                            email = 'michael.avoyan@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git'
+                        developerConnection = 'scm:git:ssh://[email protected]/velocitycareerlabs/WalletAndroid'
+                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name = "CentralPortal"
+                url = uri("https://central.sonatype.com/api/v1/publish/")
+                credentials {
+                    username = mavenCentralTokenUsername
+                    password = mavenCentralTokenPassword
+                }
+            }
+        }
+    }
+
+    signing {
+        useInMemoryPgpKeys(
+                mavenCentralSigningKeyId,
+                mavenCentralSigningGpgPrivateKey,
+                mavenCentralSigningPassword
+        )
+        sign publishing.publications.release
+        sign publishing.publications.rc
+    }
+
+    tasks.register("publishRelease") {
+        group = "publishing"
+        description = "Builds and publishes VCL release AAR to Maven Central"
+
+        dependsOn(
+                ":VCL:clean",
+                ":VCL:assembleAllRelease",
+                ":VCL:publishReleasePublicationToCentralPortalRepository"
+        )
+    }
+
+    tasks.register("publishRc") {
+        group = "publishing"
+        description = "Builds and publishes VCL RC AAR to Maven Central"
+
+        dependsOn(
+                ":VCL:clean",
+                ":VCL:assembleAllRc",
+                ":VCL:publishRcPublicationToCentralPortalRepository"
+        )
+    }
+}
