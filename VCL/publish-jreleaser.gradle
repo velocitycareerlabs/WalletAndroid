@@ -1,13 +1,14 @@
 apply plugin: 'org.jreleaser'
-
 apply from: 'load-maven-keys.gradle'
 
+// Only apply JReleaser logic when publishing
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("jreleaser") }
 if (!isPublishTask) {
     logger.lifecycle("🟡 Skipping JReleaser config: not a jreleaser-related task.")
     return
 }
 
+// Ensure all required credentials are available
 def requiredSecrets = [
         mavenCentralTokenUsername,
         mavenCentralTokenPassword,
@@ -15,14 +16,13 @@ def requiredSecrets = [
         mavenCentralSigningGpgPrivateKey,
         mavenCentralSigningPassword
 ]
-
 if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
     throw new GradleException("❌ Missing required Maven Central credentials or signing keys.")
 }
 
+// Determine version dynamically
 def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
         .orElse(providers.provider { publishVersion })
-
 def artifactBaseProvider = resolvedVersionProvider.map { version -> "${publishArtifactId}-$version" }
 
 jreleaser {
@@ -62,40 +62,21 @@ jreleaser {
     deploy {
         maven {
             mavenCentral {
-                active = 'ALWAYS'
+                app {
+                    active = 'ALWAYS'
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    username = mavenCentralTokenUsername
+                    password = mavenCentralTokenPassword
+                    namespace = 'velocitycareerlabs'
 
-                coordinates {
-                    groupId = publishGroupId
-                    artifactId = publishArtifactId
-                    version.set(resolvedVersionProvider)
-                }
-
-                pom {
-                    name = 'vcl'
-                    packaging = 'aar'
-                    description = 'Velocity Career Labs Android SDK'
-                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-
-                    licenses {
-                        license {
-                            name = 'The Apache License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
+                    artifactOverride {
+                        groupId = publishGroupId
+                        artifactId = publishArtifactId
+                        sourceJar = true
+                        javadocJar = true
                     }
 
-                    developers {
-                        developer {
-                            id = 'velocitycareerlabs'
-                            name = 'Michael Avoyán'
-                            email = 'michael.avoyan@gmail.com'
-                        }
-                    }
-
-                    scm {
-                        connection = 'scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git'
-                        developerConnection = 'scm:git:ssh://[email protected]/velocitycareerlabs/WalletAndroid'
-                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                    }
+                    // Files injected after evaluation
                 }
             }
         }
@@ -106,15 +87,17 @@ jreleaser {
     }
 }
 
+// Attach files after evaluation
 afterEvaluate {
     def artifactBase = artifactBaseProvider.get()
-    jreleaser.deploy.maven.mavenCentral.files = [
-            [ path: "${buildDir}/outputs/aar/${artifactBase}.aar", type: "aar" ],
-            [ path: "${buildDir}/libs/${artifactBase}-sources.jar", type: "jar", classifier: "sources" ],
-            [ path: "${buildDir}/libs/${artifactBase}-javadoc.jar", type: "jar", classifier: "javadoc" ]
+    jreleaser.deploy.maven.mavenCentral.app.files = [
+            [path: "${buildDir}/outputs/aar/${artifactBase}.aar", type: "aar"],
+            [path: "${buildDir}/libs/${artifactBase}-sources.jar", type: "jar", classifier: "sources"],
+            [path: "${buildDir}/libs/${artifactBase}-javadoc.jar", type: "jar", classifier: "javadoc"]
     ]
 }
 
+// ========== TASKS ==========
 tasks.register("jreleaserRelease") {
     group = "publishing"
     description = "Publishes release AAR using JReleaser"
