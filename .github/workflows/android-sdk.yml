@@ -38,9 +38,7 @@ jobs:
       - name: 🧪 Build AAR + Sources + Javadoc
         run: |
           ./gradlew clean \
-            :VCL:assembleRelease \
-            :VCL:generateSourcesJar \
-            :VCL:generateJavadocJar \
+            :VCL:assembleAllRelease \
             -PprojectVersion=${RELEASE_VERSION} \
             -Pprerelease=${{ github.event.inputs.environment == 'rc' }} \
             --stacktrace

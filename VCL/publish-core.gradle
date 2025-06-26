@@ -33,13 +33,13 @@ def isPublishTask = gradle.startParameter.taskNames.any { taskName ->
     taskName.toLowerCase().contains("publish")
 }
 if (!isPublishTask) {
-    logger.lifecycle("🟡 Skipping publish-core-pure.gradle: not a publishing task.")
+    logger.lifecycle("🟡 Skipping publish-core.gradle: not a publishing task.")
     return
 }
 
 afterEvaluate {
-    def releaseAar = file("${layout.buildDirectory}/outputs/aar/${publishArtifactId}-${publishVersion}.aar")
-    def rcAar = file("${layout.buildDirectory}/outputs/aar/${publishArtifactId}-${publishVersion}-rc.aar")
+    def releaseAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${publishVersion}.aar")
+    def rcAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${publishVersion}-rc.aar")
 
     publishing {
         publications {
@@ -48,7 +48,7 @@ afterEvaluate {
                 artifactId = publishArtifactId
                 version = publishVersion
 
-                artifact(releaseAar) { builtBy tasks.named("assembleRelease") }
+                artifact(releaseAar) { builtBy(tasks.named("assembleRelease")) }
                 artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
                 artifact(tasks.named("generateJavadocJar").get()) { classifier = "javadoc" }
 
@@ -83,7 +83,7 @@ afterEvaluate {
                 artifactId = publishArtifactId
                 version = "${publishVersion}-rc"
 
-                artifact(rcAar) { builtBy tasks.named("assembleRc") }
+                artifact(rcAar) { builtBy(tasks.named("assembleRc")) }
                 artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
                 artifact(tasks.named("generateJavadocJar").get()) { classifier = "javadoc" }
 
@@ -138,25 +138,22 @@ afterEvaluate {
 
     tasks.register("publishRelease") {
         group = "publishing"
-        description = "Cleans and builds VCL release artifacts"
+        description = "Builds and publishes VCL release AAR to Maven Central"
 
         dependsOn(
                 ":VCL:clean",
-                ":VCL:assembleRelease",
-                ":VCL:generateSourcesJar",
-                ":VCL:generateJavadocJar",
+                ":VCL:assembleAllRelease",
                 ":VCL:publishReleasePublicationToCentralPortalRepository"
         )
     }
+
     tasks.register("publishRc") {
         group = "publishing"
-        description = "Cleans and builds VCL rc artifacts"
+        description = "Builds and publishes VCL RC AAR to Maven Central"
 
         dependsOn(
                 ":VCL:clean",
-                ":VCL:assembleRc",
-                ":VCL:generateSourcesJar",
-                ":VCL:generateJavadocJar",
+                ":VCL:assembleAllRc",
                 ":VCL:publishRcPublicationToCentralPortalRepository"
         )
     }
