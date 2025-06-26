@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'maven-publish'
     id 'signing'
+    id 'org.jreleaser' version '1.18.0'
 }
 
 ext {
@@ -147,7 +148,8 @@ tasks.register("verifyExpectedArtifactsExist") {
     }
 }
 
-apply from: 'publish-core.gradle'
+//apply from: 'publish-pure.gradle'
+apply from: 'publish-jreleaser.gradle'
 
 repositories {
     google()

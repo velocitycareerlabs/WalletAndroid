@@ -1,0 +1,159 @@
+import org.gradle.api.tasks.bundling.Jar
+
+def propertiesFilePath = '/Volumes/Keybase/team/velocitycareers/mobile/android/maven2/maven2.properties'
+
+static def loadProperties(String filePath) {
+    def props = new Properties()
+    def file = new File(filePath)
+    if (file.exists()) file.withInputStream { props.load(it) }
+    return props
+}
+
+def properties = loadProperties(propertiesFilePath)
+
+def loadSecret = { name ->
+    System.getenv(name)?.trim() ?: properties.getProperty(name)?.trim()
+}
+
+ext {
+    mavenCentralTokenUsername = loadSecret("MAVEN_CENTRAL_TOKEN_USERNAME")
+    mavenCentralTokenPassword = loadSecret("MAVEN_CENTRAL_TOKEN_PASSWORD")
+    mavenCentralSigningKeyId = loadSecret("MAVEN_CENTRAL_SIGNING_KEY_ID")
+    mavenCentralSigningPassword = loadSecret("MAVEN_CENTRAL_SIGNING_PASSWORD")
+    mavenCentralSigningGpgPrivateKeyB64 = loadSecret("MAVEN_CENTRAL_GPG_PRIVATE_KEY_B64")
+    mavenCentralSigningGpgPrivateKey = mavenCentralSigningGpgPrivateKeyB64 ?
+            new String(Base64.decoder.decode(mavenCentralSigningGpgPrivateKeyB64)) : null
+}
+
+// Skip if not a publish task
+def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("jreleaser") }
+if (!isPublishTask) {
+    logger.lifecycle("🟡 Skipping JReleaser config: not a jreleaser-related task.")
+    return
+}
+
+apply plugin: 'org.jreleaser'
+
+// 🔁 Lazily resolve version at execution time
+def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
+        .orElse(providers.provider { publishVersion })
+
+jreleaser {
+    enabled = true
+
+    project {
+        name = 'vcl'
+        version = resolvedVersionProvider.get()
+        description = 'Velocity Career Labs Android SDK consumer app.'
+        website = 'https://github.com/velocitycareerlabs/WalletAndroid'
+        authors = ['Michael Avoyán']
+        license = 'Apache-2.0'
+        inceptionYear = '2024'
+        tags = ['android', 'sdk', 'aar', 'velocity', 'career']
+    }
+
+    release {
+        github {
+            owner = 'velocitycareerlabs'
+            repo = 'WalletAndroid'
+            tagName = "release-${resolvedVersionProvider.get()}"
+            releaseName = resolvedVersionProvider.get()
+            prerelease = resolvedVersionProvider.get().contains("rc")
+            sign = true
+        }
+    }
+
+    signing {
+        active = 'ALWAYS'
+        armored = true
+        mode = 'MEMORY'
+        keyId = mavenCentralSigningKeyId
+        secretKey = mavenCentralSigningGpgPrivateKeyB64
+        password = mavenCentralSigningPassword
+    }
+
+    deploy {
+        maven {
+            central {
+                active = 'ALWAYS'
+                url = 'https://central.sonatype.com/api/v1/publish/'
+                stagingRepository = ''
+                username = mavenCentralTokenUsername
+                password = mavenCentralTokenPassword
+
+                coordinates {
+                    groupId = publishGroupId
+                    artifactId = publishArtifactId
+                    version = resolvedVersionProvider.get()
+                }
+
+                files = [
+                        [path: "${buildDir}/outputs/aar/${publishArtifactId}-${resolvedVersionProvider.get()}.aar",     type: "aar"],
+                        [path: "${buildDir}/libs/${publishArtifactId}-${resolvedVersionProvider.get()}-sources.jar",    type: "jar", classifier: "sources"],
+                        [path: "${buildDir}/libs/${publishArtifactId}-${resolvedVersionProvider.get()}-javadoc.jar",    type: "jar", classifier: "javadoc"]
+                ]
+
+                pom {
+                    name = 'vcl'
+                    packaging = 'aar'
+                    description = 'Velocity Career Labs Android SDK'
+                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'velocitycareerlabs'
+                            name = 'Michael Avoyán'
+                            email = 'michael.avoyan@gmail.com'
+                        }
+                    }
+
+                    scm {
+                        connection = 'scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git'
+                        developerConnection = 'scm:git:ssh://[email protected]/velocitycareerlabs/WalletAndroid'
+                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    }
+                }
+            }
+        }
+    }
+
+    assemble {
+        enabled = false
+    }
+}
+
+// ✅ Task: publish RELEASE version
+tasks.register("jreleaserRelease") {
+    group = "publishing"
+    description = "Publishes release AAR using JReleaser"
+    dependsOn("assembleRelease", "generateSourcesJar", "generateJavadocJar")
+    doFirst {
+        logger.lifecycle("📦 Releasing version: ${publishVersion}")
+        project.extensions.extraProperties.set("jreleaserVersionOverride", publishVersion)
+    }
+    doLast {
+        jreleaser.fullRelease()
+    }
+}
+
+// ✅ Task: publish RC version
+tasks.register("jreleaserRc") {
+    group = "publishing"
+    description = "Publishes RC AAR using JReleaser"
+    dependsOn("assembleRc", "generateSourcesJar", "generateJavadocJar")
+    doFirst {
+        def rcVersion = "${publishVersion}-rc"
+        logger.lifecycle("📦 Releasing RC version: ${rcVersion}")
+        project.extensions.extraProperties.set("jreleaserVersionOverride", rcVersion)
+    }
+    doLast {
+        jreleaser.fullRelease()
+    }
+}
