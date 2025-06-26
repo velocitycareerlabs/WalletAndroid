@@ -63,9 +63,12 @@ jreleaser {
         maven {
             mavenCentral {
                 active = 'ALWAYS'
-                groupId = publishGroupId
-                artifactId = publishArtifactId
-                version.set(resolvedVersionProvider)
+
+                coordinates {
+                    groupId = publishGroupId
+                    artifactId = publishArtifactId
+                    version.set(resolvedVersionProvider)
+                }
 
                 pom {
                     name = 'vcl'
@@ -112,7 +115,6 @@ afterEvaluate {
     ]
 }
 
-// ========== TASKS ==========
 tasks.register("jreleaserRelease") {
     group = "publishing"
     description = "Publishes release AAR using JReleaser"
