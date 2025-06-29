@@ -6,8 +6,6 @@ plugins {
     id 'org.jreleaser'
 }
 
-apply from: 'publish-jreleaser.gradle'
-
 ext {
     publishCode = 164
     publishVersion = "2.7.4"
@@ -141,6 +139,8 @@ tasks.register("verifyExpectedArtifactsExist") {
         printDirContents("LIBS", "build/libs")
     }
 }
+
+apply from: 'publish-jreleaser.gradle'
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.16.0'
