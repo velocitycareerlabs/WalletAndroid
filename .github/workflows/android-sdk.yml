@@ -52,10 +52,6 @@ jobs:
         run: |
           ./gradlew :VCL:stageArtifacts
 
-      - name: Debug staging
-        run: |
-          tree VCL/target/staging-deploy
-
       - name: 🚀 Run JReleaser full-release
         if: github.event.inputs.environment != 'dev'
         uses: jreleaser/release-action@v2
