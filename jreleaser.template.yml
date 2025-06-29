@@ -24,14 +24,6 @@ signing:
   # passphrase: JRELEASER_GPG_PASSPHRASE
   artifacts: true
 
-distributions:
-  vcl:
-    type: JAVA_BINARY
-    artifacts:
-      - path: VCL/build/outputs/aar/vcl-{{projectVersion}}.aar
-      - path: VCL/build/libs/vcl-{{projectVersion}}-sources.jar
-      - path: VCL/build/libs/vcl-{{projectVersion}}-javadoc.jar
-
 release:
   github:
     owner: velocitycareerlabs
