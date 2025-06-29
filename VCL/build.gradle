@@ -6,9 +6,7 @@ plugins {
     id 'org.jreleaser'
 }
 
-if (project.hasProperty("enableJreleaser") && project.property("enableJreleaser") == "true") {
-    apply from: "$rootDir/VCL/publish-jreleaser.gradle"
-}
+apply from: 'publish-jreleaser.gradle'
 
 ext {
     publishCode = 164
@@ -80,6 +78,12 @@ android {
     }
 }
 
+repositories {
+    google()
+    mavenCentral()
+    mavenLocal()
+}
+
 // === Artifact Tasks ===
 tasks.register("generateSourcesJar", Jar) {
     group = "assemble"
@@ -136,30 +140,6 @@ tasks.register("verifyExpectedArtifactsExist") {
         printDirContents("AAR", "build/outputs/aar")
         printDirContents("LIBS", "build/libs")
     }
-}
-
-tasks.register("jreleaserPublishRelease") {
-    group = "publishing"
-    description = "Forward jreleaserPublishRelease to VCL module"
-    dependsOn(":VCL:jreleaserPublishRelease")
-}
-
-tasks.register("jreleaserPublishRc") {
-    group = "publishing"
-    description = "Forward jreleaserPublishRc to VCL module"
-    dependsOn(":VCL:jreleaserPublishRc")
-}
-
-tasks.register("jreleaserPublishDry") {
-    group = "publishing"
-    description = "Forward jreleaserPublishDry to VCL module"
-    dependsOn(":VCL:jreleaserPublishDry")
-}
-
-repositories {
-    google()
-    mavenCentral()
-    mavenLocal()
 }
 
 dependencies {

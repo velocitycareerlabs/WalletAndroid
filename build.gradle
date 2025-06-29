@@ -31,3 +31,21 @@ allprojects {
 tasks.register('clean', Delete) {
     delete rootProject.layout.buildDirectory.get()
 }
+
+tasks.register("jreleaserPublishRelease") {
+    group = "publishing"
+    description = "Forward jreleaserPublishRelease to VCL module"
+    dependsOn(":VCL:jreleaserPublishRelease")
+}
+
+tasks.register("jreleaserPublishRc") {
+    group = "publishing"
+    description = "Forward jreleaserPublishRc to VCL module"
+    dependsOn(":VCL:jreleaserPublishRc")
+}
+
+tasks.register("jreleaserPublishDry") {
+    group = "publishing"
+    description = "Forward jreleaserPublishDry to VCL module"
+    dependsOn(":VCL:jreleaserPublishDry")
+}
