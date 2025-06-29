@@ -125,12 +125,13 @@ tasks.register("jreleaserPublishDry") {
 }
 
 // === Gradle 8.x Compatibility ===
-gradle.taskGraph.whenReady { graph ->
-    if (graph.hasTask(":${project.name}:jreleaserFullRelease")) {
-        tasks.named("jreleaserFullRelease").configure {
-            it.dryrun.set(isDryRun)
-            it.gitRootSearch.set(true)
-            it.strict.set(true)
-        }
+gradle.taskGraph.whenReady {
+    def fullReleaseTask = tasks.findByName("jreleaserFullRelease")
+    if (fullReleaseTask != null) {
+        fullReleaseTask.dryrun.set(isDryRun)
+        fullReleaseTask.gitRootSearch.set(true)
+        fullReleaseTask.strict.set(true)
+    } else {
+        logger.lifecycle("❌ jreleaserFullRelease task not found.")
     }
 }
