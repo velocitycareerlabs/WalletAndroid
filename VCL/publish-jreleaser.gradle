@@ -1,13 +1,13 @@
 apply from: 'load-maven-keys.gradle'
 
-// Only apply when running jreleaser-related tasks
+// Apply only for JReleaser-related tasks
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("jreleaser") }
 if (!isPublishTask) {
     logger.lifecycle("🟡 Skipping JReleaser config: not a jreleaser-related task.")
     return
 }
 
-// Ensure required Maven Central keys are defined
+// Validate required secrets
 def requiredSecrets = [
         mavenCentralTokenUsername,
         mavenCentralTokenPassword,
@@ -19,12 +19,11 @@ if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
     throw new GradleException("❌ Missing required Maven Central credentials or signing keys.")
 }
 
-// Resolve version and artifact base name
+// Dynamically resolve version and artifact base name
 def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
         .orElse(providers.provider { publishVersion })
 def artifactBaseProvider = resolvedVersionProvider.map { version -> "${publishArtifactId}-$version" }
 
-// Optional dry run mode from extra properties
 def isDryRun = project.hasProperty("dryrun") && project.property("dryrun").toString().toBoolean()
 if (isDryRun) {
     logger.lifecycle("ℹ️ JReleaser dry-run mode ENABLED")
@@ -34,11 +33,11 @@ jreleaser {
     enabled = true
 
     project {
-        name = 'vcl'
+        name = publishArtifactId
         version.set(resolvedVersionProvider)
         description = 'Velocity Career Labs Android SDK consumer app.'
         website = 'https://github.com/velocitycareerlabs/WalletAndroid'
-        authors = ['Michael Avoyán']
+        authors = ['Michael Avoyan']
         license = 'Apache-2.0'
         inceptionYear = '2024'
         tags = ['android', 'sdk', 'aar', 'velocity', 'vcl']
@@ -118,7 +117,7 @@ jreleaser {
     }
 }
 
-// ========== TASK ALIASES ==========
+// ==== Task Aliases ====
 tasks.register("jreleaserPublishRelease") {
     group = "publishing"
     description = "Runs jreleaserFullRelease for the release build"
@@ -134,8 +133,7 @@ tasks.register("jreleaserPublishRc") {
     description = "Runs jreleaserFullRelease for RC build"
     dependsOn("assembleRc", "generateSourcesJar", "generateJavadocJar")
     doFirst {
-        def rcVersion = "${publishVersion}-rc"
-        project.extensions.extraProperties.set("jreleaserVersionOverride", rcVersion)
+        project.extensions.extraProperties.set("jreleaserVersionOverride", "${publishVersion}-rc")
     }
     finalizedBy("jreleaserFullRelease")
 }
@@ -151,7 +149,7 @@ tasks.register("jreleaserPublishDry") {
     finalizedBy("jreleaserFullRelease")
 }
 
-// ========== GRADLE 8.x+ STRICT CONFIGURATION ==========
+// ==== Gradle 8.x Compatibility ====
 gradle.taskGraph.whenReady { graph ->
     if (graph.hasTask(":${project.name}:jreleaserFullRelease")) {
         tasks.named("jreleaserFullRelease").configure { task ->

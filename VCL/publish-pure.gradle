@@ -39,7 +39,7 @@ afterEvaluate {
                     developers {
                         developer {
                             id = 'velocitycareerlabs'
-                            name = 'Michael Avoyán'
+                            name = 'Michael Avoyan'
                             email = 'michael.avoyan@gmail.com'
                         }
                     }
@@ -74,7 +74,7 @@ afterEvaluate {
                     developers {
                         developer {
                             id = 'velocitycareerlabs'
-                            name = 'Michael Avoyán'
+                            name = 'Michael Avoyan'
                             email = 'michael.avoyan@gmail.com'
                         }
                     }

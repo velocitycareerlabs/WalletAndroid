@@ -3,7 +3,8 @@ plugins {
     id 'kotlin-android'
     id 'maven-publish'
     id 'signing'
-    id 'org.jreleaser'
+//    id 'org.jreleaser' version '1.18.0' apply false
+    id 'org.jreleaser' version '1.17.0'
 }
 
 if (project.hasProperty("enableJreleaser") && project.property("enableJreleaser") == "true") {
