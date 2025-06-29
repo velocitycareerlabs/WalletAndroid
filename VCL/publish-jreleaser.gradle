@@ -19,7 +19,7 @@ if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
     throw new GradleException("❌ Missing required Maven Central credentials or signing keys.")
 }
 
-// Use static version and artifact ID from build.gradle
+// Load artifact metadata
 def resolvedVersion = project.version.toString()
 def artifactBase = "${publishArtifactId.toLowerCase()}-$resolvedVersion"
 def isDryRun = project.hasProperty("dryrun") && project.property("dryrun").toString().toBoolean()
@@ -33,7 +33,6 @@ jreleaser {
 
     project {
         name = publishArtifactId
-        groupId = publishGroupId
         version.set(resolvedVersion)
         description = 'Velocity Career Labs Android SDK consumer app.'
         website = 'https://github.com/velocitycareerlabs/WalletAndroid'
@@ -83,15 +82,6 @@ jreleaser {
                     sourceJar = true
                     javadocJar = true
                     verifyPom = false
-
-                    artifactOverride {
-                        groupId = publishGroupId
-                        artifactId = publishArtifactId
-                        sourceJar = true
-                        javadocJar = true
-                        verifyPom = false
-                    }
-
                     applyMavenCentralRules = false
                 }
             }
@@ -112,38 +102,49 @@ jreleaser {
     }
 }
 
-// ==== Task Aliases ====
+// === Helper Tasks ===
+tasks.register("assembleAllRelease") {
+    group = "assemble"
+    dependsOn("assembleRelease", "generateSourcesJar", "generateJavadocJar")
+}
+
+tasks.register("assembleAllRc") {
+    group = "assemble"
+    dependsOn("assembleRc", "generateSourcesJar", "generateJavadocJar")
+}
+
+// === Publishing Aliases ===
 tasks.register("jreleaserPublishRelease") {
     group = "publishing"
     description = "Runs jreleaserFullRelease for the release build"
-    dependsOn("assembleRelease", "generateSourcesJar", "generateJavadocJar")
+    dependsOn("assembleAllRelease")
     finalizedBy("jreleaserFullRelease")
 }
 
 tasks.register("jreleaserPublishRc") {
     group = "publishing"
     description = "Runs jreleaserFullRelease for RC build"
-    dependsOn("assembleRc", "generateSourcesJar", "generateJavadocJar")
+    dependsOn("assembleAllRc")
     finalizedBy("jreleaserFullRelease")
 }
 
 tasks.register("jreleaserPublishDry") {
     group = "publishing"
     description = "Dry-run JReleaser publish (no deployment)"
-    dependsOn("assembleRelease", "generateSourcesJar", "generateJavadocJar")
+    dependsOn("assembleAllRelease")
     doFirst {
         project.extensions.extraProperties.set("dryrun", true)
     }
     finalizedBy("jreleaserFullRelease")
 }
 
-// ==== Gradle 8.x Compatibility ====
+// === Gradle 8.x Compatibility ===
 gradle.taskGraph.whenReady { graph ->
     if (graph.hasTask(":${project.name}:jreleaserFullRelease")) {
-        tasks.named("jreleaserFullRelease").configure { task ->
-            task.dryrun.set(isDryRun)
-            task.gitRootSearch.set(true)
-            task.strict.set(true)
+        tasks.named("jreleaserFullRelease").configure {
+            it.dryrun.set(isDryRun)
+            it.gitRootSearch.set(true)
+            it.strict.set(true)
         }
     }
 }
