@@ -45,7 +45,7 @@ jobs:
 
       - name: ✅ Verify expected artifacts exist
         run: ./gradlew \
-            :VCL:verifyExpectedArtifactsExist
+          :VCL:verifyExpectedArtifactsExist
       - name: 🚀 Run JReleaser full-release
         if: github.event.inputs.environment != 'dev'
         uses: jreleaser/release-action@v2
