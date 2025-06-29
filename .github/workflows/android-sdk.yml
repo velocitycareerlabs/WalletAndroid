@@ -48,9 +48,14 @@ jobs:
           ./gradlew \
             :VCL:verifyExpectedArtifactsExist
 
+      - name: 📦 Stage Artifacts
+        run: |
+          ./gradlew :VCL:stageArtifacts
+
       - name: Find Staging
         run: | 
-          find / -name staging-deploy
+          find . -name staging-deploy
+
       - name: 🚀 Run JReleaser full-release
         if: github.event.inputs.environment != 'dev'
         uses: jreleaser/release-action@v2
