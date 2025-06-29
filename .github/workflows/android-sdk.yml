@@ -45,13 +45,8 @@ jobs:
 
       - name: ✅ Verify expected artifacts exist
         run: |
-          echo "Checking artifacts for version ${RELEASE_VERSION}..."
-          test -f VCL/build/outputs/aar/vcl-${RELEASE_VERSION}.aar || (echo "❌ AAR not found" && exit 1)
-          test -f VCL/build/libs/vcl-${RELEASE_VERSION}-sources.jar || (echo "❌ Sources JAR missing" && exit 1)
-          test -f VCL/build/libs/vcl-${RELEASE_VERSION}-javadoc.jar || (echo "❌ Javadoc JAR missing" && exit 1)
-#        run: |
-#          ./gradlew :VCL:verifyExpectedArtifactsExist
-
+          ./gradlew \
+            :VCL:verifyExpectedArtifactsExist
       - name: 🚀 Run JReleaser full-release
         if: github.event.inputs.environment != 'dev'
         uses: jreleaser/release-action@v2
