@@ -1,6 +1,6 @@
 apply from: 'load-maven-keys.gradle'
 
-// Apply only for JReleaser-related tasks
+// Early exit if not a JReleaser task
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("jreleaser") }
 if (!isPublishTask) {
     logger.lifecycle("🟡 Skipping JReleaser config: not a jreleaser-related task.")
@@ -21,7 +21,8 @@ if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
 
 // Load artifact metadata
 def resolvedVersion = project.version.toString()
-def artifactBase = "${publishArtifactId.toLowerCase()}-$resolvedVersion"
+def artifactIdLower = publishArtifactId.toLowerCase()
+def artifactBase = "${artifactIdLower}-$resolvedVersion"
 def isDryRun = project.hasProperty("dryrun") && project.property("dryrun").toString().toBoolean()
 
 if (isDryRun) {
@@ -38,7 +39,6 @@ jreleaser {
         website = 'https://github.com/velocitycareerlabs/WalletAndroid'
         authors = ['Michael Avoyan']
         license = 'Apache-2.0'
-        inceptionYear = '2024'
         tags = ['android', 'sdk', 'aar', 'velocity', 'vcl']
     }
 
@@ -122,7 +122,7 @@ tasks.register("jreleaserPublishDry") {
     description = "Dry-run JReleaser publish (no deployment)"
     dependsOn("assembleAllRelease")
     doFirst {
-        project.extensions.extraProperties.set("dryrun", true)
+        ext.dryrun = true
     }
     finalizedBy("jreleaserFullRelease")
 }
