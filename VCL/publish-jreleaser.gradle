@@ -135,7 +135,7 @@ afterEvaluate {
             it.strict.set(true)
             logger.lifecycle("ℹ️ JReleaser full release task configured")
         }
-    } catch (UnknownTaskException e) {
-        logger.lifecycle("⚠️ jreleaserFullRelease task not found at configuration time")
+    } catch (Exception e) {
+        logger.lifecycle("⚠️ jreleaserFullRelease task not found at configuration time with exception:\n${e.message}")
     }
 }
