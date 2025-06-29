@@ -107,6 +107,7 @@ tasks.register("jreleaserPublishRelease") {
     description = "Runs jreleaserFullRelease for the release build"
     dependsOn("assembleAllRelease")
     finalizedBy("jreleaserFullRelease")
+    logger.lifecycle("ℹ️ JReleaser publish release registered")
 }
 
 tasks.register("jreleaserPublishRc") {
@@ -114,6 +115,7 @@ tasks.register("jreleaserPublishRc") {
     description = "Runs jreleaserFullRelease for the RC build"
     dependsOn("assembleAllRc")
     finalizedBy("jreleaserFullRelease")
+    logger.lifecycle("ℹ️ JReleaser publish RC registered")
 }
 
 tasks.register("jreleaserPublishDry") {
@@ -122,16 +124,18 @@ tasks.register("jreleaserPublishDry") {
     dependsOn("assembleAllRelease")
     doFirst { ext.dryrun = true }
     finalizedBy("jreleaserFullRelease")
+    logger.lifecycle("ℹ️ JReleaser dry-run mode registered")
 }
 
-// === Gradle 8.x Compatibility ===
-gradle.taskGraph.whenReady {
-    def fullReleaseTask = tasks.findByName("jreleaserFullRelease")
-    if (fullReleaseTask != null) {
-        fullReleaseTask.dryrun.set(isDryRun)
-        fullReleaseTask.gitRootSearch.set(true)
-        fullReleaseTask.strict.set(true)
-    } else {
-        logger.lifecycle("❌ jreleaserFullRelease task not found.")
+afterEvaluate {
+    try {
+        tasks.named("jreleaserFullRelease") {
+            it.dryrun.set(isDryRun)
+            it.gitRootSearch.set(true)
+            it.strict.set(true)
+            logger.lifecycle("ℹ️ JReleaser full release task configured")
+        }
+    } catch (UnknownTaskException e) {
+        logger.lifecycle("⚠️ jreleaserFullRelease task not found at configuration time")
     }
 }
