@@ -1,13 +1,13 @@
 apply from: 'load-maven-keys.gradle'
 
-// Early exit if not a JReleaser task
+// === Early Exit if Not a JReleaser Task ===
 def isPublishTask = gradle.startParameter.taskNames.any { it.toLowerCase().contains("jreleaser") }
 if (!isPublishTask) {
     logger.lifecycle("🟡 Skipping JReleaser config: not a jreleaser-related task.")
     return
 }
 
-// Validate required secrets
+// === Validate Required Secrets ===
 def requiredSecrets = [
         mavenCentralTokenUsername,
         mavenCentralTokenPassword,
@@ -15,20 +15,20 @@ def requiredSecrets = [
         mavenCentralSigningGpgPrivateKey,
         mavenCentralSigningPassword
 ]
-if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
+if (requiredSecrets.any { it?.trim().isEmpty() }) {
     throw new GradleException("❌ Missing required Maven Central credentials or signing keys.")
 }
 
-// Load artifact metadata
+// === Resolve Metadata ===
 def resolvedVersion = project.version.toString()
 def artifactIdLower = publishArtifactId.toLowerCase()
 def artifactBase = "${artifactIdLower}-$resolvedVersion"
 def isDryRun = project.hasProperty("dryrun") && project.property("dryrun").toString().toBoolean()
-
 if (isDryRun) {
     logger.lifecycle("ℹ️ JReleaser dry-run mode ENABLED")
 }
 
+// === JReleaser Configuration ===
 jreleaser {
     enabled.set(true)
 
@@ -76,7 +76,6 @@ jreleaser {
                     username = mavenCentralTokenUsername
                     password = mavenCentralTokenPassword
                     namespace = 'velocitycareerlabs'
-
                     sign = true
                     checksums = true
                     sourceJar = true
@@ -95,14 +94,14 @@ jreleaser {
     distributions {
         vcl {
             active = 'ALWAYS'
-            artifact { path = file("${buildDir}/outputs/aar/${artifactBase}.aar") }
-            artifact { path = file("${buildDir}/libs/${artifactBase}-sources.jar") }
-            artifact { path = file("${buildDir}/libs/${artifactBase}-javadoc.jar") }
+            artifact { path = file("$buildDir/outputs/aar/${artifactBase}.aar") }
+            artifact { path = file("$buildDir/libs/${artifactBase}-sources.jar") }
+            artifact { path = file("$buildDir/libs/${artifactBase}-javadoc.jar") }
         }
     }
 }
 
-// === Publishing Aliases ===
+// === JReleaser Publishing Aliases ===
 tasks.register("jreleaserPublishRelease") {
     group = "publishing"
     description = "Runs jreleaserFullRelease for the release build"
@@ -112,7 +111,7 @@ tasks.register("jreleaserPublishRelease") {
 
 tasks.register("jreleaserPublishRc") {
     group = "publishing"
-    description = "Runs jreleaserFullRelease for RC build"
+    description = "Runs jreleaserFullRelease for the RC build"
     dependsOn("assembleAllRc")
     finalizedBy("jreleaserFullRelease")
 }
