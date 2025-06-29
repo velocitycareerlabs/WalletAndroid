@@ -102,17 +102,6 @@ jreleaser {
     }
 }
 
-// === Helper Tasks ===
-tasks.register("assembleAllRelease") {
-    group = "assemble"
-    dependsOn("assembleRelease", "generateSourcesJar", "generateJavadocJar")
-}
-
-tasks.register("assembleAllRc") {
-    group = "assemble"
-    dependsOn("assembleRc", "generateSourcesJar", "generateJavadocJar")
-}
-
 // === Publishing Aliases ===
 tasks.register("jreleaserPublishRelease") {
     group = "publishing"
