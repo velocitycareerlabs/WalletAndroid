@@ -140,6 +140,16 @@ tasks.register("verifyExpectedArtifactsExist") {
     }
 }
 
+tasks.register("stageArtifacts", Copy) {
+    from("${layout.buildDirectory.get()}/outputs/aar") {
+        include("**/*.aar")
+    }
+    from("${layout.buildDirectory.get()}/libs") {
+        include("**/*.jar")
+    }
+    into("target/staging-deploy")
+}
+
 apply from: "${rootDir}/VCL/publish-jreleaser.gradle"
 
 dependencies {
