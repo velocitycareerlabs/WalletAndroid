@@ -22,6 +22,11 @@ if (requiredSecrets.any { it?.trim()?.isEmpty() }) {
 // === Resolve Metadata ===
 def resolvedVersion = project.version.toString()
 def artifactBase = "${publishArtifactId.toLowerCase()}-$resolvedVersion"
+def isDryRun = project.hasProperty("dryrun") && project.property("dryrun").toString().toBoolean()
+
+if (isDryRun) {
+    logger.lifecycle("ℹ️ JReleaser dry-run mode ENABLED")
+}
 
 // === JReleaser Configuration ===
 jreleaser {
@@ -90,10 +95,42 @@ jreleaser {
     }
 }
 
-// === Safe Configuration for Gradle 8+
-afterEvaluate {
+// === Publishing Task Aliases ===
+//tasks.register("jreleaserPublishRelease") {
+//    group = "publishing"
+//    description = "Runs jreleaserFullRelease for the release build"
+//    dependsOn("assembleAllRelease")
+//    doFirst {
+//        project.ext.set("dryrun", false)
+//    }
+//    finalizedBy("jreleaserFullRelease")
+//}
+//
+//tasks.register("jreleaserPublishRc") {
+//    group = "publishing"
+//    description = "Runs jreleaserFullRelease for the RC build"
+//    dependsOn("assembleAllRc")
+//    doFirst {
+//        project.ext.set("dryrun", false)
+//    }
+//    finalizedBy("jreleaserFullRelease")
+//}
+//
+//tasks.register("jreleaserPublishDry") {
+//    group = "publishing"
+//    description = "Dry-run JReleaser publish (no deployment)"
+//    dependsOn("assembleAllRelease")
+//    doFirst {
+//        project.ext.set("dryrun", true)
+//    }
+//    finalizedBy("jreleaserFullRelease")
+//}
+
+// Safe configuration block (Gradle 8+)
+gradle.projectsEvaluated {
     if (project.plugins.hasPlugin('org.jreleaser')) {
         tasks.matching { it.name.startsWith("jreleaser") }.configureEach { task ->
+            if (task.hasProperty("dryrun")) task.setProperty("dryrun", isDryRun)
             if (task.hasProperty("gitRootSearch")) task.setProperty("gitRootSearch", true)
             if (task.hasProperty("strict")) task.setProperty("strict", true)
         }
