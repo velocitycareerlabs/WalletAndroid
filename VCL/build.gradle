@@ -84,12 +84,14 @@ android {
 tasks.register("generateSourcesJar", Jar) {
     group = "assemble"
     archiveClassifier.set("sources")
+    archiveBaseName.set(publishArtifactId.toLowerCase())
     from(android.sourceSets.main.java.srcDirs + android.sourceSets.main.kotlin.srcDirs)
 }
 
 tasks.register("generateJavadocJar", Jar) {
     group = "assemble"
     archiveClassifier.set("javadoc")
+    archiveBaseName.set(publishArtifactId.toLowerCase())
     doFirst {
         def dummyDir = file("${layout.buildDirectory.get()}/empty-javadoc")
         dummyDir.mkdirs()

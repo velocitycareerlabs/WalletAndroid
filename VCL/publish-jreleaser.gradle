@@ -24,10 +24,10 @@ if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
     throw new GradleException("❌ Missing required Maven Central credentials or signing keys.")
 }
 
-// Dynamically resolve version and artifact base name
+// Resolve version and artifact base name
 def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
         .orElse(providers.provider { publishVersion })
-def artifactBaseProvider = resolvedVersionProvider.map { version -> "${publishArtifactId}-$version" }
+def artifactBaseProvider = resolvedVersionProvider.map { version -> "${publishArtifactId.toLowerCase()}-$version" }
 
 def isDryRun = project.hasProperty("dryrun") && project.property("dryrun").toString().toBoolean()
 if (isDryRun) {
@@ -37,7 +37,7 @@ if (isDryRun) {
 project.version = resolvedVersionProvider.get()
 
 jreleaser {
-    enabled = true
+    enabled.set(true)
 
     project {
         name = publishArtifactId
@@ -86,6 +86,12 @@ jreleaser {
                     password = mavenCentralTokenPassword
                     namespace = 'velocitycareerlabs'
 
+                    sign = true
+                    checksums = true
+                    sourceJar = true
+                    javadocJar = true
+                    verifyPom = false
+
                     artifactOverride {
                         groupId = publishGroupId
                         artifactId = publishArtifactId
@@ -95,11 +101,6 @@ jreleaser {
                     }
 
                     applyMavenCentralRules = false
-                    sign = true
-                    checksums = true
-                    sourceJar = true
-                    javadocJar = true
-                    verifyPom = false
                 }
             }
         }
