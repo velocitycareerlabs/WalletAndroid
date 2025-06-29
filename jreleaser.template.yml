@@ -48,4 +48,4 @@ deploy:
         authorization: BASIC
         sign: true
         stagingRepositories:
-          - target/staging-deploy
+          - VCL/target/staging-deploy
