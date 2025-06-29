@@ -106,6 +106,9 @@ tasks.register("jreleaserPublishRelease") {
     group = "publishing"
     description = "Runs jreleaserFullRelease for the release build"
     dependsOn("assembleAllRelease")
+    doFirst {
+        project.ext.set("dryrun", false)
+    }
     finalizedBy("jreleaserFullRelease")
     logger.lifecycle("ℹ️ JReleaser publish release registered")
 }
@@ -114,6 +117,9 @@ tasks.register("jreleaserPublishRc") {
     group = "publishing"
     description = "Runs jreleaserFullRelease for the RC build"
     dependsOn("assembleAllRc")
+    doFirst {
+        project.ext.set("dryrun", false)
+    }
     finalizedBy("jreleaserFullRelease")
     logger.lifecycle("ℹ️ JReleaser publish RC registered")
 }
@@ -122,17 +128,21 @@ tasks.register("jreleaserPublishDry") {
     group = "publishing"
     description = "Dry-run JReleaser publish (no deployment)"
     dependsOn("assembleAllRelease")
-    doFirst { ext.dryrun = true }
+    doFirst {
+        project.ext.set("dryrun", true)
+    }
     finalizedBy("jreleaserFullRelease")
     logger.lifecycle("ℹ️ JReleaser dry-run mode registered")
 }
 
-afterEvaluate {
+// === Safe Configuration of jreleaserFullRelease for Gradle 8+ ===
+gradle.taskGraph.whenReady {
     try {
-        tasks.named("jreleaserFullRelease") {
-            it.dryrun.set(isDryRun)
-            it.gitRootSearch.set(true)
-            it.strict.set(true)
+        def task = tasks.findByName("jreleaserFullRelease")
+        if (task != null) {
+            task.dryrun.set(project.hasProperty("dryrun") && project.dryrun.toString().toBoolean())
+            task.gitRootSearch.set(true)
+            task.strict.set(true)
             logger.lifecycle("ℹ️ JReleaser full release task configured")
         }
     } catch (Exception e) {
