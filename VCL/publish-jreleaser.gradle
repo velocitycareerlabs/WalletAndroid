@@ -7,6 +7,11 @@ if (!isPublishTask) {
     return
 }
 
+// Validate version early
+if (!project.hasProperty("publishVersion")) {
+    throw new GradleException("❌ Missing required project property: publishVersion")
+}
+
 // Validate required secrets
 def requiredSecrets = [
         mavenCentralTokenUsername,
@@ -29,11 +34,14 @@ if (isDryRun) {
     logger.lifecycle("ℹ️ JReleaser dry-run mode ENABLED")
 }
 
+project.version = resolvedVersionProvider.get()
+
 jreleaser {
     enabled = true
 
     project {
         name = publishArtifactId
+        groupId = publishGroupId
         version.set(resolvedVersionProvider)
         description = 'Velocity Career Labs Android SDK consumer app.'
         website = 'https://github.com/velocitycareerlabs/WalletAndroid'

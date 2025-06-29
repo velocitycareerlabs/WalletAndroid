@@ -14,9 +14,9 @@ buildscript {
     }
 }
 
-//plugins {
-//    id 'org.jreleaser' version '1.18.0' apply false
-//}
+plugins {
+    id 'org.jreleaser' version '1.18.0' apply false
+}
 
 allprojects {
     repositories {
