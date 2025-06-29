@@ -47,3 +47,5 @@ deploy:
         # stage: from JRELEASER_MAVENCENTRAL_STAGE
         authorization: BASIC
         sign: true
+        stagingRepositories:
+          - target/staging-deploy
