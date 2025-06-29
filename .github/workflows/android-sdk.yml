@@ -47,6 +47,10 @@ jobs:
         run: |
           ./gradlew \
             :VCL:verifyExpectedArtifactsExist
+
+      - name: Find Staging
+        run: | 
+          find / -name staging-deploy
       - name: 🚀 Run JReleaser full-release
         if: github.event.inputs.environment != 'dev'
         uses: jreleaser/release-action@v2
@@ -69,7 +73,3 @@ jobs:
           JRELEASER_TAG_NAME: ${{ github.event.inputs.environment == 'rc' && 'rc-' || '' }}${{ env.RELEASE_VERSION }}
           JRELEASER_RELEASE_NAME: ${{ github.event.inputs.environment == 'rc' && 'Release Candidate ' || '' }}${{ env.RELEASE_VERSION }}
           JRELEASER_PRERELEASE_PATTERN: ${{ github.event.inputs.environment == 'rc' && env.RELEASE_VERSION || 'OFF' }}
-
-      - name: 🧹 Clean up GPG files
-        if: github.event.inputs.environment != 'dev' && always()
-        run: rm -f private.gpg public.gpg
