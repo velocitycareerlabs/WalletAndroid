@@ -21,9 +21,9 @@ if (requiredSecrets.any { it?.trim().isEmpty() }) {
 
 // === Resolve Metadata ===
 def resolvedVersion = project.version.toString()
-def artifactIdLower = publishArtifactId.toLowerCase()
-def artifactBase = "${artifactIdLower}-$resolvedVersion"
+def artifactBase = "${publishArtifactId.toLowerCase()}-$resolvedVersion"
 def isDryRun = project.hasProperty("dryrun") && project.property("dryrun").toString().toBoolean()
+
 if (isDryRun) {
     logger.lifecycle("ℹ️ JReleaser dry-run mode ENABLED")
 }
@@ -101,7 +101,7 @@ jreleaser {
     }
 }
 
-// === JReleaser Publishing Aliases ===
+// === Publishing Task Aliases ===
 tasks.register("jreleaserPublishRelease") {
     group = "publishing"
     description = "Runs jreleaserFullRelease for the release build"
@@ -120,9 +120,7 @@ tasks.register("jreleaserPublishDry") {
     group = "publishing"
     description = "Dry-run JReleaser publish (no deployment)"
     dependsOn("assembleAllRelease")
-    doFirst {
-        ext.dryrun = true
-    }
+    doFirst { ext.dryrun = true }
     finalizedBy("jreleaserFullRelease")
 }
 
