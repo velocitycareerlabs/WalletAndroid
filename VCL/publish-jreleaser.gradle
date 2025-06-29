@@ -126,17 +126,17 @@ tasks.register("jreleaserPublishDry") {
     finalizedBy("jreleaserFullRelease")
 }
 
-// === Eager Configuration of JReleaser Tasks ===
+// === Safe configuration of JReleaser Tasks (Gradle 8+)
 gradle.projectsEvaluated {
-    tasks.withType(org.jreleaser.gradle.plugin.tasks.AbstractJReleaserTask).configureEach { task ->
+    tasks.matching { it.name.startsWith("jreleaser") }.configureEach { task ->
         if (task.hasProperty("dryrun")) {
-            task.dryrun.set(project.hasProperty("dryrun") && project.dryrun.toString().toBoolean())
+            task.setProperty("dryrun", isDryRun)
         }
         if (task.hasProperty("gitRootSearch")) {
-            task.gitRootSearch.set(true)
+            task.setProperty("gitRootSearch", true)
         }
         if (task.hasProperty("strict")) {
-            task.strict.set(true)
+            task.setProperty("strict", true)
         }
     }
 }
