@@ -96,6 +96,8 @@ afterEvaluate {
         tasks.matching { it.name.startsWith("jreleaser") }.configureEach { task ->
             if (task.hasProperty("gitRootSearch")) task.setProperty("gitRootSearch", true)
             if (task.hasProperty("strict")) task.setProperty("strict", true)
+            if (task.hasProperty("dryrun")) task.setProperty("dryrun", false)
+//            if (task.hasProperty("jlogger")) task.setProperty("jlogger", null)
         }
     }
 }
