@@ -104,7 +104,6 @@ tasks.register("jreleaserPublishRelease") {
         project.ext.set("dryrun", false)
     }
     finalizedBy("jreleaserFullRelease")
-    logger.lifecycle("ℹ️ JReleaser publish release registered")
 }
 
 tasks.register("jreleaserPublishRc") {
@@ -115,7 +114,6 @@ tasks.register("jreleaserPublishRc") {
         project.ext.set("dryrun", false)
     }
     finalizedBy("jreleaserFullRelease")
-    logger.lifecycle("ℹ️ JReleaser publish RC registered")
 }
 
 tasks.register("jreleaserPublishDry") {
@@ -126,19 +124,19 @@ tasks.register("jreleaserPublishDry") {
         project.ext.set("dryrun", true)
     }
     finalizedBy("jreleaserFullRelease")
-    logger.lifecycle("ℹ️ JReleaser dry-run mode registered")
 }
 
 // === Eager Configuration of JReleaser Tasks ===
-tasks.matching { it.name.startsWith("jreleaser") }.configureEach {
-    if (it.hasProperty("dryrun")) {
-        it.dryrun.set(project.hasProperty("dryrun") && project.dryrun.toString().toBoolean())
+gradle.projectsEvaluated {
+    tasks.withType(org.jreleaser.gradle.plugin.tasks.AbstractJReleaserTask).configureEach { task ->
+        if (task.hasProperty("dryrun")) {
+            task.dryrun.set(project.hasProperty("dryrun") && project.dryrun.toString().toBoolean())
+        }
+        if (task.hasProperty("gitRootSearch")) {
+            task.gitRootSearch.set(true)
+        }
+        if (task.hasProperty("strict")) {
+            task.strict.set(true)
+        }
     }
-    if (it.hasProperty("gitRootSearch")) {
-        it.gitRootSearch.set(true)
-    }
-    if (it.hasProperty("strict")) {
-        it.strict.set(true)
-    }
-    logger.lifecycle("ℹ️ JReleaser task '${it.name}' configured")
 }
