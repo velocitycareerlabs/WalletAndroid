@@ -15,7 +15,7 @@ def requiredSecrets = [
         mavenCentralSigningGpgPrivateKey,
         mavenCentralSigningPassword
 ]
-if (requiredSecrets.any { it?.trim().isEmpty() }) {
+if (requiredSecrets.any { it?.trim()?.isEmpty() }) {
     throw new GradleException("❌ Missing required Maven Central credentials or signing keys.")
 }
 
@@ -69,17 +69,11 @@ jreleaser {
     deploy {
         maven {
             mavenCentral {
-                app {
+                sonatype {
                     active = 'ALWAYS'
                     url = 'https://central.sonatype.com/api/v1/publisher'
-                    authorization = 'BEARER'
                     username = mavenCentralTokenUsername
                     password = mavenCentralTokenPassword
-                    namespace = 'velocitycareerlabs'
-                    sign = true
-                    checksums = true
-                    sourceJar = true
-                    javadocJar = true
                     verifyPom = false
                     applyMavenCentralRules = false
                 }
@@ -135,17 +129,16 @@ tasks.register("jreleaserPublishDry") {
     logger.lifecycle("ℹ️ JReleaser dry-run mode registered")
 }
 
-// === Safe Configuration of jreleaserFullRelease for Gradle 8+ ===
-gradle.taskGraph.whenReady {
-    try {
-        def task = tasks.findByName("jreleaserFullRelease")
-        if (task != null) {
-            task.dryrun.set(project.hasProperty("dryrun") && project.dryrun.toString().toBoolean())
-            task.gitRootSearch.set(true)
-            task.strict.set(true)
-            logger.lifecycle("ℹ️ JReleaser full release task configured")
-        }
-    } catch (Exception e) {
-        logger.lifecycle("⚠️ jreleaserFullRelease task not found at configuration time with exception:\n${e.message}")
+// === Eager Configuration of JReleaser Tasks ===
+tasks.matching { it.name.startsWith("jreleaser") }.configureEach {
+    if (it.hasProperty("dryrun")) {
+        it.dryrun.set(project.hasProperty("dryrun") && project.dryrun.toString().toBoolean())
     }
+    if (it.hasProperty("gitRootSearch")) {
+        it.gitRootSearch.set(true)
+    }
+    if (it.hasProperty("strict")) {
+        it.strict.set(true)
+    }
+    logger.lifecycle("ℹ️ JReleaser task '${it.name}' configured")
 }
