@@ -7,11 +7,6 @@ if (!isPublishTask) {
     return
 }
 
-// Validate version early
-if (!project.hasProperty("publishVersion")) {
-    throw new GradleException("❌ Missing required project property: publishVersion")
-}
-
 // Validate required secrets
 def requiredSecrets = [
         mavenCentralTokenUsername,
@@ -24,17 +19,14 @@ if (requiredSecrets.any { it == null || it.trim().isEmpty() }) {
     throw new GradleException("❌ Missing required Maven Central credentials or signing keys.")
 }
 
-// Resolve version and artifact base name
-def resolvedVersionProvider = providers.gradleProperty("jreleaserVersionOverride")
-        .orElse(providers.provider { publishVersion })
-def artifactBaseProvider = resolvedVersionProvider.map { version -> "${publishArtifactId.toLowerCase()}-$version" }
-
+// Use static version and artifact ID from build.gradle
+def resolvedVersion = project.version.toString()
+def artifactBase = "${publishArtifactId.toLowerCase()}-$resolvedVersion"
 def isDryRun = project.hasProperty("dryrun") && project.property("dryrun").toString().toBoolean()
+
 if (isDryRun) {
     logger.lifecycle("ℹ️ JReleaser dry-run mode ENABLED")
 }
-
-project.version = resolvedVersionProvider.get()
 
 jreleaser {
     enabled.set(true)
@@ -42,7 +34,7 @@ jreleaser {
     project {
         name = publishArtifactId
         groupId = publishGroupId
-        version.set(resolvedVersionProvider)
+        version.set(resolvedVersion)
         description = 'Velocity Career Labs Android SDK consumer app.'
         website = 'https://github.com/velocitycareerlabs/WalletAndroid'
         authors = ['Michael Avoyan']
@@ -55,9 +47,9 @@ jreleaser {
         github {
             repoOwner = 'velocitycareerlabs'
             name = 'WalletAndroid'
-            tagName.set(resolvedVersionProvider.map { "release-$it" })
-            releaseName.set(resolvedVersionProvider)
-            prerelease.enabled.set(resolvedVersionProvider.map { it.contains("rc") })
+            tagName.set("release-$resolvedVersion")
+            releaseName.set(resolvedVersion)
+            prerelease.enabled.set(resolvedVersion.contains("rc"))
             sign = true
         }
     }
@@ -113,15 +105,9 @@ jreleaser {
     distributions {
         vcl {
             active = 'ALWAYS'
-            artifact {
-                path = file("${buildDir}/outputs/aar/${artifactBaseProvider.get()}.aar")
-            }
-            artifact {
-                path = file("${buildDir}/libs/${artifactBaseProvider.get()}-sources.jar")
-            }
-            artifact {
-                path = file("${buildDir}/libs/${artifactBaseProvider.get()}-javadoc.jar")
-            }
+            artifact { path = file("${buildDir}/outputs/aar/${artifactBase}.aar") }
+            artifact { path = file("${buildDir}/libs/${artifactBase}-sources.jar") }
+            artifact { path = file("${buildDir}/libs/${artifactBase}-javadoc.jar") }
         }
     }
 }
@@ -131,9 +117,6 @@ tasks.register("jreleaserPublishRelease") {
     group = "publishing"
     description = "Runs jreleaserFullRelease for the release build"
     dependsOn("assembleRelease", "generateSourcesJar", "generateJavadocJar")
-    doFirst {
-        project.extensions.extraProperties.set("jreleaserVersionOverride", publishVersion)
-    }
     finalizedBy("jreleaserFullRelease")
 }
 
@@ -141,9 +124,6 @@ tasks.register("jreleaserPublishRc") {
     group = "publishing"
     description = "Runs jreleaserFullRelease for RC build"
     dependsOn("assembleRc", "generateSourcesJar", "generateJavadocJar")
-    doFirst {
-        project.extensions.extraProperties.set("jreleaserVersionOverride", "${publishVersion}-rc")
-    }
     finalizedBy("jreleaserFullRelease")
 }
 
@@ -152,7 +132,6 @@ tasks.register("jreleaserPublishDry") {
     description = "Dry-run JReleaser publish (no deployment)"
     dependsOn("assembleRelease", "generateSourcesJar", "generateJavadocJar")
     doFirst {
-        project.extensions.extraProperties.set("jreleaserVersionOverride", publishVersion)
         project.extensions.extraProperties.set("dryrun", true)
     }
     finalizedBy("jreleaserFullRelease")
