@@ -26,7 +26,6 @@ signing:
   # publicKey: from JRELEASER_GPG_PUBLIC_KEY
   # secretKey: from JRELEASER_GPG_SECRET_KEY
   # passphrase: JRELEASER_GPG_PASSPHRASE
-  artifacts: true
 
 release:
   github:
@@ -51,5 +50,9 @@ deploy:
         # stage: from JRELEASER_MAVENCENTRAL_STAGE
         authorization: BASIC
         sign: true
+        checksums: true
+        sourceJar: true
+        javadocJar: true
+        verifyPom: true
         stagingRepositories:
           - VCL/target/staging-deploy
