@@ -60,7 +60,6 @@ jobs:
           arguments: >
             full-release
             --config-file=jreleaser.template.yml
-            -D=projectVersion=${{ env.RELEASE_VERSION }}
             --strict
         env:
           JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
