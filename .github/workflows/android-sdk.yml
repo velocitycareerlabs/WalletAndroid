@@ -52,9 +52,8 @@ jobs:
         run: |
           ./gradlew :VCL:stageArtifacts
 
-      - name: Debug Staging Directory Tree
+      - name: 🌳 Staging Directory Contents
         run: |
-          echo "Staging directory contents:"
           ls -R VCL/target/staging-deploy
 
       - name: 🚀 Run JReleaser full-release

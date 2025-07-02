@@ -227,7 +227,7 @@ tasks.register("stageArtifacts", Copy) {
     from("${layout.buildDirectory.get()}/libs") {
         include("**/*.jar")
     }
-    into("target/staging-deploy${mavenPath}")
+    into("target/staging-deploy/${mavenPath}")
 }
 
 dependencies {
