@@ -76,74 +76,79 @@ android {
     }
 }
 
-publishing {
-    publications {
-        create("release", MavenPublication) {
-            groupId = publishGroupId
-            artifactId = publishArtifactId
-            version = publishVersion
+afterEvaluate {
+    def releaseAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${publishVersion}.aar")
+    def rcAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${publishVersion}-rc.aar")
 
-            artifact(releaseAar) { builtBy(tasks.named("assembleRelease")) }
-            artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
-            artifact(tasks.named("generateJavadocJar").get()) { classifier = "javadoc" }
+    publishing {
+        publications {
+            create("release", MavenPublication) {
+                groupId = publishGroupId
+                artifactId = publishArtifactId
+                version = publishVersion
 
-            pom {
-                name = 'vcl'
-                packaging = 'aar'
-                description = 'Velocity Career Labs Android SDK consumer app.'
-                url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'velocitycareerlabs'
-                        name = 'Michael Avoyan'
-                        email = 'michael.avoyan@gmail.com'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git'
-                    developerConnection = 'scm:git:ssh://[email protected]/velocitycareerlabs/WalletAndroid'
+                artifact(releaseAar) { builtBy(tasks.named("assembleRelease")) }
+                artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
+                artifact(tasks.named("generateJavadocJar").get()) { classifier = "javadoc" }
+
+                pom {
+                    name = 'vcl'
+                    packaging = 'aar'
+                    description = 'Velocity Career Labs Android SDK consumer app.'
                     url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'velocitycareerlabs'
+                            name = 'Michael Avoyan'
+                            email = 'michael.avoyan@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git'
+                        developerConnection = 'scm:git:ssh://[email protected]/velocitycareerlabs/WalletAndroid'
+                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    }
                 }
             }
-        }
 
-        create("rc", MavenPublication) {
-            groupId = publishGroupId
-            artifactId = publishArtifactId
-            version = "${publishVersion}-rc"
+            create("rc", MavenPublication) {
+                groupId = publishGroupId
+                artifactId = publishArtifactId
+                version = "${publishVersion}-rc"
 
-            artifact(rcAar) { builtBy(tasks.named("assembleRc")) }
-            artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
-            artifact(tasks.named("generateJavadocJar").get()) { classifier = "javadoc" }
+                artifact(rcAar) { builtBy(tasks.named("assembleRc")) }
+                artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
+                artifact(tasks.named("generateJavadocJar").get()) { classifier = "javadoc" }
 
-            pom {
-                name = 'vcl'
-                packaging = 'aar'
-                description = 'Velocity Career Labs Android SDK RC build.'
-                url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'velocitycareerlabs'
-                        name = 'Michael Avoyan'
-                        email = 'michael.avoyan@gmail.com'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git'
-                    developerConnection = 'scm:git:ssh://[email protected]/velocitycareerlabs/WalletAndroid'
+                pom {
+                    name = 'vcl'
+                    packaging = 'aar'
+                    description = 'Velocity Career Labs Android SDK RC build.'
                     url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'velocitycareerlabs'
+                            name = 'Michael Avoyan'
+                            email = 'michael.avoyan@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git'
+                        developerConnection = 'scm:git:ssh://[email protected]/velocitycareerlabs/WalletAndroid'
+                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
+                    }
                 }
             }
         }
