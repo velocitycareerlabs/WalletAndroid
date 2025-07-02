@@ -220,13 +220,14 @@ tasks.register("verifyExpectedArtifactsExist") {
 }
 
 tasks.register("stageArtifacts", Copy) {
+    def mavenPath = "${publishGroupId.replace('.', '/')}/${publishArtifactId}/${publishVersion}/"
     from("${layout.buildDirectory.get()}/outputs/aar") {
         include("**/*.aar")
     }
     from("${layout.buildDirectory.get()}/libs") {
         include("**/*.jar")
     }
-    into("target/staging-deploy")
+    into("target/staging-deploy${mavenPath}")
 }
 
 dependencies {
