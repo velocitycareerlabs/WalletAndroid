@@ -61,7 +61,7 @@ jobs:
       - name: 🧪 Generate POM File
         run: |
           ./gradlew :VCL:generatePomFileFor${{ env.PUBLICATION_NAME }}Publication
-          cp VCL/build/publications/${{ env.PUBLICATION_NAME }}/pom-default.xml VCL/target/staging-deploy/${{ env.POM_FILE_NAME }}
+          cp VCL/build/publications/${{ env.PUBLICATION_NAME }}/pom-default.xml VCL/target/staging-deploy/io/velocitycareerlabs/vcl/$RELEASE_VERSION/${{ env.POM_FILE_NAME }}
 
       - name: 📂 List staged artifacts
         run: |
