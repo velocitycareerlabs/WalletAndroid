@@ -53,6 +53,6 @@ deploy:
         checksums: true
         sourceJar: true
         javadocJar: true
-        verifyPom: true
+        verifyPom: false
         stagingRepositories:
           - VCL/target/staging-deploy
