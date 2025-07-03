@@ -35,6 +35,12 @@ jobs:
           echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
           echo "Found version: $VERSION"
 
+      - name: 🔧 Set publication name and POM file name
+        run: |
+          PUB_NAME=
+          echo "PUBLICATION_NAME=${{ github.event.inputs.environment == 'rc' && 'rc' || 'release' }}" >> $GITHUB_ENV
+          echo "POM_FILE_NAME=vcl-${{ github.event.inputs.environment == 'rc' && 'rc-' || '' }}${RELEASE_VERSION}.pom" >> $GITHUB_ENV
+
       - name: 🧪 Build AAR + Sources + Javadoc
         run: |
           ./gradlew clean \
@@ -52,7 +58,12 @@ jobs:
         run: |
           ./gradlew :VCL:stageArtifacts
 
-      - name: 🌳 Staging Directory Contents
+      - name: 🧪 Generate POM File
+        run: |
+          ./gradlew :VCL:generatePomFileFor${{ env.PUBLICATION_NAME }}Publication
+          cp VCL/build/publications/${{ env.PUBLICATION_NAME }}/pom-default.xml VCL/target/staging-deploy/${{ env.POM_FILE_NAME }}
+
+      - name: 📂 List staged artifacts
         run: |
           ls -R VCL/target/staging-deploy
 
