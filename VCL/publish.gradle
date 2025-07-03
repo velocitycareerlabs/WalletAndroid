@@ -1,14 +1,10 @@
-import org.gradle.api.tasks.bundling.Jar
-
-apply from: 'load-maven-keys.gradle'
-
-def isPublishTask = gradle.startParameter.taskNames.any { taskName ->
-    taskName.toLowerCase().contains("publish")
-}
-if (!isPublishTask) {
-    logger.lifecycle("🟡 Skipping publish-core.gradle: not a publishing task.")
-    return
-}
+//def isPublishTask = gradle.startParameter.taskNames.any { taskName ->
+//    taskName.toLowerCase().contains("publish")
+//}
+//if (!isPublishTask) {
+//    logger.lifecycle("🟡 Skipping publish-core.gradle: not a publishing task.")
+//    return
+//}
 
 afterEvaluate {
     def releaseAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${publishVersion}.aar")
@@ -86,48 +82,5 @@ afterEvaluate {
                 }
             }
         }
-
-        repositories {
-            maven {
-                name = "CentralPortal"
-                url = uri("https://central.sonatype.com/api/v1/publish/")
-                credentials {
-                    username = mavenCentralTokenUsername
-                    password = mavenCentralTokenPassword
-                }
-            }
-        }
-    }
-
-    signing {
-        useInMemoryPgpKeys(
-                mavenCentralSigningKeyId,
-                mavenCentralSigningGpgPrivateKey,
-                mavenCentralSigningPassword
-        )
-        sign publishing.publications.release
-        sign publishing.publications.rc
-    }
-
-    tasks.register("publishRelease") {
-        group = "publishing"
-        description = "Builds and publishes VCL release AAR to Maven Central"
-
-        dependsOn(
-                ":VCL:clean",
-                ":VCL:assembleAllRelease",
-                ":VCL:publishReleasePublicationToCentralPortalRepository"
-        )
-    }
-
-    tasks.register("publishRc") {
-        group = "publishing"
-        description = "Builds and publishes VCL RC AAR to Maven Central"
-
-        dependsOn(
-                ":VCL:clean",
-                ":VCL:assembleAllRc",
-                ":VCL:publishRcPublicationToCentralPortalRepository"
-        )
     }
 }
