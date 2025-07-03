@@ -15,10 +15,6 @@ project:
   extraProperties:
     displayName: Velocity Career Labs Android SDK
 
-files:
-  globs:
-    - pattern: VCL/target/staging-deploy/*.*
-
 signing:
   active: ALWAYS
   armored: true
