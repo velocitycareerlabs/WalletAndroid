@@ -7,8 +7,8 @@ plugins {
 }
 
 ext {
-    publishCode = 164
-    publishVersion = "2.7.4"
+    publishCode = 165
+    publishVersion = "2.7.5"
     publishArtifactId = "vcl"
     publishGroupId = "io.velocitycareerlabs"
 }
@@ -76,84 +76,7 @@ android {
     }
 }
 
-afterEvaluate {
-    def releaseAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${publishVersion}.aar")
-    def rcAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${publishVersion}-rc.aar")
-
-    publishing {
-        publications {
-            create("release", MavenPublication) {
-                groupId = publishGroupId
-                artifactId = publishArtifactId
-                version = publishVersion
-
-                artifact(releaseAar) { builtBy(tasks.named("assembleRelease")) }
-                artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
-                artifact(tasks.named("generateJavadocJar").get()) { classifier = "javadoc" }
-
-                pom {
-                    name = 'vcl'
-                    packaging = 'aar'
-                    description = 'Velocity Career Labs Android SDK consumer app.'
-                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                    licenses {
-                        license {
-                            name = 'The Apache License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
-                    developers {
-                        developer {
-                            id = 'velocitycareerlabs'
-                            name = 'Michael Avoyan'
-                            email = 'michael.avoyan@gmail.com'
-                        }
-                    }
-                    scm {
-                        connection = 'scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git'
-                        developerConnection = 'scm:git:ssh://[email protected]/velocitycareerlabs/WalletAndroid'
-                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                    }
-                }
-            }
-
-            create("rc", MavenPublication) {
-                groupId = publishGroupId
-                artifactId = publishArtifactId
-                version = "${publishVersion}-rc"
-
-                artifact(rcAar) { builtBy(tasks.named("assembleRc")) }
-                artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
-                artifact(tasks.named("generateJavadocJar").get()) { classifier = "javadoc" }
-
-                pom {
-                    name = 'vcl'
-                    packaging = 'aar'
-                    description = 'Velocity Career Labs Android SDK RC build.'
-                    url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                    licenses {
-                        license {
-                            name = 'The Apache License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
-                    developers {
-                        developer {
-                            id = 'velocitycareerlabs'
-                            name = 'Michael Avoyan'
-                            email = 'michael.avoyan@gmail.com'
-                        }
-                    }
-                    scm {
-                        connection = 'scm:git:git://github.com/velocitycareerlabs/WalletAndroid.git'
-                        developerConnection = 'scm:git:ssh://[email protected]/velocitycareerlabs/WalletAndroid'
-                        url = 'https://github.com/velocitycareerlabs/WalletAndroid'
-                    }
-                }
-            }
-        }
-    }
-}
+apply from: 'publish.gradle'
 
 repositories {
     google()
@@ -233,7 +156,7 @@ tasks.register("stageArtifacts", Copy) {
 dependencies {
     implementation 'androidx.core:core-ktx:1.16.0'
 
-    implementation 'com.nimbusds:nimbus-jose-jwt:10.3'
+    implementation 'com.nimbusds:nimbus-jose-jwt:10.3.1'
     implementation "androidx.security:security-crypto:1.1.0-beta01"
 
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
