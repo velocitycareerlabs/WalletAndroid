@@ -22,5 +22,21 @@
 
 # Preserve vcl api
 -keep class io.velocitycareerlabs.api.** { *; }
+
 # Preserve EncryptedSharedPreferences classes
 -keep class androidx.security.crypto.** { *; }
+
+# Gson / JSON mapping safety
+-keep class com.nimbusds.** { *; }
+-dontwarn com.nimbusds.**
+
+# Keep all annotations
+-keepattributes *Annotation*
+
+# Keep Kotlin metadata
+-keep class kotlin.Metadata { *; }
+
+# AndroidX test compatibility
+-dontwarn org.junit.**
+-dontwarn org.mockito.**
+-dontwarn org.robolectric.**

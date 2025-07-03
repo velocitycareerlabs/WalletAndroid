@@ -3,68 +3,61 @@ plugins {
     id 'kotlin-android'
     id 'maven-publish'
     id 'signing'
+    id 'org.jreleaser'
 }
 
 ext {
-    publishCode = 164
-    publishVersion = "2.7.4"
-    artifactId = "vcl"
-    publishGroup = "io.velocitycareerlabs"
-    namespaceId = publishGroup
+    publishCode = 165
+    publishVersion = "2.7.5"
+    publishArtifactId = "vcl"
+    publishGroupId = "io.velocitycareerlabs"
 }
-group = publishGroup
-version = publishVersion
-def code = publishCode
 
-apply from: "./publish-core.gradle"
+group = publishGroupId
+version = publishVersion
 
 android {
-    compileSdk 35
-    namespace namespaceId
+    namespace = publishGroupId
+    compileSdk = 35
 
     defaultConfig {
-        minSdk 24
-        targetSdk 35
-        versionCode code
-        versionName version
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles ["consumer-rules.pro"]
+        minSdk = 24
+        targetSdk = 35
+        versionCode = publishCode
+        versionName = version
+        consumerProguardFiles("consumer-rules.pro")
+        buildConfigField "String", "VERSION_NAME", "\"${versionName}\""
+        buildConfigField "int", "VERSION_CODE", "${versionCode}"
     }
 
     buildTypes {
-//        def BOOLEAN = "boolean"
-//        def TRUE = "true"
-//        def FALSE = "false"
         debug {
-            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
-            buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
-            minifyEnabled false
-            shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-        release {
-            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
-            buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
-            minifyEnabled false
-            shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled = false
+            shrinkResources = false
         }
         rc {
+            initWith(debug)
             buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}-rc\""
             buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
-            minifyEnabled false
-            shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        release {
+            initWith(debug)
+            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
+            buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     testOptions {
@@ -72,55 +65,115 @@ android {
         unitTests.returnDefaultValues = true
     }
 
-    buildFeatures {
-        buildConfig true
+    libraryVariants.configureEach { variant ->
+        variant.outputs.all {
+            if (variant.name == "release") {
+                outputFileName = "${publishArtifactId}-${publishVersion}.aar"
+            } else if (variant.name == "rc") {
+                outputFileName = "${publishArtifactId}-${publishVersion}-rc.aar"
+            }
+        }
     }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-tasks.register('androidSourcesJar', Jar) {
-    archiveClassifier.set('sources')
-    from android.sourceSets.main.java.srcDirs
-    from android.sourceSets.main.kotlin.srcDirs
-}
-
-artifacts {
-    archives tasks.named('androidSourcesJar')
-}
+apply from: 'publish.gradle'
 
 repositories {
+    google()
     mavenCentral()
+    mavenLocal()
+}
+
+// === Artifact Tasks ===
+tasks.register("generateSourcesJar", Jar) {
+    group = "assemble"
+    archiveClassifier.set("sources")
+    archiveBaseName.set(publishArtifactId.toLowerCase())
+    from(android.sourceSets.main.java.srcDirs + android.sourceSets.main.kotlin.srcDirs)
+}
+
+tasks.register("generateJavadocJar", Jar) {
+    group = "assemble"
+    archiveClassifier.set("javadoc")
+    archiveBaseName.set(publishArtifactId.toLowerCase())
+    doFirst {
+        def dummyDir = file("${layout.buildDirectory.get()}/empty-javadoc")
+        dummyDir.mkdirs()
+        def dummyJava = new File(dummyDir, "placeholder.java")
+        if (!dummyJava.exists()) dummyJava.text = "/** Placeholder for javadoc */"
+        from(dummyDir)
+    }
+}
+
+tasks.register("generateSourcesAndJavadocJar") {
+    group = "assemble"
+    description = "Generates sources.jar and javadoc.jar"
+    dependsOn("generateSourcesJar", "generateJavadocJar")
+}
+
+tasks.register("assembleAllRelease") {
+    group = "assemble"
+    description = "Generates AAR, sources.jar and javadoc.jar for release"
+    dependsOn("assembleRelease", "generateSourcesAndJavadocJar")
+}
+
+tasks.register("assembleAllRc") {
+    group = "assemble"
+    description = "Generates AAR, sources.jar and javadoc.jar for rc"
+    dependsOn("assembleRc", "generateSourcesAndJavadocJar")
+}
+
+tasks.register("verifyExpectedArtifactsExist") {
+    group = "verification"
+    description = "Prints the contents of key artifact directories"
+    doLast {
+        def printDirContents = { title, dirPath ->
+            println "📂 Contents of ${dirPath}/"
+            def dir = file(dirPath)
+            if (dir.exists() && dir.isDirectory()) {
+                dir.listFiles()?.each { println " - ${it.name}" }
+            } else {
+                println "❌ Directory does not exist: ${dirPath}"
+            }
+        }
+
+        printDirContents("AAR", "build/outputs/aar")
+        printDirContents("LIBS", "build/libs")
+    }
+}
+
+tasks.register("stageArtifacts", Copy) {
+    def mavenPath = "${publishGroupId.replace('.', '/')}/${publishArtifactId}/${publishVersion}/"
+    from("${layout.buildDirectory.get()}/outputs/aar") {
+        include("**/*.aar")
+    }
+    from("${layout.buildDirectory.get()}/libs") {
+        include("**/*.jar")
+    }
+    into("target/staging-deploy/${mavenPath}")
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation 'androidx.core:core-ktx:1.16.0'
 
-    implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
+    implementation 'com.nimbusds:nimbus-jose-jwt:10.3.1'
     implementation "androidx.security:security-crypto:1.1.0-beta01"
-
-    // Reflection
-//    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
 
     // Required -- JUnit 4 framework
     testImplementation 'junit:junit:4.13.2'
-    // Optional -- Robolectric environment
     testImplementation 'androidx.test:core:1.6.1'
-    testImplementation 'org.robolectric:robolectric:4.13'
-    // Optional -- Mockito framework
-    testImplementation "org.mockito:mockito-core:5.14.2"
+    testImplementation 'org.robolectric:robolectric:4.15.1'
+
+    // DON'T upgrade yet!!!
+    testImplementation 'io.mockk:mockk:1.14.2'
+
     testImplementation "org.mockito:mockito-inline:5.2.0"
     // Required -- JSON framework
-    testImplementation 'org.json:json:20240303'
+    testImplementation 'org.json:json:20250517'
     // json assert
     testImplementation 'org.skyscreamer:jsonassert:1.5.3'
-
-    testImplementation 'io.mockk:mockk:1.14.2'
 
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'

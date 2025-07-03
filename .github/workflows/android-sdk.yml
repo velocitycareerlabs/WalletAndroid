@@ -1,96 +1,92 @@
-name: WalletAndroid-SDK
+name: WalletAndroid-SDK-Publish
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       environment:
-        description: Configuration environment
+        description: 'Environment to deploy to'
         required: true
-        default: 'dev'
         type: choice
         options:
           - dev
           - rc
           - prod
 
-env:
-  PACKAGE_TYPE: "aar"
-  GRADLE_VERSION: "8.8.2"
-  JAVA_VERSION: "17"
-  ARTIFACT_PATH: "VCL/build/outputs"
-  GLOBAL_ENV: ${{ github.event_name == 'push' && format('{0}', 'dev') || inputs.environment }}
-
 jobs:
-  test-android-sdk:
+  release-android-sdk:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Git clone repository
+      - name: 🧾 Checkout code
         uses: actions/checkout@v4
-      # Setup java
-      - uses: actions/setup-java@v4
+
+      - name: ☕ Set up Java 17
+        uses: actions/setup-java@v4
         with:
+          java-version: 17
           distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-      # Run test
-      - name: Run Test
-        run: ./gradlew test
 
-  build-and-publish-android-sdk:
-    runs-on: ubuntu-latest
-    needs:
-      - test-android-sdk
-    steps:
-      - name: Git clone repository
-        uses: actions/checkout@v4
-      # Setup java
-      - uses: actions/setup-java@v4
+      - name: 🛠️ Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: 📝 Get version from build.gradle
+        run: |
+          VERSION=$(grep 'publishVersion *= *".*"' VCL/build.gradle | sed -n 's/.*publishVersion *= *"\([^"]*\)".*/\1/p')
+          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Found version: $VERSION"
+
+      - name: 🔧 Set publication name and POM file name
+        run: |
+          PUB_NAME=
+          echo "PUBLICATION_NAME=${{ github.event.inputs.environment == 'rc' && 'rc' || 'release' }}" >> $GITHUB_ENV
+          echo "POM_FILE_NAME=vcl-${{ github.event.inputs.environment == 'rc' && 'rc-' || '' }}${RELEASE_VERSION}.pom" >> $GITHUB_ENV
+
+      - name: 🧪 Build AAR + Sources + Javadoc
+        run: |
+          ./gradlew clean \
+            :VCL:assembleAll${{ github.event.inputs.environment == 'rc' && 'Rc' || 'Release' }} \
+            -PprojectVersion=${RELEASE_VERSION} \
+            -Pprerelease=${{ github.event.inputs.environment == 'rc' }} \
+            --stacktrace
+
+      - name: ✅ Verify expected artifacts exist
+        run: |
+          ./gradlew \
+            :VCL:verifyExpectedArtifactsExist
+
+      - name: 📦 Stage Artifacts
+        run: |
+          ./gradlew :VCL:stageArtifacts
+
+      - name: 🧪 Generate POM File
+        run: |
+          ./gradlew :VCL:generatePomFileFor${{ env.PUBLICATION_NAME }}Publication
+          cp VCL/build/publications/${{ env.PUBLICATION_NAME }}/pom-default.xml VCL/target/staging-deploy/io/velocitycareerlabs/vcl/$RELEASE_VERSION/${{ env.POM_FILE_NAME }}
+
+      - name: 📂 List staged artifacts
+        run: |
+          ls -R VCL/target/staging-deploy
+
+      - name: 🚀 Run JReleaser full-release
+        if: github.event.inputs.environment != 'dev'
+        uses: jreleaser/release-action@v2
         with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-      # Gradle Assemble
-      - name: Gradle Assemble
-        run: ./gradlew assemble${{ env.RELEASE_TAG }}
+          version: 1.18.0
+          arguments: >
+            full-release
+            --config-file=jreleaser.template.yml
+            --debug
         env:
-          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'Release' ) || 'Rc' }}
-      # Convert artifact to lowercase
-      - name: Rename artifact to lowercase
-        run: mv ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/VCL-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }} ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}/vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
-        env:
-          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'release' ) || 'rc' }}
-      # Show Me Built packages
-      - name: Show Me Built packages
-        run: ls -al ${{ env.ARTIFACT_PATH}}/${{ env.PACKAGE_TYPE }}/
-      - name: Export Nexus Private Key
-        run: echo "signingPrivateKey=${{ secrets.ANDROID_NEXUS_PRIVATE_KEY }}" >> nexus.properties
-      # Publish Prod/Rc
-      - name: Publish Prod/Rc
-        if: ${{ env.GLOBAL_ENV == 'prod' || env.GLOBAL_ENV == 'rc' }}
-        run: ./gradlew publish${{ env.RELEASE_TAG }}
-        env:
-          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'Release' ) || 'Rc' }}
-          MAVEN_CENTRAL_TOKEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
-          MAVEN_CENTRAL_TOKEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
-          MAVEN_CENTRAL_SIGNING_KEY_ID: ${{ secrets.MAVEN_CENTRAL_SIGNING_KEY_ID }}
-          MAVEN_CENTRAL_SIGNING_PASSWORD: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
-          MAVEN_CENTRAL_PRIVATE_KEY_B64: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_B64 }}
-      # Upload Artifacts
-      - name: Upload Artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: vcl-${{ env.RELEASE_TAG }}.${{ env.PACKAGE_TYPE }}
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.PACKAGE_TYPE }}
-          if-no-files-found: error
-          retention-days: 1
-        env:
-          RELEASE_TAG: ${{ env.GLOBAL_ENV == 'prod' && format('{0}', 'release' ) || 'rc' }}
-
-
-
-
-
-
-
+          JRELEASER_PROJECT_JAVA_ARTIFACT_ID: ${{ github.event.inputs.environment == 'rc' && 'vcl-rc' || 'vcl' }}
+          JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_TOKEN_USERNAME }}
+          JRELEASER_MAVENCENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_TOKEN_PASSWORD }}
+          JRELEASER_MAVENCENTRAL_STAGE: ${{ secrets.MAVEN_CENTRAL_STAGING_PROFILE_ID }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_PROJECT_VERSION: ${{ env.RELEASE_VERSION }}
+          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY }}
+          JRELEASER_GPG_SECRET_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PRIVATE_KEY }}
+          JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
+          JRELEASER_TAG_NAME: ${{ github.event.inputs.environment == 'rc' && 'rc-' || '' }}${{ env.RELEASE_VERSION }}
+          JRELEASER_RELEASE_NAME: ${{ github.event.inputs.environment == 'rc' && 'Release Candidate ' || '' }}${{ env.RELEASE_VERSION }}
+          JRELEASER_PRERELEASE_PATTERN: ${{ github.event.inputs.environment == 'rc' && env.RELEASE_VERSION || 'OFF' }}
+          
