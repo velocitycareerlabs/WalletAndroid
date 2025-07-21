@@ -12,11 +12,15 @@ import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierImpl.Co
 
 internal class VerificationUtils {
     companion object {
+        /**
+         * The implementation relaying on the below reference:
+         * https://github.com/velocitycareerlabs/velocitycore/blob/37c8535c2ef839ed72a2706685a398f20f4ae11c/packages/vc-checks/src/extract-credential-type.js#L20
+         */
         internal fun getCredentialType(jwtCredential: VCLJwt): String? =
             ((jwtCredential.payload?.toJSONObject()
                 ?.get(CredentialIssuerVerifierImpl.KeyVC) as? Map<*, *>)
                 ?.get(CredentialIssuerVerifierImpl.KeyType) as? List<*>)
-                ?.first() as? String
+                ?.firstOrNull{ it != "VerifiableCredential" } as? String
 
         internal fun getCredentialSubjectFromCredential(jwtCredential: VCLJwt): Map<*, *>? =
             getCredentialSubjectFromPayload(jwtCredential.payload?.toJSONObject())
