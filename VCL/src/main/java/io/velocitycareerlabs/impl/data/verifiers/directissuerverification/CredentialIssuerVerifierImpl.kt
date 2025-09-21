@@ -4,7 +4,7 @@
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.velocitycareerlabs.impl.data.verifiers
+package io.velocitycareerlabs.impl.data.verifiers.directissuerverification
 
 import io.velocitycareerlabs.api.entities.VCLCredentialType
 import io.velocitycareerlabs.api.entities.error.VCLError
@@ -18,6 +18,7 @@ import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.data.repositories.HeaderKeys
 import io.velocitycareerlabs.impl.data.repositories.HeaderValues
+import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.VerificationUtils
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
@@ -26,6 +27,7 @@ import io.velocitycareerlabs.impl.extensions.toMap
 import io.velocitycareerlabs.impl.utils.VCLLog
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.collections.get
 
 internal class CredentialIssuerVerifierImpl(
     private val credentialTypesModel: CredentialTypesModel,
@@ -40,46 +42,52 @@ internal class CredentialIssuerVerifierImpl(
     ) {
         if (jwtCredentials.isEmpty()) /* nothing to verify */ {
             completionBlock(VCLResult.Success(true))
-        } else if (finalizeOffersDescriptor.serviceTypes.all.isEmpty()) {
+            return
+        }
+        if (finalizeOffersDescriptor.serviceTypes.all.isEmpty()) {
             completionBlock(VCLResult.Failure(VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value)))
-        } else {
-            var globalError: VCLError? = null
-            val completableFutures = jwtCredentials.map { jwtCredential ->
-                CompletableFuture.supplyAsync {
-                    VerificationUtils.getCredentialType(jwtCredential)?.let { credentialTypeName ->
-                        credentialTypesModel.credentialTypeByTypeName(credentialTypeName)
-                            ?.let { credentialType ->
-                                verifyCredential(
-                                    jwtCredential,
-                                    credentialType,
-                                    finalizeOffersDescriptor.serviceTypes
-                                ) {
-                                    it.handleResult({ isVerified ->
-                                        VCLLog.d(
-                                            TAG,
-                                            "Credential verification result = $isVerified"
-                                        )
-                                    }, { error ->
-                                        globalError = error
-                                    })
-                                }
-                            } ?: run {
-                            globalError =
-                                VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value)
-                        }
-                    } ?: run {
-                        globalError =
-                            VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value)
-                    }
+            return
+        }
+
+        val globalErrorStorage = GlobalErrorStorage()
+
+        val completableFutures = jwtCredentials.map { jwtCredential ->
+            CompletableFuture.supplyAsync {
+                val credentialTypeName =
+                    VerificationUtils.Companion.getCredentialType(jwtCredential)
+                val credentialType =
+                    credentialTypesModel.credentialTypeByTypeName(credentialTypeName ?: "")
+                if (credentialTypeName == null || credentialType == null) {
+                    globalErrorStorage.update(
+                        VCLError(errorCode = VCLErrorCode.CredentialTypeNotRegistered.value)
+                    )
+                    return@supplyAsync
+                }
+
+                verifyCredential(
+                    jwtCredential,
+                    credentialType,
+                    finalizeOffersDescriptor.serviceTypes
+                ) {
+                    it.handleResult({ isVerified ->
+                        VCLLog.d(
+                            TAG,
+                            "Credential verification result = $isVerified"
+                        )
+                    }, { error ->
+                        globalErrorStorage.update(error)
+                    })
                 }
             }
-            val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
-            allFutures.join()
-            globalError?.let { // if at least one credential verification failed => the whole process fails
-                completionBlock(VCLResult.Failure(it))
-            } ?: run {
-                completionBlock(VCLResult.Success(true))
-            }
+        }
+
+        val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
+        allFutures.join()
+        globalErrorStorage.get()?.let {
+            // if at least one credential verification failed => the whole process fails
+            completionBlock(VCLResult.Failure(it))
+        } ?: run {
+            completionBlock(VCLResult.Success(true))
         }
     }
 
@@ -139,8 +147,8 @@ internal class CredentialIssuerVerifierImpl(
         } else if (permittedServiceCategory.contains(VCLServiceType.Issuer)) {
             VerificationUtils.getCredentialSubjectFromCredential(jwtCredential)?.let { credentialSubject ->
                 VerificationUtils.getContextsFromCredential(jwtCredential)?.let { credentialContexts ->
-                    resolveCredentialContexts(credentialContexts) { credentialContextsResult ->
-                        credentialContextsResult.handleResult({ completeContexts ->
+                    resolveCredentialSubjectContexts(credentialContexts) { credentialSubjectContextsResult ->
+                        credentialSubjectContextsResult.handleResult({ completeContexts ->
                             onResolveCredentialContexts(
                                 credentialSubject,
                                 jwtCredential,
@@ -177,11 +185,12 @@ internal class CredentialIssuerVerifierImpl(
         }
     }
 
-    private fun resolveCredentialContexts(
+    private fun resolveCredentialSubjectContexts(
         credentialSubjectContexts: List<*>,
         completionBlock: (VCLResult<List<Map<*, *>>>) -> Unit
     ) {
-        val completeContexts = CopyOnWriteArrayList(mutableListOf<Map<*, *>>())
+        val completeContextsStorage = CompleteContextsStorage()
+
         val completableFutures = credentialSubjectContexts.map { credentialSubjectContext ->
             CompletableFuture.supplyAsync {
                 networkService.sendRequest(
@@ -192,9 +201,8 @@ internal class CredentialIssuerVerifierImpl(
                     ),
                     completionBlock = { result ->
                         result.handleResult({ ldContextResponse ->
-                            (ldContextResponse.payload.toJsonObject()?.toMap()
-                                ?.get(KeyContext) as? Map<*, *>)?.let {
-                                completeContexts.add(it)
+                            ldContextResponse.payload.toJsonObject()?.toMap()?.let {
+                                completeContextsStorage.append(it)
                             } ?: run {
                                 VCLLog.e(
                                     TAG,
@@ -213,13 +221,13 @@ internal class CredentialIssuerVerifierImpl(
         val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
         allFutures.join()
 
-        if (completeContexts.isEmpty()) {
+        if (completeContextsStorage.isEmpty()) {
             onError(
                 VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectContext.value),
                 completionBlock = completionBlock
             )
         } else {
-            completionBlock(VCLResult.Success(completeContexts))
+            completionBlock(VCLResult.Success(completeContextsStorage.get()))
         }
     }
 
@@ -229,88 +237,73 @@ internal class CredentialIssuerVerifierImpl(
         completeContexts: List<Map<*, *>>,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        (((credentialSubject[KeyType] as? List<*>)?.get(0) as? String) ?: credentialSubject[KeyType] as? String)?.let { credentialSubjectType ->
-            var globalError: VCLError? = null
-            var isCredentialVerified = false
-            val completableFutures = completeContexts.map { completeContext ->
-                CompletableFuture.supplyAsync {
-                    val activeContext = (completeContext[credentialSubjectType] as? Map<*, *>)
-                        ?.get(KeyContext) as? Map<*, *>
-                        ?: completeContext
-                    findKeyForPrimaryOrganizationValue(activeContext)?.let { K ->
-                        VerificationUtils.getIdentifier(K, credentialSubject)?.let { did ->
-//                            Comparing issuer.id instead of iss
-//                            https://velocitycareerlabs.atlassian.net/browse/VL-6178?focusedCommentId=46933
-//                            https://velocitycareerlabs.atlassian.net/browse/VL-6988
-//                            if (jwtCredential.iss == did)
-                            val credentialIssuerId = VerificationUtils.getCredentialIssuerId(jwtCredential)
-                            VCLLog.d(
-                                TAG,
-                                "Comparing credentialIssuerId: ${credentialIssuerId ?: ""} with did: $did"
-                            )
-                            if (credentialIssuerId == did) {
-                                isCredentialVerified = true
-                            } else {
-                                globalError =
-                                    VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission.value)
-                            }
-                        } ?: run {
-                            globalError =
-                                VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission.value)
+        val credentialSubjectType = VerificationUtils.extractCredentialSubjectType(credentialSubject)
+        if (credentialSubjectType == null) {
+            onError(
+                VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectType.value),
+                completionBlock
+            )
+            return
+        }
 
-                            VCLLog.e(
-                                TAG,
-                                "DID NOT FOUND for K = $K and credentialSubject = $credentialSubject"
-                            )
-                        }
-                    } ?: run {
-//                        When K is null, the credential will pass these checks:
+        val globalErrorStorage = GlobalErrorStorage()
+        val isCredentialVerifiedStorage = IsCredentialVerifiedStorage()
+
+        val completableFutures = completeContexts.map { completeContext ->
+            CompletableFuture.supplyAsync {
+
+                val activeContext = VerificationUtils.extractActiveContext(completeContext, credentialSubjectType)
+
+                val K = VerificationUtils.findKeyForPrimaryOrganizationValue(activeContext)
+                if (K == null) {
+                    // Case: no primary organization key found → accept
+                    // When K is null, the credential will pass these checks:
 //                        https://velocitycareerlabs.atlassian.net/browse/VL-6181?focusedCommentId=44343
-                        isCredentialVerified = true
-
-                        VCLLog.d(
-                            TAG,
-                            "Key for primary organization NOT FOUND for active context:\n$activeContext"
-                        )
-                    }
+                    isCredentialVerifiedStorage.update(true)
+                    VCLLog.d(TAG, "No primary organization key in context: $activeContext")
+                    return@supplyAsync
                 }
-            }
-            val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
-            allFutures.join()
 
-            globalError?.let {
-                completionBlock(VCLResult.Failure(it))
-            } ?: run {
-                if (isCredentialVerified) {
-                    completionBlock(VCLResult.Success(true))
+                val did = VerificationUtils.getIdentifier(K, credentialSubject)
+                if (did == null) {
+                    globalErrorStorage.update(
+                        VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission.value)
+                    )
+                    VCLLog.e(TAG, "DID not found for K = $K and subject = $credentialSubject")
+                    return@supplyAsync
+                }
+
+                val issuerId = VerificationUtils.getCredentialIssuerId(jwtCredential)
+                VCLLog.d(TAG, "Comparing credentialIssuerId: ${issuerId ?: ""} with did: $did")
+
+//                    Comparing issuer.id instead of iss
+//                    https://velocitycareerlabs.atlassian.net/browse/VL-6178?focusedCommentId=46933
+//                    https://velocitycareerlabs.atlassian.net/browse/VL-6988
+//                    if (jwtCredential.iss == did)
+                if (issuerId == did) {
+                    isCredentialVerifiedStorage.update(true)
                 } else {
-                    completionBlock(
-                        VCLResult.Failure(VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure.value))
+                    globalErrorStorage.update(
+                        VCLError(errorCode = VCLErrorCode.IssuerRequiresNotaryPermission.value)
                     )
                 }
             }
+        }
+        val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
+        allFutures.join()
 
-        } ?: run {
-            onError(
-                VCLError(errorCode = VCLErrorCode.InvalidCredentialSubjectType.value),
-                completionBlock = completionBlock
+        val error = globalErrorStorage.get()
+        if (error != null) {
+            completionBlock(VCLResult.Failure(error))
+        } else if (isCredentialVerifiedStorage.get()) {
+            completionBlock(VCLResult.Success(true))
+        } else {
+            completionBlock(
+                VCLResult.Failure(
+                    VCLError(errorCode = VCLErrorCode.IssuerUnexpectedPermissionFailure.value)
+                )
             )
         }
-    }
-
-    private fun findKeyForPrimaryOrganizationValue(
-        activeContext: Map<*, *>
-    ): String? {
-        activeContext.forEach { (key, value) ->
-            (value as? Map<*, *>)?.let { valueMap ->
-                if (valueMap[KeyId] == ValPrimaryOrganization ||
-                    valueMap[KeyId] == ValPrimarySourceProfile
-                ) {
-                    return key as? String
-                }
-            }
-        }
-        return null
     }
 
     private fun <T> onError(

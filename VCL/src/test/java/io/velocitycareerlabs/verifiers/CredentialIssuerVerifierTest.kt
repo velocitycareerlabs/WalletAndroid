@@ -15,7 +15,7 @@ import io.velocitycareerlabs.api.entities.VCLOffers
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.CredentialIssuerVerifierImpl
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.extensions.toJwtList
@@ -258,23 +258,24 @@ internal class CredentialIssuerVerifierTest {
         }
     }
 
-//    @Test
-//    fun testVerifyOpenBadgeCredentialSuccess() {
-//        subject1.verifyCredentials(
-//            jwtCredentials = CredentialMocks.JwtCredentialsOpenBadgeValid.toJwtList()!!,
-//            finalizeOffersDescriptor = finalizeOffersDescriptorOfRegularIssuer,
-//        ) { verificationResult ->
-//            verificationResult.handleResult(
-//                successHandler = {
-//                    assert(it)
-//                },
-//                errorHandler = { error ->
-//                    assert(false) { "${error.toJsonObject()}" }
-//                }
-//            )
-//        }
-//    }
+    @Test
+    fun testVerifyOpenBadgeCredentialSuccess() {
+        subject1.verifyCredentials(
+            jwtCredentials = CredentialMocks.JwtCredentialsOpenBadgeValid.toJwtList()!!,
+            finalizeOffersDescriptor = finalizeOffersDescriptorOfRegularIssuer,
+        ) { verificationResult ->
+            verificationResult.handleResult(
+                successHandler = {
+                    assert(it)
+                },
+                errorHandler = { error ->
+                    assert(false) { "${error.toJsonObject()}" }
+                }
+            )
+        }
+    }
 
+//    K is null => verification passed
 //    @Test
 //    fun testVerifyOpenBadgeCredentialError() {
 //        subject2.verifyCredentials(
@@ -283,10 +284,10 @@ internal class CredentialIssuerVerifierTest {
 //        ) { verificationResult ->
 //            verificationResult.handleResult(
 //                successHandler = {
-//                    assert(it)
+//                    assert(false) { "${VCLErrorCode.IssuerRequiresNotaryPermission.value} error code is expected" }
 //                },
 //                errorHandler = { error ->
-//                    assert(false) { "${error.toJsonObject()}" }
+//                    assert(error.errorCode == VCLErrorCode.IssuerRequiresNotaryPermission.value)
 //                }
 //            )
 //        }

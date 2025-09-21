@@ -18,7 +18,7 @@ import io.velocitycareerlabs.impl.data.repositories.ResolveDidDocumentRepository
 import io.velocitycareerlabs.impl.data.usecases.FinalizeOffersUseCaseImpl
 import io.velocitycareerlabs.impl.data.usecases.GenerateOffersUseCaseImpl
 import io.velocitycareerlabs.impl.data.verifiers.CredentialDidVerifierImpl
-import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.CredentialIssuerVerifierImpl
 import io.velocitycareerlabs.impl.data.verifiers.CredentialsByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.data.verifiers.OffersByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.domain.usecases.FinalizeOffersUseCase

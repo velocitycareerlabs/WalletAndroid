@@ -25,8 +25,8 @@ import io.velocitycareerlabs.impl.data.usecases.*
 import io.velocitycareerlabs.api.jwt.VCLJwtSignService
 import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
 import io.velocitycareerlabs.api.keys.VCLKeyService
-import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierEmptyImpl
-import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.CredentialIssuerVerifierEmptyImpl
+import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.CredentialIssuerVerifierImpl
 import io.velocitycareerlabs.impl.data.verifiers.CredentialManifestByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.data.verifiers.CredentialsByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.data.verifiers.OffersByDeepLinkVerifierImpl
@@ -34,7 +34,6 @@ import io.velocitycareerlabs.impl.data.verifiers.PresentationRequestByDeepLinkVe
 import io.velocitycareerlabs.impl.domain.models.*
 import io.velocitycareerlabs.impl.domain.usecases.*
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
-import io.velocitycareerlabs.impl.domain.verifiers.PresentationRequestByDeepLinkVerifier
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.impl.jwt.remote.VCLJwtSignServiceRemoteImpl
