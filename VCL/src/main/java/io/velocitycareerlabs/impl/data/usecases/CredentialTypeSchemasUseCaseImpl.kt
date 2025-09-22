@@ -12,9 +12,29 @@ import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
 import io.velocitycareerlabs.impl.domain.repositories.CredentialTypeSchemaRepository
 import io.velocitycareerlabs.impl.domain.usecases.CredentialTypeSchemasUseCase
 import io.velocitycareerlabs.impl.utils.VCLLog
+import java.util.Collections
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 
+class CredentialTypeSchemasMapStorage {
+    private val credentialTypeSchemasMap: MutableMap<String, VCLCredentialTypeSchema> =
+        Collections.synchronizedMap(mutableMapOf())
+
+    fun add(schemaName: String, schema: VCLCredentialTypeSchema) {
+        credentialTypeSchemasMap[schemaName] = schema
+    }
+
+    fun isEmpty(): Boolean {
+        return credentialTypeSchemasMap.isEmpty()
+    }
+
+    fun get(): Map<String, VCLCredentialTypeSchema> {
+        // Return a snapshot to avoid exposing live mutable state
+        synchronized(credentialTypeSchemasMap) {
+            return HashMap(credentialTypeSchemasMap)
+        }
+    }
+}
 internal class CredentialTypeSchemasUseCaseImpl (
     private val credentialTypeSchemaRepository: CredentialTypeSchemaRepository,
     private val credentialTypes: VCLCredentialTypes,
@@ -23,12 +43,13 @@ internal class CredentialTypeSchemasUseCaseImpl (
 
     private val TAG = CredentialTypeSchemasUseCaseImpl::class.simpleName
 
+    private val credentialTypeSchemasStorage = CredentialTypeSchemasMapStorage()
+
     override fun getCredentialTypeSchemas(
         cacheSequence: Int,
         completionBlock: (VCLResult<VCLCredentialTypeSchemas>) -> Unit
     ) {
         executor.runOnBackground {
-            val credentialTypeSchemasMap = ConcurrentHashMap<String, VCLCredentialTypeSchema>()
 
             val schemaNamesArr =
                 credentialTypes.all?.filter { it.schemaName != null }?.map { it.schemaName }
@@ -41,7 +62,7 @@ internal class CredentialTypeSchemasUseCaseImpl (
                             schemaName,
                             cacheSequence
                         ) { result ->
-                            result.data?.let { credentialTypeSchemasMap[schemaName] = it }
+                            result.data?.let { credentialTypeSchemasStorage.add(schemaName, it) }
                         }
                     }
                 }
@@ -50,12 +71,12 @@ internal class CredentialTypeSchemasUseCaseImpl (
             val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())
             allFutures.join()
 
-            if (credentialTypeSchemasMap.isEmpty()) {
+            if (credentialTypeSchemasStorage.isEmpty()) {
                 VCLLog.e(TAG, "Credential type schemas were not fount.")
             } else {
                 executor.runOnMain {
                     completionBlock(VCLResult.Success(
-                        VCLCredentialTypeSchemas(credentialTypeSchemasMap)
+                        VCLCredentialTypeSchemas(credentialTypeSchemasStorage.get())
                     ))
                 }
             }
