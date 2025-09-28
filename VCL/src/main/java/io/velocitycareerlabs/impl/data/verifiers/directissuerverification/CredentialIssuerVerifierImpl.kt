@@ -15,23 +15,15 @@ import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLServiceType
 import io.velocitycareerlabs.api.entities.VCLServiceTypes
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.data.infrastructure.network.Request
-import io.velocitycareerlabs.impl.data.repositories.HeaderKeys
-import io.velocitycareerlabs.impl.data.repositories.HeaderValues
-import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.VerificationUtils
-import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
+import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.repositories.CredentialSubjectContextRepository
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
-import io.velocitycareerlabs.impl.extensions.toJsonObject
-import io.velocitycareerlabs.impl.extensions.toMap
 import io.velocitycareerlabs.impl.utils.VCLLog
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CopyOnWriteArrayList
-import kotlin.collections.get
 
 internal class CredentialIssuerVerifierImpl(
     private val credentialTypesModel: CredentialTypesModel,
-    private val networkService: NetworkService
+    private val credentialSubjectContextRepository: CredentialSubjectContextRepository
 ): CredentialIssuerVerifier {
     val TAG = CredentialIssuerVerifierImpl::class.java.simpleName
 
@@ -193,29 +185,18 @@ internal class CredentialIssuerVerifierImpl(
 
         val completableFutures = credentialSubjectContexts.map { credentialSubjectContext ->
             CompletableFuture.supplyAsync {
-                networkService.sendRequest(
-                    endpoint = credentialSubjectContext as? String ?: "",
-                    method = Request.HttpMethod.GET,
-                    headers = listOf(
-                        Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)
-                    ),
-                    completionBlock = { result ->
-                        result.handleResult({ ldContextResponse ->
-                            ldContextResponse.payload.toJsonObject()?.toMap()?.let {
-                                completeContextsStorage.append(it)
-                            } ?: run {
-                                VCLLog.e(
-                                    TAG,
-                                    "Unexpected LD-Context payload:\n${ldContextResponse.payload}"
-                                )
-                            }
-                        }, { error ->
-                            VCLLog.e(
-                                TAG,
-                                "Error fetching $credentialSubjectContext:\n${error.toJsonObject()}"
-                            )
-                        })
+                credentialSubjectContextRepository.getCredentialSubjectContext(
+                    credentialSubjectContext as? String ?: ""
+                ) { result ->
+                    result.handleResult({ contextMap ->
+                        completeContextsStorage.append(contextMap)
+                    }, { error ->
+                        VCLLog.e(
+                            TAG,
+                            "Error fetching $credentialSubjectContext:\n${error.toJsonObject()}"
+                        )
                     })
+                }
             }
         }
         val allFutures = CompletableFuture.allOf(*completableFutures.toTypedArray())

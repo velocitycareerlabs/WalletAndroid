@@ -31,6 +31,7 @@ import io.velocitycareerlabs.impl.data.verifiers.CredentialManifestByDeepLinkVer
 import io.velocitycareerlabs.impl.data.verifiers.CredentialsByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.data.verifiers.OffersByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.data.verifiers.PresentationRequestByDeepLinkVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.repositories.CredentialSubjectContextRepositoryImpl
 import io.velocitycareerlabs.impl.domain.models.*
 import io.velocitycareerlabs.impl.domain.usecases.*
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
@@ -270,7 +271,9 @@ internal object VclBlocksProvider {
                 if (isDirectIssuerCheckOn) {
                         credentialIssuerVerifier = CredentialIssuerVerifierImpl(
                                 credentialTypesModel,
-                                NetworkServiceImpl()
+                                CredentialSubjectContextRepositoryImpl(
+                                        NetworkServiceImpl()
+                                )
                         )
                 }
                 return FinalizeOffersUseCaseImpl(
