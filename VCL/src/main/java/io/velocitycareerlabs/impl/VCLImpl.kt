@@ -63,7 +63,7 @@ internal class VCLImpl: VCL {
     private lateinit var jwtServiceUseCase: JwtServiceUseCase
     private lateinit var keyServiceUseCase: KeyServiceUseCase
 
-    private var initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
+    private val initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
     private lateinit var profileServiceTypeVerifier: ProfileServiceTypeVerifier
 
     override fun initialize(
@@ -77,8 +77,6 @@ internal class VCLImpl: VCL {
         initGlobalConfigurations()
 
         printVersion()
-
-        this.initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
 
         cacheRemoteData(
             context = context.applicationContext,

@@ -7,7 +7,7 @@
 
 package io.velocitycareerlabs.utils
 
-import io.velocitycareerlabs.impl.data.verifiers.VerificationUtils
+import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.VerificationUtils
 import org.junit.Test
 
 class VerificationUtilsTest {

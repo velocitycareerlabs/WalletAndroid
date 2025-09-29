@@ -8,22 +8,25 @@
 package io.velocitycareerlabs.impl.utils
 
 import io.velocitycareerlabs.api.entities.error.VCLError
+import java.util.Collections
+import java.util.concurrent.atomic.AtomicInteger
 
 internal class InitializationWatcher(private val initAmount: Int) {
-    private var initCount = 0
+    private val initCount = AtomicInteger(0)
 
-    private var errors: ArrayList<VCLError> = arrayListOf()
+    private val errors = Collections.synchronizedList(mutableListOf<VCLError>())
 
-    fun onInitializedModel(error: VCLError?, enforceFailure: Boolean=false): Boolean{
-        initCount++
-        error?.let{ errors.add(it) }
+    fun onInitializedModel(error: VCLError?, enforceFailure: Boolean = false): Boolean {
+        initCount.incrementAndGet()
+        error?.let { errors.add(it) }
         return isInitializationComplete(enforceFailure)
     }
+
     fun firstError(): VCLError? {
-        return if(errors.isNotEmpty()) errors.first()
-        else null
+        return errors.firstOrNull()
     }
-    private fun isInitializationComplete(enforceFailure: Boolean): Boolean{
-        return initCount == initAmount || enforceFailure
+
+    private fun isInitializationComplete(enforceFailure: Boolean): Boolean {
+        return initCount.get() == initAmount || enforceFailure
     }
 }

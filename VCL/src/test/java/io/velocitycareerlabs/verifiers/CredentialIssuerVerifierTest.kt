@@ -15,7 +15,8 @@ import io.velocitycareerlabs.api.entities.VCLOffers
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.api.entities.handleResult
-import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.CredentialIssuerVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.repositories.CredentialSubjectContextRepositoryImpl
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialIssuerVerifier
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.extensions.toJwtList
@@ -142,85 +143,113 @@ internal class CredentialIssuerVerifierTest {
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+            )
         )
         subject2 = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+            )
         )
         subject3 = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.IssuerCategoryNotaryIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+            )
         )
         subject4 = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.IssuerCategoryNotaryIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+            )
         )
         subject5 = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            )
         )
         subject6 = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+            )
         )
         subject7 = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.IssuerCategoryNotaryIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+            )
         )
         subject8 = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+            )
         )
         subject9 = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.IssuerCategoryIdDocumentIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+            )
         )
         subject10 = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.IssuerCategoryNotaryContactIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+            )
         )
         subject11 = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+            )
         )
         subject12 = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
             ),
-            NetworkServiceSuccess(validResponse = ""),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = "")
+            )
         )
         subject13 = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10JsonldWithoutPrimaryOrganization),
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10JsonldWithoutPrimaryOrganization)
+            )
         )
         subjectQa = CredentialIssuerVerifierImpl(
             CredentialTypesModelMock(
                 issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
             ),
-            NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10JsonldQa)
+            CredentialSubjectContextRepositoryImpl(
+                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10JsonldQa)
+            )
         )
     }
 
@@ -258,23 +287,24 @@ internal class CredentialIssuerVerifierTest {
         }
     }
 
-//    @Test
-//    fun testVerifyOpenBadgeCredentialSuccess() {
-//        subject1.verifyCredentials(
-//            jwtCredentials = CredentialMocks.JwtCredentialsOpenBadgeValid.toJwtList()!!,
-//            finalizeOffersDescriptor = finalizeOffersDescriptorOfRegularIssuer,
-//        ) { verificationResult ->
-//            verificationResult.handleResult(
-//                successHandler = {
-//                    assert(it)
-//                },
-//                errorHandler = { error ->
-//                    assert(false) { "${error.toJsonObject()}" }
-//                }
-//            )
-//        }
-//    }
+    @Test
+    fun testVerifyOpenBadgeCredentialSuccess() {
+        subject1.verifyCredentials(
+            jwtCredentials = CredentialMocks.JwtCredentialsOpenBadgeValid.toJwtList()!!,
+            finalizeOffersDescriptor = finalizeOffersDescriptorOfRegularIssuer,
+        ) { verificationResult ->
+            verificationResult.handleResult(
+                successHandler = {
+                    assert(it)
+                },
+                errorHandler = { error ->
+                    assert(false) { "${error.toJsonObject()}" }
+                }
+            )
+        }
+    }
 
+//    K is null => verification passed
 //    @Test
 //    fun testVerifyOpenBadgeCredentialError() {
 //        subject2.verifyCredentials(
@@ -283,10 +313,10 @@ internal class CredentialIssuerVerifierTest {
 //        ) { verificationResult ->
 //            verificationResult.handleResult(
 //                successHandler = {
-//                    assert(it)
+//                    assert(false) { "${VCLErrorCode.IssuerRequiresNotaryPermission.value} error code is expected" }
 //                },
 //                errorHandler = { error ->
-//                    assert(false) { "${error.toJsonObject()}" }
+//                    assert(error.errorCode == VCLErrorCode.IssuerRequiresNotaryPermission.value)
 //                }
 //            )
 //        }

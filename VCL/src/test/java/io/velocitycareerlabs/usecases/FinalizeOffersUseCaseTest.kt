@@ -18,9 +18,10 @@ import io.velocitycareerlabs.impl.data.repositories.ResolveDidDocumentRepository
 import io.velocitycareerlabs.impl.data.usecases.FinalizeOffersUseCaseImpl
 import io.velocitycareerlabs.impl.data.usecases.GenerateOffersUseCaseImpl
 import io.velocitycareerlabs.impl.data.verifiers.CredentialDidVerifierImpl
-import io.velocitycareerlabs.impl.data.verifiers.CredentialIssuerVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.CredentialIssuerVerifierImpl
 import io.velocitycareerlabs.impl.data.verifiers.CredentialsByDeepLinkVerifierImpl
 import io.velocitycareerlabs.impl.data.verifiers.OffersByDeepLinkVerifierImpl
+import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.repositories.CredentialSubjectContextRepositoryImpl
 import io.velocitycareerlabs.impl.domain.usecases.FinalizeOffersUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
@@ -148,7 +149,9 @@ internal class FinalizeOffersUseCaseTest {
                 CredentialTypesModelMock(
                     issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
                 ),
-                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+                CredentialSubjectContextRepositoryImpl(
+                    NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+                )
             ),
             CredentialDidVerifierImpl(),
             CredentialsByDeepLinkVerifierImpl(
@@ -199,7 +202,9 @@ internal class FinalizeOffersUseCaseTest {
                 CredentialTypesModelMock(
                     issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
                 ),
-                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+                CredentialSubjectContextRepositoryImpl(
+                    NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+                )
             ),
             CredentialDidVerifierImpl(),
             CredentialsByDeepLinkVerifierImpl(
@@ -251,7 +256,9 @@ internal class FinalizeOffersUseCaseTest {
                 CredentialTypesModelMock(
                     issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
                 ),
-                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+                CredentialSubjectContextRepositoryImpl(
+                    NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+                )
             ),
             CredentialDidVerifierImpl(),
             CredentialsByDeepLinkVerifierImpl(
@@ -292,7 +299,9 @@ internal class FinalizeOffersUseCaseTest {
                 CredentialTypesModelMock(
                     issuerCategory = CredentialTypesModelMock.issuerCategoryRegularIssuer
                 ),
-                NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld),
+                CredentialSubjectContextRepositoryImpl(
+                    NetworkServiceSuccess(validResponse = JsonLdMocks.Layer1v10Jsonld)
+                )
             ),
             CredentialDidVerifierImpl(),
             CredentialsByDeepLinkVerifierImpl(

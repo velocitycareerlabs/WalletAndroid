@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.impl.data.verifiers
+package io.velocitycareerlabs.impl.data.verifiers.directissuerverification
 
 import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
 import io.velocitycareerlabs.api.entities.VCLJwt
