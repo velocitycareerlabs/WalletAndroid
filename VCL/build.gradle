@@ -17,11 +17,11 @@ version = publishVersion
 
 android {
     namespace = publishGroupId
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = publishCode
         versionName = version
         consumerProguardFiles("consumer-rules.pro")
@@ -153,7 +153,7 @@ tasks.register("stageArtifacts", Copy) {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.16.0'
+    implementation 'androidx.core:core-ktx:1.17.0'
 
     implementation 'com.nimbusds:nimbus-jose-jwt:10.5'
     implementation "androidx.security:security-crypto:1.1.0"
@@ -166,7 +166,7 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.16'
 
     // DON'T upgrade yet!!!
-    testImplementation 'io.mockk:mockk:1.14.2'
+    testImplementation 'io.mockk:mockk:1.14.6'
 
     testImplementation "org.mockito:mockito-inline:5.2.0"
     // Required -- JSON framework
