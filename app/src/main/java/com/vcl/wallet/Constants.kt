@@ -125,18 +125,7 @@ object Constants {
                 ),
         )
 
-    val CredentialTypes =
-        listOf(
-            "EducationDegreeRegistrationV1.0",
-            "EducationDegreeStudyV1.0",
-            "EducationDegreeGraduationV1.0",
-            "EmploymentPastV1.1",
-            "Badge",
-            "BadgeV1.1",
-            "OpenBadgeV1.0",
-            "OpenBadgeV2.0",
-            "OpenBadgeCredential",
-        )
+    val CredentialTypes = listOf<String>()
 
     const val ResidentPermitV10 = "ResidentPermitV1.0"
 
