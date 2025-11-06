@@ -134,9 +134,16 @@ internal class CredentialIssuerVerifierImpl(
         permittedServiceCategory: VCLServiceTypes,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        if (permittedServiceCategory.contains(VCLServiceType.NotaryIssuer)) {
+        if (
+            permittedServiceCategory.contains(VCLServiceType.NotaryIssuer) ||
+            permittedServiceCategory.contains(VCLServiceType.NotaryWorkPermitIssuer)
+        ) {
             completionBlock(VCLResult.Success(true))
-        } else if (permittedServiceCategory.contains(VCLServiceType.Issuer)) {
+        } else if (
+            permittedServiceCategory.contains(VCLServiceType.Issuer) || 
+            permittedServiceCategory.contains(VCLServiceType.CareerIssuer) ||
+            permittedServiceCategory.contains(VCLServiceType.WorkPermitIssuer)
+        ) {
             VerificationUtils.getCredentialSubjectFromCredential(jwtCredential)?.let { credentialSubject ->
                 VerificationUtils.getContextsFromCredential(jwtCredential)?.let { credentialContexts ->
                     resolveCredentialSubjectContexts(credentialContexts) { credentialSubjectContextsResult ->
