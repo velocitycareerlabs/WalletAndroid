@@ -45,5 +45,7 @@ internal class CredentialTypesModelMock(
         const val IssuerCategoryNotaryIdDocumentIssuer = "NotaryIdDocumentIssuer"
         const val IssuerCategoryContactIssuer = "ContactIssuer"
         const val IssuerCategoryNotaryContactIssuer = "NotaryContactIssuer"
+        const val IssuerCategoryWorkPermitIssuer = "WorkPermitIssuer"
+        const val IssuerCategoryNotaryWorkPermitIssuer = "NotaryWorkPermitIssuer"
     }
 }

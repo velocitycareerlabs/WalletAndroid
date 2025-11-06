@@ -17,7 +17,9 @@ data class VCLServiceTypes(
             VCLIssuingType.Career -> listOf(
                 VCLServiceType.Issuer,
                 VCLServiceType.CareerIssuer,
-                VCLServiceType.NotaryIssuer
+                VCLServiceType.NotaryIssuer,
+                VCLServiceType.WorkPermitIssuer,
+                VCLServiceType.NotaryWorkPermitIssuer
             )
             VCLIssuingType.Identity -> listOf(
                 VCLServiceType.IdentityIssuer,
@@ -34,7 +36,9 @@ data class VCLServiceTypes(
                 VCLServiceType.IdDocumentIssuer,
                 VCLServiceType.NotaryIdDocumentIssuer,
                 VCLServiceType.ContactIssuer,
-                VCLServiceType.NotaryContactIssuer
+                VCLServiceType.NotaryContactIssuer,
+                VCLServiceType.WorkPermitIssuer,
+                VCLServiceType.NotaryWorkPermitIssuer
             )
             VCLIssuingType.Undefined -> listOf(VCLServiceType.Undefined)
         }

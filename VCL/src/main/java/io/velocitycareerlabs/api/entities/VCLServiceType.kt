@@ -18,6 +18,8 @@ enum class VCLServiceType(val value: String) {
     NotaryIdDocumentIssuer("NotaryIdDocumentIssuer"),
     ContactIssuer("ContactIssuer"),
     NotaryContactIssuer("NotaryContactIssuer"),
+    WorkPermitIssuer("WorkPermitIssuer"),
+    NotaryWorkPermitIssuer("NotaryWorkPermitIssuer"),
 
     Undefined("Undefined");
 
@@ -46,6 +48,12 @@ enum class VCLServiceType(val value: String) {
             }
             if(value.contains(CareerIssuer.value)) {
                 return CareerIssuer
+            }
+            if(value.contains(NotaryWorkPermitIssuer.value)) {
+                return NotaryWorkPermitIssuer
+            }
+            if(value.contains(WorkPermitIssuer.value)) {
+                return WorkPermitIssuer
             }
             if(value.contains(Issuer.value)) {
                 return Issuer
