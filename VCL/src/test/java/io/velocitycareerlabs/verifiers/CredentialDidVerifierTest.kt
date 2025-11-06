@@ -40,6 +40,9 @@ internal class CredentialDidVerifierTest {
     lateinit var finalizeOffersDescriptorOfNotaryIssuer: VCLFinalizeOffersDescriptor
     lateinit var credentialManifestFromNotaryIssuer: VCLCredentialManifest
 
+    lateinit var finalizeOffersDescriptorOfNotaryWorkPermitIssuer: VCLFinalizeOffersDescriptor
+    lateinit var credentialManifestFromNotaryWorkPermitIssuer: VCLCredentialManifest
+
     lateinit var finalizeOffersDescriptorOfRegularIssuer: VCLFinalizeOffersDescriptor
     lateinit var credentialManifestFromRegularIssuer: VCLCredentialManifest
 
@@ -52,6 +55,18 @@ internal class CredentialDidVerifierTest {
         )
         finalizeOffersDescriptorOfNotaryIssuer = VCLFinalizeOffersDescriptor(
             credentialManifest = credentialManifestFromNotaryIssuer,
+            challenge = OffersMock.challenge,
+            approvedOfferIds = listOf(),
+            rejectedOfferIds = listOf()
+        )
+
+        credentialManifestFromNotaryWorkPermitIssuer = VCLCredentialManifest(
+            jwt = VCLJwt(CredentialManifestMocks.JwtCredentialManifestFromNotaryWorkPermitIssuer),
+            verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileOfNotaryWorkPermitIssuer.toJsonObject()!!),
+            didJwk = DidJwkMocks.DidJwk
+        )
+        finalizeOffersDescriptorOfNotaryWorkPermitIssuer = VCLFinalizeOffersDescriptor(
+            credentialManifest = credentialManifestFromNotaryWorkPermitIssuer,
             challenge = OffersMock.challenge,
             approvedOfferIds = listOf(),
             rejectedOfferIds = listOf()
@@ -165,6 +180,29 @@ internal class CredentialDidVerifierTest {
             verifiableCredentialsResult.handleResult(
                 successHandler = { verifiableCredentials ->
                     assert(verifiableCredentials.passedCredentials.isEmpty())
+                    assert(verifiableCredentials.failedCredentials.isEmpty())
+                },
+                errorHandler = { error ->
+                    assert(false) { "${error.toJsonObject()}" }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testVerifyNotaryWorkPermissionCredentialsSuccess() {
+        subject.verifyCredentials(
+            jwtCredentials = CredentialMocks.JwtCredentialsFromNotaryWorkPermitIssuer.toJwtList()!!,
+            finalizeOffersDescriptor = finalizeOffersDescriptorOfNotaryWorkPermitIssuer
+        ) { verifiableCredentialsResult ->
+            verifiableCredentialsResult.handleResult(
+                successHandler = { verifiableCredentials ->
+                    assert(verifiableCredentials.passedCredentials.size == 1)
+                    assert(
+                        verifiableCredentials.passedCredentials.find {
+                            it.encodedJwt == CredentialMocks.JwtCredentialCertificationFromNotaryWorkPermitIssuer
+                        } != null
+                    )
                     assert(verifiableCredentials.failedCredentials.isEmpty())
                 },
                 errorHandler = { error ->
