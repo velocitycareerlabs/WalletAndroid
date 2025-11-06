@@ -141,6 +141,7 @@ internal class CredentialIssuerVerifierImpl(
             completionBlock(VCLResult.Success(true))
         } else if (
             permittedServiceCategory.contains(VCLServiceType.Issuer) || 
+            permittedServiceCategory.contains(VCLServiceType.CareerIssuer) ||
             permittedServiceCategory.contains(VCLServiceType.WorkPermitIssuer)
         ) {
             VerificationUtils.getCredentialSubjectFromCredential(jwtCredential)?.let { credentialSubject ->
