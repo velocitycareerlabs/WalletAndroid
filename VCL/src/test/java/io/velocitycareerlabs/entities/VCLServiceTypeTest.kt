@@ -22,6 +22,8 @@ class VCLServiceTypeTest {
         assert(VCLServiceType.fromString(value = "NotaryIdDocumentIssuer") == VCLServiceType.NotaryIdDocumentIssuer)
         assert(VCLServiceType.fromString(value = "ContactIssuer") == VCLServiceType.ContactIssuer)
         assert(VCLServiceType.fromString(value = "NotaryContactIssuer") == VCLServiceType.NotaryContactIssuer)
+        assert(VCLServiceType.fromString(value = "WorkPermitIssuer") == VCLServiceType.WorkPermitIssuer)
+        assert(VCLServiceType.fromString(value = "NotaryWorkPermitIssuer") == VCLServiceType.NotaryWorkPermitIssuer)
         assert(VCLServiceType.fromString(value = "OtherService") == VCLServiceType.Undefined)
         assert(VCLServiceType.fromString(value = "Undefined") == VCLServiceType.Undefined)
     }
@@ -37,6 +39,8 @@ class VCLServiceTypeTest {
         assert(VCLServiceType.fromString(value = "NotaryIdDocumentIssuer05%#Rg&*") == VCLServiceType.NotaryIdDocumentIssuer)
         assert(VCLServiceType.fromString(value = "ContactIssuer05%#Rg&*") == VCLServiceType.ContactIssuer)
         assert(VCLServiceType.fromString(value = "NotaryContactIssuer05%#Rg&*") == VCLServiceType.NotaryContactIssuer)
+        assert(VCLServiceType.fromString(value = "WorkPermitIssuer05%#Rg&*") == VCLServiceType.WorkPermitIssuer)
+        assert(VCLServiceType.fromString(value = "NotaryWorkPermitIssuer05%#Rg&*") == VCLServiceType.NotaryWorkPermitIssuer)
         assert(VCLServiceType.fromString(value = "ksdjhkD#OtherService959)%") == VCLServiceType.Undefined)
         assert(VCLServiceType.fromString(value = "#Wfg85\$Undefined)%dgsc") == VCLServiceType.Undefined)
         assert(VCLServiceType.fromString(value = "") == VCLServiceType.Undefined)

@@ -25,7 +25,9 @@ class VCLServiceTypesTest {
                 VCLServiceType.IdDocumentIssuer,
                 VCLServiceType.NotaryIdDocumentIssuer,
                 VCLServiceType.ContactIssuer,
-                VCLServiceType.NotaryContactIssuer
+                VCLServiceType.NotaryContactIssuer,
+                VCLServiceType.WorkPermitIssuer,
+                VCLServiceType.NotaryWorkPermitIssuer
             )
         )
 
@@ -38,6 +40,8 @@ class VCLServiceTypesTest {
         assert(serviceTypes.contains(VCLServiceType.NotaryIdDocumentIssuer))
         assert(serviceTypes.contains(VCLServiceType.ContactIssuer))
         assert(serviceTypes.contains(VCLServiceType.NotaryContactIssuer))
+        assert(serviceTypes.contains(VCLServiceType.WorkPermitIssuer))
+        assert(serviceTypes.contains(VCLServiceType.NotaryWorkPermitIssuer))
 
         assert(serviceTypes.containsAtLeastOneOf(VCLServiceTypes(
             listOf(
@@ -106,6 +110,8 @@ class VCLServiceTypesTest {
         assert(!serviceTypes.contains(VCLServiceType.NotaryIdDocumentIssuer))
         assert(!serviceTypes.contains(VCLServiceType.ContactIssuer))
         assert(!serviceTypes.contains(VCLServiceType.NotaryContactIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.WorkPermitIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.NotaryWorkPermitIssuer))
         assert(!serviceTypes.contains(VCLServiceType.Undefined))
 
         assert(!serviceTypes.containsAtLeastOneOf(VCLServiceTypes(
@@ -118,7 +124,9 @@ class VCLServiceTypesTest {
                 VCLServiceType.IdDocumentIssuer,
                 VCLServiceType.NotaryIdDocumentIssuer,
                 VCLServiceType.ContactIssuer,
-                VCLServiceType.NotaryContactIssuer
+                VCLServiceType.NotaryContactIssuer,
+                VCLServiceType.WorkPermitIssuer,
+                VCLServiceType.NotaryWorkPermitIssuer,
             ))))
     }
 
@@ -129,6 +137,8 @@ class VCLServiceTypesTest {
         assert(serviceTypes.contains(VCLServiceType.Issuer))
         assert(serviceTypes.contains(VCLServiceType.CareerIssuer))
         assert(serviceTypes.contains(VCLServiceType.NotaryIssuer))
+        assert(serviceTypes.contains(VCLServiceType.WorkPermitIssuer))
+        assert(serviceTypes.contains(VCLServiceType.NotaryWorkPermitIssuer))
 
         assert(serviceTypes.containsAtLeastOneOf(VCLServiceTypes(
             listOf(
@@ -169,6 +179,8 @@ class VCLServiceTypesTest {
         assert(!serviceTypes.contains(VCLServiceType.Issuer))
         assert(!serviceTypes.contains(VCLServiceType.CareerIssuer))
         assert(!serviceTypes.contains(VCLServiceType.NotaryIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.WorkPermitIssuer))
+        assert(!serviceTypes.contains(VCLServiceType.NotaryWorkPermitIssuer))
         assert(!serviceTypes.contains(VCLServiceType.Undefined))
 
         assert(!serviceTypes.containsAtLeastOneOf(VCLServiceTypes(
@@ -187,6 +199,8 @@ class VCLServiceTypesTest {
         assert(serviceTypes.contains(VCLServiceType.Issuer))
         assert(serviceTypes.contains(VCLServiceType.CareerIssuer))
         assert(serviceTypes.contains(VCLServiceType.NotaryIssuer))
+        assert(serviceTypes.contains(VCLServiceType.WorkPermitIssuer))
+        assert(serviceTypes.contains(VCLServiceType.NotaryWorkPermitIssuer))
 
         assert(serviceTypes.containsAtLeastOneOf(VCLServiceTypes(
             listOf(
