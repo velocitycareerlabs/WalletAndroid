@@ -29,6 +29,10 @@ interface VCLSubmission {
             .putOpt(SubmissionCodingKeys.KeyIss, iss)
         val vp = JSONObject()
             .putOpt(
+                SubmissionCodingKeys.KeyContext,
+                SubmissionCodingKeys.ValueContextList.toJsonArray()
+            )
+            .putOpt(
                 SubmissionCodingKeys.KeyType,
                 SubmissionCodingKeys.ValueVerifiablePresentation
             )
@@ -50,7 +54,6 @@ interface VCLSubmission {
         .putOpt(SubmissionCodingKeys.KeyExchangeId, exchangeId)
         .putOpt(SubmissionCodingKeys.KeyJwtVp, jwt.encodedJwt)
         .putOpt(SubmissionCodingKeys.KeyPushDelegate, pushDelegate?.toJsonObject())
-        .putOpt(SubmissionCodingKeys.KeyContext, SubmissionCodingKeys.ValueContextList.toJsonArray())
 }
 
 object SubmissionCodingKeys {
