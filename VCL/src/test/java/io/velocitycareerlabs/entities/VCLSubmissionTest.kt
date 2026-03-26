@@ -22,6 +22,8 @@ import io.velocitycareerlabs.infrastructure.resources.valid.PresentationSubmissi
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
 import org.junit.Before
 import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
 import org.json.JSONArray
@@ -117,7 +119,7 @@ class VCLSubmissionTest {
         )
 
     private fun assertMatchesUuid(value: String?) {
-        assert(value != null && uuidRegex.matches(value))
+        assertTrue("Expected UUID but got: $value", value != null && uuidRegex.matches(value))
     }
 
     private fun normalizedPayload(payload: JSONObject): JSONObject {
@@ -194,7 +196,7 @@ class VCLSubmissionTest {
 
     @Test
     fun testContext() {
-        assert(SubmissionCodingKeys.KeyContext == "@context")
-        assert(SubmissionCodingKeys.ValueContextList == listOf("https://www.w3.org/2018/credentials/v1"))
+        assertEquals("@context", SubmissionCodingKeys.KeyContext)
+        assertEquals(listOf("https://www.w3.org/2018/credentials/v1"), SubmissionCodingKeys.ValueContextList)
     }
 }
