@@ -73,18 +73,13 @@ internal class NetworkServiceImpl: NetworkService {
             } else {
                 val errorMessageStream = connection.errorStream ?: connection.inputStream
                 val errorPayload = errorMessageStream.convertToString()
-                val errorPayloadJson = errorPayload.toJsonObject()
                 completionBlock(
                     VCLResult.Failure(
-                        if (errorPayloadJson != null) {
-                            VCLError.fromPayloadJson(errorPayloadJson)
-                        } else {
-                            VCLError(
-                                payload = errorPayload,
-                                message = errorPayload,
-                                statusCode = connection.responseCode
-                            )
-                        }
+                        createError(
+                            payload = errorPayload,
+                            contentType = connection.contentType,
+                            statusCode = connection.responseCode
+                        )
                     )
                 )
             }
@@ -169,4 +164,27 @@ internal class NetworkServiceImpl: NetworkService {
         VCLLog.d(TAG, "Response:\nstatus code: " + response.code)
         VCLLog.d(TAG, response.payload)
     }
+
+    private fun createError(
+        payload: String,
+        contentType: String?,
+        statusCode: Int,
+    ): VCLError {
+        if (isJsonContentType(contentType)) {
+            payload.toJsonObject()?.let { payloadJson ->
+                return VCLError.fromPayloadJson(payloadJson)
+            }
+        }
+
+        return VCLError(
+            payload = payload,
+            message = payload,
+            statusCode = statusCode
+        )
+    }
+
+    private fun isJsonContentType(contentType: String?): Boolean =
+        contentType?.let {
+            it.contains(Request.ContentTypeApplicationJson) || it.contains("+json")
+        } == true
 }
