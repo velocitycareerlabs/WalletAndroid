@@ -17,13 +17,16 @@ class VCLErrorTest {
     @Test
     fun testErrorFromPayload() {
         val error = VCLError.fromPayloadJson(JSONObject(ErrorMocks.Payload))
+        val expectedError = VCLError(
+            payload = JSONObject(ErrorMocks.Payload).toString(),
+            error = ErrorMocks.Error,
+            errorCode = ErrorMocks.ErrorCode,
+            requestId = ErrorMocks.RequestId,
+            message = ErrorMocks.Message,
+            statusCode = ErrorMocks.StatusCode
+        )
 
-        assert(JSONObject(error.payload ?: "").toString() == JSONObject(ErrorMocks.Payload).toString())
-        assert(error.error == ErrorMocks.Error)
-        assert(error.errorCode == ErrorMocks.ErrorCode)
-        assert(error.requestId == ErrorMocks.RequestId)
-        assert(error.message == ErrorMocks.Message)
-        assert(error.statusCode == ErrorMocks.StatusCode)
+        assert(error == expectedError)
     }
 
     @Test
@@ -35,26 +38,30 @@ class VCLErrorTest {
             message = ErrorMocks.Message,
             statusCode = ErrorMocks.StatusCode
         )
+        val expectedError = VCLError(
+            error = ErrorMocks.Error,
+            errorCode = ErrorMocks.ErrorCode,
+            requestId = ErrorMocks.RequestId,
+            message = ErrorMocks.Message,
+            statusCode = ErrorMocks.StatusCode
+        )
 
-        assert(error.payload == null)
-        assert(error.error == ErrorMocks.Error)
-        assert(error.errorCode == ErrorMocks.ErrorCode)
-        assert(error.requestId == ErrorMocks.RequestId)
-        assert(error.message == ErrorMocks.Message)
-        assert(error.statusCode == ErrorMocks.StatusCode)
+        assert(error == expectedError)
     }
 
     @Test
     fun testErrorToJsonFromPayload() {
         val error = VCLError.fromPayloadJson(JSONObject(ErrorMocks.Payload))
         val errorJsonObject = error.toJsonObject()
+        val expectedJsonObject = JSONObject()
+            .put(VCLError.KeyPayload, JSONObject(ErrorMocks.Payload).toString())
+            .put(VCLError.KeyError, ErrorMocks.Error)
+            .put(VCLError.KeyErrorCode, ErrorMocks.ErrorCode)
+            .put(VCLError.KeyRequestId, ErrorMocks.RequestId)
+            .put(VCLError.KeyMessage, ErrorMocks.Message)
+            .put(VCLError.KeyStatusCode, ErrorMocks.StatusCode)
 
-        assert(JSONObject(errorJsonObject.optString(VCLError.KeyPayload)).toString() == JSONObject(ErrorMocks.Payload).toString())
-        assert(errorJsonObject.optString(VCLError.KeyError) == ErrorMocks.Error)
-        assert(errorJsonObject.optString(VCLError.KeyErrorCode) == ErrorMocks.ErrorCode)
-        assert(errorJsonObject.optString(VCLError.KeyRequestId) == ErrorMocks.RequestId)
-        assert(errorJsonObject.optString(VCLError.KeyMessage) == ErrorMocks.Message)
-        assert(errorJsonObject.optInt(VCLError.KeyStatusCode) == ErrorMocks.StatusCode)
+        assert(errorJsonObject.similar(expectedJsonObject))
     }
 
     @Test
@@ -67,12 +74,13 @@ class VCLErrorTest {
             statusCode = ErrorMocks.StatusCode
         )
         val errorJsonObject = error.toJsonObject()
+        val expectedJsonObject = JSONObject()
+            .put(VCLError.KeyError, ErrorMocks.Error)
+            .put(VCLError.KeyErrorCode, ErrorMocks.ErrorCode)
+            .put(VCLError.KeyRequestId, ErrorMocks.RequestId)
+            .put(VCLError.KeyMessage, ErrorMocks.Message)
+            .put(VCLError.KeyStatusCode, ErrorMocks.StatusCode)
 
-        assert(errorJsonObject.optString(VCLError.KeyPayload) == "")
-        assert(errorJsonObject.optString(VCLError.KeyError) == ErrorMocks.Error)
-        assert(errorJsonObject.optString(VCLError.KeyErrorCode) == ErrorMocks.ErrorCode)
-        assert(errorJsonObject.optString(VCLError.KeyRequestId) == ErrorMocks.RequestId)
-        assert(errorJsonObject.optString(VCLError.KeyMessage) == ErrorMocks.Message)
-        assert(errorJsonObject.optInt(VCLError.KeyStatusCode) == ErrorMocks.StatusCode)
+        assert(errorJsonObject.similar(expectedJsonObject))
     }
 }
