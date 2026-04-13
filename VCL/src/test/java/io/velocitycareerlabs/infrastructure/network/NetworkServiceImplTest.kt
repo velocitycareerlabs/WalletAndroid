@@ -1,6 +1,4 @@
 /**
- * Created by OpenAI Codex on 13/04/2026.
- *
  * Copyright 2022 Velocity Career Labs inc.
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -15,6 +13,7 @@ import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.infrastructure.resources.valid.ErrorMocks
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -32,9 +31,10 @@ internal class NetworkServiceImplTest {
             responseCode = 400
         )
 
+        assertPayloadJsonEquals(payloadJson, error)
         assertEquals(
             VCLError(
-                payload = payloadJson.toString(),
+                payload = error.payload,
                 error = ErrorMocks.Error,
                 errorCode = ErrorMocks.ErrorCode,
                 requestId = ErrorMocks.RequestId,
@@ -55,9 +55,10 @@ internal class NetworkServiceImplTest {
             responseCode = 400
         )
 
+        assertPayloadJsonEquals(payloadJson, error)
         assertEquals(
             VCLError(
-                payload = payloadJson.toString(),
+                payload = error.payload,
                 error = ErrorMocks.Error,
                 errorCode = ErrorMocks.ErrorCode,
                 requestId = ErrorMocks.RequestId,
@@ -80,9 +81,10 @@ internal class NetworkServiceImplTest {
             responseCode = 422
         )
 
+        assertPayloadJsonEquals(payloadJson, error)
         assertEquals(
             VCLError(
-                payload = payloadJson.toString(),
+                payload = error.payload,
                 error = ErrorMocks.Error,
                 errorCode = ErrorMocks.ErrorCode,
                 requestId = ErrorMocks.RequestId,
@@ -164,6 +166,13 @@ internal class NetworkServiceImplTest {
 
         return (result as? VCLResult.Failure)?.error
             ?: error("Expected NetworkServiceImpl to return VCLResult.Failure")
+    }
+
+    private fun assertPayloadJsonEquals(
+        expectedPayloadJson: JSONObject,
+        error: VCLError,
+    ) {
+        assertTrue(JSONObject(error.payload!!).similar(expectedPayloadJson))
     }
 
     private class FakeHttpURLConnection(
