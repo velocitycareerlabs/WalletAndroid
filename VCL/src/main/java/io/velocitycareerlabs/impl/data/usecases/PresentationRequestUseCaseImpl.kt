@@ -122,7 +122,7 @@ internal class PresentationRequestUseCaseImpl(
             }
         else
             onError(
-                VCLError(message = "Failed  to verify: ${presentationRequest.jwt.payload}"),
+                VCLError(message = "Failed to verify: ${presentationRequest.jwt.payload}"),
                 completionBlock
             )
     }

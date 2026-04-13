@@ -73,23 +73,17 @@ internal class NetworkServiceImpl: NetworkService {
             } else {
                 val errorMessageStream = connection.errorStream ?: connection.inputStream
                 val errorPayload = errorMessageStream.convertToString()
+                val errorPayloadJson = errorPayload.toJsonObject()
                 completionBlock(
                     VCLResult.Failure(
-                        if (errorPayload.toJsonObject() != null) {
-                            VCLError.fromPayload(errorPayload)
+                        if (errorPayloadJson != null) {
+                            VCLError.fromPayload(errorPayload, errorPayloadJson)
                         } else {
                             VCLError(
+                                payload = errorPayload,
                                 message = errorPayload,
                                 statusCode = connection.responseCode
-                            ).let { errorObject ->
-                                VCLError(
-                                    payload = errorObject.toJsonObject().toString(),
-                                    errorCode = errorObject.errorCode,
-                                    requestId = errorObject.requestId,
-                                    message = errorObject.message,
-                                    statusCode = errorObject.statusCode
-                                )
-                            }
+                            )
                         }
                     )
                 )
