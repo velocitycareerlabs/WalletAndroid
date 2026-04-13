@@ -82,6 +82,31 @@ internal class NetworkServiceImplTest {
     }
 
     @Test
+    fun testJsonErrorBodyWithoutStatusCodeFallsBackToHttpStatus() {
+        val payloadJson = JSONObject(ErrorMocks.Payload).apply {
+            remove(VCLError.KeyStatusCode)
+        }
+
+        val error = sendFailure(
+            payload = payloadJson.toString(),
+            contentType = Request.ContentTypeApplicationJson,
+            responseCode = 422
+        )
+
+        assertEquals(
+            VCLError(
+                payload = payloadJson.toString(),
+                error = ErrorMocks.Error,
+                errorCode = ErrorMocks.ErrorCode,
+                requestId = ErrorMocks.RequestId,
+                message = ErrorMocks.Message,
+                statusCode = 422
+            ),
+            error
+        )
+    }
+
+    @Test
     fun testMalformedJsonBodyFallsBackToPlainTextError() {
         val malformedPayload = "{not valid json"
 

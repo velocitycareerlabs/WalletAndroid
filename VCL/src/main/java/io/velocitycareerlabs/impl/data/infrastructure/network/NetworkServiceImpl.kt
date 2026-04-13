@@ -172,7 +172,9 @@ internal class NetworkServiceImpl: NetworkService {
     ): VCLError {
         if (isJsonContentType(contentType)) {
             payload.toJsonObject()?.let { payloadJson ->
-                return VCLError.fromPayloadJson(payloadJson)
+                val payloadError = VCLError.fromPayloadJson(payloadJson)
+                return payloadError.takeIf { it.statusCode != null }
+                    ?: payloadError.copy(statusCode = statusCode)
             }
         }
 
