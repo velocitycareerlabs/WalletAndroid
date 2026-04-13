@@ -33,9 +33,9 @@ class PresentationRequestByDeepLinkVerifierTest {
             DidDocumentMocks.DidDocumentMock
         ) {
             it.handleResult({ isVerified ->
-                assert(isVerified)
+                assertTrue(isVerified)
             }, { error ->
-                assert(false) { "${error.toJsonObject()}" }
+                fail("${error.toJsonObject()}")
             })
         }
     }
@@ -51,9 +51,9 @@ class PresentationRequestByDeepLinkVerifierTest {
             DidDocumentMocks.DidDocumentMock
         ) {
             it.handleResult({ isVerified ->
-                assert(isVerified)
+                assertTrue(isVerified)
             }, { error ->
-                assert(false) { "${error.toJsonObject()}" }
+                fail("${error.toJsonObject()}")
             })
         }
     }
@@ -83,9 +83,9 @@ class PresentationRequestByDeepLinkVerifierTest {
             didDocumentWithPresentationRequestIss
         ) {
             it.handleResult({ isVerified ->
-                assert(isVerified)
+                assertTrue(isVerified)
             }, { error ->
-                assert(false) { "${error.toJsonObject()}" }
+                fail("${error.toJsonObject()}")
             })
         }
     }
@@ -100,9 +100,9 @@ class PresentationRequestByDeepLinkVerifierTest {
             DidDocumentMocks.DidDocumentWithWrongDidMock
         ) {
             it.handleResult({
-                assert(false) { "${VCLErrorCode.MismatchedPresentationRequestInspectorDid.value} error code is expected" }
+                fail("${VCLErrorCode.MismatchedPresentationRequestInspectorDid.value} error code is expected")
             }, { error ->
-                assert(error.errorCode == VCLErrorCode.MismatchedPresentationRequestInspectorDid.value)
+                assertEquals(VCLErrorCode.MismatchedPresentationRequestInspectorDid.value, error.errorCode)
             })
         }
     }
