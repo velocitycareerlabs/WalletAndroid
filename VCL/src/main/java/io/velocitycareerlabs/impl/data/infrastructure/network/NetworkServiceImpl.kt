@@ -77,7 +77,7 @@ internal class NetworkServiceImpl: NetworkService {
                 completionBlock(
                     VCLResult.Failure(
                         if (errorPayloadJson != null) {
-                            VCLError.fromPayload(errorPayload, errorPayloadJson)
+                            VCLError.fromPayloadJson(errorPayloadJson)
                         } else {
                             VCLError(
                                 payload = errorPayload,

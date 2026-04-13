@@ -19,7 +19,7 @@ data class VCLError(
     val statusCode: Int? = null,
 ) : Error(message) {
     @Deprecated(
-        message = "Use named arguments for human-readable text, or VCLError.fromPayload(...) for payload parsing.",
+        message = "Use named arguments for human-readable text, or VCLError.fromPayloadJson(...) for payload parsing.",
     )
     constructor(
         payload: String?,
@@ -56,27 +56,11 @@ data class VCLError(
         }
 
     companion object CodingKeys {
-        fun fromPayload(
-            payload: String?,
-            errorCode: String? = null,
-        ): VCLError {
-            val payloadJson = payload?.toJsonObject()
-            return if (payloadJson != null) {
-                fromPayload(payload, payloadJson, errorCode)
-            } else {
-                VCLError(
-                    payload = payload,
-                    errorCode = errorCode ?: VCLErrorCode.SdkError.value,
-                )
-            }
-        }
-
-        internal fun fromPayload(
-            payload: String?,
+        fun fromPayloadJson(
             payloadJson: JSONObject,
             errorCode: String? = null,
         ) = VCLError(
-            payload = payload,
+            payload = payloadJson.toString(),
             error = payloadJson.optNullableString(KeyError),
             errorCode = errorCode ?: payloadJson.optNullableString(KeyErrorCode)
                 ?: VCLErrorCode.SdkError.value,

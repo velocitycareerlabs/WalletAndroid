@@ -9,15 +9,16 @@ package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.infrastructure.resources.valid.ErrorMocks
+import org.json.JSONObject
 import org.junit.Test
 
 class VCLErrorTest {
 
     @Test
     fun testErrorFromPayload() {
-        val error = VCLError.fromPayload(ErrorMocks.Payload)
+        val error = VCLError.fromPayloadJson(JSONObject(ErrorMocks.Payload))
 
-        assert(error.payload == ErrorMocks.Payload)
+        assert(JSONObject(error.payload ?: "").toString() == JSONObject(ErrorMocks.Payload).toString())
         assert(error.error == ErrorMocks.Error)
         assert(error.errorCode == ErrorMocks.ErrorCode)
         assert(error.requestId == ErrorMocks.RequestId)
@@ -45,10 +46,10 @@ class VCLErrorTest {
 
     @Test
     fun testErrorToJsonFromPayload() {
-        val error = VCLError.fromPayload(ErrorMocks.Payload)
+        val error = VCLError.fromPayloadJson(JSONObject(ErrorMocks.Payload))
         val errorJsonObject = error.toJsonObject()
 
-        assert(errorJsonObject.optString(VCLError.KeyPayload) == ErrorMocks.Payload)
+        assert(JSONObject(errorJsonObject.optString(VCLError.KeyPayload)).toString() == JSONObject(ErrorMocks.Payload).toString())
         assert(errorJsonObject.optString(VCLError.KeyError) == ErrorMocks.Error)
         assert(errorJsonObject.optString(VCLError.KeyErrorCode) == ErrorMocks.ErrorCode)
         assert(errorJsonObject.optString(VCLError.KeyRequestId) == ErrorMocks.RequestId)
