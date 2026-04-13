@@ -52,7 +52,7 @@ internal class VCLJwtSignServiceRemoteImpl(
                         } ?: run {
                             completionBlock(
                                 VCLResult.Failure(
-                                VCLError(payload = "Failed to parse data from $jwtSignServiceUrl")
+                                    VCLError(message = "Failed to parse data from $jwtSignServiceUrl")
                                 )
                             )
                         }

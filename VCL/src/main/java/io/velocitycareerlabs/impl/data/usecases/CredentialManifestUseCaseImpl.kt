@@ -61,7 +61,7 @@ internal class CredentialManifestUseCaseImpl(
                                             )
                                         } ?: run {
                                         onError(
-                                            VCLError("public jwk not found for kid: ${credentialManifest.jwt.kid}"),
+                                            VCLError(message = "public jwk not found for kid: ${credentialManifest.jwt.kid}"),
                                             completionBlock
                                         )
                                     }
@@ -155,7 +155,7 @@ internal class CredentialManifestUseCaseImpl(
             }
         } else {
             onError(
-                VCLError("Failed to verify credentialManifest jwt:\n${credentialManifest.jwt}"),
+                VCLError(message = "Failed to verify credentialManifest jwt:\n${credentialManifest.jwt}"),
                 completionBlock
             )
         }

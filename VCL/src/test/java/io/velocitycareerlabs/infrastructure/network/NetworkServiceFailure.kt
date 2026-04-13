@@ -26,6 +26,6 @@ internal class NetworkServiceFailure(
         useCaches: Boolean,
         completionBlock: (VCLResult<Response>) -> Unit
     ) {
-        completionBlock(VCLResult.Failure(VCLError(errorMessage)))
+        completionBlock(VCLResult.Failure(VCLError(message = errorMessage)))
     }
 }

@@ -13,6 +13,7 @@ import io.velocitycareerlabs.api.entities.error.VCLStatusCode
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.extensions.convertToString
+import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.utils.VCLLog
 import java.io.*
 import java.net.HttpURLConnection
@@ -20,7 +21,9 @@ import java.net.URL
 import java.net.UnknownHostException
 import javax.net.ssl.HttpsURLConnection
 
-internal class NetworkServiceImpl: NetworkService {
+internal class NetworkServiceImpl(
+    private val connectionFactory: ((Request) -> HttpURLConnection)? = null,
+) : NetworkService {
     private val TAG = NetworkServiceImpl::class.simpleName
 
     override fun sendRequest(
@@ -71,9 +74,14 @@ internal class NetworkServiceImpl: NetworkService {
                 completionBlock(VCLResult.Success(response))
             } else {
                 val errorMessageStream = connection.errorStream ?: connection.inputStream
+                val errorPayload = errorMessageStream.convertToString()
                 completionBlock(
                     VCLResult.Failure(
-                        VCLError(payload = errorMessageStream.convertToString())
+                        createError(
+                            payload = errorPayload,
+                            contentType = connection.contentType,
+                            statusCode = connection.responseCode
+                        )
                     )
                 )
             }
@@ -127,11 +135,13 @@ internal class NetworkServiceImpl: NetworkService {
      * Returns new connection. referred to by given url.
      */
     private fun createConnection(request: Request): HttpURLConnection {
-        val connection = if (request.endpoint.startsWith("https")) {
-            URL(request.endpoint).openConnection() as HttpsURLConnection
-        } else {
-            URL(request.endpoint).openConnection() as HttpURLConnection
-        }
+        val connection =
+            connectionFactory?.invoke(request)
+                ?: if (request.endpoint.startsWith("https")) {
+                    URL(request.endpoint).openConnection() as HttpsURLConnection
+                } else {
+                    URL(request.endpoint).openConnection() as HttpURLConnection
+                }
         connection.connectTimeout = request.connectTimeOut
         connection.readTimeout = request.readTimeOut
         connection.requestMethod = request.method.value
@@ -158,4 +168,30 @@ internal class NetworkServiceImpl: NetworkService {
         VCLLog.d(TAG, "Response:\nstatus code: " + response.code)
         VCLLog.d(TAG, response.payload)
     }
+
+    private fun createError(
+        payload: String,
+        contentType: String?,
+        statusCode: Int,
+    ): VCLError {
+        if (isJsonContentType(contentType)) {
+            payload.toJsonObject()?.let { payloadJson ->
+                val payloadError = VCLError.fromPayloadJson(payloadJson)
+                return payloadError.takeIf { it.statusCode != null }
+                    ?: payloadError.copy(statusCode = statusCode)
+            }
+        }
+
+        return VCLError(
+            payload = payload,
+            message = payload,
+            statusCode = statusCode
+        )
+    }
+
+    private fun isJsonContentType(contentType: String?): Boolean =
+        contentType?.let {
+            it.contains(Request.ContentTypeApplicationJson, ignoreCase = true) ||
+                it.contains("+json", ignoreCase = true)
+        } == true
 }

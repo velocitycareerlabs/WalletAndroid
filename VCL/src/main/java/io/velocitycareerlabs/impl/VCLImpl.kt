@@ -203,7 +203,7 @@ internal class VCLImpl: VCL {
                                 )
                             }
                         } ?: run {
-                            errorHandler(VCLError("Failed to get credential type schemas"))
+                            errorHandler(VCLError(message = "Failed to get credential type schemas"))
                         }
                     }
                 },
@@ -256,7 +256,7 @@ internal class VCLImpl: VCL {
                 }
             )
         } ?: run {
-            VCLError("did was not found in $presentationRequestDescriptor").let {
+            VCLError(message = "did was not found in $presentationRequestDescriptor").let {
                 logError("getPresentationRequest::verifiedProfile", it)
                 errorHandler(it)
             }
@@ -347,7 +347,7 @@ internal class VCLImpl: VCL {
                 }
             )
         } ?: run {
-            VCLError("did was not found in $credentialManifestDescriptor").let {
+            VCLError(message = "did was not found in $credentialManifestDescriptor").let {
                 logError("getCredentialManifest::verifiedProfile", it)
                 errorHandler(it)
             }
@@ -477,7 +477,7 @@ internal class VCLImpl: VCL {
                 )
             }
         } ?: run {
-            val error = VCLError("No countries for getCredentialTypesUIFormSchema")
+            val error = VCLError(message = "No countries for getCredentialTypesUIFormSchema")
             logError("getCredentialTypesUIFormSchema", error)
             errorHandler(error)
         }

@@ -37,7 +37,7 @@ internal class CredentialSubjectContextRepositoryImpl(
                     ldContextResponse.payload.toJsonObject()?.toMap()?.let {
                         completionBlock(VCLResult.Success(it))
                     } ?: run {
-                        val error = VCLError("Unexpected LD-Context payload for $credentialSubjectContextEndpoint")
+                        val error = VCLError(message = "Unexpected LD-Context payload for $credentialSubjectContextEndpoint")
                         completionBlock(VCLResult.Failure(error))
                     }
                 }, { error ->

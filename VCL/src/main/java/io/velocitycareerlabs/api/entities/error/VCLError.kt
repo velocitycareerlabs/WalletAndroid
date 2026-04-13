@@ -18,6 +18,9 @@ data class VCLError(
     override val message: String? = null,
     val statusCode: Int? = null,
 ) : Error(message) {
+    @Deprecated(
+        message = "Use named arguments for human-readable text, or VCLError.fromPayloadJson(...) for payload parsing.",
+    )
     constructor(
         payload: String?,
         errorCode: String? = null,
@@ -53,6 +56,25 @@ data class VCLError(
         }
 
     companion object CodingKeys {
+        fun fromPayloadJson(
+            payloadJson: JSONObject,
+            errorCode: String? = null,
+        ) = VCLError(
+            payload = payloadJson.toString(),
+            error = payloadJson.optNullableString(KeyError),
+            errorCode = errorCode ?: payloadJson.optNullableString(KeyErrorCode)
+                ?: VCLErrorCode.SdkError.value,
+            requestId = payloadJson.optNullableString(KeyRequestId),
+            message = payloadJson.optNullableString(KeyMessage),
+            statusCode = payloadJson.optNullableInt(KeyStatusCode),
+        )
+
+        private fun JSONObject?.optNullableString(key: String): String? =
+            takeIf { it?.has(key) == true && !it.isNull(key) }?.optString(key)
+
+        private fun JSONObject?.optNullableInt(key: String): Int? =
+            takeIf { it?.has(key) == true && !it.isNull(key) }?.optInt(key)
+
         const val KeyPayload = "payload"
         const val KeyError = "error"
         const val KeyErrorCode = "errorCode"

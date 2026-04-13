@@ -9,20 +9,27 @@ package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.infrastructure.resources.valid.ErrorMocks
+import org.json.JSONObject
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class VCLErrorTest {
 
     @Test
     fun testErrorFromPayload() {
-        val error = VCLError(ErrorMocks.Payload)
+        val payloadJson = JSONObject(ErrorMocks.Payload)
+        val error = VCLError.fromPayloadJson(payloadJson)
+        val expectedError = VCLError(
+            payload = payloadJson.toString(),
+            error = ErrorMocks.Error,
+            errorCode = ErrorMocks.ErrorCode,
+            requestId = ErrorMocks.RequestId,
+            message = ErrorMocks.Message,
+            statusCode = ErrorMocks.StatusCode
+        )
 
-        assert(error.payload == ErrorMocks.Payload)
-        assert(error.error == ErrorMocks.Error)
-        assert(error.errorCode == ErrorMocks.ErrorCode)
-        assert(error.requestId == ErrorMocks.RequestId)
-        assert(error.message == ErrorMocks.Message)
-        assert(error.statusCode == ErrorMocks.StatusCode)
+        assertEquals(expectedError, error)
     }
 
     @Test
@@ -34,26 +41,31 @@ class VCLErrorTest {
             message = ErrorMocks.Message,
             statusCode = ErrorMocks.StatusCode
         )
+        val expectedError = VCLError(
+            error = ErrorMocks.Error,
+            errorCode = ErrorMocks.ErrorCode,
+            requestId = ErrorMocks.RequestId,
+            message = ErrorMocks.Message,
+            statusCode = ErrorMocks.StatusCode
+        )
 
-        assert(error.payload == null)
-        assert(error.error == ErrorMocks.Error)
-        assert(error.errorCode == ErrorMocks.ErrorCode)
-        assert(error.requestId == ErrorMocks.RequestId)
-        assert(error.message == ErrorMocks.Message)
-        assert(error.statusCode == ErrorMocks.StatusCode)
+        assertEquals(expectedError, error)
     }
 
     @Test
     fun testErrorToJsonFromPayload() {
-        val error = VCLError(ErrorMocks.Payload)
+        val payloadJson = JSONObject(ErrorMocks.Payload)
+        val error = VCLError.fromPayloadJson(payloadJson)
         val errorJsonObject = error.toJsonObject()
+        val expectedJsonObject = JSONObject()
+            .put(VCLError.KeyPayload, payloadJson.toString())
+            .put(VCLError.KeyError, ErrorMocks.Error)
+            .put(VCLError.KeyErrorCode, ErrorMocks.ErrorCode)
+            .put(VCLError.KeyRequestId, ErrorMocks.RequestId)
+            .put(VCLError.KeyMessage, ErrorMocks.Message)
+            .put(VCLError.KeyStatusCode, ErrorMocks.StatusCode)
 
-        assert(errorJsonObject.optString(VCLError.KeyPayload) == ErrorMocks.Payload)
-        assert(errorJsonObject.optString(VCLError.KeyError) == ErrorMocks.Error)
-        assert(errorJsonObject.optString(VCLError.KeyErrorCode) == ErrorMocks.ErrorCode)
-        assert(errorJsonObject.optString(VCLError.KeyRequestId) == ErrorMocks.RequestId)
-        assert(errorJsonObject.optString(VCLError.KeyMessage) == ErrorMocks.Message)
-        assert(errorJsonObject.optInt(VCLError.KeyStatusCode) == ErrorMocks.StatusCode)
+        assertTrue(errorJsonObject.similar(expectedJsonObject))
     }
 
     @Test
@@ -66,12 +78,13 @@ class VCLErrorTest {
             statusCode = ErrorMocks.StatusCode
         )
         val errorJsonObject = error.toJsonObject()
+        val expectedJsonObject = JSONObject()
+            .put(VCLError.KeyError, ErrorMocks.Error)
+            .put(VCLError.KeyErrorCode, ErrorMocks.ErrorCode)
+            .put(VCLError.KeyRequestId, ErrorMocks.RequestId)
+            .put(VCLError.KeyMessage, ErrorMocks.Message)
+            .put(VCLError.KeyStatusCode, ErrorMocks.StatusCode)
 
-        assert(errorJsonObject.optString(VCLError.KeyPayload) == "")
-        assert(errorJsonObject.optString(VCLError.KeyError) == ErrorMocks.Error)
-        assert(errorJsonObject.optString(VCLError.KeyErrorCode) == ErrorMocks.ErrorCode)
-        assert(errorJsonObject.optString(VCLError.KeyRequestId) == ErrorMocks.RequestId)
-        assert(errorJsonObject.optString(VCLError.KeyMessage) == ErrorMocks.Message)
-        assert(errorJsonObject.optInt(VCLError.KeyStatusCode) == ErrorMocks.StatusCode)
+        assertTrue(errorJsonObject.similar(expectedJsonObject))
     }
 }
