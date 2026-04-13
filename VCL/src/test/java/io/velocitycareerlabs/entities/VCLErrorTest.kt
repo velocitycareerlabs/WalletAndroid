@@ -16,9 +16,10 @@ class VCLErrorTest {
 
     @Test
     fun testErrorFromPayload() {
-        val error = VCLError.fromPayloadJson(JSONObject(ErrorMocks.Payload))
+        val payloadJson = JSONObject(ErrorMocks.Payload)
+        val error = VCLError.fromPayloadJson(payloadJson)
         val expectedError = VCLError(
-            payload = JSONObject(ErrorMocks.Payload).toString(),
+            payload = payloadJson.toString(),
             error = ErrorMocks.Error,
             errorCode = ErrorMocks.ErrorCode,
             requestId = ErrorMocks.RequestId,
@@ -51,10 +52,11 @@ class VCLErrorTest {
 
     @Test
     fun testErrorToJsonFromPayload() {
-        val error = VCLError.fromPayloadJson(JSONObject(ErrorMocks.Payload))
+        val payloadJson = JSONObject(ErrorMocks.Payload)
+        val error = VCLError.fromPayloadJson(payloadJson)
         val errorJsonObject = error.toJsonObject()
         val expectedJsonObject = JSONObject()
-            .put(VCLError.KeyPayload, JSONObject(ErrorMocks.Payload).toString())
+            .put(VCLError.KeyPayload, payloadJson.toString())
             .put(VCLError.KeyError, ErrorMocks.Error)
             .put(VCLError.KeyErrorCode, ErrorMocks.ErrorCode)
             .put(VCLError.KeyRequestId, ErrorMocks.RequestId)
