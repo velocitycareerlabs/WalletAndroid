@@ -14,6 +14,7 @@ import io.velocitycareerlabs.impl.data.infrastructure.network.NetworkServiceImpl
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.infrastructure.resources.valid.ErrorMocks
 import org.json.JSONObject
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import java.io.ByteArrayInputStream
@@ -24,7 +25,6 @@ import java.net.URLConnection
 import java.net.URLStreamHandler
 import java.net.URLStreamHandlerFactory
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.test.assertEquals
 
 internal class NetworkServiceImplTest {
     private lateinit var subject: NetworkServiceImpl
