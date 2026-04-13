@@ -24,7 +24,16 @@ data class VCLError(
     constructor(
         payload: String?,
         errorCode: String? = null,
-    ) : this(parsePayload(payload, payload?.toJsonObject(), errorCode))
+    ) : this(
+        payload = payload,
+        error = payload?.toJsonObject()?.optString(KeyError),
+        errorCode =
+            errorCode ?: payload?.toJsonObject()?.optString(KeyErrorCode)
+                ?: VCLErrorCode.SdkError.value,
+        requestId = payload?.toJsonObject()?.optString(KeyRequestId),
+        message = payload?.toJsonObject()?.optString(KeyMessage),
+        statusCode = payload?.toJsonObject()?.optInt(KeyStatusCode),
+    )
 
     constructor(
         exception: Exception,
@@ -50,44 +59,37 @@ data class VCLError(
         fun fromPayload(
             payload: String?,
             errorCode: String? = null,
-        ) = VCLError(parsePayload(payload, payload?.toJsonObject(), errorCode))
+        ): VCLError {
+            val payloadJson = payload?.toJsonObject()
+            return if (payloadJson != null) {
+                fromPayload(payload, payloadJson, errorCode)
+            } else {
+                VCLError(
+                    payload = payload,
+                    errorCode = errorCode ?: VCLErrorCode.SdkError.value,
+                )
+            }
+        }
 
         internal fun fromPayload(
             payload: String?,
             payloadJson: JSONObject,
             errorCode: String? = null,
-        ) = VCLError(parsePayload(payload, payloadJson, errorCode))
-
-        private fun parsePayload(
-            payload: String?,
-            payloadJson: JSONObject?,
-            errorCode: String?,
-        ): ParsedPayload {
-            return ParsedPayload(
-                payload = payload,
-                error = payloadJson.optNullableString(KeyError),
-                errorCode = errorCode ?: payloadJson.optNullableString(KeyErrorCode)
-                    ?: VCLErrorCode.SdkError.value,
-                requestId = payloadJson.optNullableString(KeyRequestId),
-                message = payloadJson.optNullableString(KeyMessage),
-                statusCode = payloadJson.optNullableInt(KeyStatusCode),
-            )
-        }
+        ) = VCLError(
+            payload = payload,
+            error = payloadJson.optNullableString(KeyError),
+            errorCode = errorCode ?: payloadJson.optNullableString(KeyErrorCode)
+                ?: VCLErrorCode.SdkError.value,
+            requestId = payloadJson.optNullableString(KeyRequestId),
+            message = payloadJson.optNullableString(KeyMessage),
+            statusCode = payloadJson.optNullableInt(KeyStatusCode),
+        )
 
         private fun JSONObject?.optNullableString(key: String): String? =
             takeIf { it?.has(key) == true && !it.isNull(key) }?.optString(key)
 
         private fun JSONObject?.optNullableInt(key: String): Int? =
             takeIf { it?.has(key) == true && !it.isNull(key) }?.optInt(key)
-
-        private data class ParsedPayload(
-            val payload: String?,
-            val error: String?,
-            val errorCode: String,
-            val requestId: String?,
-            val message: String?,
-            val statusCode: Int?,
-        )
 
         const val KeyPayload = "payload"
         const val KeyError = "error"
@@ -96,13 +98,4 @@ data class VCLError(
         const val KeyMessage = "message"
         const val KeyStatusCode = "statusCode"
     }
-
-    private constructor(parsedPayload: ParsedPayload) : this(
-        payload = parsedPayload.payload,
-        error = parsedPayload.error,
-        errorCode = parsedPayload.errorCode,
-        requestId = parsedPayload.requestId,
-        message = parsedPayload.message,
-        statusCode = parsedPayload.statusCode,
-    )
 }
