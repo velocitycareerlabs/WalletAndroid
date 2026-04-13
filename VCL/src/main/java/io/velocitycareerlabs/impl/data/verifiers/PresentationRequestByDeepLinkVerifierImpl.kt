@@ -25,8 +25,10 @@ internal class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByD
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
         deepLink.did?.let { deepLinkDid ->
-            if (didDocument.id == presentationRequest.iss && didDocument.id == deepLinkDid ||
-                didDocument.alsoKnownAs.contains(presentationRequest.iss) && didDocument.alsoKnownAs.contains(deepLinkDid)) {
+            if (
+                isDidBoundToDidDocument(presentationRequest.iss, didDocument) &&
+                isDidBoundToDidDocument(deepLinkDid, didDocument)
+            ) {
                 completionBlock(VCLResult.Success(true))
             } else {
                 onError(
@@ -35,8 +37,14 @@ internal class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByD
                     completionBlock = completionBlock
                 )
             }
-        }
+        } ?: onError(
+            errorMessage = "DID not found in deep link: ${deepLink.value}",
+            completionBlock = completionBlock,
+        )
     }
+
+    private fun isDidBoundToDidDocument(did: String, didDocument: VCLDidDocument): Boolean =
+        didDocument.id == did || didDocument.alsoKnownAs.contains(did)
 
     private fun onError(
         errorCode: VCLErrorCode = VCLErrorCode.SdkError,
