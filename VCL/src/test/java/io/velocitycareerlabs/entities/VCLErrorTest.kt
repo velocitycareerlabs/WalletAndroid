@@ -15,7 +15,7 @@ class VCLErrorTest {
 
     @Test
     fun testErrorFromPayload() {
-        val error = VCLError(ErrorMocks.Payload)
+        val error = VCLError.fromPayload(ErrorMocks.Payload)
 
         assert(error.payload == ErrorMocks.Payload)
         assert(error.error == ErrorMocks.Error)
@@ -45,7 +45,7 @@ class VCLErrorTest {
 
     @Test
     fun testErrorToJsonFromPayload() {
-        val error = VCLError(ErrorMocks.Payload)
+        val error = VCLError.fromPayload(ErrorMocks.Payload)
         val errorJsonObject = error.toJsonObject()
 
         assert(errorJsonObject.optString(VCLError.KeyPayload) == ErrorMocks.Payload)

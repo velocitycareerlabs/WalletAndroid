@@ -158,7 +158,11 @@ internal class CredentialIssuerVerifierImpl(
                             onError(
                                 VCLError(
                                     payload = error.payload,
-                                    errorCode = VCLErrorCode.InvalidCredentialSubjectContext.value
+                                    error = error.error,
+                                    errorCode = VCLErrorCode.InvalidCredentialSubjectContext.value,
+                                    requestId = error.requestId,
+                                    message = error.message,
+                                    statusCode = error.statusCode
                                 ),
                                 completionBlock
                             )

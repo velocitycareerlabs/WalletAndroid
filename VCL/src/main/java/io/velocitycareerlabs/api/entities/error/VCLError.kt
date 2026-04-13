@@ -18,6 +18,10 @@ data class VCLError(
     override val message: String? = null,
     val statusCode: Int? = null,
 ) : Error(message) {
+    @Deprecated(
+        message = "Use named arguments for human-readable text, or VCLError.fromPayload(...) for payload parsing.",
+        replaceWith = ReplaceWith("VCLError.fromPayload(payload, errorCode)")
+    )
     constructor(
         payload: String?,
         errorCode: String? = null,
@@ -53,6 +57,22 @@ data class VCLError(
         }
 
     companion object CodingKeys {
+        fun fromPayload(
+            payload: String?,
+            errorCode: String? = null,
+        ): VCLError {
+            val payloadJson = payload?.toJsonObject()
+            return VCLError(
+                payload = payload,
+                error = payloadJson?.optString(KeyError),
+                errorCode = errorCode ?: payloadJson?.optString(KeyErrorCode)
+                    ?: VCLErrorCode.SdkError.value,
+                requestId = payloadJson?.optString(KeyRequestId),
+                message = payloadJson?.optString(KeyMessage),
+                statusCode = payloadJson?.optInt(KeyStatusCode),
+            )
+        }
+
         const val KeyPayload = "payload"
         const val KeyError = "error"
         const val KeyErrorCode = "errorCode"

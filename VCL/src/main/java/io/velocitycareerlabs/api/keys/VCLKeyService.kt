@@ -28,7 +28,7 @@ interface VCLKeyService {
         signatureAlgorithm: VCLSignatureAlgorithm,
         completionBlock: (VCLResult<ECKey>) -> Unit
     ) {
-        completionBlock(VCLResult.Failure(VCLError(payload = "implemented for local crypto services only")))
+        completionBlock(VCLResult.Failure(VCLError(message = "implemented for local crypto services only")))
     }
     /**
      * implemented for local crypto services only
@@ -37,7 +37,7 @@ interface VCLKeyService {
         keyId: String,
         completionBlock: (VCLResult<ECKey>) -> Unit
     ) {
-        completionBlock(VCLResult.Failure(VCLError(payload = "implemented for local crypto services only")))
+        completionBlock(VCLResult.Failure(VCLError(message = "implemented for local crypto services only")))
     }
     /**
      * implemented for local crypto services only
@@ -46,6 +46,6 @@ interface VCLKeyService {
         ecKey: ECKey,
         completionBlock: (VCLResult<ECKey>) -> Unit
     ) {
-        completionBlock(VCLResult.Failure(VCLError(payload = "implemented for local crypto services only")))
+        completionBlock(VCLResult.Failure(VCLError(message = "implemented for local crypto services only")))
     }
 }

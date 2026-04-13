@@ -58,7 +58,7 @@ internal class PresentationRequestUseCaseImpl(
                                         )
                                     } ?: run {
                                         onError(
-                                            VCLError("public jwk not found for kid: ${presentationRequest.jwt.kid}"),
+                                            VCLError(message = "public jwk not found for kid: ${presentationRequest.jwt.kid}"),
                                             completionBlock
                                         )
                                     }
@@ -122,7 +122,7 @@ internal class PresentationRequestUseCaseImpl(
             }
         else
             onError(
-                VCLError("Failed  to verify: ${presentationRequest.jwt.payload}"),
+                VCLError(message = "Failed  to verify: ${presentationRequest.jwt.payload}"),
                 completionBlock
             )
     }

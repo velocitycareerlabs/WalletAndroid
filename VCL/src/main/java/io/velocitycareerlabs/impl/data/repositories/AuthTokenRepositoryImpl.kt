@@ -50,7 +50,7 @@ internal class AuthTokenRepositoryImpl(
                             } ?: run {
                                 completionBlock(
                                     VCLResult.Failure(
-                                        VCLError("Failed to parse: auth token response")
+                                        VCLError(message = "Failed to parse: auth token response")
                                     )
                                 )
                             }

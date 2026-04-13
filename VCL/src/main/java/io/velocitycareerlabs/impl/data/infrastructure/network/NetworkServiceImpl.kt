@@ -13,6 +13,7 @@ import io.velocitycareerlabs.api.entities.error.VCLStatusCode
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.extensions.convertToString
+import io.velocitycareerlabs.impl.extensions.toJsonObject
 import io.velocitycareerlabs.impl.utils.VCLLog
 import java.io.*
 import java.net.HttpURLConnection
@@ -71,9 +72,25 @@ internal class NetworkServiceImpl: NetworkService {
                 completionBlock(VCLResult.Success(response))
             } else {
                 val errorMessageStream = connection.errorStream ?: connection.inputStream
+                val errorPayload = errorMessageStream.convertToString()
                 completionBlock(
                     VCLResult.Failure(
-                        VCLError(payload = errorMessageStream.convertToString())
+                        if (errorPayload.toJsonObject() != null) {
+                            VCLError.fromPayload(errorPayload)
+                        } else {
+                            VCLError(
+                                message = errorPayload,
+                                statusCode = connection.responseCode
+                            ).let { errorObject ->
+                                VCLError(
+                                    payload = errorObject.toJsonObject().toString(),
+                                    errorCode = errorObject.errorCode,
+                                    requestId = errorObject.requestId,
+                                    message = errorObject.message,
+                                    statusCode = errorObject.statusCode
+                                )
+                            }
+                        }
                     )
                 )
             }

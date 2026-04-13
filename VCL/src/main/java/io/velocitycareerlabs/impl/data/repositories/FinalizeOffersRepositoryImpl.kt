@@ -48,7 +48,7 @@ internal class FinalizeOffersRepositoryImpl(
                             } ?: run {
                                 completionBlock(
                                     VCLResult.Failure(
-                                        VCLError("Failed to parse: ${finalizedOffersResponse.payload}")
+                                        VCLError(message = "Failed to parse: ${finalizedOffersResponse.payload}")
                                     )
                                 )
                             }

@@ -45,7 +45,7 @@ internal class PresentationRequestRepositoryImpl(
                 }
             )
         } ?: run {
-            completionBlock(VCLResult.Failure(VCLError("presentationRequestDescriptor.endpoint = null")))
+            completionBlock(VCLResult.Failure(VCLError(message = "presentationRequestDescriptor.endpoint = null")))
         }
     }
 }

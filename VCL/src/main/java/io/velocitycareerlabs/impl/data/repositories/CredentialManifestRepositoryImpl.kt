@@ -46,7 +46,7 @@ internal class CredentialManifestRepositoryImpl(
                 }
             )
         } ?: run {
-            completionBlock(VCLResult.Failure(VCLError("credentialManifestDescriptor.endpoint = null")))
+            completionBlock(VCLResult.Failure(VCLError(message = "credentialManifestDescriptor.endpoint = null")))
         }
     }
 }

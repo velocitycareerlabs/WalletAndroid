@@ -61,7 +61,7 @@ internal class VCLKeyServiceRemoteImpl(
                         } ?: run {
                             completionBlock(
                                 VCLResult.Failure(
-                                    VCLError("Failed to create did:jwk from the provided URL: ${keyServiceUrls.createDidKeyServiceUrl}")
+                                    VCLError(message = "Failed to create did:jwk from the provided URL: ${keyServiceUrls.createDidKeyServiceUrl}")
                                 )
                             )
                         }
