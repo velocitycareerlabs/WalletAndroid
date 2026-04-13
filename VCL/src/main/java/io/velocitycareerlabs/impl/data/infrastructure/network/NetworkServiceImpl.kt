@@ -185,6 +185,7 @@ internal class NetworkServiceImpl: NetworkService {
 
     private fun isJsonContentType(contentType: String?): Boolean =
         contentType?.let {
-            it.contains(Request.ContentTypeApplicationJson) || it.contains("+json")
+            it.contains(Request.ContentTypeApplicationJson, ignoreCase = true) ||
+                it.contains("+json", ignoreCase = true)
         } == true
 }

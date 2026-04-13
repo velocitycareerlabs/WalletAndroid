@@ -10,6 +10,8 @@ package io.velocitycareerlabs.entities
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.infrastructure.resources.valid.ErrorMocks
 import org.json.JSONObject
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class VCLErrorTest {
@@ -27,7 +29,7 @@ class VCLErrorTest {
             statusCode = ErrorMocks.StatusCode
         )
 
-        assert(error == expectedError)
+        assertEquals(expectedError, error)
     }
 
     @Test
@@ -47,7 +49,7 @@ class VCLErrorTest {
             statusCode = ErrorMocks.StatusCode
         )
 
-        assert(error == expectedError)
+        assertEquals(expectedError, error)
     }
 
     @Test
@@ -63,7 +65,7 @@ class VCLErrorTest {
             .put(VCLError.KeyMessage, ErrorMocks.Message)
             .put(VCLError.KeyStatusCode, ErrorMocks.StatusCode)
 
-        assert(errorJsonObject.similar(expectedJsonObject))
+        assertTrue(errorJsonObject.similar(expectedJsonObject))
     }
 
     @Test
@@ -83,6 +85,6 @@ class VCLErrorTest {
             .put(VCLError.KeyMessage, ErrorMocks.Message)
             .put(VCLError.KeyStatusCode, ErrorMocks.StatusCode)
 
-        assert(errorJsonObject.similar(expectedJsonObject))
+        assertTrue(errorJsonObject.similar(expectedJsonObject))
     }
 }
