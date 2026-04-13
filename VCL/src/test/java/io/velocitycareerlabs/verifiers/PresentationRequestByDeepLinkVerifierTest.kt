@@ -11,6 +11,9 @@ import io.velocitycareerlabs.infrastructure.resources.valid.DidDocumentMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.PresentationRequestMocks
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -100,6 +103,24 @@ class PresentationRequestByDeepLinkVerifierTest {
                 assert(false) { "${VCLErrorCode.MismatchedPresentationRequestInspectorDid.value} error code is expected" }
             }, { error ->
                 assert(error.errorCode == VCLErrorCode.MismatchedPresentationRequestInspectorDid.value)
+            })
+        }
+    }
+
+    @Test
+    fun testVerifyPresentationRequestErrorWhenDeepLinkDidMissing() {
+        subject = PresentationRequestByDeepLinkVerifierImpl()
+
+        subject.verifyPresentationRequest(
+            presentationRequest,
+            VCLDeepLink(value = "velocity-network://inspect"),
+            DidDocumentMocks.DidDocumentMock
+        ) {
+            it.handleResult({
+                fail("${VCLErrorCode.SdkError.value} error code is expected")
+            }, { error ->
+                assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
+                assertTrue(error.message?.contains("DID not found in deep link") == true)
             })
         }
     }
