@@ -21,7 +21,9 @@ import java.net.URL
 import java.net.UnknownHostException
 import javax.net.ssl.HttpsURLConnection
 
-internal class NetworkServiceImpl: NetworkService {
+internal class NetworkServiceImpl(
+    private val connectionFactory: ((Request) -> HttpURLConnection)? = null,
+) : NetworkService {
     private val TAG = NetworkServiceImpl::class.simpleName
 
     override fun sendRequest(
@@ -133,11 +135,13 @@ internal class NetworkServiceImpl: NetworkService {
      * Returns new connection. referred to by given url.
      */
     private fun createConnection(request: Request): HttpURLConnection {
-        val connection = if (request.endpoint.startsWith("https")) {
-            URL(request.endpoint).openConnection() as HttpsURLConnection
-        } else {
-            URL(request.endpoint).openConnection() as HttpURLConnection
-        }
+        val connection =
+            connectionFactory?.invoke(request)
+                ?: if (request.endpoint.startsWith("https")) {
+                    URL(request.endpoint).openConnection() as HttpsURLConnection
+                } else {
+                    URL(request.endpoint).openConnection() as HttpURLConnection
+                }
         connection.connectTimeout = request.connectTimeOut
         connection.readTimeout = request.readTimeOut
         connection.requestMethod = request.method.value

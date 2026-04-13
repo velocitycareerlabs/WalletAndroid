@@ -15,26 +15,13 @@ import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.infrastructure.resources.valid.ErrorMocks
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
-import java.net.URLConnection
-import java.net.URLStreamHandler
-import java.net.URLStreamHandlerFactory
-import java.util.concurrent.atomic.AtomicBoolean
 
 internal class NetworkServiceImplTest {
-    private lateinit var subject: NetworkServiceImpl
-
-    @Before
-    fun setUp() {
-        installMockProtocolFactoryIfNeeded()
-        subject = NetworkServiceImpl()
-    }
-
     @Test
     fun testJsonErrorBodyUsesPayloadJsonFactory() {
         val payloadJson = JSONObject(ErrorMocks.Payload)
@@ -153,18 +140,19 @@ internal class NetworkServiceImplTest {
         contentType: String?,
         responseCode: Int,
     ): VCLError {
-        nextConnectionFactory = { url ->
+        val subject =
+            NetworkServiceImpl(connectionFactory = { request ->
             FakeHttpURLConnection(
-                url = url,
+                url = URL(request.endpoint),
                 responseCodeValue = responseCode,
                 contentTypeValue = contentType,
                 errorPayload = payload
             )
-        }
+            })
 
         var result: VCLResult<io.velocitycareerlabs.impl.data.infrastructure.network.Response>? = null
         subject.sendRequest(
-            endpoint = "mockhttp://example.com/error",
+            endpoint = "http://example.com/error",
             body = null,
             contentType = Request.ContentTypeApplicationJson,
             method = Request.HttpMethod.GET,
@@ -199,31 +187,5 @@ internal class NetworkServiceImplTest {
 
         override fun getInputStream(): InputStream =
             ByteArrayInputStream((errorPayload ?: "").toByteArray())
-    }
-
-    private companion object {
-        private const val MockProtocol = "mockhttp"
-        private val isFactoryInstalled = AtomicBoolean(false)
-
-        @Volatile
-        private var nextConnectionFactory: ((URL) -> HttpURLConnection)? = null
-
-        private fun installMockProtocolFactoryIfNeeded() {
-            if (isFactoryInstalled.compareAndSet(false, true)) {
-                URL.setURLStreamHandlerFactory(
-                    URLStreamHandlerFactory { protocol ->
-                        if (protocol == MockProtocol) {
-                            object : URLStreamHandler() {
-                                override fun openConnection(url: URL): URLConnection =
-                                    nextConnectionFactory?.invoke(url)
-                                        ?: error("No connection factory configured for $url")
-                            }
-                        } else {
-                            null
-                        }
-                    }
-                )
-            }
-        }
     }
 }
