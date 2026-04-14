@@ -8,48 +8,59 @@
 package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.infrastructure.resources.valid.ErrorMocks
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class VCLErrorTest {
-
     @Test
     fun testErrorFromPayload() {
         val payloadJson = JSONObject(ErrorMocks.Payload)
         val error = VCLError.fromPayloadJson(payloadJson)
-        val expectedError = VCLError(
-            payload = payloadJson.toString(),
-            error = ErrorMocks.Error,
-            errorCode = ErrorMocks.ErrorCode,
-            requestId = ErrorMocks.RequestId,
-            message = ErrorMocks.Message,
-            statusCode = ErrorMocks.StatusCode
-        )
 
-        assertEquals(expectedError, error)
+        assertEquals(payloadJson.toString(), error.payload)
+        assertEquals(ErrorMocks.Error, error.error)
+        assertEquals(ErrorMocks.ErrorCode, error.errorCode)
+        assertEquals(ErrorMocks.RequestId, error.requestId)
+        assertEquals(ErrorMocks.Message, error.message)
+        assertEquals(ErrorMocks.StatusCode, error.statusCode)
+        assertNull(error.cause)
     }
 
     @Test
     fun testErrorFromProperties() {
+        val cause = IllegalStateException("manual cause")
         val error = VCLError(
             error = ErrorMocks.Error,
             errorCode = ErrorMocks.ErrorCode,
             requestId = ErrorMocks.RequestId,
             message = ErrorMocks.Message,
-            statusCode = ErrorMocks.StatusCode
-        )
-        val expectedError = VCLError(
-            error = ErrorMocks.Error,
-            errorCode = ErrorMocks.ErrorCode,
-            requestId = ErrorMocks.RequestId,
-            message = ErrorMocks.Message,
-            statusCode = ErrorMocks.StatusCode
+            statusCode = ErrorMocks.StatusCode,
+            cause = cause,
         )
 
-        assertEquals(expectedError, error)
+        assertEquals(ErrorMocks.Error, error.error)
+        assertEquals(ErrorMocks.ErrorCode, error.errorCode)
+        assertEquals(ErrorMocks.RequestId, error.requestId)
+        assertEquals(ErrorMocks.Message, error.message)
+        assertEquals(ErrorMocks.StatusCode, error.statusCode)
+        assertSame(cause, error.cause)
+    }
+
+    @Test
+    fun testErrorFromException() {
+        val exception = IllegalStateException("boom", IllegalArgumentException("cause"))
+        val error = VCLError(exception = exception, statusCode = ErrorMocks.StatusCode)
+
+        assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
+        assertEquals(exception.toString(), error.message)
+        assertEquals(ErrorMocks.StatusCode, error.statusCode)
+        assertSame(exception, error.cause)
     }
 
     @Test
@@ -75,7 +86,7 @@ class VCLErrorTest {
             errorCode = ErrorMocks.ErrorCode,
             requestId = ErrorMocks.RequestId,
             message = ErrorMocks.Message,
-            statusCode = ErrorMocks.StatusCode
+            statusCode = ErrorMocks.StatusCode,
         )
         val errorJsonObject = error.toJsonObject()
         val expectedJsonObject = JSONObject()

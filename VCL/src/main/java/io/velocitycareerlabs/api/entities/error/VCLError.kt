@@ -17,7 +17,8 @@ data class VCLError(
     val requestId: String? = null,
     override val message: String? = null,
     val statusCode: Int? = null,
-) : Error(message) {
+    override val cause: Throwable? = null,
+) : Error(message, cause) {
     @Deprecated(
         message = "Use named arguments for human-readable text, or VCLError.fromPayloadJson(...) for payload parsing.",
     )
@@ -43,6 +44,7 @@ data class VCLError(
         errorCode = errorCode,
         message = exception.toString(),
         statusCode = statusCode,
+        cause = exception,
     )
 
     fun toJsonObject() =
