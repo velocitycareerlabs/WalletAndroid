@@ -21,7 +21,7 @@ Add this to your `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'io.velocitycareerlabs:vcl:2.9.1' // or latest version
+    implementation 'io.velocitycareerlabs:vcl:2.9.2' // or latest version
     implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
     implementation "androidx.security:security-crypto:1.1.0-alpha07"
 }
