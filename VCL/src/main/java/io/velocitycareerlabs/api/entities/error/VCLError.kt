@@ -8,7 +8,6 @@
 package io.velocitycareerlabs.api.entities.error
 
 import io.velocitycareerlabs.impl.extensions.toJsonObject
-import org.json.JSONArray
 import org.json.JSONObject
 
 data class VCLError(
@@ -23,19 +22,22 @@ data class VCLError(
     data class Diagnostic(
         val nativePlatform: String = ValueNativePlatformAndroid,
         val nativeErrorType: String? = null,
-        val nativeStackFrames: List<String>? = null,
-        val nativeStackTop: String? = null,
-        val nativeCause: String? = null,
+        val nativeCauseType: String? = null,
+        val nativeCauseMessage: String? = null,
+        val nativeCauseStackTop: String? = null,
     ) {
         fun toJsonObject() =
             JSONObject().apply {
                 putOpt(KeyNativePlatform, nativePlatform)
                 putOpt(KeyNativeErrorType, nativeErrorType)
-                putOpt(KeyNativeStackFrames, nativeStackFrames?.let { JSONArray(it) })
-                putOpt(KeyNativeStackTop, nativeStackTop)
-                putOpt(KeyNativeCause, nativeCause)
+                putOpt(KeyNativeCauseType, nativeCauseType)
+                putOpt(KeyNativeCauseMessage, nativeCauseMessage)
+                putOpt(KeyNativeCauseStackTop, nativeCauseStackTop)
             }
     }
+
+    private var wrapperStackFramesInternal: List<String>? = null
+    private var causeStackFramesInternal: List<String>? = null
 
     @Deprecated(
         message = "Use named arguments for human-readable text, or VCLError.fromPayloadJson(...) for payload parsing.",
@@ -53,7 +55,9 @@ data class VCLError(
         message = payload?.toJsonObject()?.optString(KeyMessage),
         statusCode = payload?.toJsonObject()?.optInt(KeyStatusCode),
         diagnostic = captureDiagnostic(nativeErrorType = ValuePayloadDiagnosticType),
-    )
+    ) {
+        wrapperStackFramesInternal = captureCurrentStackFrames()
+    }
 
     constructor(
         exception: Exception,
@@ -64,7 +68,10 @@ data class VCLError(
         message = exception.toString(),
         statusCode = statusCode,
         diagnostic = captureDiagnostic(exception),
-    )
+    ) {
+        wrapperStackFramesInternal = exception.stackTrace.toFrameStrings()
+        causeStackFramesInternal = exception.cause?.stackTrace?.toFrameStrings()
+    }
 
     fun toJsonObject() =
         JSONObject().apply {
@@ -94,33 +101,33 @@ data class VCLError(
             message = payloadJson.optNullableString(KeyMessage),
             statusCode = payloadJson.optNullableInt(KeyStatusCode),
             diagnostic = captureDiagnostic(nativeErrorType = ValuePayloadDiagnosticType),
-        )
+        ).also {
+            it.wrapperStackFramesInternal = captureCurrentStackFrames()
+        }
 
         private fun captureDiagnostic(exception: Exception) =
             captureDiagnostic(
                 nativeErrorType = exception::class.java.name,
-                nativeCause = exception.cause?.toString(),
-                nativeStackFrames = exception.stackTrace.toUsefulStackFrames(),
+                nativeCauseType = exception.cause?.javaClass?.name,
+                nativeCauseMessage = exception.cause?.message ?: exception.cause?.toString(),
+                nativeCauseStackTop = exception.cause?.stackTrace?.toFrameStrings()?.firstOrNull(),
             )
 
         private fun captureDiagnostic(
             nativeErrorType: String,
-            nativeCause: String? = null,
-            nativeStackFrames: List<String> = Throwable().stackTrace.toUsefulStackFrames(),
+            nativeCauseType: String? = null,
+            nativeCauseMessage: String? = null,
+            nativeCauseStackTop: String? = null,
         ) = Diagnostic(
             nativeErrorType = nativeErrorType,
-            nativeStackFrames = nativeStackFrames.ifEmpty { null },
-            nativeStackTop = nativeStackFrames.firstOrNull(),
-            nativeCause = nativeCause,
+            nativeCauseType = nativeCauseType,
+            nativeCauseMessage = nativeCauseMessage,
+            nativeCauseStackTop = nativeCauseStackTop,
         )
 
-        private fun Array<StackTraceElement>.toUsefulStackFrames() =
-            mapNotNull {
-                it.toString().takeUnless { frame ->
-                    frame.contains("${VCLError::class.java.name}.") ||
-                        frame.contains("${VCLError::class.java.name}\$Companion.")
-                }
-            }.take(MaxDiagnosticStackFrames)
+        private fun captureCurrentStackFrames() = Throwable().stackTrace.toFrameStrings()
+
+        private fun Array<StackTraceElement>.toFrameStrings() = map { it.toString() }
 
         private fun JSONObject?.optNullableString(key: String): String? =
             takeIf { it?.has(key) == true && !it.isNull(key) }?.optString(key)
@@ -137,11 +144,10 @@ data class VCLError(
         const val KeyDiagnostic = "diagnostic"
         const val KeyNativePlatform = "nativePlatform"
         const val KeyNativeErrorType = "nativeErrorType"
-        const val KeyNativeStackFrames = "nativeStackFrames"
-        const val KeyNativeStackTop = "nativeStackTop"
-        const val KeyNativeCause = "nativeCause"
+        const val KeyNativeCauseType = "nativeCauseType"
+        const val KeyNativeCauseMessage = "nativeCauseMessage"
+        const val KeyNativeCauseStackTop = "nativeCauseStackTop"
         const val ValueNativePlatformAndroid = "android"
         const val ValuePayloadDiagnosticType = "VCLErrorPayload"
-        const val MaxDiagnosticStackFrames = 5
     }
 }

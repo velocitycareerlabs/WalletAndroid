@@ -10,7 +10,6 @@ package io.velocitycareerlabs.entities
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.infrastructure.resources.valid.ErrorMocks
-import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -19,9 +18,9 @@ import org.junit.Test
 class VCLErrorTest {
     private val diagnostic = VCLError.Diagnostic(
         nativeErrorType = "NativeErrorType",
-        nativeStackFrames = listOf("frame 1", "frame 2"),
-        nativeStackTop = "frame 1",
-        nativeCause = "NativeCause",
+        nativeCauseType = "NativeCauseType",
+        nativeCauseMessage = "NativeCauseMessage",
+        nativeCauseStackTop = "NativeCauseStackTop",
     )
 
     @Test
@@ -37,9 +36,9 @@ class VCLErrorTest {
         assertEquals(ErrorMocks.StatusCode, error.statusCode)
         assertEquals(VCLError.ValueNativePlatformAndroid, error.diagnostic?.nativePlatform)
         assertEquals(VCLError.ValuePayloadDiagnosticType, error.diagnostic?.nativeErrorType)
-        assertTrue(error.diagnostic?.nativeStackFrames?.isNotEmpty() == true)
-        assertEquals(error.diagnostic?.nativeStackFrames?.first(), error.diagnostic?.nativeStackTop)
-        assertTrue((error.diagnostic?.nativeStackFrames?.count() ?: 0) <= VCLError.MaxDiagnosticStackFrames)
+        assertEquals(null, error.diagnostic?.nativeCauseType)
+        assertEquals(null, error.diagnostic?.nativeCauseMessage)
+        assertEquals(null, error.diagnostic?.nativeCauseStackTop)
     }
 
     @Test
@@ -71,9 +70,9 @@ class VCLErrorTest {
         assertEquals(ErrorMocks.StatusCode, error.statusCode)
         assertEquals(VCLError.ValueNativePlatformAndroid, error.diagnostic?.nativePlatform)
         assertEquals(IllegalStateException::class.java.name, error.diagnostic?.nativeErrorType)
-        assertEquals(exception.stackTrace.firstOrNull()?.toString(), error.diagnostic?.nativeStackTop)
-        assertEquals(exception.cause?.toString(), error.diagnostic?.nativeCause)
-        assertEquals(exception.stackTrace.map { it.toString() }.take(VCLError.MaxDiagnosticStackFrames), error.diagnostic?.nativeStackFrames)
+        assertEquals(IllegalArgumentException::class.java.name, error.diagnostic?.nativeCauseType)
+        assertEquals("cause", error.diagnostic?.nativeCauseMessage)
+        assertEquals(exception.cause?.stackTrace?.firstOrNull()?.toString(), error.diagnostic?.nativeCauseStackTop)
     }
 
     @Test
@@ -111,8 +110,6 @@ class VCLErrorTest {
                 JSONObject()
                     .put(VCLError.KeyNativePlatform, VCLError.ValueNativePlatformAndroid)
                     .put(VCLError.KeyNativeErrorType, VCLError.ValuePayloadDiagnosticType)
-                    .put(VCLError.KeyNativeStackFrames, error.diagnostic?.nativeStackFrames?.let { JSONArray(it) })
-                    .put(VCLError.KeyNativeStackTop, error.diagnostic?.nativeStackTop)
             )
         }))
     }
@@ -160,9 +157,9 @@ class VCLErrorTest {
                 JSONObject()
                     .put(VCLError.KeyNativePlatform, VCLError.ValueNativePlatformAndroid)
                     .put(VCLError.KeyNativeErrorType, diagnostic.nativeErrorType)
-                    .put(VCLError.KeyNativeStackFrames, JSONArray(diagnostic.nativeStackFrames))
-                    .put(VCLError.KeyNativeStackTop, diagnostic.nativeStackTop)
-                    .put(VCLError.KeyNativeCause, diagnostic.nativeCause)
+                    .put(VCLError.KeyNativeCauseType, diagnostic.nativeCauseType)
+                    .put(VCLError.KeyNativeCauseMessage, diagnostic.nativeCauseMessage)
+                    .put(VCLError.KeyNativeCauseStackTop, diagnostic.nativeCauseStackTop)
             )
 
         assertTrue(errorJsonObject.similar(expectedJsonObject))
