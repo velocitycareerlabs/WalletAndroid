@@ -10,14 +10,14 @@ package io.velocitycareerlabs.api.entities.error
 import io.velocitycareerlabs.impl.extensions.toJsonObject
 import org.json.JSONObject
 
-class VCLError(
+data class VCLError(
     val payload: String? = null,
     val error: String? = null,
     val errorCode: String = VCLErrorCode.SdkError.value,
     val requestId: String? = null,
     override val message: String? = null,
     val statusCode: Int? = null,
-    cause: Throwable? = null,
+    override val cause: Throwable? = null,
 ) : Error(message, cause) {
     @Deprecated(
         message = "Use named arguments for human-readable text, or VCLError.fromPayloadJson(...) for payload parsing.",
@@ -56,24 +56,6 @@ class VCLError(
             putOpt(KeyMessage, message)
             putOpt(KeyStatusCode, statusCode)
         }
-
-    fun copy(
-        payload: String? = this.payload,
-        error: String? = this.error,
-        errorCode: String = this.errorCode,
-        requestId: String? = this.requestId,
-        message: String? = this.message,
-        statusCode: Int? = this.statusCode,
-        cause: Throwable? = this.cause,
-    ) = VCLError(
-        payload = payload,
-        error = error,
-        errorCode = errorCode,
-        requestId = requestId,
-        message = message,
-        statusCode = statusCode,
-        cause = cause,
-    )
 
     companion object CodingKeys {
         fun fromPayloadJson(
