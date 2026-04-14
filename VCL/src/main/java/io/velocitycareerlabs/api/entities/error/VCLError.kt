@@ -8,6 +8,7 @@
 package io.velocitycareerlabs.api.entities.error
 
 import io.velocitycareerlabs.impl.extensions.toJsonObject
+import org.json.JSONArray
 import org.json.JSONObject
 
 data class VCLError(
@@ -17,7 +18,25 @@ data class VCLError(
     val requestId: String? = null,
     override val message: String? = null,
     val statusCode: Int? = null,
+    val diagnostic: Diagnostic? = null,
 ) : Error(message) {
+    data class Diagnostic(
+        val nativePlatform: String = ValueNativePlatformAndroid,
+        val nativeErrorType: String? = null,
+        val nativeStackFrames: List<String>? = null,
+        val nativeStackTop: String? = null,
+        val nativeCause: String? = null,
+    ) {
+        fun toJsonObject() =
+            JSONObject().apply {
+                putOpt(KeyNativePlatform, nativePlatform)
+                putOpt(KeyNativeErrorType, nativeErrorType)
+                putOpt(KeyNativeStackFrames, nativeStackFrames?.let { JSONArray(it) })
+                putOpt(KeyNativeStackTop, nativeStackTop)
+                putOpt(KeyNativeCause, nativeCause)
+            }
+    }
+
     @Deprecated(
         message = "Use named arguments for human-readable text, or VCLError.fromPayloadJson(...) for payload parsing.",
     )
@@ -33,6 +52,7 @@ data class VCLError(
         requestId = payload?.toJsonObject()?.optString(KeyRequestId),
         message = payload?.toJsonObject()?.optString(KeyMessage),
         statusCode = payload?.toJsonObject()?.optInt(KeyStatusCode),
+        diagnostic = captureDiagnostic(nativeErrorType = ValuePayloadDiagnosticType),
     )
 
     constructor(
@@ -43,6 +63,7 @@ data class VCLError(
         errorCode = errorCode,
         message = exception.toString(),
         statusCode = statusCode,
+        diagnostic = captureDiagnostic(exception),
     )
 
     fun toJsonObject() =
@@ -53,6 +74,7 @@ data class VCLError(
             putOpt(KeyRequestId, requestId)
             putOpt(KeyMessage, message)
             putOpt(KeyStatusCode, statusCode)
+            putOpt(KeyDiagnostic, diagnostic?.toJsonObject())
         }
 
     companion object CodingKeys {
@@ -67,6 +89,25 @@ data class VCLError(
             requestId = payloadJson.optNullableString(KeyRequestId),
             message = payloadJson.optNullableString(KeyMessage),
             statusCode = payloadJson.optNullableInt(KeyStatusCode),
+            diagnostic = captureDiagnostic(nativeErrorType = ValuePayloadDiagnosticType),
+        )
+
+        private fun captureDiagnostic(exception: Exception) =
+            captureDiagnostic(
+                nativeErrorType = exception::class.java.name,
+                nativeCause = exception.cause?.toString(),
+                nativeStackFrames = exception.stackTrace.map { it.toString() },
+            )
+
+        private fun captureDiagnostic(
+            nativeErrorType: String,
+            nativeCause: String? = null,
+            nativeStackFrames: List<String> = Throwable().stackTrace.map { it.toString() },
+        ) = Diagnostic(
+            nativeErrorType = nativeErrorType,
+            nativeStackFrames = nativeStackFrames.ifEmpty { null },
+            nativeStackTop = nativeStackFrames.firstOrNull(),
+            nativeCause = nativeCause,
         )
 
         private fun JSONObject?.optNullableString(key: String): String? =
@@ -81,5 +122,13 @@ data class VCLError(
         const val KeyRequestId = "requestId"
         const val KeyMessage = "message"
         const val KeyStatusCode = "statusCode"
+        const val KeyDiagnostic = "diagnostic"
+        const val KeyNativePlatform = "nativePlatform"
+        const val KeyNativeErrorType = "nativeErrorType"
+        const val KeyNativeStackFrames = "nativeStackFrames"
+        const val KeyNativeStackTop = "nativeStackTop"
+        const val KeyNativeCause = "nativeCause"
+        const val ValueNativePlatformAndroid = "android"
+        const val ValuePayloadDiagnosticType = "VCLErrorPayload"
     }
 }
