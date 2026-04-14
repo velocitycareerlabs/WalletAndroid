@@ -6,8 +6,8 @@ plugins {
 }
 
 ext {
-    publishCode = 173
-    publishVersion = "2.9.0"
+    publishCode = 174
+    publishVersion = "2.9.1"
     publishArtifactId = "vcl"
     publishGroupId = "io.velocitycareerlabs"
 }
