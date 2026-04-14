@@ -24,7 +24,6 @@ data class VCLError(
         val nativeErrorType: String? = null,
         val nativeCauseType: String? = null,
         val nativeCauseMessage: String? = null,
-        val nativeCauseStackTop: String? = null,
     ) {
         fun toJsonObject() =
             JSONObject().apply {
@@ -32,7 +31,6 @@ data class VCLError(
                 putOpt(KeyNativeErrorType, nativeErrorType)
                 putOpt(KeyNativeCauseType, nativeCauseType)
                 putOpt(KeyNativeCauseMessage, nativeCauseMessage)
-                putOpt(KeyNativeCauseStackTop, nativeCauseStackTop)
             }
     }
 
@@ -110,19 +108,16 @@ data class VCLError(
                 nativeErrorType = exception::class.java.name,
                 nativeCauseType = exception.cause?.javaClass?.name,
                 nativeCauseMessage = exception.cause?.message ?: exception.cause?.toString(),
-                nativeCauseStackTop = exception.cause?.stackTrace?.toFrameStrings()?.firstOrNull(),
             )
 
         private fun captureDiagnostic(
             nativeErrorType: String,
             nativeCauseType: String? = null,
             nativeCauseMessage: String? = null,
-            nativeCauseStackTop: String? = null,
         ) = Diagnostic(
             nativeErrorType = nativeErrorType,
             nativeCauseType = nativeCauseType,
             nativeCauseMessage = nativeCauseMessage,
-            nativeCauseStackTop = nativeCauseStackTop,
         )
 
         private fun captureCurrentStackFrames() = Throwable().stackTrace.toFrameStrings()
@@ -146,7 +141,6 @@ data class VCLError(
         const val KeyNativeErrorType = "nativeErrorType"
         const val KeyNativeCauseType = "nativeCauseType"
         const val KeyNativeCauseMessage = "nativeCauseMessage"
-        const val KeyNativeCauseStackTop = "nativeCauseStackTop"
         const val ValueNativePlatformAndroid = "android"
         const val ValuePayloadDiagnosticType = "VCLErrorPayload"
     }

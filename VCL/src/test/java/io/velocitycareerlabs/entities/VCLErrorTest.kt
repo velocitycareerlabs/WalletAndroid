@@ -20,7 +20,6 @@ class VCLErrorTest {
         nativeErrorType = "NativeErrorType",
         nativeCauseType = "NativeCauseType",
         nativeCauseMessage = "NativeCauseMessage",
-        nativeCauseStackTop = "NativeCauseStackTop",
     )
 
     @Test
@@ -38,7 +37,6 @@ class VCLErrorTest {
         assertEquals(VCLError.ValuePayloadDiagnosticType, error.diagnostic?.nativeErrorType)
         assertEquals(null, error.diagnostic?.nativeCauseType)
         assertEquals(null, error.diagnostic?.nativeCauseMessage)
-        assertEquals(null, error.diagnostic?.nativeCauseStackTop)
     }
 
     @Test
@@ -72,7 +70,6 @@ class VCLErrorTest {
         assertEquals(IllegalStateException::class.java.name, error.diagnostic?.nativeErrorType)
         assertEquals(IllegalArgumentException::class.java.name, error.diagnostic?.nativeCauseType)
         assertEquals("cause", error.diagnostic?.nativeCauseMessage)
-        assertEquals(exception.cause?.stackTrace?.firstOrNull()?.toString(), error.diagnostic?.nativeCauseStackTop)
     }
 
     @Test
@@ -159,7 +156,6 @@ class VCLErrorTest {
                     .put(VCLError.KeyNativeErrorType, diagnostic.nativeErrorType)
                     .put(VCLError.KeyNativeCauseType, diagnostic.nativeCauseType)
                     .put(VCLError.KeyNativeCauseMessage, diagnostic.nativeCauseMessage)
-                    .put(VCLError.KeyNativeCauseStackTop, diagnostic.nativeCauseStackTop)
             )
 
         assertTrue(errorJsonObject.similar(expectedJsonObject))
