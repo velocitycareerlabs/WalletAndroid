@@ -41,8 +41,8 @@ class VCLErrorTest {
             requestId = ErrorMocks.RequestId,
             message = ErrorMocks.Message,
             statusCode = ErrorMocks.StatusCode,
+            cause = cause,
         )
-        error.initCause(cause)
 
         assertEquals(ErrorMocks.Error, error.error)
         assertEquals(ErrorMocks.ErrorCode, error.errorCode)

@@ -17,7 +17,8 @@ class VCLError(
     val requestId: String? = null,
     override val message: String? = null,
     val statusCode: Int? = null,
-) : Error(message) {
+    cause: Throwable? = null,
+) : Error(message, cause) {
     @Deprecated(
         message = "Use named arguments for human-readable text, or VCLError.fromPayloadJson(...) for payload parsing.",
     )
@@ -43,9 +44,8 @@ class VCLError(
         errorCode = errorCode,
         message = exception.toString(),
         statusCode = statusCode,
-    ) {
-        initCause(exception)
-    }
+        cause = exception,
+    )
 
     fun toJsonObject() =
         JSONObject().apply {
@@ -72,9 +72,8 @@ class VCLError(
         requestId = requestId,
         message = message,
         statusCode = statusCode,
-    ).also {
-        cause?.let(it::initCause)
-    }
+        cause = cause,
+    )
 
     companion object CodingKeys {
         fun fromPayloadJson(
