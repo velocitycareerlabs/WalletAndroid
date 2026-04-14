@@ -74,6 +74,10 @@ data class VCLError(
             putOpt(KeyRequestId, requestId)
             putOpt(KeyMessage, message)
             putOpt(KeyStatusCode, statusCode)
+        }
+
+    fun toDiagnosticJsonObject() =
+        toJsonObject().apply {
             putOpt(KeyDiagnostic, diagnostic?.toJsonObject())
         }
 
@@ -96,19 +100,27 @@ data class VCLError(
             captureDiagnostic(
                 nativeErrorType = exception::class.java.name,
                 nativeCause = exception.cause?.toString(),
-                nativeStackFrames = exception.stackTrace.map { it.toString() },
+                nativeStackFrames = exception.stackTrace.toUsefulStackFrames(),
             )
 
         private fun captureDiagnostic(
             nativeErrorType: String,
             nativeCause: String? = null,
-            nativeStackFrames: List<String> = Throwable().stackTrace.map { it.toString() },
+            nativeStackFrames: List<String> = Throwable().stackTrace.toUsefulStackFrames(),
         ) = Diagnostic(
             nativeErrorType = nativeErrorType,
             nativeStackFrames = nativeStackFrames.ifEmpty { null },
             nativeStackTop = nativeStackFrames.firstOrNull(),
             nativeCause = nativeCause,
         )
+
+        private fun Array<StackTraceElement>.toUsefulStackFrames() =
+            mapNotNull {
+                it.toString().takeUnless { frame ->
+                    frame.contains("${VCLError::class.java.name}.") ||
+                        frame.contains("${VCLError::class.java.name}\$Companion.")
+                }
+            }.take(MaxDiagnosticStackFrames)
 
         private fun JSONObject?.optNullableString(key: String): String? =
             takeIf { it?.has(key) == true && !it.isNull(key) }?.optString(key)
@@ -130,5 +142,6 @@ data class VCLError(
         const val KeyNativeCause = "nativeCause"
         const val ValueNativePlatformAndroid = "android"
         const val ValuePayloadDiagnosticType = "VCLErrorPayload"
+        const val MaxDiagnosticStackFrames = 5
     }
 }

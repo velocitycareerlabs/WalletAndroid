@@ -39,6 +39,7 @@ class VCLErrorTest {
         assertEquals(VCLError.ValuePayloadDiagnosticType, error.diagnostic?.nativeErrorType)
         assertTrue(error.diagnostic?.nativeStackFrames?.isNotEmpty() == true)
         assertEquals(error.diagnostic?.nativeStackFrames?.first(), error.diagnostic?.nativeStackTop)
+        assertTrue((error.diagnostic?.nativeStackFrames?.count() ?: 0) <= VCLError.MaxDiagnosticStackFrames)
     }
 
     @Test
@@ -72,7 +73,7 @@ class VCLErrorTest {
         assertEquals(IllegalStateException::class.java.name, error.diagnostic?.nativeErrorType)
         assertEquals(exception.stackTrace.firstOrNull()?.toString(), error.diagnostic?.nativeStackTop)
         assertEquals(exception.cause?.toString(), error.diagnostic?.nativeCause)
-        assertEquals(exception.stackTrace.map { it.toString() }, error.diagnostic?.nativeStackFrames)
+        assertEquals(exception.stackTrace.map { it.toString() }.take(VCLError.MaxDiagnosticStackFrames), error.diagnostic?.nativeStackFrames)
     }
 
     @Test
@@ -80,6 +81,22 @@ class VCLErrorTest {
         val payloadJson = JSONObject(ErrorMocks.Payload)
         val error = VCLError.fromPayloadJson(payloadJson)
         val errorJsonObject = error.toJsonObject()
+        val expectedJsonObject = JSONObject()
+            .put(VCLError.KeyPayload, payloadJson.toString())
+            .put(VCLError.KeyError, ErrorMocks.Error)
+            .put(VCLError.KeyErrorCode, ErrorMocks.ErrorCode)
+            .put(VCLError.KeyRequestId, ErrorMocks.RequestId)
+            .put(VCLError.KeyMessage, ErrorMocks.Message)
+            .put(VCLError.KeyStatusCode, ErrorMocks.StatusCode)
+
+        assertTrue(errorJsonObject.similar(expectedJsonObject))
+    }
+
+    @Test
+    fun testErrorToDiagnosticJsonFromPayload() {
+        val payloadJson = JSONObject(ErrorMocks.Payload)
+        val error = VCLError.fromPayloadJson(payloadJson)
+        val errorJsonObject = error.toDiagnosticJsonObject()
         val expectedJsonObject = JSONObject()
             .put(VCLError.KeyPayload, payloadJson.toString())
             .put(VCLError.KeyError, ErrorMocks.Error)
@@ -111,6 +128,27 @@ class VCLErrorTest {
             diagnostic = diagnostic,
         )
         val errorJsonObject = error.toJsonObject()
+        val expectedJsonObject = JSONObject()
+            .put(VCLError.KeyError, ErrorMocks.Error)
+            .put(VCLError.KeyErrorCode, ErrorMocks.ErrorCode)
+            .put(VCLError.KeyRequestId, ErrorMocks.RequestId)
+            .put(VCLError.KeyMessage, ErrorMocks.Message)
+            .put(VCLError.KeyStatusCode, ErrorMocks.StatusCode)
+
+        assertTrue(errorJsonObject.similar(expectedJsonObject))
+    }
+
+    @Test
+    fun testErrorToDiagnosticJsonFromProperties() {
+        val error = VCLError(
+            error = ErrorMocks.Error,
+            errorCode = ErrorMocks.ErrorCode,
+            requestId = ErrorMocks.RequestId,
+            message = ErrorMocks.Message,
+            statusCode = ErrorMocks.StatusCode,
+            diagnostic = diagnostic,
+        )
+        val errorJsonObject = error.toDiagnosticJsonObject()
         val expectedJsonObject = JSONObject()
             .put(VCLError.KeyError, ErrorMocks.Error)
             .put(VCLError.KeyErrorCode, ErrorMocks.ErrorCode)
