@@ -32,20 +32,19 @@ jobs:
       - name: 📝 Get version from build.gradle
         run: |
           VERSION=$(grep 'publishVersion *= *".*"' VCL/build.gradle | sed -n 's/.*publishVersion *= *"\([^"]*\)".*/\1/p')
-          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "Found version: $VERSION"
 
       - name: 🔧 Set publication name and POM file name
         run: |
-          PUB_NAME=
-          echo "PUBLICATION_NAME=${{ github.event.inputs.environment == 'rc' && 'rc' || 'release' }}" >> $GITHUB_ENV
-          echo "POM_FILE_NAME=vcl-${{ github.event.inputs.environment == 'rc' && 'rc-' || '' }}${RELEASE_VERSION}.pom" >> $GITHUB_ENV
+          echo "PUBLICATION_NAME=${{ github.event.inputs.environment == 'rc' && 'rc' || 'release' }}" >> "$GITHUB_ENV"
+          echo "POM_FILE_NAME=vcl-${{ github.event.inputs.environment == 'rc' && 'rc-' || '' }}${RELEASE_VERSION}.pom" >> "$GITHUB_ENV"
 
       - name: 🧪 Build AAR + Sources + Javadoc
         run: |
           ./gradlew clean \
             :VCL:assembleAll${{ github.event.inputs.environment == 'rc' && 'Rc' || 'Release' }} \
-            -PprojectVersion=${RELEASE_VERSION} \
+            -PprojectVersion="${RELEASE_VERSION}" \
             -Pprerelease=${{ github.event.inputs.environment == 'rc' }} \
             --stacktrace
 
@@ -61,7 +60,7 @@ jobs:
       - name: 🧪 Generate POM File
         run: |
           ./gradlew :VCL:generatePomFileFor${{ env.PUBLICATION_NAME }}Publication
-          cp VCL/build/publications/${{ env.PUBLICATION_NAME }}/pom-default.xml VCL/target/staging-deploy/io/velocitycareerlabs/vcl/$RELEASE_VERSION/${{ env.POM_FILE_NAME }}
+          cp VCL/build/publications/${{ env.PUBLICATION_NAME }}/pom-default.xml "VCL/target/staging-deploy/io/velocitycareerlabs/vcl/${RELEASE_VERSION}/${{ env.POM_FILE_NAME }}"
 
       - name: 📂 List staged artifacts
         run: |
