@@ -53,6 +53,7 @@ import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
 import java.net.UnknownHostException
+import java.util.Collections
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
@@ -656,7 +657,7 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
         private val didDocumentStatusCode: Int = 200,
         private val didDocumentContentType: String? = Request.ContentTypeApplicationJson,
     ) {
-        val requestedEndpoints = mutableListOf<String>()
+        val requestedEndpoints: MutableList<String> = Collections.synchronizedList(mutableListOf())
 
         fun connectionFor(request: Request): HttpURLConnection {
             requestedEndpoints.add(request.endpoint)
