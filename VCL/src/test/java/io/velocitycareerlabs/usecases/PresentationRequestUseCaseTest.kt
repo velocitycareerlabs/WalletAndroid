@@ -114,10 +114,10 @@ internal class PresentationRequestUseCaseTest {
         ) {
             it.handleResult(
                 successHandler = {
-                    assert(false) { "${VCLErrorCode.SdkError.value} error code is expected" }
+                    assert(false) { "${VCLErrorCode.ClientRequestRejected.value} error code is expected" }
                 },
                 errorHandler = { error ->
-                    assert(error.errorCode == VCLErrorCode.SdkError.value)
+                    assert(error.errorCode == VCLErrorCode.ClientRequestRejected.value)
                 }
             )
         }

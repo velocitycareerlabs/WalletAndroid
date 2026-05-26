@@ -12,6 +12,7 @@ import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.repositories.CredentialManifestRepository
+import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
 import org.json.JSONObject
 import java.lang.Exception
 
@@ -34,19 +35,51 @@ internal class CredentialManifestRepositoryImpl(
                             try {
                                 val jwtStr = JSONObject(credentialManifestResponse.payload)
                                     .optString(VCLCredentialManifest.KeyIssuingRequest)
-                                completionBlock(VCLResult.Success(jwtStr))
+                                if (jwtStr.isBlank()) {
+                                    completionBlock(
+                                        VCLResult.Failure(
+                                            ErrorTaxonomy.classifyClientRequestFetch(
+                                                VCLError(message = "Credential manifest response is missing issuing_request"),
+                                                requestUri = endpoint,
+                                                requestKind = ErrorTaxonomy.RequestKindIssuing,
+                                            )
+                                        )
+                                    )
+                                } else {
+                                    completionBlock(VCLResult.Success(jwtStr))
+                                }
                             } catch (ex: Exception) {
-                                completionBlock(VCLResult.Failure(VCLError(ex)))
+                                completionBlock(
+                                    VCLResult.Failure(
+                                        ErrorTaxonomy.classifyClientRequestFetch(
+                                            VCLError(ex),
+                                            requestUri = endpoint,
+                                            requestKind = ErrorTaxonomy.RequestKindIssuing,
+                                        )
+                                    )
+                                )
                             }
                         },
                         { error ->
-                            completionBlock(VCLResult.Failure(error))
+                            completionBlock(
+                                VCLResult.Failure(
+                                    ErrorTaxonomy.classifyClientRequestFetch(
+                                        error,
+                                        requestUri = endpoint,
+                                        requestKind = ErrorTaxonomy.RequestKindIssuing,
+                                    )
+                                )
+                            )
                         }
                     )
                 }
             )
         } ?: run {
-            completionBlock(VCLResult.Failure(VCLError(message = "credentialManifestDescriptor.endpoint = null")))
+            completionBlock(
+                VCLResult.Failure(
+                    VCLError(message = "credentialManifestDescriptor.endpoint = null")
+                )
+            )
         }
     }
 }

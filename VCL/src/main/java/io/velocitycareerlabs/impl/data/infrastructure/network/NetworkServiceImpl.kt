@@ -9,6 +9,7 @@ package io.velocitycareerlabs.impl.data.infrastructure.network
 
 import android.accounts.NetworkErrorException
 import io.velocitycareerlabs.api.entities.error.VCLError
+import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.api.entities.error.VCLStatusCode
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
@@ -90,6 +91,7 @@ internal class NetworkServiceImpl(
                 VCLResult.Failure(
                     VCLError(
                         exception = ex,
+                        errorCode = VCLErrorCode.ConnectivityFailure.value,
                         statusCode = VCLStatusCode.NetworkError.value
                     )
                 )
@@ -99,6 +101,7 @@ internal class NetworkServiceImpl(
                 VCLResult.Failure(
                     VCLError(
                         exception = ex,
+                        errorCode = VCLErrorCode.ConnectivityFailure.value,
                         statusCode = VCLStatusCode.NetworkError.value
                     )
                 )
@@ -177,8 +180,7 @@ internal class NetworkServiceImpl(
         if (isJsonContentType(contentType)) {
             payload.toJsonObject()?.let { payloadJson ->
                 val payloadError = VCLError.fromPayloadJson(payloadJson)
-                return payloadError.takeIf { it.statusCode != null }
-                    ?: payloadError.copy(statusCode = statusCode)
+                return payloadError.copy(statusCode = statusCode)
             }
         }
 

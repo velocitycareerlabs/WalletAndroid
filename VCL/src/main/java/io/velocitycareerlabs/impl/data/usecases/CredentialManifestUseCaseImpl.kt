@@ -15,6 +15,7 @@ import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
 import io.velocitycareerlabs.impl.domain.repositories.ResolveDidDocumentRepository
 import io.velocitycareerlabs.impl.domain.usecases.CredentialManifestUseCase
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialManifestByDeepLinkVerifier
+import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
 import io.velocitycareerlabs.impl.utils.VCLLog
 
 internal class CredentialManifestUseCaseImpl(
@@ -59,19 +60,37 @@ internal class CredentialManifestUseCaseImpl(
                                                 didDocument,
                                                 completionBlock
                                             )
-                                        } ?: run {
+                                    } ?: run {
                                         onError(
-                                            VCLError(message = "public jwk not found for kid: ${credentialManifest.jwt.kid}"),
+                                            ErrorTaxonomy.classifyDidResolution(
+                                                VCLError(message = "public jwk not found for kid: ${credentialManifest.jwt.kid}"),
+                                                requestKind = ErrorTaxonomy.RequestKindIssuing,
+                                                requestDid = credentialManifest.iss,
+                                            ),
                                             completionBlock
                                         )
                                     }
 
                                 }, { error ->
-                                    onError(error, completionBlock);
+                                    onError(
+                                        ErrorTaxonomy.classifyDidResolution(
+                                            error,
+                                            requestKind = ErrorTaxonomy.RequestKindIssuing,
+                                            requestDid = credentialManifest.iss,
+                                        ),
+                                        completionBlock
+                                    );
                                 })
                             }
                         } catch (ex: Exception) {
-                            this.onError(VCLError(ex), completionBlock)
+                            this.onError(
+                                ErrorTaxonomy.classifyClientRequestFetch(
+                                    VCLError(ex),
+                                    requestUri = credentialManifestDescriptor.endpoint,
+                                    requestKind = ErrorTaxonomy.RequestKindIssuing,
+                                ),
+                                completionBlock
+                            )
                         }
                     },
                     { error ->
@@ -102,7 +121,14 @@ internal class CredentialManifestUseCaseImpl(
                     )
                 },
                 { error ->
-                    onError(error, completionBlock)
+                    onError(
+                        ErrorTaxonomy.classifyRequestValidation(
+                            error,
+                            requestKind = ErrorTaxonomy.RequestKindIssuing,
+                            requestDid = credentialManifest.iss,
+                        ),
+                        completionBlock
+                    )
                 }
             )
         }
@@ -132,7 +158,14 @@ internal class CredentialManifestUseCaseImpl(
                         )
                     },
                     { error ->
-                        onError(error, completionBlock)
+                        onError(
+                            ErrorTaxonomy.classifyRequestValidation(
+                                error,
+                                requestKind = ErrorTaxonomy.RequestKindIssuing,
+                                requestDid = credentialManifest.iss,
+                            ),
+                            completionBlock
+                        )
                     }
                 )
             }
@@ -155,7 +188,11 @@ internal class CredentialManifestUseCaseImpl(
             }
         } else {
             onError(
-                VCLError(message = "Failed to verify credentialManifest jwt:\n${credentialManifest.jwt}"),
+                ErrorTaxonomy.classifyRequestValidation(
+                    VCLError(message = "Failed to verify credentialManifest jwt:\n${credentialManifest.jwt}"),
+                    requestKind = ErrorTaxonomy.RequestKindIssuing,
+                    requestDid = credentialManifest.iss,
+                ),
                 completionBlock
             )
         }

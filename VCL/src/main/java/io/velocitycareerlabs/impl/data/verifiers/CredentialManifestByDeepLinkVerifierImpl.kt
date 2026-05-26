@@ -13,6 +13,7 @@ import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialManifestByDeepLinkVerifier
+import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
 import io.velocitycareerlabs.impl.utils.VCLLog
 
 internal class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDeepLinkVerifier {
@@ -51,8 +52,15 @@ internal class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDee
 
     ) {
         VCLLog.e(TAG, errorMessage)
+        val error = VCLError(errorCode = errorCode.value, message = errorMessage)
         completionBlock(
-            (VCLResult.Failure(VCLError(errorCode = errorCode.value, message = errorMessage)))
+            (VCLResult.Failure(
+                ErrorTaxonomy.classifyRequestValidation(
+                    error,
+                    requestKind = ErrorTaxonomy.RequestKindIssuing,
+                    requestDid = null,
+                )
+            ))
         )
     }
 }

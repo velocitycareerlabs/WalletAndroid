@@ -42,7 +42,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -53,6 +52,7 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
+import java.net.URLEncoder
 import java.net.UnknownHostException
 import java.util.Collections
 import java.util.concurrent.CountDownLatch
@@ -61,8 +61,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
-@Ignore("Legacy baseline for compatibility-mode work; taxonomy mode is the only implemented mode in this branch.")
-internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
+internal class ErrorTaxonomyContractTest {
     // Link validation -> invalid_link
 
     @Test
@@ -73,8 +72,14 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
             listOf(VCLDeepLink("not a url"), missingDidDeepLink).forEach { deepLink ->
                 val error = getEntryPointError(entryPoint, deepLink)
 
-                assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
-                assertTrue(error.message!!.contains("did was not found"))
+                assertDiagnostics(
+                    expected = entryPoint.expectedDiagnostics(
+                        errorCode = VCLErrorCode.InvalidLink.value,
+                        validationPhase = "link_validation",
+                        requestUri = deepLink.requestUri,
+                    ),
+                    actual = error,
+                )
             }
         }
     }
@@ -87,8 +92,54 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
             )
             val error = getEntryPointError(entryPoint, deepLink)
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
-            assertEquals(entryPoint.endpointNullMessage, error.message)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.InvalidLink.value,
+                    validationPhase = "link_validation",
+                    requestUri = deepLink.requestUri,
+                ),
+                actual = error,
+            )
+        }
+    }
+
+    @Test
+    fun unsupportedFlowPathReturnsInvalidLink() {
+        entryPoints.forEach { entryPoint ->
+            val deepLink = VCLDeepLink(
+                "velocity-network://unknown-flow?request_uri=${entryPoint.encodedRequestUri}" +
+                    "&${entryPoint.didParam}=did:example:entity"
+            )
+            val error = getEntryPointError(entryPoint, deepLink)
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.InvalidLink.value,
+                    validationPhase = "link_validation",
+                    requestUri = deepLink.requestUri,
+                ),
+                actual = error,
+            )
+        }
+    }
+
+    @Test
+    fun wrongFlowDidParamReturnsInvalidLink() {
+        entryPoints.forEach { entryPoint ->
+            val deepLink = VCLDeepLink(
+                "velocity-network://${entryPoint.schemePath}?request_uri=${simpleRequestUri()}" +
+                    "&${entryPoint.otherDidParam}=did:example:entity"
+            )
+            val error = getEntryPointError(entryPoint, deepLink)
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.InvalidLink.value,
+                    validationPhase = "link_validation",
+                    requestUri = deepLink.requestUri,
+                ),
+                actual = error,
+            )
         }
     }
 
@@ -115,13 +166,19 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
             )
             val error = getEntryPointError(entryPoint, deepLink)
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
-            assertEquals(entryPoint.endpointNullMessage, error.message)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.InvalidLink.value,
+                    validationPhase = "link_validation",
+                    requestUri = null,
+                ),
+                actual = error,
+            )
         }
     }
 
     @Test
-    fun malformedAndDisallowedRequestUriValuesReachTransportAsRawEndpointText() {
+    fun malformedAndDisallowedRequestUriValuesReturnInvalidLink() {
         entryPoints.forEach { entryPoint ->
             val malformedRequestUriDeepLink = VCLDeepLink(
                 "velocity-network://${entryPoint.schemePath}?request_uri=not-a-url" +
@@ -135,10 +192,44 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
             val malformedRequestUri = getEntryPointError(entryPoint, malformedRequestUriDeepLink)
             val disallowedSchemeRequestUri = getEntryPointError(entryPoint, disallowedSchemeDeepLink)
 
-            assertEquals(VCLErrorCode.SdkError.value, malformedRequestUri.errorCode)
-            assertTrue(malformedRequestUri.message!!.contains("no protocol: not-a-url"))
-            assertEquals(VCLErrorCode.SdkError.value, disallowedSchemeRequestUri.errorCode)
-            assertTrue(disallowedSchemeRequestUri.message!!.contains("unknown protocol: ftp"))
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.InvalidLink.value,
+                    validationPhase = "link_validation",
+                    requestUri = malformedRequestUriDeepLink.requestUri,
+                ),
+                actual = malformedRequestUri,
+            )
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.InvalidLink.value,
+                    validationPhase = "link_validation",
+                    requestUri = disallowedSchemeDeepLink.requestUri,
+                ),
+                actual = disallowedSchemeRequestUri,
+            )
+        }
+    }
+
+    @Test
+    fun malformedDidSyntaxReturnsInvalidLink() {
+        entryPoints.forEach { entryPoint ->
+            listOf("not-a-did", "did:", "did:example", "did:Example:entity").forEach { did ->
+                val deepLink = VCLDeepLink(
+                    "velocity-network://${entryPoint.schemePath}?request_uri=${entryPoint.encodedRequestUri}" +
+                        "&${entryPoint.didParam}=$did"
+                )
+                val error = getEntryPointError(entryPoint, deepLink)
+
+                assertDiagnostics(
+                    expected = entryPoint.expectedDiagnostics(
+                        errorCode = VCLErrorCode.InvalidLink.value,
+                        validationPhase = "link_validation",
+                        requestUri = deepLink.requestUri,
+                    ),
+                    actual = error,
+                )
+            }
         }
     }
 
@@ -154,8 +245,15 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 ),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
-            assertEquals(VCLStatusCode.NetworkError.value, error.statusCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                        errorCode = VCLErrorCode.ConnectivityFailure.value,
+                        statusCode = VCLStatusCode.NetworkError.value,
+                        validationPhase = "client_request_fetch",
+                        requestUri = entryPoint.defaultDeepLink.requestUri,
+                ),
+                actual = error,
+            )
             assertTrue(error.message!!.contains("offline"))
         }
     }
@@ -173,10 +271,20 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                     ),
                 )
 
-                assertEquals(ErrorMocks.ErrorCode, error.errorCode)
-                assertEquals(ErrorMocks.RequestId, error.requestId)
+                assertDiagnostics(
+                    expected = entryPoint.expectedDiagnostics(
+                        payload = ErrorMocks.Payload,
+                        error = ErrorMocks.Error,
+                        errorCode = VCLErrorCode.ClientRequestUnauthorized.value,
+                        sourceErrorCode = ErrorMocks.ErrorCode,
+                        requestId = ErrorMocks.RequestId,
+                        statusCode = statusCode,
+                        validationPhase = "client_request_fetch",
+                        requestUri = entryPoint.defaultDeepLink.requestUri,
+                    ),
+                    actual = error,
+                )
                 assertEquals(ErrorMocks.Message, error.message)
-                assertEquals(ErrorMocks.StatusCode, error.statusCode)
             }
         }
     }
@@ -198,8 +306,19 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                     ),
                 )
 
-                assertEquals(ErrorMocks.ErrorCode, error.errorCode)
-                assertEquals(statusCode, error.statusCode)
+                assertDiagnostics(
+                    expected = entryPoint.expectedDiagnostics(
+                        payload = payloadWithoutStatusCode,
+                        error = ErrorMocks.Error,
+                        errorCode = VCLErrorCode.ClientRequestRejected.value,
+                        sourceErrorCode = ErrorMocks.ErrorCode,
+                        requestId = ErrorMocks.RequestId,
+                        statusCode = statusCode,
+                        validationPhase = "client_request_fetch",
+                        requestUri = entryPoint.defaultDeepLink.requestUri,
+                    ),
+                    actual = error,
+                )
             }
         }
     }
@@ -216,8 +335,17 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 ),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
-            assertEquals(500, error.statusCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    payload = "plain text failure",
+                    errorCode = VCLErrorCode.ClientRequestRejected.value,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    statusCode = 500,
+                    validationPhase = "client_request_fetch",
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
+                ),
+                actual = error,
+            )
             assertEquals("plain text failure", error.message)
             assertEquals("plain text failure", error.payload)
         }
@@ -239,10 +367,20 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 ),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
-            assertEquals(ErrorMocks.RequestId, error.requestId)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    payload = payloadWithoutErrorCode,
+                    error = ErrorMocks.Error,
+                    errorCode = VCLErrorCode.ClientRequestRejected.value,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    requestId = ErrorMocks.RequestId,
+                    statusCode = 422,
+                    validationPhase = "client_request_fetch",
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
+                ),
+                actual = error,
+            )
             assertEquals(ErrorMocks.Message, error.message)
-            assertEquals(ErrorMocks.StatusCode, error.statusCode)
         }
     }
 
@@ -254,7 +392,15 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 router = defaultRouter(entryPoint).copy(requestPayload = ""),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.ClientRequestRejected.value,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "client_request_fetch",
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
+                ),
+                actual = error,
+            )
         }
     }
 
@@ -266,7 +412,15 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 router = defaultRouter(entryPoint).copy(requestPayload = "not json"),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.ClientRequestRejected.value,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "client_request_fetch",
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
+                ),
+                actual = error,
+            )
         }
     }
 
@@ -278,7 +432,15 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 router = defaultRouter(entryPoint).copy(requestPayload = "{}"),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.ClientRequestRejected.value,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "client_request_fetch",
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
+                ),
+                actual = error,
+            )
         }
     }
 
@@ -296,8 +458,18 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 ),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
-            assertEquals(404, error.statusCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.didUnresolvableErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    statusCode = 404,
+                    validationPhase = "did_resolution",
+                    requestDid = entryPoint.requestDid,
+                    payload = """{"message":"resolve failed","errorCode":"sdk_error"}""",
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
             assertEquals("resolve failed", error.message)
         }
     }
@@ -310,7 +482,16 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 router = defaultRouter(entryPoint).copy(didDocumentPayload = "not json"),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.didUnresolvableErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "did_resolution",
+                    requestDid = entryPoint.requestDid,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
             assertTrue(error.message!!.contains("public jwk not found for kid"))
         }
     }
@@ -323,7 +504,16 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 router = defaultRouter(entryPoint).copy(didDocumentPayload = "{}"),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.didUnresolvableErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "did_resolution",
+                    requestDid = entryPoint.requestDid,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
             assertTrue(error.message!!.contains("public jwk not found for kid"))
         }
     }
@@ -342,8 +532,17 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 ),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
-            assertEquals(404, error.statusCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.notRegisteredErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    statusCode = 404,
+                    validationPhase = "registration_check",
+                    payload = """{"message":"profile missing","errorCode":"sdk_error"}""",
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
             assertEquals("profile missing", error.message)
         }
     }
@@ -358,8 +557,16 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 router = defaultRouter(entryPoint).copy(verifiedProfilePayload = "{}"),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
-            assertEquals(VCLStatusCode.VerificationError.value, error.statusCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.requestUnauthorizedErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    statusCode = VCLStatusCode.VerificationError.value,
+                    validationPhase = "request_authorization",
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
             assertTrue(error.message!!.contains("Wrong service type"))
         }
     }
@@ -376,8 +583,16 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 router = defaultRouter(entryPoint).copy(verifiedProfilePayload = wrongServiceProfile),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
-            assertEquals(VCLStatusCode.VerificationError.value, error.statusCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.requestUnauthorizedErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    statusCode = VCLStatusCode.VerificationError.value,
+                    validationPhase = "request_authorization",
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
             assertTrue(error.message!!.contains("Wrong service type"))
         }
     }
@@ -404,26 +619,22 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 )
             }
 
-            assertEquals(entryPoint.mismatchErrorCode, error.errorCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.requestInvalidErrorCode,
+                    sourceErrorCode = entryPoint.legacyMismatchErrorCode,
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
             assertTrue(router.requestedEndpoints.any { it.contains(entryPoint.lastDid) })
         }
     }
 
     @Test
-    fun malformedDidSyntaxIsAcceptedUntilRequestValidation() {
-        entryPoints.forEach { entryPoint ->
-            val deepLink = VCLDeepLink(
-                "velocity-network://${entryPoint.schemePath}?request_uri=${entryPoint.encodedRequestUri}" +
-                    "&${entryPoint.didParam}=not-a-did"
-            )
-            val error = getEntryPointError(entryPoint, deepLink)
-
-            assertEquals(entryPoint.mismatchErrorCode, error.errorCode)
-        }
-    }
-
-    @Test
-    fun requestValidationFailuresUseLegacyMismatchErrorCodes() {
+    fun requestValidationFailuresUseTaxonomyCodes() {
         entryPoints.forEach { entryPoint ->
             val deepLink = VCLDeepLink(
                 "velocity-network://${entryPoint.schemePath}?request_uri=${entryPoint.encodedRequestUri}" +
@@ -431,7 +642,16 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
             )
             val error = getEntryPointError(entryPoint, deepLink)
 
-            assertEquals(entryPoint.mismatchErrorCode, error.errorCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.requestInvalidErrorCode,
+                    sourceErrorCode = entryPoint.legacyMismatchErrorCode,
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
         }
     }
 
@@ -448,55 +668,133 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 jwtVerificationResult = VCLResult.Failure(expectedError),
             )
 
-            assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.requestInvalidErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
             assertEquals("jwt signature verification failed", error.message)
         }
     }
 
-    private enum class EntryPoint {
-        Issuing,
-        Presentation,
+    private enum class EntryPoint(
+        val defaultDeepLink: VCLDeepLink,
+        val requestKind: String,
+        val requestDid: String,
+        val legacyMismatchErrorCode: String,
+        val requestInvalidErrorCode: String,
+        val didUnresolvableErrorCode: String,
+        val notRegisteredErrorCode: String,
+        val requestUnauthorizedErrorCode: String,
+        val didParam: String,
+        val otherDidParam: String,
+        val schemePath: String,
+        val encodedRequestUri: String,
+    ) {
+        Issuing(
+            defaultDeepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet,
+            requestKind = "issuing_request",
+            requestDid = DeepLinkMocks.IssuerDid,
+            legacyMismatchErrorCode = VCLErrorCode.MismatchedRequestIssuerDid.value,
+            requestInvalidErrorCode = VCLErrorCode.IssuerRequestInvalid.value,
+            didUnresolvableErrorCode = VCLErrorCode.IssuerDidUnresolvable.value,
+            notRegisteredErrorCode = VCLErrorCode.IssuerNotRegistered.value,
+            requestUnauthorizedErrorCode = VCLErrorCode.IssuerRequestUnauthorized.value,
+            didParam = "issuerDid",
+            otherDidParam = "inspectorDid",
+            schemePath = "issue",
+            encodedRequestUri = DeepLinkMocks.CredentialManifestRequestUriStr,
+        ),
+        Presentation(
+            defaultDeepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet,
+            requestKind = "presentation_request",
+            requestDid = DeepLinkMocks.InspectorDid,
+            legacyMismatchErrorCode = VCLErrorCode.MismatchedPresentationRequestInspectorDid.value,
+            requestInvalidErrorCode = VCLErrorCode.VerifierRequestInvalid.value,
+            didUnresolvableErrorCode = VCLErrorCode.VerifierDidUnresolvable.value,
+            notRegisteredErrorCode = VCLErrorCode.VerifierNotRegistered.value,
+            requestUnauthorizedErrorCode = VCLErrorCode.VerifierRequestUnauthorized.value,
+            didParam = "inspectorDid",
+            otherDidParam = "issuerDid",
+            schemePath = "inspect",
+            encodedRequestUri = DeepLinkMocks.PresentationRequestRequestUriStr,
+        ),
     }
 
-    private val entryPoints = listOf(EntryPoint.Issuing, EntryPoint.Presentation)
+    private val entryPoints = EntryPoint.entries
 
-    private val EntryPoint.defaultDeepLink: VCLDeepLink
-        get() = when (this) {
-            EntryPoint.Issuing -> DeepLinkMocks.CredentialManifestDeepLinkDevNet
-            EntryPoint.Presentation -> DeepLinkMocks.PresentationRequestDeepLinkDevNet
-        }
+    private data class ErrorDiagnostics(
+        val payload: String? = null,
+        val error: String? = null,
+        val errorCode: String,
+        val sourceErrorCode: String? = null,
+        val requestId: String? = null,
+        val statusCode: Int? = null,
+        val validationPhase: String? = null,
+        val requestDid: String? = null,
+        val requestUri: String? = null,
+        val requestKind: String? = null,
+    )
 
-    private val EntryPoint.endpointNullMessage: String
-        get() = when (this) {
-            EntryPoint.Issuing -> "credentialManifestDescriptor.endpoint = null"
-            EntryPoint.Presentation -> "presentationRequestDescriptor.endpoint = null"
-        }
+    private fun assertDiagnostics(
+        expected: ErrorDiagnostics,
+        actual: VCLError,
+    ) {
+        assertEquals(expected.canonicalizePayload(), actual.toDiagnostics())
+    }
 
-    private val EntryPoint.mismatchErrorCode: String
-        get() = when (this) {
-            EntryPoint.Issuing -> VCLErrorCode.MismatchedRequestIssuerDid.value
-            EntryPoint.Presentation -> VCLErrorCode.MismatchedPresentationRequestInspectorDid.value
-        }
+    private fun VCLError.toDiagnostics() = ErrorDiagnostics(
+        payload = payload?.canonicalJsonOrSelf(),
+        error = error,
+        errorCode = errorCode,
+        sourceErrorCode = sourceErrorCode,
+        requestId = requestId,
+        statusCode = statusCode,
+        validationPhase = validationPhase,
+        requestDid = requestDid,
+        requestUri = requestUri,
+        requestKind = requestKind,
+    )
 
-    private val EntryPoint.didParam: String
-        get() = when (this) {
-            EntryPoint.Issuing -> "issuerDid"
-            EntryPoint.Presentation -> "inspectorDid"
-        }
+    private fun ErrorDiagnostics.canonicalizePayload() =
+        copy(payload = payload?.canonicalJsonOrSelf())
 
-    private val EntryPoint.schemePath: String
-        get() = when (this) {
-            EntryPoint.Issuing -> "issue"
-            EntryPoint.Presentation -> "inspect"
-        }
+    private fun String.canonicalJsonOrSelf(): String =
+        runCatching { JSONObject(this).toString() }.getOrDefault(this)
 
-    private val EntryPoint.encodedRequestUri: String
-        get() = when (this) {
-            EntryPoint.Issuing -> DeepLinkMocks.CredentialManifestRequestUriStr
-            EntryPoint.Presentation -> DeepLinkMocks.PresentationRequestRequestUriStr
-        }
+    private fun EntryPoint.expectedDiagnostics(
+        errorCode: String,
+        payload: String? = null,
+        error: String? = null,
+        sourceErrorCode: String? = null,
+        requestId: String? = null,
+        statusCode: Int? = null,
+        validationPhase: String? = null,
+        requestDid: String? = null,
+        requestUri: String? = null,
+        requestKind: String? = this.requestKind,
+    ) = ErrorDiagnostics(
+        payload = payload,
+        error = error,
+        errorCode = errorCode,
+        sourceErrorCode = sourceErrorCode,
+        requestId = requestId,
+        statusCode = statusCode,
+        validationPhase = validationPhase,
+        requestDid = requestDid,
+        requestUri = requestUri,
+        requestKind = requestKind,
+    )
 
     private val EntryPoint.lastDid: String get() = "did:example:last"
+
+    private fun simpleRequestUri(): String =
+        URLEncoder.encode("https://example.com/request", "UTF-8")
 
     private fun defaultRouter(entryPoint: EntryPoint): BaselineHttpRouter =
         when (entryPoint) {

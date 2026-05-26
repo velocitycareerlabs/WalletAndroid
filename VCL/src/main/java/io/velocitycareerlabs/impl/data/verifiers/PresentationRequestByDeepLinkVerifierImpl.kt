@@ -13,6 +13,7 @@ import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.impl.domain.verifiers.PresentationRequestByDeepLinkVerifier
+import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
 import io.velocitycareerlabs.impl.utils.VCLLog
 
 internal class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByDeepLinkVerifier {
@@ -43,8 +44,8 @@ internal class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByD
         )
     }
 
-    private fun isDidBoundToDidDocument(did: String, didDocument: VCLDidDocument): Boolean =
-        didDocument.id == did || didDocument.alsoKnownAs.contains(did)
+    private fun isDidBoundToDidDocument(requestDid: String, didDocument: VCLDidDocument): Boolean =
+        didDocument.id == requestDid || didDocument.alsoKnownAs.contains(requestDid)
 
     private fun onError(
         errorCode: VCLErrorCode = VCLErrorCode.SdkError,
@@ -53,8 +54,15 @@ internal class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByD
 
     ) {
         VCLLog.e(TAG, errorMessage)
+        val error = VCLError(errorCode = errorCode.value, message = errorMessage)
         completionBlock(
-            (VCLResult.Failure(VCLError(errorCode = errorCode.value, message = errorMessage)))
+            (VCLResult.Failure(
+                ErrorTaxonomy.classifyRequestValidation(
+                    error,
+                    requestKind = ErrorTaxonomy.RequestKindPresentation,
+                    requestDid = null,
+                )
+            ))
         )
     }
 }

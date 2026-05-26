@@ -100,9 +100,9 @@ class PresentationRequestByDeepLinkVerifierTest {
             DidDocumentMocks.DidDocumentWithWrongDidMock
         ) {
             it.handleResult({
-                fail("${VCLErrorCode.MismatchedPresentationRequestInspectorDid.value} error code is expected")
+                fail("${VCLErrorCode.VerifierRequestInvalid.value} error code is expected")
             }, { error ->
-                assertEquals(VCLErrorCode.MismatchedPresentationRequestInspectorDid.value, error.errorCode)
+                assertEquals(VCLErrorCode.VerifierRequestInvalid.value, error.errorCode)
             })
         }
     }
@@ -117,9 +117,9 @@ class PresentationRequestByDeepLinkVerifierTest {
             DidDocumentMocks.DidDocumentMock
         ) {
             it.handleResult({
-                fail("${VCLErrorCode.SdkError.value} error code is expected")
+                fail("${VCLErrorCode.VerifierRequestInvalid.value} error code is expected")
             }, { error ->
-                assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
+                assertEquals(VCLErrorCode.VerifierRequestInvalid.value, error.errorCode)
                 assertTrue(error.message?.contains("DID not found in deep link") == true)
             })
         }

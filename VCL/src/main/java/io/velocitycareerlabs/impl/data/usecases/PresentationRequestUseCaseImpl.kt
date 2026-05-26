@@ -13,6 +13,7 @@ import io.velocitycareerlabs.impl.domain.repositories.*
 import io.velocitycareerlabs.impl.domain.usecases.PresentationRequestUseCase
 import io.velocitycareerlabs.impl.domain.verifiers.PresentationRequestByDeepLinkVerifier
 import io.velocitycareerlabs.impl.extensions.encode
+import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
 import io.velocitycareerlabs.impl.utils.VCLLog
 
 internal class PresentationRequestUseCaseImpl(
@@ -58,13 +59,24 @@ internal class PresentationRequestUseCaseImpl(
                                         )
                                     } ?: run {
                                         onError(
-                                            VCLError(message = "public jwk not found for kid: ${presentationRequest.jwt.kid}"),
+                                            ErrorTaxonomy.classifyDidResolution(
+                                                VCLError(message = "public jwk not found for kid: ${presentationRequest.jwt.kid}"),
+                                                requestKind = ErrorTaxonomy.RequestKindPresentation,
+                                                requestDid = presentationRequest.iss,
+                                            ),
                                             completionBlock
                                         )
                                     }
                                 },
                                 { error ->
-                                    onError(error, completionBlock)
+                                    onError(
+                                        ErrorTaxonomy.classifyDidResolution(
+                                            error,
+                                            requestKind = ErrorTaxonomy.RequestKindPresentation,
+                                            requestDid = presentationRequest.iss,
+                                        ),
+                                        completionBlock
+                                    )
                                 }
                             )
                         }
@@ -102,11 +114,25 @@ internal class PresentationRequestUseCaseImpl(
                             completionBlock
                         )
                     }, { error ->
-                        onError(error, completionBlock)
+                        onError(
+                            ErrorTaxonomy.classifyRequestValidation(
+                                error,
+                                requestKind = ErrorTaxonomy.RequestKindPresentation,
+                                requestDid = presentationRequest.iss,
+                            ),
+                            completionBlock
+                        )
                     })
                 }
             }, { error ->
-                onError(error, completionBlock)
+                onError(
+                    ErrorTaxonomy.classifyRequestValidation(
+                        error,
+                        requestKind = ErrorTaxonomy.RequestKindPresentation,
+                        requestDid = presentationRequest.iss,
+                    ),
+                    completionBlock
+                )
             })
         }
     }
@@ -122,7 +148,11 @@ internal class PresentationRequestUseCaseImpl(
             }
         else
             onError(
-                VCLError(message = "Failed to verify: ${presentationRequest.jwt.payload}"),
+                ErrorTaxonomy.classifyRequestValidation(
+                    VCLError(message = "Failed to verify: ${presentationRequest.jwt.payload}"),
+                    requestKind = ErrorTaxonomy.RequestKindPresentation,
+                    requestDid = presentationRequest.iss,
+                ),
                 completionBlock
             )
     }

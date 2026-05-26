@@ -12,6 +12,7 @@ import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.repositories.PresentationRequestRepository
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
+import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
 import org.json.JSONObject
 import java.lang.Exception
 
@@ -35,17 +36,49 @@ internal class PresentationRequestRepositoryImpl(
                         try {
                             val encodedJwtStr = JSONObject(presentationRequestResponse.payload)
                                 .optString(VCLPresentationRequest.KeyPresentationRequest)
-                            completionBlock(VCLResult.Success(encodedJwtStr))
+                            if (encodedJwtStr.isBlank()) {
+                                completionBlock(
+                                    VCLResult.Failure(
+                                        ErrorTaxonomy.classifyClientRequestFetch(
+                                            VCLError(message = "Presentation request response is missing presentation_request"),
+                                            requestUri = endpoint,
+                                            requestKind = ErrorTaxonomy.RequestKindPresentation,
+                                        )
+                                    )
+                                )
+                            } else {
+                                completionBlock(VCLResult.Success(encodedJwtStr))
+                            }
                         } catch (ex: Exception) {
-                            completionBlock(VCLResult.Failure(VCLError(ex)))
+                            completionBlock(
+                                VCLResult.Failure(
+                                    ErrorTaxonomy.classifyClientRequestFetch(
+                                        VCLError(ex),
+                                        requestUri = endpoint,
+                                        requestKind = ErrorTaxonomy.RequestKindPresentation,
+                                    )
+                                )
+                            )
                         }
                     }, {
-                        completionBlock(VCLResult.Failure(it))
+                        completionBlock(
+                            VCLResult.Failure(
+                                ErrorTaxonomy.classifyClientRequestFetch(
+                                    it,
+                                    requestUri = endpoint,
+                                    requestKind = ErrorTaxonomy.RequestKindPresentation,
+                                )
+                            )
+                        )
                     })
                 }
             )
         } ?: run {
-            completionBlock(VCLResult.Failure(VCLError(message = "presentationRequestDescriptor.endpoint = null")))
+            completionBlock(
+                VCLResult.Failure(
+                    VCLError(message = "presentationRequestDescriptor.endpoint = null")
+                )
+            )
         }
     }
 }
