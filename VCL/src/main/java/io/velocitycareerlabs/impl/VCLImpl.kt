@@ -247,64 +247,53 @@ internal class VCLImpl(
         successHandler: (VCLPresentationRequest) -> Unit,
         errorHandler: (VCLError) -> Unit
     ) {
-        val descriptorDid = presentationRequestDescriptor.did
-        val linkValidationError = velocityDeepLinkValidator.validateDeepLink(
-            deepLink = presentationRequestDescriptor.deepLink,
-            expectedPath = "inspect",
-            expectedDidParam = VCLDeepLink.KeyInspectorDid,
-            requestKind = ErrorTaxonomy.RequestKindPresentation,
-        )
-        if (linkValidationError != null) {
-            logError("getPresentationRequest::linkValidation", linkValidationError)
-            errorHandler(toPublicError(linkValidationError, ErrorTaxonomy.RequestKindPresentation))
+        val descriptorDid = try {
+            validatePresentationRequestDescriptor(presentationRequestDescriptor)
+            presentationRequestDescriptor.did!!
+        } catch (error: EntryPointValidationException) {
+            handleRequestEntryError(
+                context = "getPresentationRequest::descriptorValidation",
+                error = error.vclError,
+                requestKind = ErrorTaxonomy.RequestKindPresentation,
+                errorHandler = errorHandler,
+            )
             return
         }
-        velocityDeepLinkValidator.validateRequestEndpoint(
-            requestUri = presentationRequestDescriptor.endpoint,
-            requestKind = ErrorTaxonomy.RequestKindPresentation,
-        )?.let {
-            logError("getPresentationRequest::endpointValidation", it)
-            errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindPresentation))
-            return
-        }
-        descriptorDid?.let {
-            profileServiceTypeVerifier.verifyServiceTypeOfVerifiedProfile(
-                verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = descriptorDid),
-                expectedServiceTypes = VCLServiceTypes(VCLServiceType.Inspector),
-                successHandler = { verifiedProfile ->
-                    presentationRequestUseCase.getPresentationRequest(
-                        presentationRequestDescriptor,
-                        verifiedProfile
-                    ) { presentationRequestResult ->
-                        presentationRequestResult.handleResult(
-                            {
-                                successHandler(it)
-                            },
-                            {
-                                logError("getPresentationRequest", it)
-                                errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindPresentation))
-                            }
-                        )
-                    }
-                },
-                errorHandler = {
-                    val taxonomyError = classifyProfileVerificationError(
+        profileServiceTypeVerifier.verifyServiceTypeOfVerifiedProfile(
+            verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = descriptorDid),
+            expectedServiceTypes = VCLServiceTypes(VCLServiceType.Inspector),
+            successHandler = { verifiedProfile ->
+                presentationRequestUseCase.getPresentationRequest(
+                    presentationRequestDescriptor,
+                    verifiedProfile
+                ) { presentationRequestResult ->
+                    presentationRequestResult.handleResult(
+                        {
+                            successHandler(it)
+                        },
+                        {
+                            handleRequestEntryError(
+                                context = "getPresentationRequest",
+                                error = it,
+                                requestKind = ErrorTaxonomy.RequestKindPresentation,
+                                errorHandler = errorHandler,
+                            )
+                        }
+                    )
+                }
+            },
+            errorHandler = {
+                handleRequestEntryError(
+                    context = "profile verification failed",
+                    error = classifyProfileVerificationError(
                         it,
                         ErrorTaxonomy.RequestKindPresentation,
-                    )
-                    logError("profile verification failed", taxonomyError)
-                    errorHandler(toPublicError(taxonomyError, ErrorTaxonomy.RequestKindPresentation))
-                }
-            )
-        } ?: run {
-            ErrorTaxonomy.invalidLink(
-                message = "did was not found in $presentationRequestDescriptor",
-                requestKind = ErrorTaxonomy.RequestKindPresentation,
-            ).let {
-                logError("getPresentationRequest::verifiedProfile", it)
-                errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindPresentation))
+                    ),
+                    requestKind = ErrorTaxonomy.RequestKindPresentation,
+                    errorHandler = errorHandler,
+                )
             }
-        }
+        )
     }
 
     override fun submitPresentation(
@@ -367,64 +356,51 @@ internal class VCLImpl(
             TAG,
             "credentialManifestDescriptor: ${credentialManifestDescriptor.toPropsString()}"
         )
-        val descriptorDid = credentialManifestDescriptor.did
-        credentialManifestDescriptor.deepLink?.let { deepLink ->
-            val linkValidationError = velocityDeepLinkValidator.validateDeepLink(
-                deepLink = deepLink,
-                expectedPath = "issue",
-                expectedDidParam = VCLDeepLink.KeyIssuerDid,
+        val descriptorDid = try {
+            validateCredentialManifestDescriptor(credentialManifestDescriptor)
+            credentialManifestDescriptor.did!!
+        } catch (error: EntryPointValidationException) {
+            handleRequestEntryError(
+                context = "getCredentialManifest::descriptorValidation",
+                error = error.vclError,
                 requestKind = ErrorTaxonomy.RequestKindIssuing,
+                errorHandler = errorHandler,
             )
-            if (linkValidationError != null) {
-                logError("getCredentialManifest::linkValidation", linkValidationError)
-                errorHandler(toPublicError(linkValidationError, ErrorTaxonomy.RequestKindIssuing))
-                return
-            }
-        }
-        velocityDeepLinkValidator.validateRequestEndpoint(
-            requestUri = credentialManifestDescriptor.endpoint,
-            requestKind = ErrorTaxonomy.RequestKindIssuing,
-        )?.let {
-            logError("getCredentialManifest::endpointValidation", it)
-            errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindIssuing))
             return
         }
-        descriptorDid?.let {
-            profileServiceTypeVerifier.verifyServiceTypeOfVerifiedProfile(
-                verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = descriptorDid),
-                expectedServiceTypes = VCLServiceTypes(credentialManifestDescriptor.issuingType),
-                successHandler = { verifiedProfile ->
-                    credentialManifestUseCase.getCredentialManifest(
-                        credentialManifestDescriptor,
-                        verifiedProfile
-                    ) { credentialManifest ->
-                        credentialManifest.handleResult({
-                            successHandler(it)
-                        }, {
-                            logError("getCredentialManifest", it)
-                            errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindIssuing))
-                        }
+        profileServiceTypeVerifier.verifyServiceTypeOfVerifiedProfile(
+            verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = descriptorDid),
+            expectedServiceTypes = VCLServiceTypes(credentialManifestDescriptor.issuingType),
+            successHandler = { verifiedProfile ->
+                credentialManifestUseCase.getCredentialManifest(
+                    credentialManifestDescriptor,
+                    verifiedProfile
+                ) { credentialManifest ->
+                    credentialManifest.handleResult({
+                        successHandler(it)
+                    }, {
+                        handleRequestEntryError(
+                            context = "getCredentialManifest",
+                            error = it,
+                            requestKind = ErrorTaxonomy.RequestKindIssuing,
+                            errorHandler = errorHandler,
                         )
                     }
-                },
-                errorHandler = {
-                    val taxonomyError = classifyProfileVerificationError(
+                    )
+                }
+            },
+            errorHandler = {
+                handleRequestEntryError(
+                    context = "profile verification failed",
+                    error = classifyProfileVerificationError(
                         it,
                         ErrorTaxonomy.RequestKindIssuing,
-                    )
-                    logError("profile verification failed", taxonomyError)
-                    errorHandler(toPublicError(taxonomyError, ErrorTaxonomy.RequestKindIssuing))
-                }
-            )
-        } ?: run {
-            ErrorTaxonomy.invalidLink(
-                message = "did was not found in $credentialManifestDescriptor",
-                requestKind = ErrorTaxonomy.RequestKindIssuing,
-            ).let {
-                logError("getCredentialManifest::verifiedProfile", it)
-                errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindIssuing))
+                    ),
+                    requestKind = ErrorTaxonomy.RequestKindIssuing,
+                    errorHandler = errorHandler,
+                )
             }
-        }
+        )
     }
 
     override fun generateOffers(
@@ -647,6 +623,59 @@ internal class VCLImpl(
             ErrorTaxonomy.classifyRegistration(error, requestKind, requestDid = null)
         }
 
+    private fun validatePresentationRequestDescriptor(descriptor: VCLPresentationRequestDescriptor) {
+        velocityDeepLinkValidator.validateDeepLink(
+            deepLink = descriptor.deepLink,
+            expectedPath = "inspect",
+            expectedDidParam = VCLDeepLink.KeyInspectorDid,
+            requestKind = ErrorTaxonomy.RequestKindPresentation,
+        )?.throwValidationError()
+        velocityDeepLinkValidator.validateRequestEndpoint(
+            requestUri = descriptor.endpoint,
+            requestKind = ErrorTaxonomy.RequestKindPresentation,
+        )?.throwValidationError()
+        if (descriptor.did.isNullOrBlank()) {
+            ErrorTaxonomy.invalidLink(
+                message = "did was not found in $descriptor",
+                requestKind = ErrorTaxonomy.RequestKindPresentation,
+            ).throwValidationError()
+        }
+    }
+
+    private fun validateCredentialManifestDescriptor(descriptor: VCLCredentialManifestDescriptor) {
+        descriptor.deepLink?.let { deepLink ->
+            velocityDeepLinkValidator.validateDeepLink(
+                deepLink = deepLink,
+                expectedPath = "issue",
+                expectedDidParam = VCLDeepLink.KeyIssuerDid,
+                requestKind = ErrorTaxonomy.RequestKindIssuing,
+            )?.throwValidationError()
+        }
+        velocityDeepLinkValidator.validateRequestEndpoint(
+            requestUri = descriptor.endpoint,
+            requestKind = ErrorTaxonomy.RequestKindIssuing,
+        )?.throwValidationError()
+        if (descriptor.did.isNullOrBlank()) {
+            ErrorTaxonomy.invalidLink(
+                message = "did was not found in $descriptor",
+                requestKind = ErrorTaxonomy.RequestKindIssuing,
+            ).throwValidationError()
+        }
+    }
+
+    private fun VCLError.throwValidationError(): Nothing =
+        throw EntryPointValidationException(this)
+
+    private fun handleRequestEntryError(
+        context: String,
+        error: VCLError,
+        requestKind: String,
+        errorHandler: (VCLError) -> Unit,
+    ) {
+        logError(context, error)
+        errorHandler(toPublicError(error, requestKind))
+    }
+
     private fun toPublicError(error: VCLError, requestKind: String): VCLError =
         if (initializationDescriptor.isErrorTaxonomyBackwardCompatibilityEnabled) {
             errorTaxonomyCompatibilityMapper.map(
@@ -664,6 +693,8 @@ internal class VCLImpl(
         } else {
             "credentialManifestDescriptor.endpoint = null"
         }
+
+    private class EntryPointValidationException(val vclError: VCLError) : Exception()
 }
 
 internal fun VCLImpl.logError(message: String = "", error: VCLError) {
