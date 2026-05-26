@@ -180,10 +180,7 @@ internal class NetworkServiceImpl(
         if (isJsonContentType(contentType)) {
             payload.toJsonObject()?.let { payloadJson ->
                 val payloadError = VCLError.fromPayloadJson(payloadJson)
-                return payloadError.copy(
-                    statusCode = payloadError.statusCode ?: statusCode,
-                    httpStatusCode = statusCode,
-                )
+                return payloadError.copy(statusCode = statusCode)
             }
         }
 
@@ -191,7 +188,6 @@ internal class NetworkServiceImpl(
             payload = payload,
             message = payload,
             statusCode = statusCode,
-            httpStatusCode = statusCode,
         )
     }
 

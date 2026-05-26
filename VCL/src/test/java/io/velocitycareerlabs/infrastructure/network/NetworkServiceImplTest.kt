@@ -39,8 +39,7 @@ internal class NetworkServiceImplTest {
                 errorCode = ErrorMocks.ErrorCode,
                 requestId = ErrorMocks.RequestId,
                 message = ErrorMocks.Message,
-                statusCode = ErrorMocks.StatusCode,
-                httpStatusCode = 400,
+                statusCode = 400,
             ),
             error
         )
@@ -64,8 +63,7 @@ internal class NetworkServiceImplTest {
                 errorCode = ErrorMocks.ErrorCode,
                 requestId = ErrorMocks.RequestId,
                 message = ErrorMocks.Message,
-                statusCode = ErrorMocks.StatusCode,
-                httpStatusCode = 400,
+                statusCode = 400,
             ),
             error
         )
@@ -92,7 +90,6 @@ internal class NetworkServiceImplTest {
                 requestId = ErrorMocks.RequestId,
                 message = ErrorMocks.Message,
                 statusCode = 422,
-                httpStatusCode = 422,
             ),
             error
         )
@@ -114,7 +111,6 @@ internal class NetworkServiceImplTest {
                 errorCode = VCLErrorCode.SdkError.value,
                 message = malformedPayload,
                 statusCode = 502,
-                httpStatusCode = 502,
             ),
             error
         )
@@ -136,7 +132,6 @@ internal class NetworkServiceImplTest {
                 errorCode = VCLErrorCode.SdkError.value,
                 message = textPayload,
                 statusCode = 500,
-                httpStatusCode = 500,
             ),
             error
         )

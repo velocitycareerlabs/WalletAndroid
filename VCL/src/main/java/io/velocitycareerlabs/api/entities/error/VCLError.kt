@@ -17,7 +17,6 @@ data class VCLError(
     val requestId: String? = null,
     override val message: String? = null,
     val statusCode: Int? = null,
-    val httpStatusCode: Int? = null,
     val sourceErrorCode: String? = null,
     val validationPhase: String? = null,
     val requestDid: String? = null,
@@ -61,7 +60,6 @@ data class VCLError(
             putOpt(KeyRequestId, requestId)
             putOpt(KeyMessage, message)
             putOpt(KeyStatusCode, statusCode)
-            putOpt(KeyHttpStatusCode, httpStatusCode)
             putOpt(KeySourceErrorCode, sourceErrorCode)
             putOpt(KeyValidationPhase, validationPhase)
             putOpt(KeyRequestDid, requestDid)
@@ -81,7 +79,6 @@ data class VCLError(
             requestId = payloadJson.optNullableString(KeyRequestId),
             message = payloadJson.optNullableString(KeyMessage),
             statusCode = payloadJson.optNullableInt(KeyStatusCode),
-            httpStatusCode = payloadJson.optNullableInt(KeyHttpStatusCode),
             sourceErrorCode = payloadJson.optNullableString(KeySourceErrorCode),
             validationPhase = payloadJson.optNullableString(KeyValidationPhase),
             requestDid = payloadJson.optNullableString(KeyRequestDid),
@@ -101,7 +98,6 @@ data class VCLError(
         const val KeyRequestId = "requestId"
         const val KeyMessage = "message"
         const val KeyStatusCode = "statusCode"
-        const val KeyHttpStatusCode = "httpStatusCode"
         const val KeySourceErrorCode = "sourceErrorCode"
         const val KeyValidationPhase = "validationPhase"
         const val KeyRequestDid = "requestDid"

@@ -56,7 +56,7 @@ internal object ErrorTaxonomy {
                 requestUri = requestUri,
                 requestKind = requestKind,
             )
-            error.transportStatusCode == 401 || error.transportStatusCode == 403 -> error.withTaxonomy(
+            error.statusCode == 401 || error.statusCode == 403 -> error.withTaxonomy(
                 VCLErrorCode.ClientRequestUnauthorized,
                 PhaseClientRequestFetch,
                 requestUri = requestUri,
@@ -168,9 +168,6 @@ internal object ErrorTaxonomy {
     fun VCLError.isConnectivityFailure(): Boolean =
         errorCode == VCLErrorCode.ConnectivityFailure.value ||
             statusCode == VCLStatusCode.NetworkError.value
-
-    private val VCLError.transportStatusCode: Int?
-        get() = httpStatusCode ?: statusCode
 
     fun VCLError.isTaxonomyError(): Boolean =
         VCLErrorCode.entries.any { it.value == errorCode && it.isTaxonomyCode }
