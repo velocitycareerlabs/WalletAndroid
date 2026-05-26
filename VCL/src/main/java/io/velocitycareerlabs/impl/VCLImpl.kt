@@ -250,10 +250,10 @@ internal class VCLImpl(
         val descriptorDid = try {
             validatePresentationRequestDescriptor(presentationRequestDescriptor)
             presentationRequestDescriptor.did!!
-        } catch (error: EntryPointValidationException) {
+        } catch (error: VCLError) {
             handleRequestEntryError(
                 context = "getPresentationRequest::descriptorValidation",
-                error = error.vclError,
+                error = error,
                 requestKind = ErrorTaxonomy.RequestKindPresentation,
                 errorHandler = errorHandler,
             )
@@ -359,10 +359,10 @@ internal class VCLImpl(
         val descriptorDid = try {
             validateCredentialManifestDescriptor(credentialManifestDescriptor)
             credentialManifestDescriptor.did!!
-        } catch (error: EntryPointValidationException) {
+        } catch (error: VCLError) {
             handleRequestEntryError(
                 context = "getCredentialManifest::descriptorValidation",
-                error = error.vclError,
+                error = error,
                 requestKind = ErrorTaxonomy.RequestKindIssuing,
                 errorHandler = errorHandler,
             )
@@ -664,7 +664,7 @@ internal class VCLImpl(
     }
 
     private fun VCLError.throwValidationError(): Nothing =
-        throw EntryPointValidationException(this)
+        throw this
 
     private fun handleRequestEntryError(
         context: String,
@@ -694,7 +694,6 @@ internal class VCLImpl(
             "credentialManifestDescriptor.endpoint = null"
         }
 
-    private class EntryPointValidationException(val vclError: VCLError) : Exception()
 }
 
 internal fun VCLImpl.logError(message: String = "", error: VCLError) {
