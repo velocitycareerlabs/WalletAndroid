@@ -248,17 +248,12 @@ internal class VCLImpl(
         errorHandler: (VCLError) -> Unit
     ) {
         validatePresentationRequestDescriptor(presentationRequestDescriptor)?.let { error ->
-            handleRequestEntryError(
-                context = "getPresentationRequest::descriptorValidation",
-                error = error,
-                requestKind = ErrorTaxonomy.RequestKindPresentation,
-                errorHandler = errorHandler,
-            )
+            logError("getPresentationRequest::descriptorValidation", error)
+            errorHandler(toPublicError(error, ErrorTaxonomy.RequestKindPresentation))
             return
         }
-        val descriptorDid = presentationRequestDescriptor.did!!
         profileServiceTypeVerifier.verifyServiceTypeOfVerifiedProfile(
-            verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = descriptorDid),
+            verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = presentationRequestDescriptor.did!!),
             expectedServiceTypes = VCLServiceTypes(VCLServiceType.Inspector),
             successHandler = { verifiedProfile ->
                 presentationRequestUseCase.getPresentationRequest(
@@ -270,26 +265,19 @@ internal class VCLImpl(
                             successHandler(it)
                         },
                         {
-                            handleRequestEntryError(
-                                context = "getPresentationRequest",
-                                error = it,
-                                requestKind = ErrorTaxonomy.RequestKindPresentation,
-                                errorHandler = errorHandler,
-                            )
+                            logError("getPresentationRequest", it)
+                            errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindPresentation))
                         }
                     )
                 }
             },
             errorHandler = {
-                handleRequestEntryError(
-                    context = "profile verification failed",
-                    error = classifyProfileVerificationError(
-                        it,
-                        ErrorTaxonomy.RequestKindPresentation,
-                    ),
-                    requestKind = ErrorTaxonomy.RequestKindPresentation,
-                    errorHandler = errorHandler,
+                val taxonomyError = classifyProfileVerificationError(
+                    it,
+                    ErrorTaxonomy.RequestKindPresentation,
                 )
+                logError("profile verification failed", taxonomyError)
+                errorHandler(toPublicError(taxonomyError, ErrorTaxonomy.RequestKindPresentation))
             }
         )
     }
@@ -355,17 +343,12 @@ internal class VCLImpl(
             "credentialManifestDescriptor: ${credentialManifestDescriptor.toPropsString()}"
         )
         validateCredentialManifestDescriptor(credentialManifestDescriptor)?.let { error ->
-            handleRequestEntryError(
-                context = "getCredentialManifest::descriptorValidation",
-                error = error,
-                requestKind = ErrorTaxonomy.RequestKindIssuing,
-                errorHandler = errorHandler,
-            )
+            logError("getCredentialManifest::descriptorValidation", error)
+            errorHandler(toPublicError(error, ErrorTaxonomy.RequestKindIssuing))
             return
         }
-        val descriptorDid = credentialManifestDescriptor.did!!
         profileServiceTypeVerifier.verifyServiceTypeOfVerifiedProfile(
-            verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = descriptorDid),
+            verifiedProfileDescriptor = VCLVerifiedProfileDescriptor(did = credentialManifestDescriptor.did!!),
             expectedServiceTypes = VCLServiceTypes(credentialManifestDescriptor.issuingType),
             successHandler = { verifiedProfile ->
                 credentialManifestUseCase.getCredentialManifest(
@@ -375,26 +358,19 @@ internal class VCLImpl(
                     credentialManifest.handleResult({
                         successHandler(it)
                     }, {
-                        handleRequestEntryError(
-                            context = "getCredentialManifest",
-                            error = it,
-                            requestKind = ErrorTaxonomy.RequestKindIssuing,
-                            errorHandler = errorHandler,
-                        )
+                        logError("getCredentialManifest", it)
+                        errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindIssuing))
                     }
                     )
                 }
             },
             errorHandler = {
-                handleRequestEntryError(
-                    context = "profile verification failed",
-                    error = classifyProfileVerificationError(
-                        it,
-                        ErrorTaxonomy.RequestKindIssuing,
-                    ),
-                    requestKind = ErrorTaxonomy.RequestKindIssuing,
-                    errorHandler = errorHandler,
+                val taxonomyError = classifyProfileVerificationError(
+                    it,
+                    ErrorTaxonomy.RequestKindIssuing,
                 )
+                logError("profile verification failed", taxonomyError)
+                errorHandler(toPublicError(taxonomyError, ErrorTaxonomy.RequestKindIssuing))
             }
         )
     }
@@ -659,16 +635,6 @@ internal class VCLImpl(
             )
         }
         return null
-    }
-
-    private fun handleRequestEntryError(
-        context: String,
-        error: VCLError,
-        requestKind: String,
-        errorHandler: (VCLError) -> Unit,
-    ) {
-        logError(context, error)
-        errorHandler(toPublicError(error, requestKind))
     }
 
     private fun toPublicError(error: VCLError, requestKind: String): VCLError =
