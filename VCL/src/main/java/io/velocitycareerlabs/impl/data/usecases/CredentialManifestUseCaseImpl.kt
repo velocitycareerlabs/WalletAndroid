@@ -52,24 +52,11 @@ internal class CredentialManifestUseCaseImpl(
                                 credentialManifest.iss
                             ) { didDocumentResult ->
                                 didDocumentResult.handleResult({ didDocument ->
-                                    didDocument.getPublicJwk(credentialManifest.jwt.kid ?: "")
-                                        ?.let { publicJwk ->
-                                            verifyCredentialManifestJwt(
-                                                publicJwk,
-                                                credentialManifest,
-                                                didDocument,
-                                                completionBlock
-                                            )
-                                    } ?: run {
-                                        onError(
-                                            unresolvedJwtKeyError(
-                                                jwt = credentialManifest.jwt,
-                                                requestDid = credentialManifest.iss,
-                                            ),
-                                            completionBlock
-                                        )
-                                    }
-
+                                    verifyCredentialManifestJwt(
+                                        credentialManifest,
+                                        didDocument,
+                                        completionBlock
+                                    )
                                 }, { error ->
                                     onError(
                                         ErrorTaxonomy.classifyDidResolution(
@@ -101,11 +88,18 @@ internal class CredentialManifestUseCaseImpl(
     }
 
     private fun verifyCredentialManifestJwt(
-        publicJwk: VCLPublicJwk,
         credentialManifest: VCLCredentialManifest,
         didDocument: VCLDidDocument,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
+        val publicJwk = didDocument.getPublicJwk(credentialManifest.jwt.kid ?: "")
+            ?: return onError(
+                unresolvedJwtKeyError(
+                    jwt = credentialManifest.jwt,
+                    requestDid = credentialManifest.iss,
+                ),
+                completionBlock
+            )
         jwtServiceRepository.verifyJwt(
             credentialManifest.jwt,
             publicJwk,

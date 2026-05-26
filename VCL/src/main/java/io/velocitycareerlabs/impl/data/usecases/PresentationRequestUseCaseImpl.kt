@@ -50,22 +50,11 @@ internal class PresentationRequestUseCaseImpl(
                         ) { didDocumentResult ->
                             didDocumentResult.handleResult(
                                 { didDocument ->
-                                    didDocument.getPublicJwk(kid = presentationRequest.jwt.kid ?: "")?.let { publicJwk ->
-                                        verifyPresentationRequest(
-                                            publicJwk,
-                                            presentationRequest,
-                                            didDocument,
-                                            completionBlock
-                                        )
-                                    } ?: run {
-                                        onError(
-                                            unresolvedJwtKeyError(
-                                                jwt = presentationRequest.jwt,
-                                                requestDid = presentationRequest.iss,
-                                            ),
-                                            completionBlock
-                                        )
-                                    }
+                                    verifyPresentationRequest(
+                                        presentationRequest,
+                                        didDocument,
+                                        completionBlock
+                                    )
                                 },
                                 { error ->
                                     onError(
@@ -89,11 +78,18 @@ internal class PresentationRequestUseCaseImpl(
     }
 
     private fun verifyPresentationRequest(
-        publicJwk: VCLPublicJwk,
         presentationRequest: VCLPresentationRequest,
         didDocument: VCLDidDocument,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
+        val publicJwk = didDocument.getPublicJwk(kid = presentationRequest.jwt.kid ?: "")
+            ?: return onError(
+                unresolvedJwtKeyError(
+                    jwt = presentationRequest.jwt,
+                    requestDid = presentationRequest.iss,
+                ),
+                completionBlock
+            )
         jwtServiceRepository.verifyJwt(
             presentationRequest.jwt,
             publicJwk,
