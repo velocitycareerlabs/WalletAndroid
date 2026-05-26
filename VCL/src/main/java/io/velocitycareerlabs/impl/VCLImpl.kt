@@ -15,6 +15,7 @@ import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.domain.models.CredentialTypeSchemasModel
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
+import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.models.CountriesModel
 import io.velocitycareerlabs.impl.domain.models.CredentialTypesModel
 import io.velocitycareerlabs.impl.domain.usecases.AuthTokenUseCase
@@ -33,9 +34,12 @@ import io.velocitycareerlabs.impl.domain.usecases.VerifiedProfileUseCase
 import io.velocitycareerlabs.impl.utils.InitializationWatcher
 import io.velocitycareerlabs.impl.utils.VCLLog
 import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
+import java.net.HttpURLConnection
 import kotlin.jvm.Throws
 
-internal class VCLImpl: VCL {
+internal class VCLImpl(
+    private val connectionFactory: ((Request) -> HttpURLConnection)? = null,
+): VCL {
     companion object {
         val TAG = VCLImpl::class.simpleName
 
@@ -88,47 +92,54 @@ internal class VCLImpl: VCL {
 
     @Throws
     private fun initializeUseCases(context: Context) {
-        authTokenUseCase = VclBlocksProvider.provideAuthTokenUseCase()
+        authTokenUseCase = VclBlocksProvider.provideAuthTokenUseCase(connectionFactory)
         presentationRequestUseCase =
             VclBlocksProvider.providePresentationRequestUseCase(
                 context,
-                initializationDescriptor.cryptoServicesDescriptor
+                initializationDescriptor.cryptoServicesDescriptor,
+                connectionFactory
             )
         presentationSubmissionUseCase = VclBlocksProvider.providePresentationSubmissionUseCase(
             context,
-            initializationDescriptor.cryptoServicesDescriptor
+            initializationDescriptor.cryptoServicesDescriptor,
+            connectionFactory
         )
-        exchangeProgressUseCase = VclBlocksProvider.provideExchangeProgressUseCase()
-        organizationsUseCase = VclBlocksProvider.provideOrganizationsUseCase()
+        exchangeProgressUseCase = VclBlocksProvider.provideExchangeProgressUseCase(connectionFactory)
+        organizationsUseCase = VclBlocksProvider.provideOrganizationsUseCase(connectionFactory)
         credentialManifestUseCase =
             VclBlocksProvider.provideCredentialManifestUseCase(
                 context,
-                initializationDescriptor.cryptoServicesDescriptor
+                initializationDescriptor.cryptoServicesDescriptor,
+                connectionFactory
             )
         identificationSubmissionUseCase = VclBlocksProvider.provideIdentificationSubmissionUseCase(
             context,
-            initializationDescriptor.cryptoServicesDescriptor
+            initializationDescriptor.cryptoServicesDescriptor,
+            connectionFactory
         )
-        generateOffersUseCase = VclBlocksProvider.provideGenerateOffersUseCase()
+        generateOffersUseCase = VclBlocksProvider.provideGenerateOffersUseCase(connectionFactory)
         finalizeOffersUseCase =
             VclBlocksProvider.provideFinalizeOffersUseCase(
                 context,
                 credentialTypesModel,
                 initializationDescriptor.cryptoServicesDescriptor,
-                initializationDescriptor.isDirectIssuerCheckOn
+                initializationDescriptor.isDirectIssuerCheckOn,
+                connectionFactory
             )
         credentialTypesUIFormSchemaUseCase =
-            VclBlocksProvider.provideCredentialTypesUIFormSchemaUseCase()
-        verifiedProfileUseCase = VclBlocksProvider.provideVerifiedProfileUseCase()
+            VclBlocksProvider.provideCredentialTypesUIFormSchemaUseCase(connectionFactory)
+        verifiedProfileUseCase = VclBlocksProvider.provideVerifiedProfileUseCase(connectionFactory)
         jwtServiceUseCase =
             VclBlocksProvider.provideJwtServiceUseCase(
                 context,
-                initializationDescriptor.cryptoServicesDescriptor
+                initializationDescriptor.cryptoServicesDescriptor,
+                connectionFactory
             )
         keyServiceUseCase =
             VclBlocksProvider.provideKeyServiceUseCase(
                 context,
-                initializationDescriptor.cryptoServicesDescriptor
+                initializationDescriptor.cryptoServicesDescriptor,
+                connectionFactory
             )
     }
 
@@ -161,9 +172,9 @@ internal class VCLImpl: VCL {
         errorHandler: (VCLError) -> Unit
     ) {
         credentialTypesModel =
-            VclBlocksProvider.provideCredentialTypesModel(context)
+            VclBlocksProvider.provideCredentialTypesModel(context, connectionFactory)
         countriesModel =
-            VclBlocksProvider.provideCountriesModel(context)
+            VclBlocksProvider.provideCountriesModel(context, connectionFactory)
 
         countriesModel.initialize(cacheSequence) { result ->
             result.handleResult(
@@ -186,7 +197,8 @@ internal class VCLImpl: VCL {
                             credentialTypeSchemasModel =
                                 VclBlocksProvider.provideCredentialTypeSchemasModel(
                                     context,
-                                    credentialTypes
+                                    credentialTypes,
+                                    connectionFactory
                                 )
                             credentialTypeSchemasModel.initialize(cacheSequence) { result ->
                                 result.handleResult(
