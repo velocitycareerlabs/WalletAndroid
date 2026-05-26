@@ -25,6 +25,7 @@ import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescri
 import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
 import io.velocitycareerlabs.impl.VCLImpl
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
+import io.velocitycareerlabs.impl.utils.VelocityDeepLinkValidator
 import io.velocitycareerlabs.infrastructure.resources.valid.CountriesMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypeSchemaMocks
@@ -69,12 +70,16 @@ internal class ErrorTaxonomyContractTest {
         entryPoints.forEach { entryPoint ->
             val missingDidDeepLink = VCLDeepLink("velocity-network://${entryPoint.schemePath}")
 
-            listOf(VCLDeepLink("not a url"), missingDidDeepLink).forEach { deepLink ->
+            mapOf(
+                VCLDeepLink("not a url") to VelocityDeepLinkValidator.SourceUnparseablePayload,
+                missingDidDeepLink to VelocityDeepLinkValidator.SourceInvalidOrMissingDid,
+            ).forEach { (deepLink, sourceErrorCode) ->
                 val error = getEntryPointError(entryPoint, deepLink)
 
                 assertDiagnostics(
                     expected = entryPoint.expectedDiagnostics(
                         errorCode = VCLErrorCode.InvalidLink.value,
+                        sourceErrorCode = sourceErrorCode,
                         validationPhase = "link_validation",
                         requestUri = deepLink.requestUri,
                     ),
@@ -95,6 +100,7 @@ internal class ErrorTaxonomyContractTest {
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
                     errorCode = VCLErrorCode.InvalidLink.value,
+                    sourceErrorCode = VelocityDeepLinkValidator.SourceUnsupportedVelocityLink,
                     validationPhase = "link_validation",
                     requestUri = deepLink.requestUri,
                 ),
@@ -115,6 +121,7 @@ internal class ErrorTaxonomyContractTest {
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
                     errorCode = VCLErrorCode.InvalidLink.value,
+                    sourceErrorCode = VelocityDeepLinkValidator.SourceUnsupportedVelocityLink,
                     validationPhase = "link_validation",
                     requestUri = deepLink.requestUri,
                 ),
@@ -135,6 +142,7 @@ internal class ErrorTaxonomyContractTest {
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
                     errorCode = VCLErrorCode.InvalidLink.value,
+                    sourceErrorCode = VelocityDeepLinkValidator.SourceInvalidOrMissingDid,
                     validationPhase = "link_validation",
                     requestUri = deepLink.requestUri,
                 ),
@@ -169,6 +177,7 @@ internal class ErrorTaxonomyContractTest {
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
                     errorCode = VCLErrorCode.InvalidLink.value,
+                    sourceErrorCode = VelocityDeepLinkValidator.SourceInvalidOrMissingRequestUri,
                     validationPhase = "link_validation",
                     requestUri = null,
                 ),
@@ -195,6 +204,7 @@ internal class ErrorTaxonomyContractTest {
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
                     errorCode = VCLErrorCode.InvalidLink.value,
+                    sourceErrorCode = VelocityDeepLinkValidator.SourceInvalidOrMissingRequestUri,
                     validationPhase = "link_validation",
                     requestUri = malformedRequestUriDeepLink.requestUri,
                 ),
@@ -203,6 +213,7 @@ internal class ErrorTaxonomyContractTest {
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
                     errorCode = VCLErrorCode.InvalidLink.value,
+                    sourceErrorCode = VelocityDeepLinkValidator.SourceInvalidOrMissingRequestUri,
                     validationPhase = "link_validation",
                     requestUri = disallowedSchemeDeepLink.requestUri,
                 ),
@@ -224,6 +235,7 @@ internal class ErrorTaxonomyContractTest {
                 assertDiagnostics(
                     expected = entryPoint.expectedDiagnostics(
                         errorCode = VCLErrorCode.InvalidLink.value,
+                        sourceErrorCode = VelocityDeepLinkValidator.SourceInvalidOrMissingDid,
                         validationPhase = "link_validation",
                         requestUri = deepLink.requestUri,
                     ),
@@ -278,7 +290,8 @@ internal class ErrorTaxonomyContractTest {
                         errorCode = VCLErrorCode.ClientRequestUnauthorized.value,
                         sourceErrorCode = ErrorMocks.ErrorCode,
                         requestId = ErrorMocks.RequestId,
-                        statusCode = statusCode,
+                        statusCode = ErrorMocks.StatusCode,
+                        httpStatusCode = statusCode,
                         validationPhase = "client_request_fetch",
                         requestUri = entryPoint.defaultDeepLink.requestUri,
                     ),
@@ -314,6 +327,7 @@ internal class ErrorTaxonomyContractTest {
                         sourceErrorCode = ErrorMocks.ErrorCode,
                         requestId = ErrorMocks.RequestId,
                         statusCode = statusCode,
+                        httpStatusCode = statusCode,
                         validationPhase = "client_request_fetch",
                         requestUri = entryPoint.defaultDeepLink.requestUri,
                     ),
@@ -341,6 +355,7 @@ internal class ErrorTaxonomyContractTest {
                     errorCode = VCLErrorCode.ClientRequestRejected.value,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
                     statusCode = 500,
+                    httpStatusCode = 500,
                     validationPhase = "client_request_fetch",
                     requestUri = entryPoint.defaultDeepLink.requestUri,
                 ),
@@ -374,7 +389,8 @@ internal class ErrorTaxonomyContractTest {
                     errorCode = VCLErrorCode.ClientRequestRejected.value,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
                     requestId = ErrorMocks.RequestId,
-                    statusCode = 422,
+                    statusCode = ErrorMocks.StatusCode,
+                    httpStatusCode = 422,
                     validationPhase = "client_request_fetch",
                     requestUri = entryPoint.defaultDeepLink.requestUri,
                 ),
@@ -463,6 +479,7 @@ internal class ErrorTaxonomyContractTest {
                     errorCode = entryPoint.didUnresolvableErrorCode,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
                     statusCode = 404,
+                    httpStatusCode = 404,
                     validationPhase = "did_resolution",
                     requestDid = entryPoint.requestDid,
                     payload = """{"message":"resolve failed","errorCode":"sdk_error"}""",
@@ -537,6 +554,7 @@ internal class ErrorTaxonomyContractTest {
                     errorCode = entryPoint.notRegisteredErrorCode,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
                     statusCode = 404,
+                    httpStatusCode = 404,
                     validationPhase = "registration_check",
                     payload = """{"message":"profile missing","errorCode":"sdk_error"}""",
                     requestKind = entryPoint.requestKind,
@@ -735,6 +753,7 @@ internal class ErrorTaxonomyContractTest {
         val sourceErrorCode: String? = null,
         val requestId: String? = null,
         val statusCode: Int? = null,
+        val httpStatusCode: Int? = null,
         val validationPhase: String? = null,
         val requestDid: String? = null,
         val requestUri: String? = null,
@@ -755,6 +774,7 @@ internal class ErrorTaxonomyContractTest {
         sourceErrorCode = sourceErrorCode,
         requestId = requestId,
         statusCode = statusCode,
+        httpStatusCode = httpStatusCode,
         validationPhase = validationPhase,
         requestDid = requestDid,
         requestUri = requestUri,
@@ -774,6 +794,7 @@ internal class ErrorTaxonomyContractTest {
         sourceErrorCode: String? = null,
         requestId: String? = null,
         statusCode: Int? = null,
+        httpStatusCode: Int? = null,
         validationPhase: String? = null,
         requestDid: String? = null,
         requestUri: String? = null,
@@ -785,6 +806,7 @@ internal class ErrorTaxonomyContractTest {
         sourceErrorCode = sourceErrorCode,
         requestId = requestId,
         statusCode = statusCode,
+        httpStatusCode = httpStatusCode,
         validationPhase = validationPhase,
         requestDid = requestDid,
         requestUri = requestUri,

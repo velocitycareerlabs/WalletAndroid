@@ -27,9 +27,36 @@ internal class ErrorTaxonomyCompatibilityMapper {
         requestKind: String,
         endpointNullMessage: String,
     ): VCLError {
-        if (error.message?.contains("Invalid or missing DID") == true && error.requestUri != null) {
-            return legacyCopy(error, errorCode = requestKind.mismatchErrorCode())
+        return when (error.sourceErrorCode) {
+            VelocityDeepLinkValidator.SourceInvalidOrMissingDid ->
+                if (error.requestUri != null) {
+                    legacyCopy(error, errorCode = requestKind.mismatchErrorCode())
+                } else {
+                    legacyCopy(
+                        error,
+                        errorCode = VCLErrorCode.SdkError.value,
+                        message = LegacyMissingDidMessage,
+                    )
+                }
+            VelocityDeepLinkValidator.SourceInvalidOrMissingRequestUri,
+            VelocityDeepLinkValidator.SourceInvalidOrMissingRequestEndpoint ->
+                mapInvalidRequestUri(error, endpointNullMessage)
+            VelocityDeepLinkValidator.SourceUnparseablePayload ->
+                legacyCopy(
+                    error,
+                    errorCode = VCLErrorCode.SdkError.value,
+                    message = LegacyMissingDidMessage,
+                )
+            else ->
+                legacyCopy(
+                    error,
+                    errorCode = VCLErrorCode.SdkError.value,
+                    message = endpointNullMessage,
+                )
         }
+    }
+
+    private fun mapInvalidRequestUri(error: VCLError, endpointNullMessage: String): VCLError {
         error.requestUri?.let { requestUri ->
             if (requestUri.startsWith("ftp://")) {
                 return legacyCopy(
@@ -46,15 +73,6 @@ internal class ErrorTaxonomyCompatibilityMapper {
                 )
             }
         }
-        if (error.message?.contains("Payload is not a parseable URL") == true ||
-            error.message?.contains("Invalid or missing DID") == true
-        ) {
-            return legacyCopy(
-                error,
-                errorCode = VCLErrorCode.SdkError.value,
-                message = "did was not found in Velocity link",
-            )
-        }
         return legacyCopy(
             error,
             errorCode = VCLErrorCode.SdkError.value,
@@ -62,11 +80,20 @@ internal class ErrorTaxonomyCompatibilityMapper {
         )
     }
 
-    private fun mapTaxonomyError(error: VCLError): VCLError =
-        legacyCopy(
-            mapNetworkStatus(error),
-            errorCode = error.sourceErrorCode ?: VCLErrorCode.SdkError.value,
+    private fun mapTaxonomyError(error: VCLError): VCLError {
+        val networkStatusError = mapNetworkStatus(error)
+        val sourceErrorCode = networkStatusError.sourceErrorCode
+        if (sourceErrorCode == networkStatusError.errorCode || sourceErrorCode == null) {
+            return legacyCopy(
+                networkStatusError,
+                errorCode = VCLErrorCode.SdkError.value,
+            )
+        }
+        return legacyCopy(
+            networkStatusError,
+            errorCode = sourceErrorCode,
         )
+    }
 
     private fun mapNetworkStatus(error: VCLError): VCLError {
         val payloadStatusCode = error.payload?.toJsonObject()?.optNullableInt(VCLError.KeyStatusCode)
@@ -97,4 +124,8 @@ internal class ErrorTaxonomyCompatibilityMapper {
 
     private fun JSONObject?.optNullableInt(key: String): Int? =
         takeIf { it?.has(key) == true && !it.isNull(key) }?.optInt(key)
+
+    private companion object {
+        const val LegacyMissingDidMessage = "did was not found in Velocity link"
+    }
 }

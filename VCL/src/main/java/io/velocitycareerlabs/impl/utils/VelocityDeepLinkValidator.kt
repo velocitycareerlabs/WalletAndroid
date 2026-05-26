@@ -21,12 +21,14 @@ internal class VelocityDeepLinkValidator {
         val uri = runCatching { URI(deepLink.value) }.getOrNull()
             ?: return ErrorTaxonomy.invalidLink(
                 message = "Payload is not a parseable URL",
+                sourceErrorCode = SourceUnparseablePayload,
                 requestUri = deepLink.requestUri,
                 requestKind = requestKind,
             )
         if (uri.scheme !in AllowedVelocitySchemes || uri.host != expectedPath) {
             return ErrorTaxonomy.invalidLink(
                 message = "Unsupported Velocity link: ${deepLink.value}",
+                sourceErrorCode = SourceUnsupportedVelocityLink,
                 requestUri = deepLink.requestUri,
                 requestKind = requestKind,
             )
@@ -35,6 +37,7 @@ internal class VelocityDeepLinkValidator {
         if (!isSyntacticallyValidDid(descriptorDid)) {
             return ErrorTaxonomy.invalidLink(
                 message = "Invalid or missing DID in Velocity link",
+                sourceErrorCode = SourceInvalidOrMissingDid,
                 requestUri = deepLink.requestUri,
                 requestKind = requestKind,
             )
@@ -42,6 +45,7 @@ internal class VelocityDeepLinkValidator {
         if (!isAllowedRequestUri(deepLink.requestUri)) {
             return ErrorTaxonomy.invalidLink(
                 message = "Invalid or missing request_uri in Velocity link",
+                sourceErrorCode = SourceInvalidOrMissingRequestUri,
                 requestUri = deepLink.requestUri,
                 requestKind = requestKind,
             )
@@ -56,6 +60,7 @@ internal class VelocityDeepLinkValidator {
         if (!isAllowedRequestUri(requestUri)) {
             return ErrorTaxonomy.invalidLink(
                 message = "Invalid or missing request endpoint",
+                sourceErrorCode = SourceInvalidOrMissingRequestEndpoint,
                 requestUri = requestUri,
                 requestKind = requestKind,
             )
@@ -84,12 +89,17 @@ internal class VelocityDeepLinkValidator {
     private fun isSyntacticallyValidDid(did: String?): Boolean =
         did?.matches(DidPattern) == true
 
-    private companion object {
+    companion object {
         val AllowedVelocitySchemes = setOf(
             "velocity-network",
             "velocity-network-devnet",
             "velocity-network-testnet",
         )
         val DidPattern = Regex("^did:[a-z0-9]+:[A-Za-z0-9._:%-]+(?:[:/][A-Za-z0-9._:%-]+)*$")
+        const val SourceUnparseablePayload = "invalid_link_unparseable_payload"
+        const val SourceUnsupportedVelocityLink = "invalid_link_unsupported_velocity_link"
+        const val SourceInvalidOrMissingDid = "invalid_link_invalid_or_missing_did"
+        const val SourceInvalidOrMissingRequestUri = "invalid_link_invalid_or_missing_request_uri"
+        const val SourceInvalidOrMissingRequestEndpoint = "invalid_link_invalid_or_missing_request_endpoint"
     }
 }

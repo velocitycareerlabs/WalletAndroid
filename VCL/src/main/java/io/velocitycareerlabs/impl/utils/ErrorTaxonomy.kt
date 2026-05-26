@@ -22,6 +22,7 @@ internal object ErrorTaxonomy {
 
     fun invalidLink(
         message: String?,
+        sourceErrorCode: String? = null,
         requestDid: String? = null,
         requestUri: String? = null,
         requestKind: String? = null,
@@ -29,6 +30,7 @@ internal object ErrorTaxonomy {
     ) = VCLError(
         errorCode = VCLErrorCode.InvalidLink.value,
         message = message,
+        sourceErrorCode = sourceErrorCode,
         validationPhase = PhaseLinkValidation,
         requestDid = requestDid,
         requestUri = requestUri,
@@ -54,7 +56,7 @@ internal object ErrorTaxonomy {
                 requestUri = requestUri,
                 requestKind = requestKind,
             )
-            error.statusCode == 401 || error.statusCode == 403 -> error.withTaxonomy(
+            error.transportStatusCode == 401 || error.transportStatusCode == 403 -> error.withTaxonomy(
                 VCLErrorCode.ClientRequestUnauthorized,
                 PhaseClientRequestFetch,
                 requestUri = requestUri,
@@ -166,6 +168,9 @@ internal object ErrorTaxonomy {
     fun VCLError.isConnectivityFailure(): Boolean =
         errorCode == VCLErrorCode.ConnectivityFailure.value ||
             statusCode == VCLStatusCode.NetworkError.value
+
+    private val VCLError.transportStatusCode: Int?
+        get() = httpStatusCode ?: statusCode
 
     fun VCLError.isTaxonomyError(): Boolean =
         VCLErrorCode.entries.any { it.value == errorCode && it.isTaxonomyCode }
