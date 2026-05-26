@@ -59,7 +59,10 @@ internal class PresentationRequestUseCaseImpl(
                                         )
                                     } ?: run {
                                         onError(
-                                            presentationRequest.unresolvedJwtKeyError(),
+                                            unresolvedJwtKeyError(
+                                                jwt = presentationRequest.jwt,
+                                                requestDid = presentationRequest.iss,
+                                            ),
                                             completionBlock
                                         )
                                     }
@@ -133,11 +136,11 @@ internal class PresentationRequestUseCaseImpl(
         }
     }
 
-    private fun VCLPresentationRequest.unresolvedJwtKeyError(): VCLError =
+    private fun unresolvedJwtKeyError(jwt: VCLJwt, requestDid: String?): VCLError =
         ErrorTaxonomy.classifyRequestValidation(
             VCLError(message = jwt.kid?.let { "public jwk not found for kid: $it" } ?: "JWT kid is missing"),
             requestKind = ErrorTaxonomy.RequestKindPresentation,
-            requestDid = iss,
+            requestDid = requestDid,
         )
 
     private fun onVerificationSuccess(
