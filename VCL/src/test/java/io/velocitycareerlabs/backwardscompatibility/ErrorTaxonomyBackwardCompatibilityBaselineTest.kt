@@ -42,7 +42,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -61,7 +60,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
-@Ignore("Legacy baseline for compatibility-mode work; taxonomy mode is the only implemented mode in this branch.")
 internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
     // Link validation -> invalid_link
 
@@ -550,6 +548,7 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
             context = ApplicationProvider.getApplicationContext(),
             initializationDescriptor = VCLInitializationDescriptor(
                 cacheSequence = cacheSequence.incrementAndGet(),
+                isErrorTaxonomyBackwardCompatibilityEnabled = true,
                 cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
                     cryptoServiceType = VCLCryptoServiceType.Injected,
                     injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(

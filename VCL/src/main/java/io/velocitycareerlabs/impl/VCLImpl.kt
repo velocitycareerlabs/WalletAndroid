@@ -36,6 +36,7 @@ import io.velocitycareerlabs.impl.utils.InitializationWatcher
 import io.velocitycareerlabs.impl.utils.VCLLog
 import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
 import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
+import io.velocitycareerlabs.impl.utils.ErrorTaxonomyCompatibilityMapper
 import io.velocitycareerlabs.impl.utils.VelocityDeepLinkValidator
 import java.net.HttpURLConnection
 import kotlin.jvm.Throws
@@ -72,6 +73,7 @@ internal class VCLImpl(
 
     private val initializationWatcher = InitializationWatcher(ModelsToInitializeAmount)
     private val velocityDeepLinkValidator = VelocityDeepLinkValidator()
+    private val errorTaxonomyCompatibilityMapper = ErrorTaxonomyCompatibilityMapper()
     private lateinit var profileServiceTypeVerifier: ProfileServiceTypeVerifier
 
     override fun initialize(
@@ -255,7 +257,7 @@ internal class VCLImpl(
         )
         if (linkValidationError != null) {
             logError("getPresentationRequest::linkValidation", linkValidationError)
-            errorHandler(linkValidationError)
+            errorHandler(toPublicError(linkValidationError, ErrorTaxonomy.RequestKindPresentation))
             return
         }
         velocityDeepLinkValidator.validateRequestEndpoint(
@@ -263,7 +265,7 @@ internal class VCLImpl(
             requestKind = ErrorTaxonomy.RequestKindPresentation,
         )?.let {
             logError("getPresentationRequest::endpointValidation", it)
-            errorHandler(it)
+            errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindPresentation))
             return
         }
         descriptorDid?.let {
@@ -281,7 +283,7 @@ internal class VCLImpl(
                             },
                             {
                                 logError("getPresentationRequest", it)
-                                errorHandler(it)
+                                errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindPresentation))
                             }
                         )
                     }
@@ -292,7 +294,7 @@ internal class VCLImpl(
                         ErrorTaxonomy.RequestKindPresentation,
                     )
                     logError("profile verification failed", taxonomyError)
-                    errorHandler(taxonomyError)
+                    errorHandler(toPublicError(taxonomyError, ErrorTaxonomy.RequestKindPresentation))
                 }
             )
         } ?: run {
@@ -301,7 +303,7 @@ internal class VCLImpl(
                 requestKind = ErrorTaxonomy.RequestKindPresentation,
             ).let {
                 logError("getPresentationRequest::verifiedProfile", it)
-                errorHandler(it)
+                errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindPresentation))
             }
         }
     }
@@ -376,7 +378,7 @@ internal class VCLImpl(
             )
             if (linkValidationError != null) {
                 logError("getCredentialManifest::linkValidation", linkValidationError)
-                errorHandler(linkValidationError)
+                errorHandler(toPublicError(linkValidationError, ErrorTaxonomy.RequestKindIssuing))
                 return
             }
         }
@@ -385,7 +387,7 @@ internal class VCLImpl(
             requestKind = ErrorTaxonomy.RequestKindIssuing,
         )?.let {
             logError("getCredentialManifest::endpointValidation", it)
-            errorHandler(it)
+            errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindIssuing))
             return
         }
         descriptorDid?.let {
@@ -401,7 +403,7 @@ internal class VCLImpl(
                             successHandler(it)
                         }, {
                             logError("getCredentialManifest", it)
-                            errorHandler(it)
+                            errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindIssuing))
                         }
                         )
                     }
@@ -412,7 +414,7 @@ internal class VCLImpl(
                         ErrorTaxonomy.RequestKindIssuing,
                     )
                     logError("profile verification failed", taxonomyError)
-                    errorHandler(taxonomyError)
+                    errorHandler(toPublicError(taxonomyError, ErrorTaxonomy.RequestKindIssuing))
                 }
             )
         } ?: run {
@@ -421,7 +423,7 @@ internal class VCLImpl(
                 requestKind = ErrorTaxonomy.RequestKindIssuing,
             ).let {
                 logError("getCredentialManifest::verifiedProfile", it)
-                errorHandler(it)
+                errorHandler(toPublicError(it, ErrorTaxonomy.RequestKindIssuing))
             }
         }
     }
@@ -646,6 +648,24 @@ internal class VCLImpl(
             ErrorTaxonomy.classifyServiceAuthorization(error, requestKind, requestDid = null)
         } else {
             ErrorTaxonomy.classifyRegistration(error, requestKind, requestDid = null)
+        }
+
+    private fun toPublicError(error: VCLError, requestKind: String): VCLError =
+        if (initializationDescriptor.isErrorTaxonomyBackwardCompatibilityEnabled) {
+            errorTaxonomyCompatibilityMapper.map(
+                error = error,
+                requestKind = requestKind,
+                endpointNullMessage = requestKind.endpointNullMessage(),
+            )
+        } else {
+            error
+        }
+
+    private fun String.endpointNullMessage(): String =
+        if (this == ErrorTaxonomy.RequestKindPresentation) {
+            "presentationRequestDescriptor.endpoint = null"
+        } else {
+            "credentialManifestDescriptor.endpoint = null"
         }
 }
 
