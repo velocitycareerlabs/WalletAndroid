@@ -12,7 +12,6 @@ import android.util.Log
 import io.velocitycareerlabs.api.VCL
 import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
-import io.velocitycareerlabs.api.entities.error.VCLStatusCode
 import io.velocitycareerlabs.impl.domain.models.CredentialTypeSchemasModel
 import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
@@ -642,9 +641,7 @@ internal class VCLImpl(
     }
 
     private fun classifyProfileVerificationError(error: VCLError, requestKind: String): VCLError =
-        if (error.statusCode == VCLStatusCode.VerificationError.value ||
-            error.message?.contains("Wrong service type") == true
-        ) {
+        if (error.sourceErrorCode == ProfileServiceTypeVerifier.SourceWrongServiceType) {
             ErrorTaxonomy.classifyServiceAuthorization(error, requestKind, requestDid = null)
         } else {
             ErrorTaxonomy.classifyRegistration(error, requestKind, requestDid = null)

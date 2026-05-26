@@ -131,6 +131,7 @@ class ProfileServiceTypeVerifierTest {
             },
             errorHandler = { error ->
                 assert(error.statusCode == VCLStatusCode.VerificationError.value)
+                assert(error.sourceErrorCode == ProfileServiceTypeVerifier.SourceWrongServiceType)
                 assert(JSONObject(error.message!!).optString("profileName") == "University of Massachusetts Amherst")
             }
         )
@@ -146,6 +147,7 @@ class ProfileServiceTypeVerifierTest {
             },
             errorHandler = { error ->
                 assert(error.statusCode == VCLStatusCode.VerificationError.value)
+                assert(error.sourceErrorCode == ProfileServiceTypeVerifier.SourceWrongServiceType)
                 assert(JSONObject(error.message!!).optString("profileName") == "University of Massachusetts Amherst")
             }
         )
@@ -161,6 +163,7 @@ class ProfileServiceTypeVerifierTest {
             },
             errorHandler = { error ->
                 assert(error.statusCode == VCLStatusCode.VerificationError.value)
+                assert(error.sourceErrorCode == ProfileServiceTypeVerifier.SourceWrongServiceType)
                 assert(JSONObject(error.message!!).optString("profileName") == "University of Massachusetts Amherst")
             }
         )

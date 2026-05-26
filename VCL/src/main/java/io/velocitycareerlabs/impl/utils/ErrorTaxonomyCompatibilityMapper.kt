@@ -83,7 +83,10 @@ internal class ErrorTaxonomyCompatibilityMapper {
     private fun mapTaxonomyError(error: VCLError): VCLError {
         val networkStatusError = mapNetworkStatus(error)
         val sourceErrorCode = networkStatusError.sourceErrorCode
-        if (sourceErrorCode == networkStatusError.errorCode || sourceErrorCode == null) {
+        if (sourceErrorCode == networkStatusError.errorCode ||
+            sourceErrorCode == ProfileServiceTypeVerifier.SourceWrongServiceType ||
+            sourceErrorCode == null
+        ) {
             return legacyCopy(
                 networkStatusError,
                 errorCode = VCLErrorCode.SdkError.value,

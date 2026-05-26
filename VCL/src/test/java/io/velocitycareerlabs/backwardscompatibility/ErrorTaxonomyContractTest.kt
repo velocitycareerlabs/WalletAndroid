@@ -25,6 +25,7 @@ import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescri
 import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
 import io.velocitycareerlabs.impl.VCLImpl
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
+import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
 import io.velocitycareerlabs.impl.utils.VelocityDeepLinkValidator
 import io.velocitycareerlabs.infrastructure.resources.valid.CountriesMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
@@ -572,7 +573,7 @@ internal class ErrorTaxonomyContractTest {
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
                     errorCode = entryPoint.requestUnauthorizedErrorCode,
-                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    sourceErrorCode = ProfileServiceTypeVerifier.SourceWrongServiceType,
                     statusCode = VCLStatusCode.VerificationError.value,
                     validationPhase = "request_authorization",
                     requestKind = entryPoint.requestKind,
@@ -598,7 +599,7 @@ internal class ErrorTaxonomyContractTest {
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
                     errorCode = entryPoint.requestUnauthorizedErrorCode,
-                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    sourceErrorCode = ProfileServiceTypeVerifier.SourceWrongServiceType,
                     statusCode = VCLStatusCode.VerificationError.value,
                     validationPhase = "request_authorization",
                     requestKind = entryPoint.requestKind,

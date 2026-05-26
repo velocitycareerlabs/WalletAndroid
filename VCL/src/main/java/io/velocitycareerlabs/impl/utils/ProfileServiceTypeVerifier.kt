@@ -61,6 +61,7 @@ internal class ProfileServiceTypeVerifier(
                         verifiedProfile.name,
                         "Wrong service type - expected: ${expectedServiceTypes.all}, found: ${verifiedProfile.serviceTypes.all}"
                     ),
+                    sourceErrorCode = SourceWrongServiceType,
                     statusCode = VCLStatusCode.VerificationError.value
                 )
             )
@@ -76,5 +77,9 @@ internal class ProfileServiceTypeVerifier(
             VCLLog.e(VCLImpl.TAG, "", e)
         }
         return "$profileName $message"
+    }
+
+    companion object {
+        const val SourceWrongServiceType = "wrong_service_type"
     }
 }
