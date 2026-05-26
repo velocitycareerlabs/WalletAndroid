@@ -62,11 +62,7 @@ internal class CredentialManifestUseCaseImpl(
                                             )
                                     } ?: run {
                                         onError(
-                                            ErrorTaxonomy.classifyDidResolution(
-                                                VCLError(message = "public jwk not found for kid: ${credentialManifest.jwt.kid}"),
-                                                requestKind = ErrorTaxonomy.RequestKindIssuing,
-                                                requestDid = credentialManifest.iss,
-                                            ),
+                                            credentialManifest.unresolvedJwtKeyError(),
                                             completionBlock
                                         )
                                     }
@@ -176,6 +172,13 @@ internal class CredentialManifestUseCaseImpl(
             }
         }
     }
+
+    private fun VCLCredentialManifest.unresolvedJwtKeyError(): VCLError =
+        ErrorTaxonomy.classifyRequestValidation(
+            VCLError(message = jwt.kid?.let { "public jwk not found for kid: $it" } ?: "JWT kid is missing"),
+            requestKind = ErrorTaxonomy.RequestKindIssuing,
+            requestDid = iss,
+        )
 
     private fun onVerificationSuccess(
         isVerified: Boolean,

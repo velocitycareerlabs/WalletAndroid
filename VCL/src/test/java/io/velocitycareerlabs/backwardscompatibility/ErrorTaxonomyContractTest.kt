@@ -12,7 +12,9 @@ import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorByDeepL
 import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.api.entities.VCLDidJwk
 import io.velocitycareerlabs.api.entities.VCLJwt
+import io.velocitycareerlabs.api.entities.VCLCredentialManifest
 import io.velocitycareerlabs.api.entities.VCLPresentationRequestDescriptor
+import io.velocitycareerlabs.api.entities.VCLPresentationRequest
 import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLToken
@@ -56,6 +58,7 @@ import java.net.MalformedURLException
 import java.net.URL
 import java.net.URLEncoder
 import java.net.UnknownHostException
+import java.util.Base64
 import java.util.Collections
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -497,9 +500,9 @@ internal class ErrorTaxonomyContractTest {
 
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
-                    errorCode = entryPoint.didUnresolvableErrorCode,
+                    errorCode = entryPoint.requestInvalidErrorCode,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
-                    validationPhase = "did_resolution",
+                    validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
                     requestKind = entryPoint.requestKind,
                 ),
@@ -519,15 +522,41 @@ internal class ErrorTaxonomyContractTest {
 
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
-                    errorCode = entryPoint.didUnresolvableErrorCode,
+                    errorCode = entryPoint.requestInvalidErrorCode,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
-                    validationPhase = "did_resolution",
+                    validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
             )
             assertTrue(error.message!!.contains("public jwk not found for kid"))
+        }
+    }
+
+    @Test
+    fun missingJwtKidReturnsRequestInvalid() {
+        entryPoints.forEach { entryPoint ->
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(
+                    requestPayload = entryPoint.requestPayloadForJwt(
+                        encodedJwtWithoutKid(entryPoint.defaultRequestJwt)
+                    ),
+                ),
+            )
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.requestInvalidErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
+            assertEquals("JWT kid is missing", error.message)
         }
     }
 
@@ -808,6 +837,28 @@ internal class ErrorTaxonomyContractTest {
 
     private fun simpleRequestUri(): String =
         URLEncoder.encode("https://example.com/request", "UTF-8")
+
+    private val EntryPoint.defaultRequestJwt: String
+        get() = when (this) {
+            EntryPoint.Issuing -> CredentialManifestMocks.JwtCredentialManifest1
+            EntryPoint.Presentation -> PresentationRequestMocks.EncodedPresentationRequest
+        }
+
+    private fun EntryPoint.requestPayloadForJwt(encodedJwt: String): String =
+        when (this) {
+            EntryPoint.Issuing -> JSONObject().put(VCLCredentialManifest.KeyIssuingRequest, encodedJwt)
+            EntryPoint.Presentation -> JSONObject().put(VCLPresentationRequest.KeyPresentationRequest, encodedJwt)
+        }.toString()
+
+    private fun encodedJwtWithoutKid(encodedJwt: String): String {
+        val parts = encodedJwt.split(".")
+        val headerJson = JSONObject(String(Base64.getUrlDecoder().decode(parts[0])))
+        headerJson.remove(VCLJwt.KeyKid)
+        val encodedHeader = Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString(headerJson.toString().toByteArray(Charsets.UTF_8))
+        return listOf(encodedHeader, parts[1], parts[2]).joinToString(".")
+    }
 
     private fun defaultRouter(entryPoint: EntryPoint): BaselineHttpRouter =
         when (entryPoint) {
