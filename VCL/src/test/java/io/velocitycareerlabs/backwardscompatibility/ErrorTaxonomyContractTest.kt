@@ -535,6 +535,28 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
+    fun emptyDidDocumentVerificationMethodsReturnsDidUnresolvable() {
+        entryPoints.forEach { entryPoint ->
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(didDocumentPayload = """{"verificationMethod":[]}"""),
+            )
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.didUnresolvableErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "did_resolution",
+                    requestDid = entryPoint.requestDid,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
+            assertTrue(error.message!!.contains("public jwk not found for kid"))
+        }
+    }
+
+    @Test
     fun missingJwtKidReturnsRequestInvalid() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
