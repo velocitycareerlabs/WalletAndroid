@@ -98,4 +98,28 @@ class VCLErrorTest {
 
         assertTrue(errorJsonObject.similar(expectedJsonObject))
     }
+
+    @Test
+    fun testErrorToJsonFromTaxonomyDiagnostics() {
+        val error = VCLError(
+            errorCode = "issuer_request_invalid",
+            message = "Invalid request",
+            sourceErrorCode = "mismatched_request_issuer_did",
+            validationPhase = "request_validation",
+            requestDid = "did:example:issuer",
+            requestUri = "https://example.com/request",
+            requestKind = "issuing_request",
+        )
+        val errorJsonObject = error.toJsonObject()
+        val expectedJsonObject = JSONObject()
+            .put(VCLError.KeyErrorCode, "issuer_request_invalid")
+            .put(VCLError.KeyMessage, "Invalid request")
+            .put(VCLError.KeySourceErrorCode, "mismatched_request_issuer_did")
+            .put(VCLError.KeyValidationPhase, "request_validation")
+            .put(VCLError.KeyRequestDid, "did:example:issuer")
+            .put(VCLError.KeyRequestUri, "https://example.com/request")
+            .put(VCLError.KeyRequestKind, "issuing_request")
+
+        assertTrue(errorJsonObject.similar(expectedJsonObject))
+    }
 }
