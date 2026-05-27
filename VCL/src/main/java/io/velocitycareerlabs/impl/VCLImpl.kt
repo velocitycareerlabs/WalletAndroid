@@ -616,17 +616,9 @@ internal class VCLImpl(
             errorTaxonomyCompatibilityMapper.map(
                 error = error,
                 requestKind = requestKind,
-                endpointNullMessage = requestKind.endpointNullMessage(),
             )
         } else {
             error
-        }
-
-    private fun String.endpointNullMessage(): String =
-        if (this == ErrorTaxonomy.RequestKindPresentation) {
-            "presentationRequestDescriptor.endpoint = null"
-        } else {
-            "credentialManifestDescriptor.endpoint = null"
         }
 
 }

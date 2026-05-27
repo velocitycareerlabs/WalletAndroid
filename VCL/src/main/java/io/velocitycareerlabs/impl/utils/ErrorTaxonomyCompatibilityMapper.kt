@@ -14,10 +14,9 @@ internal class ErrorTaxonomyCompatibilityMapper {
     fun map(
         error: VCLError,
         requestKind: String,
-        endpointNullMessage: String,
     ): VCLError =
         when (error.errorCode) {
-            VCLErrorCode.InvalidLink.value -> mapInvalidLink(error, requestKind, endpointNullMessage)
+            VCLErrorCode.InvalidLink.value -> mapInvalidLink(error, requestKind)
             VCLErrorCode.ConnectivityFailure.value -> legacyCopy(error, errorCode = VCLErrorCode.SdkError.value)
             else -> if (ErrorTaxonomy.run { error.isTaxonomyError() }) mapTaxonomyError(error) else mapNetworkStatus(error)
         }
@@ -25,8 +24,8 @@ internal class ErrorTaxonomyCompatibilityMapper {
     private fun mapInvalidLink(
         error: VCLError,
         requestKind: String,
-        endpointNullMessage: String,
     ): VCLError {
+        val endpointNullMessage = requestKind.endpointNullMessage()
         return when (error.sourceErrorCode) {
             VelocityDeepLinkValidator.SourceInvalidOrMissingDid ->
                 if (error.requestUri != null) {
@@ -123,6 +122,13 @@ internal class ErrorTaxonomyCompatibilityMapper {
             VCLErrorCode.MismatchedPresentationRequestInspectorDid.value
         } else {
             VCLErrorCode.MismatchedRequestIssuerDid.value
+        }
+
+    private fun String.endpointNullMessage(): String =
+        if (this == ErrorTaxonomy.RequestKindPresentation) {
+            "presentationRequestDescriptor.endpoint = null"
+        } else {
+            "credentialManifestDescriptor.endpoint = null"
         }
 
     private fun JSONObject?.optNullableInt(key: String): Int? =
