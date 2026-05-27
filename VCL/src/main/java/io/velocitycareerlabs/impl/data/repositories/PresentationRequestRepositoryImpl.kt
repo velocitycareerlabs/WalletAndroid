@@ -39,8 +39,8 @@ internal class PresentationRequestRepositoryImpl(
                             if (encodedJwtStr.isBlank()) {
                                 completionBlock(
                                     VCLResult.Failure(
-                                        ErrorTaxonomy.classifyClientRequestFetch(
-                                            VCLError(message = "Presentation request response is missing presentation_request"),
+                                        ErrorTaxonomy.toClientRequestFetchError(
+                                            VCLError(message = "Missing presentation_request"),
                                             requestUri = endpoint,
                                             requestKind = ErrorTaxonomy.RequestKindPresentation,
                                         )
@@ -52,7 +52,7 @@ internal class PresentationRequestRepositoryImpl(
                         } catch (ex: Exception) {
                             completionBlock(
                                 VCLResult.Failure(
-                                    ErrorTaxonomy.classifyClientRequestFetch(
+                                    ErrorTaxonomy.toClientRequestFetchError(
                                         VCLError(ex),
                                         requestUri = endpoint,
                                         requestKind = ErrorTaxonomy.RequestKindPresentation,
@@ -63,7 +63,7 @@ internal class PresentationRequestRepositoryImpl(
                     }, {
                         completionBlock(
                             VCLResult.Failure(
-                                ErrorTaxonomy.classifyClientRequestFetch(
+                                ErrorTaxonomy.toClientRequestFetchError(
                                     it,
                                     requestUri = endpoint,
                                     requestKind = ErrorTaxonomy.RequestKindPresentation,

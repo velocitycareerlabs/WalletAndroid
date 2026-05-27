@@ -57,7 +57,7 @@ internal class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByD
         val error = VCLError(errorCode = errorCode.value, message = errorMessage)
         completionBlock(
             (VCLResult.Failure(
-                ErrorTaxonomy.classifyRequestValidation(
+                ErrorTaxonomy.toRequestValidationError(
                     error,
                     requestKind = ErrorTaxonomy.RequestKindPresentation,
                     requestDid = null,

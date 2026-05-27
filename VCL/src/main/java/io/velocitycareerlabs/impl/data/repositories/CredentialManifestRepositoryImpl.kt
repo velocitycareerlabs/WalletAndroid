@@ -38,8 +38,8 @@ internal class CredentialManifestRepositoryImpl(
                                 if (jwtStr.isBlank()) {
                                     completionBlock(
                                         VCLResult.Failure(
-                                            ErrorTaxonomy.classifyClientRequestFetch(
-                                                VCLError(message = "Credential manifest response is missing issuing_request"),
+                                            ErrorTaxonomy.toClientRequestFetchError(
+                                                VCLError(message = "Missing issuing_request"),
                                                 requestUri = endpoint,
                                                 requestKind = ErrorTaxonomy.RequestKindIssuing,
                                             )
@@ -51,7 +51,7 @@ internal class CredentialManifestRepositoryImpl(
                             } catch (ex: Exception) {
                                 completionBlock(
                                     VCLResult.Failure(
-                                        ErrorTaxonomy.classifyClientRequestFetch(
+                                        ErrorTaxonomy.toClientRequestFetchError(
                                             VCLError(ex),
                                             requestUri = endpoint,
                                             requestKind = ErrorTaxonomy.RequestKindIssuing,
@@ -63,7 +63,7 @@ internal class CredentialManifestRepositoryImpl(
                         { error ->
                             completionBlock(
                                 VCLResult.Failure(
-                                    ErrorTaxonomy.classifyClientRequestFetch(
+                                    ErrorTaxonomy.toClientRequestFetchError(
                                         error,
                                         requestUri = endpoint,
                                         requestKind = ErrorTaxonomy.RequestKindIssuing,

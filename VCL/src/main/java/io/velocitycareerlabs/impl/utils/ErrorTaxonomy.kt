@@ -38,119 +38,71 @@ internal object ErrorTaxonomy {
         cause = cause,
     )
 
-    fun classifyClientRequestFetch(
+    fun toClientRequestFetchError(
         error: VCLError,
         requestUri: String?,
         requestKind: String,
     ): VCLError =
-        if (error.isTaxonomyError()) {
-            error.withMissingTaxonomyContext(
-                requestUri = requestUri,
-                requestKind = requestKind,
+        error.toTaxonomyError(
+            taxonomyCode = clientRequestFetchCode(error),
+            context = TaxonomyContext(
                 validationPhase = PhaseClientRequestFetch,
-            )
-        } else when {
-            error.isConnectivityFailure() -> error.withTaxonomy(
-                VCLErrorCode.ConnectivityFailure,
-                PhaseClientRequestFetch,
                 requestUri = requestUri,
                 requestKind = requestKind,
-            )
-            error.statusCode == 401 || error.statusCode == 403 -> error.withTaxonomy(
-                VCLErrorCode.ClientRequestUnauthorized,
-                PhaseClientRequestFetch,
-                requestUri = requestUri,
-                requestKind = requestKind,
-            )
-            else -> error.withTaxonomy(
-                VCLErrorCode.ClientRequestRejected,
-                PhaseClientRequestFetch,
-                requestUri = requestUri,
-                requestKind = requestKind,
-            )
-        }
+            ),
+        )
 
-    fun classifyDidResolution(error: VCLError, requestKind: String, requestDid: String?): VCLError =
-        if (error.isTaxonomyError()) {
-            error.withMissingTaxonomyContext(
-                requestDid = requestDid,
-                requestKind = requestKind,
+    fun toDidResolutionError(error: VCLError, requestKind: String, requestDid: String?): VCLError =
+        error.toTaxonomyError(
+            taxonomyCode = if (error.isConnectivityFailure()) {
+                VCLErrorCode.ConnectivityFailure
+            } else {
+                requestKind.didUnresolvableCode()
+            },
+            context = TaxonomyContext(
                 validationPhase = PhaseDidResolution,
-            )
-        } else if (error.isConnectivityFailure()) {
-            error.withTaxonomy(
-                VCLErrorCode.ConnectivityFailure,
-                PhaseDidResolution,
                 requestDid = requestDid,
                 requestKind = requestKind,
-            )
-        } else {
-            error.withTaxonomy(
-                requestKind.didUnresolvableCode(),
-                PhaseDidResolution,
-                requestDid = requestDid,
-                requestKind = requestKind,
-            )
-        }
+            ),
+        )
 
-    fun classifyRegistration(error: VCLError, requestKind: String, requestDid: String?): VCLError =
-        if (error.isTaxonomyError()) {
-            error.withMissingTaxonomyContext(
-                requestDid = requestDid,
-                requestKind = requestKind,
+    fun toRegistrationCheckError(error: VCLError, requestKind: String, requestDid: String?): VCLError =
+        error.toTaxonomyError(
+            taxonomyCode = if (error.isConnectivityFailure()) {
+                VCLErrorCode.ConnectivityFailure
+            } else {
+                requestKind.notRegisteredCode()
+            },
+            context = TaxonomyContext(
                 validationPhase = PhaseRegistrationCheck,
-            )
-        } else if (error.isConnectivityFailure()) {
-            error.withTaxonomy(
-                VCLErrorCode.ConnectivityFailure,
-                PhaseRegistrationCheck,
                 requestDid = requestDid,
                 requestKind = requestKind,
-            )
-        } else {
-            error.withTaxonomy(
-                requestKind.notRegisteredCode(),
-                PhaseRegistrationCheck,
-                requestDid = requestDid,
-                requestKind = requestKind,
-            )
-        }
-
-    fun classifyServiceAuthorization(error: VCLError, requestKind: String, requestDid: String?): VCLError =
-        if (error.isTaxonomyError()) error.withMissingTaxonomyContext(
-            requestDid = requestDid,
-            requestKind = requestKind,
-            validationPhase = PhaseRequestAuthorization,
-        )
-        else error.withTaxonomy(
-            requestKind.requestUnauthorizedCode(),
-            PhaseRequestAuthorization,
-            requestDid = requestDid,
-            requestKind = requestKind,
+            ),
         )
 
-    fun classifyRequestValidation(error: VCLError, requestKind: String, requestDid: String?): VCLError =
-        if (error.isTaxonomyError()) {
-            error.withMissingTaxonomyContext(
+    fun toRequestAuthorizationError(error: VCLError, requestKind: String, requestDid: String?): VCLError =
+        error.toTaxonomyError(
+            taxonomyCode = requestKind.requestUnauthorizedCode(),
+            context = TaxonomyContext(
+                validationPhase = PhaseRequestAuthorization,
                 requestDid = requestDid,
                 requestKind = requestKind,
+            ),
+        )
+
+    fun toRequestValidationError(error: VCLError, requestKind: String, requestDid: String?): VCLError =
+        error.toTaxonomyError(
+            taxonomyCode = if (error.isConnectivityFailure()) {
+                VCLErrorCode.ConnectivityFailure
+            } else {
+                requestKind.requestInvalidCode()
+            },
+            context = TaxonomyContext(
                 validationPhase = PhaseRequestValidation,
-            )
-        } else if (error.isConnectivityFailure()) {
-            error.withTaxonomy(
-                VCLErrorCode.ConnectivityFailure,
-                PhaseRequestValidation,
                 requestDid = requestDid,
                 requestKind = requestKind,
-            )
-        } else {
-            error.withTaxonomy(
-                requestKind.requestInvalidCode(),
-                PhaseRequestValidation,
-                requestDid = requestDid,
-                requestKind = requestKind,
-            )
-        }
+            ),
+        )
 
     fun VCLError.isConnectivityFailure(): Boolean =
         errorCode == VCLErrorCode.ConnectivityFailure.value ||
@@ -174,43 +126,48 @@ internal object ErrorTaxonomy {
     fun VCLError.isTaxonomyError(): Boolean =
         errorCode in taxonomyErrorCodes
 
-    fun VCLError.withMissingTaxonomyContext(
-        requestDid: String? = null,
-        requestUri: String? = null,
-        requestKind: String? = null,
-        validationPhase: String? = null,
-    ): VCLError =
-        copy(
-            validationPhase = this.validationPhase ?: validationPhase,
-            requestDid = this.requestDid ?: requestDid,
-            requestUri = this.requestUri ?: requestUri,
-            requestKind = this.requestKind ?: requestKind,
-        )
-
-    fun VCLError.withTaxonomy(
+    private fun VCLError.toTaxonomyError(
         taxonomyCode: VCLErrorCode,
-        validationPhase: String,
-        requestDid: String? = this.requestDid,
-        requestUri: String? = this.requestUri,
-        requestKind: String? = this.requestKind,
+        context: TaxonomyContext,
     ): VCLError =
         if (isTaxonomyError()) {
-            withMissingTaxonomyContext(
-                requestDid = requestDid,
-                requestUri = requestUri,
-                requestKind = requestKind,
-                validationPhase = validationPhase,
+            copy(
+                validationPhase = validationPhase ?: context.validationPhase,
+                requestDid = requestDid ?: context.requestDid,
+                requestUri = requestUri ?: context.requestUri,
+                requestKind = requestKind ?: context.requestKind,
             )
         } else {
             copy(
                 errorCode = taxonomyCode.value,
-                sourceErrorCode = sourceErrorCode ?: errorCode.takeUnless { it == taxonomyCode.value },
-                validationPhase = validationPhase,
-                requestDid = requestDid,
-                requestUri = requestUri,
-                requestKind = requestKind,
+                sourceErrorCode = sourceErrorCode ?: sourceErrorCodeFor(taxonomyCode),
+                validationPhase = context.validationPhase,
+                requestDid = context.requestDid ?: requestDid,
+                requestUri = context.requestUri ?: requestUri,
+                requestKind = context.requestKind ?: requestKind,
             )
         }
+
+    private fun VCLError.sourceErrorCodeFor(taxonomyCode: VCLErrorCode): String? =
+        if (taxonomyCode == VCLErrorCode.ConnectivityFailure && errorCode == VCLErrorCode.SdkError.value) {
+            null
+        } else {
+            errorCode.takeUnless { it == taxonomyCode.value }
+        }
+
+    private fun clientRequestFetchCode(error: VCLError): VCLErrorCode =
+        when {
+            error.isConnectivityFailure() -> VCLErrorCode.ConnectivityFailure
+            error.statusCode == 401 || error.statusCode == 403 -> VCLErrorCode.ClientRequestUnauthorized
+            else -> VCLErrorCode.ClientRequestRejected
+        }
+
+    private data class TaxonomyContext(
+        val validationPhase: String,
+        val requestDid: String? = null,
+        val requestUri: String? = null,
+        val requestKind: String? = null,
+    )
 
     private fun String.didUnresolvableCode(): VCLErrorCode =
         if (isPresentationRequest()) VCLErrorCode.VerifierDidUnresolvable else VCLErrorCode.IssuerDidUnresolvable

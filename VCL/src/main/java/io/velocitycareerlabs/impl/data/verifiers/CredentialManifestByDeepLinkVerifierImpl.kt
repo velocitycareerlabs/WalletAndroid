@@ -55,7 +55,7 @@ internal class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDee
         val error = VCLError(errorCode = errorCode.value, message = errorMessage)
         completionBlock(
             (VCLResult.Failure(
-                ErrorTaxonomy.classifyRequestValidation(
+                ErrorTaxonomy.toRequestValidationError(
                     error,
                     requestKind = ErrorTaxonomy.RequestKindIssuing,
                     requestDid = null,

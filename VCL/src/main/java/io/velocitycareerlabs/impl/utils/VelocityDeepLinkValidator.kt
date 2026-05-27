@@ -7,15 +7,12 @@ package io.velocitycareerlabs.impl.utils
 
 import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.api.entities.error.VCLError
-import io.velocitycareerlabs.impl.extensions.decode
-import io.velocitycareerlabs.impl.extensions.getUrlQueryParams
 import java.net.URI
 
 internal class VelocityDeepLinkValidator {
     fun validateDeepLink(
         deepLink: VCLDeepLink,
         expectedPath: String,
-        expectedDidParam: String,
         requestKind: String,
     ): VCLError? {
         val uri = runCatching { URI(deepLink.value) }.getOrNull()
@@ -33,7 +30,7 @@ internal class VelocityDeepLinkValidator {
                 requestKind = requestKind,
             )
         }
-        val descriptorDid = expectedDid(deepLink, expectedDidParam)
+        val descriptorDid = deepLink.did
         if (!isSyntacticallyValidDid(descriptorDid)) {
             return ErrorTaxonomy.invalidLink(
                 message = "Invalid or missing DID in Velocity link",
@@ -72,19 +69,6 @@ internal class VelocityDeepLinkValidator {
         val uri = runCatching { URI(requestUri ?: return false) }.getOrNull() ?: return false
         return uri.scheme == "http" || uri.scheme == "https"
     }
-
-    private fun expectedDid(deepLink: VCLDeepLink, expectedDidParam: String): String? =
-        deepLink.value.queryParam(expectedDidParam)
-            ?: deepLink.requestUri?.queryParam(expectedDidParam)
-            ?: deepLink.requestUri?.didInPath()
-
-    private fun String.queryParam(key: String): String? =
-        runCatching { decode().getUrlQueryParams()?.get(key) }.getOrNull()
-
-    private fun String.didInPath(): String? =
-        runCatching {
-            URI(this).path.split("/").find { it.startsWith(VCLDeepLink.KeyDidPrefix) }
-        }.getOrNull()
 
     private fun isSyntacticallyValidDid(did: String?): Boolean =
         did?.matches(DidPattern) == true

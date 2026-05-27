@@ -63,7 +63,7 @@ internal class CredentialManifestUseCaseImpl(
                                     }
                                 }, { error ->
                                     onError(
-                                        ErrorTaxonomy.classifyDidResolution(
+                                        ErrorTaxonomy.toDidResolutionError(
                                             error,
                                             requestKind = ErrorTaxonomy.RequestKindIssuing,
                                             requestDid = credentialManifest.iss,
@@ -74,7 +74,7 @@ internal class CredentialManifestUseCaseImpl(
                             }
                         } catch (ex: Exception) {
                             this.onError(
-                                ErrorTaxonomy.classifyClientRequestFetch(
+                                ErrorTaxonomy.toClientRequestFetchError(
                                     VCLError(ex),
                                     requestUri = credentialManifestDescriptor.endpoint,
                                     requestKind = ErrorTaxonomy.RequestKindIssuing,
@@ -121,7 +121,7 @@ internal class CredentialManifestUseCaseImpl(
                 },
                 { error ->
                     onError(
-                        ErrorTaxonomy.classifyRequestValidation(
+                        ErrorTaxonomy.toRequestValidationError(
                             error,
                             requestKind = ErrorTaxonomy.RequestKindIssuing,
                             requestDid = credentialManifest.iss,
@@ -158,7 +158,7 @@ internal class CredentialManifestUseCaseImpl(
                     },
                     { error ->
                         onError(
-                            ErrorTaxonomy.classifyRequestValidation(
+                            ErrorTaxonomy.toRequestValidationError(
                                 error,
                                 requestKind = ErrorTaxonomy.RequestKindIssuing,
                                 requestDid = credentialManifest.iss,
@@ -177,7 +177,7 @@ internal class CredentialManifestUseCaseImpl(
     }
 
     private fun missingJwtKidError(requestDid: String?): VCLError =
-        ErrorTaxonomy.classifyRequestValidation(
+        ErrorTaxonomy.toRequestValidationError(
             VCLError(message = "JWT kid is missing"),
             requestKind = ErrorTaxonomy.RequestKindIssuing,
             requestDid = requestDid,
@@ -187,7 +187,7 @@ internal class CredentialManifestUseCaseImpl(
         if (didDocument.payload.length() == 0 ||
             (didDocument.payload.optJSONArray(VCLDidDocument.KeyVerificationMethod)?.length() ?: 0) == 0
         ) {
-            ErrorTaxonomy.classifyDidResolution(
+            ErrorTaxonomy.toDidResolutionError(
                 VCLError(message = "public jwk not found for kid"),
                 requestKind = ErrorTaxonomy.RequestKindIssuing,
                 requestDid = requestDid,
@@ -197,7 +197,7 @@ internal class CredentialManifestUseCaseImpl(
         }
 
     private fun unresolvedJwtKeyError(kid: String, requestDid: String?): VCLError =
-        ErrorTaxonomy.classifyRequestValidation(
+        ErrorTaxonomy.toRequestValidationError(
             VCLError(message = "public jwk not found for kid: $kid"),
             requestKind = ErrorTaxonomy.RequestKindIssuing,
             requestDid = requestDid,
@@ -214,7 +214,7 @@ internal class CredentialManifestUseCaseImpl(
             }
         } else {
             onError(
-                ErrorTaxonomy.classifyRequestValidation(
+                ErrorTaxonomy.toRequestValidationError(
                     VCLError(message = "Failed to verify credentialManifest jwt:\n${credentialManifest.jwt}"),
                     requestKind = ErrorTaxonomy.RequestKindIssuing,
                     requestDid = credentialManifest.iss,

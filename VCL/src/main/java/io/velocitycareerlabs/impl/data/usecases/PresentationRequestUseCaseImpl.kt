@@ -62,7 +62,7 @@ internal class PresentationRequestUseCaseImpl(
                                 },
                                 { error ->
                                     onError(
-                                        ErrorTaxonomy.classifyDidResolution(
+                                        ErrorTaxonomy.toDidResolutionError(
                                             error,
                                             requestKind = ErrorTaxonomy.RequestKindPresentation,
                                             requestDid = presentationRequest.iss,
@@ -116,7 +116,7 @@ internal class PresentationRequestUseCaseImpl(
                         )
                     }, { error ->
                         onError(
-                            ErrorTaxonomy.classifyRequestValidation(
+                            ErrorTaxonomy.toRequestValidationError(
                                 error,
                                 requestKind = ErrorTaxonomy.RequestKindPresentation,
                                 requestDid = presentationRequest.iss,
@@ -127,7 +127,7 @@ internal class PresentationRequestUseCaseImpl(
                 }
             }, { error ->
                 onError(
-                    ErrorTaxonomy.classifyRequestValidation(
+                    ErrorTaxonomy.toRequestValidationError(
                         error,
                         requestKind = ErrorTaxonomy.RequestKindPresentation,
                         requestDid = presentationRequest.iss,
@@ -139,7 +139,7 @@ internal class PresentationRequestUseCaseImpl(
     }
 
     private fun missingJwtKidError(requestDid: String?): VCLError =
-        ErrorTaxonomy.classifyRequestValidation(
+        ErrorTaxonomy.toRequestValidationError(
             VCLError(message = "JWT kid is missing"),
             requestKind = ErrorTaxonomy.RequestKindPresentation,
             requestDid = requestDid,
@@ -149,7 +149,7 @@ internal class PresentationRequestUseCaseImpl(
         if (didDocument.payload.length() == 0 ||
             (didDocument.payload.optJSONArray(VCLDidDocument.KeyVerificationMethod)?.length() ?: 0) == 0
         ) {
-            ErrorTaxonomy.classifyDidResolution(
+            ErrorTaxonomy.toDidResolutionError(
                 VCLError(message = "public jwk not found for kid"),
                 requestKind = ErrorTaxonomy.RequestKindPresentation,
                 requestDid = requestDid,
@@ -159,7 +159,7 @@ internal class PresentationRequestUseCaseImpl(
         }
 
     private fun unresolvedJwtKeyError(kid: String, requestDid: String?): VCLError =
-        ErrorTaxonomy.classifyRequestValidation(
+        ErrorTaxonomy.toRequestValidationError(
             VCLError(message = "public jwk not found for kid: $kid"),
             requestKind = ErrorTaxonomy.RequestKindPresentation,
             requestDid = requestDid,
@@ -176,7 +176,7 @@ internal class PresentationRequestUseCaseImpl(
             }
         else
             onError(
-                ErrorTaxonomy.classifyRequestValidation(
+                ErrorTaxonomy.toRequestValidationError(
                     VCLError(message = "Failed to verify: ${presentationRequest.jwt.payload}"),
                     requestKind = ErrorTaxonomy.RequestKindPresentation,
                     requestDid = presentationRequest.iss,
