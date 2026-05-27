@@ -50,7 +50,7 @@ internal class PresentationRequestUseCaseImpl(
                         ) { didDocumentResult ->
                             didDocumentResult.handleResult(
                                 { didDocument ->
-                                    validateDidDocument(didDocument, requestDid = presentationRequest.iss)?.let { error ->
+                                    validateDidDocument(didDocument, presentationRequest)?.let { error ->
                                         onError(error, completionBlock)
                                     } ?: run {
                                         verifyPresentationRequest(
@@ -145,14 +145,17 @@ internal class PresentationRequestUseCaseImpl(
             requestDid = requestDid,
         )
 
-    private fun validateDidDocument(didDocument: VCLDidDocument, requestDid: String?): VCLError? =
+    private fun validateDidDocument(
+        didDocument: VCLDidDocument,
+        presentationRequest: VCLPresentationRequest,
+    ): VCLError? =
         if (didDocument.payload.length() == 0 ||
             (didDocument.payload.optJSONArray(VCLDidDocument.KeyVerificationMethod)?.length() ?: 0) == 0
         ) {
             ErrorTaxonomy.toDidResolutionError(
                 VCLError(message = "public jwk not found for kid"),
                 requestKind = ErrorTaxonomy.RequestKindPresentation,
-                requestDid = requestDid,
+                requestDid = presentationRequest.iss,
             )
         } else {
             null

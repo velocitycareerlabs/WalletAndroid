@@ -52,7 +52,7 @@ internal class CredentialManifestUseCaseImpl(
                                 credentialManifest.iss
                             ) { didDocumentResult ->
                                 didDocumentResult.handleResult({ didDocument ->
-                                    validateDidDocument(didDocument, requestDid = credentialManifest.iss)?.let { error ->
+                                    validateDidDocument(didDocument, credentialManifest)?.let { error ->
                                         onError(error, completionBlock)
                                     } ?: run {
                                         verifyCredentialManifestJwt(
@@ -183,14 +183,17 @@ internal class CredentialManifestUseCaseImpl(
             requestDid = requestDid,
         )
 
-    private fun validateDidDocument(didDocument: VCLDidDocument, requestDid: String?): VCLError? =
+    private fun validateDidDocument(
+        didDocument: VCLDidDocument,
+        credentialManifest: VCLCredentialManifest,
+    ): VCLError? =
         if (didDocument.payload.length() == 0 ||
             (didDocument.payload.optJSONArray(VCLDidDocument.KeyVerificationMethod)?.length() ?: 0) == 0
         ) {
             ErrorTaxonomy.toDidResolutionError(
                 VCLError(message = "public jwk not found for kid"),
                 requestKind = ErrorTaxonomy.RequestKindIssuing,
-                requestDid = requestDid,
+                requestDid = credentialManifest.iss,
             )
         } else {
             null
