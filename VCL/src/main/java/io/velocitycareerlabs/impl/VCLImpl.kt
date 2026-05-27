@@ -275,6 +275,7 @@ internal class VCLImpl(
                 val taxonomyError = classifyProfileVerificationError(
                     it,
                     ErrorTaxonomy.RequestKindPresentation,
+                    presentationRequestDescriptor.did,
                 )
                 logError("profile verification failed", taxonomyError)
                 errorHandler(toPublicError(taxonomyError, ErrorTaxonomy.RequestKindPresentation))
@@ -368,6 +369,7 @@ internal class VCLImpl(
                 val taxonomyError = classifyProfileVerificationError(
                     it,
                     ErrorTaxonomy.RequestKindIssuing,
+                    credentialManifestDescriptor.did,
                 )
                 logError("profile verification failed", taxonomyError)
                 errorHandler(toPublicError(taxonomyError, ErrorTaxonomy.RequestKindIssuing))
@@ -588,11 +590,11 @@ internal class VCLImpl(
         }
     }
 
-    private fun classifyProfileVerificationError(error: VCLError, requestKind: String): VCLError =
+    private fun classifyProfileVerificationError(error: VCLError, requestKind: String, requestDid: String?): VCLError =
         if (error.sourceErrorCode == ProfileServiceTypeVerifier.SourceWrongServiceType) {
-            ErrorTaxonomy.classifyServiceAuthorization(error, requestKind, requestDid = null)
+            ErrorTaxonomy.classifyServiceAuthorization(error, requestKind, requestDid)
         } else {
-            ErrorTaxonomy.classifyRegistration(error, requestKind, requestDid = null)
+            ErrorTaxonomy.classifyRegistration(error, requestKind, requestDid)
         }
 
     private fun validatePresentationRequestDescriptor(descriptor: VCLPresentationRequestDescriptor): VCLError? {

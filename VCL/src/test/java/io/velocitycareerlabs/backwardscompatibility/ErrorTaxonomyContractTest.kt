@@ -631,6 +631,7 @@ internal class ErrorTaxonomyContractTest {
                     validationPhase = "registration_check",
                     payload = """{"message":"profile missing","errorCode":"sdk_error"}""",
                     requestKind = entryPoint.requestKind,
+                    requestDid = entryPoint.requestDid,
                 ),
                 actual = error,
             )
@@ -655,6 +656,7 @@ internal class ErrorTaxonomyContractTest {
                     statusCode = VCLStatusCode.VerificationError.value,
                     validationPhase = "request_authorization",
                     requestKind = entryPoint.requestKind,
+                    requestDid = entryPoint.requestDid,
                 ),
                 actual = error,
             )
@@ -681,6 +683,7 @@ internal class ErrorTaxonomyContractTest {
                     statusCode = VCLStatusCode.VerificationError.value,
                     validationPhase = "request_authorization",
                     requestKind = entryPoint.requestKind,
+                    requestDid = entryPoint.requestDid,
                 ),
                 actual = error,
             )
