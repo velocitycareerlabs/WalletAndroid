@@ -560,6 +560,33 @@ internal class ErrorTaxonomyContractTest {
         }
     }
 
+    @Test
+    fun jwtKidMissingFromDidDocumentVerificationMethodsReturnsRequestInvalid() {
+        entryPoints.forEach { entryPoint ->
+            val missingVerificationMethodKid = "${entryPoint.requestDid}#missing-key"
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(
+                    requestPayload = entryPoint.requestPayloadForJwt(
+                        encodedJwtWithKid(entryPoint.defaultRequestJwt, missingVerificationMethodKid)
+                    ),
+                ),
+            )
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.requestInvalidErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
+            assertEquals("public jwk not found for kid: $missingVerificationMethodKid", error.message)
+        }
+    }
+
     // Registration / profile check -> issuer_not_registered / verifier_not_registered
 
     @Test
@@ -854,6 +881,18 @@ internal class ErrorTaxonomyContractTest {
         val parts = encodedJwt.split(".")
         val headerJson = JSONObject(String(Base64.getUrlDecoder().decode(parts[0])))
         headerJson.remove(VCLJwt.KeyKid)
+        return encodedJwtWithHeader(encodedJwt, headerJson)
+    }
+
+    private fun encodedJwtWithKid(encodedJwt: String, kid: String): String {
+        val parts = encodedJwt.split(".")
+        val headerJson = JSONObject(String(Base64.getUrlDecoder().decode(parts[0])))
+        headerJson.put(VCLJwt.KeyKid, kid)
+        return encodedJwtWithHeader(encodedJwt, headerJson)
+    }
+
+    private fun encodedJwtWithHeader(encodedJwt: String, headerJson: JSONObject): String {
+        val parts = encodedJwt.split(".")
         val encodedHeader = Base64.getUrlEncoder()
             .withoutPadding()
             .encodeToString(headerJson.toString().toByteArray(Charsets.UTF_8))

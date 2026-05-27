@@ -50,11 +50,15 @@ internal class PresentationRequestUseCaseImpl(
                         ) { didDocumentResult ->
                             didDocumentResult.handleResult(
                                 { didDocument ->
-                                    verifyPresentationRequest(
-                                        presentationRequest,
-                                        didDocument,
-                                        completionBlock
-                                    )
+                                    validateDidDocument(didDocument, requestDid = presentationRequest.iss)?.let { error ->
+                                        onError(error, completionBlock)
+                                    } ?: run {
+                                        verifyPresentationRequest(
+                                            presentationRequest,
+                                            didDocument,
+                                            completionBlock
+                                        )
+                                    }
                                 },
                                 { error ->
                                     onError(
@@ -89,7 +93,7 @@ internal class PresentationRequestUseCaseImpl(
             )
         val publicJwk = didDocument.getPublicJwk(kid = kid)
             ?: return onError(
-                unresolvedDidDocumentKeyError(kid, requestDid = presentationRequest.iss),
+                unresolvedJwtKeyError(kid, requestDid = presentationRequest.iss),
                 completionBlock
             )
         jwtServiceRepository.verifyJwt(
@@ -141,8 +145,21 @@ internal class PresentationRequestUseCaseImpl(
             requestDid = requestDid,
         )
 
-    private fun unresolvedDidDocumentKeyError(kid: String, requestDid: String?): VCLError =
-        ErrorTaxonomy.classifyDidResolution(
+    private fun validateDidDocument(didDocument: VCLDidDocument, requestDid: String?): VCLError? =
+        if (didDocument.payload.length() == 0 ||
+            (didDocument.payload.optJSONArray(VCLDidDocument.KeyVerificationMethod)?.length() ?: 0) == 0
+        ) {
+            ErrorTaxonomy.classifyDidResolution(
+                VCLError(message = "public jwk not found for kid"),
+                requestKind = ErrorTaxonomy.RequestKindPresentation,
+                requestDid = requestDid,
+            )
+        } else {
+            null
+        }
+
+    private fun unresolvedJwtKeyError(kid: String, requestDid: String?): VCLError =
+        ErrorTaxonomy.classifyRequestValidation(
             VCLError(message = "public jwk not found for kid: $kid"),
             requestKind = ErrorTaxonomy.RequestKindPresentation,
             requestDid = requestDid,
