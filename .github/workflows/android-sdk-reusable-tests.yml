@@ -24,7 +24,7 @@ jobs:
 #        run: ./gradlew ktlintCheck
 
       - name: Run Unit Tests
-        run: ./gradlew test
+        run: ./gradlew test --no-parallel
 
       - name: Archive Test Results
         if: always()
