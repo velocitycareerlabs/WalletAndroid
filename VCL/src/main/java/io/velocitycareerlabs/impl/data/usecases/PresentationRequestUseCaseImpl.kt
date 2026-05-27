@@ -45,31 +45,11 @@ internal class PresentationRequestUseCaseImpl(
                             didJwk = presentationRequestDescriptor.didJwk,
                             remoteCryptoServicesToken = presentationRequestDescriptor.remoteCryptoServicesToken
                         )
-                        resolveDidDocumentRepository.resolveDidDocument(
-                            did = presentationRequest.iss
-                        ) { didDocumentResult ->
-                            didDocumentResult.handleResult(
-                                { didDocument ->
-                                    validateDidDocument(didDocument, presentationRequest)?.let { error ->
-                                        onError(error, completionBlock)
-                                    } ?: run {
-                                        verifyPresentationRequest(
-                                            presentationRequest,
-                                            didDocument,
-                                            completionBlock
-                                        )
-                                    }
-                                },
-                                { error ->
-                                    onError(
-                                        ErrorTaxonomy.toDidResolutionError(
-                                            error,
-                                            requestKind = ErrorTaxonomy.RequestKindPresentation,
-                                            requestDid = presentationRequest.iss,
-                                        ),
-                                        completionBlock
-                                    )
-                                }
+                        resolveDidDocument(presentationRequest, completionBlock) { didDocument ->
+                            verifyPresentationRequest(
+                                presentationRequest,
+                                didDocument,
+                                completionBlock
                             )
                         }
                     },
@@ -135,6 +115,36 @@ internal class PresentationRequestUseCaseImpl(
                     completionBlock
                 )
             })
+        }
+    }
+
+    private fun resolveDidDocument(
+        presentationRequest: VCLPresentationRequest,
+        completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit,
+        successHandler: (VCLDidDocument) -> Unit,
+    ) {
+        resolveDidDocumentRepository.resolveDidDocument(
+            did = presentationRequest.iss
+        ) { didDocumentResult ->
+            didDocumentResult.handleResult(
+                { didDocument ->
+                    validateDidDocument(didDocument, presentationRequest)?.let { error ->
+                        onError(error, completionBlock)
+                    } ?: run {
+                        successHandler(didDocument)
+                    }
+                },
+                { error ->
+                    onError(
+                        ErrorTaxonomy.toDidResolutionError(
+                            error,
+                            requestKind = ErrorTaxonomy.RequestKindPresentation,
+                            requestDid = presentationRequest.iss,
+                        ),
+                        completionBlock
+                    )
+                }
+            )
         }
     }
 

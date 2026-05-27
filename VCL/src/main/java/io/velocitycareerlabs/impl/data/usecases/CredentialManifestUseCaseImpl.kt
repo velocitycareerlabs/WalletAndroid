@@ -48,29 +48,12 @@ internal class CredentialManifestUseCaseImpl(
                                 didJwk = credentialManifestDescriptor.didJwk,
                                 remoteCryptoServicesToken = credentialManifestDescriptor.remoteCryptoServicesToken
                             )
-                            resolveDidDocumentRepository.resolveDidDocument(
-                                credentialManifest.iss
-                            ) { didDocumentResult ->
-                                didDocumentResult.handleResult({ didDocument ->
-                                    validateDidDocument(didDocument, credentialManifest)?.let { error ->
-                                        onError(error, completionBlock)
-                                    } ?: run {
-                                        verifyCredentialManifestJwt(
-                                            credentialManifest,
-                                            didDocument,
-                                            completionBlock
-                                        )
-                                    }
-                                }, { error ->
-                                    onError(
-                                        ErrorTaxonomy.toDidResolutionError(
-                                            error,
-                                            requestKind = ErrorTaxonomy.RequestKindIssuing,
-                                            requestDid = credentialManifest.iss,
-                                        ),
-                                        completionBlock
-                                    );
-                                })
+                            resolveDidDocument(credentialManifest, completionBlock) { didDocument ->
+                                verifyCredentialManifestJwt(
+                                    credentialManifest,
+                                    didDocument,
+                                    completionBlock
+                                )
                             }
                         } catch (ex: Exception) {
                             this.onError(
@@ -173,6 +156,33 @@ internal class CredentialManifestUseCaseImpl(
             executor.runOnMain {
                 completionBlock(VCLResult.Success(credentialManifest))
             }
+        }
+    }
+
+    private fun resolveDidDocument(
+        credentialManifest: VCLCredentialManifest,
+        completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit,
+        successHandler: (VCLDidDocument) -> Unit,
+    ) {
+        resolveDidDocumentRepository.resolveDidDocument(
+            credentialManifest.iss
+        ) { didDocumentResult ->
+            didDocumentResult.handleResult({ didDocument ->
+                validateDidDocument(didDocument, credentialManifest)?.let { error ->
+                    onError(error, completionBlock)
+                } ?: run {
+                    successHandler(didDocument)
+                }
+            }, { error ->
+                onError(
+                    ErrorTaxonomy.toDidResolutionError(
+                        error,
+                        requestKind = ErrorTaxonomy.RequestKindIssuing,
+                        requestDid = credentialManifest.iss,
+                    ),
+                    completionBlock
+                )
+            })
         }
     }
 
