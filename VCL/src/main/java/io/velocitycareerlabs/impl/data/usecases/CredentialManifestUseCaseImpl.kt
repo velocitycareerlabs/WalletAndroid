@@ -92,12 +92,14 @@ internal class CredentialManifestUseCaseImpl(
         didDocument: VCLDidDocument,
         completionBlock: (VCLResult<VCLCredentialManifest>) -> Unit
     ) {
-        val publicJwk = didDocument.getPublicJwk(credentialManifest.jwt.kid ?: "")
+        val kid = credentialManifest.jwt.kid
             ?: return onError(
-                unresolvedJwtKeyError(
-                    jwt = credentialManifest.jwt,
-                    requestDid = credentialManifest.iss,
-                ),
+                missingJwtKidError(requestDid = credentialManifest.iss),
+                completionBlock
+            )
+        val publicJwk = didDocument.getPublicJwk(kid)
+            ?: return onError(
+                unresolvedDidDocumentKeyError(kid, requestDid = credentialManifest.iss),
                 completionBlock
             )
         jwtServiceRepository.verifyJwt(
@@ -170,9 +172,16 @@ internal class CredentialManifestUseCaseImpl(
         }
     }
 
-    private fun unresolvedJwtKeyError(jwt: VCLJwt, requestDid: String?): VCLError =
+    private fun missingJwtKidError(requestDid: String?): VCLError =
         ErrorTaxonomy.classifyRequestValidation(
-            VCLError(message = jwt.kid?.let { "public jwk not found for kid: $it" } ?: "JWT kid is missing"),
+            VCLError(message = "JWT kid is missing"),
+            requestKind = ErrorTaxonomy.RequestKindIssuing,
+            requestDid = requestDid,
+        )
+
+    private fun unresolvedDidDocumentKeyError(kid: String, requestDid: String?): VCLError =
+        ErrorTaxonomy.classifyDidResolution(
+            VCLError(message = "public jwk not found for kid: $kid"),
             requestKind = ErrorTaxonomy.RequestKindIssuing,
             requestDid = requestDid,
         )

@@ -491,7 +491,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun invalidDidDocumentShapeReturnsSdkErrorAtRequestValidation() {
+    fun invalidDidDocumentShapeReturnsDidUnresolvable() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -500,9 +500,9 @@ internal class ErrorTaxonomyContractTest {
 
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
-                    errorCode = entryPoint.requestInvalidErrorCode,
+                    errorCode = entryPoint.didUnresolvableErrorCode,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
-                    validationPhase = "request_validation",
+                    validationPhase = "did_resolution",
                     requestDid = entryPoint.requestDid,
                     requestKind = entryPoint.requestKind,
                 ),
@@ -522,9 +522,9 @@ internal class ErrorTaxonomyContractTest {
 
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
-                    errorCode = entryPoint.requestInvalidErrorCode,
+                    errorCode = entryPoint.didUnresolvableErrorCode,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
-                    validationPhase = "request_validation",
+                    validationPhase = "did_resolution",
                     requestDid = entryPoint.requestDid,
                     requestKind = entryPoint.requestKind,
                 ),
