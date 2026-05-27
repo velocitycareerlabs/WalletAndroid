@@ -35,8 +35,12 @@ import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescri
 import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
 import io.velocitycareerlabs.impl.VCLImpl
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
+import io.velocitycareerlabs.impl.data.infrastructure.network.Response
+import io.velocitycareerlabs.impl.data.repositories.CredentialManifestRepositoryImpl
+import io.velocitycareerlabs.impl.data.repositories.PresentationRequestRepositoryImpl
 import io.velocitycareerlabs.impl.data.usecases.CredentialManifestUseCaseImpl
 import io.velocitycareerlabs.impl.data.usecases.PresentationRequestUseCaseImpl
+import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.repositories.CredentialManifestRepository
 import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
 import io.velocitycareerlabs.impl.domain.repositories.PresentationRequestRepository
@@ -107,6 +111,27 @@ internal class ErrorTaxonomyContractTest {
                     actual = error,
                 )
             }
+        }
+    }
+
+    @Test
+    fun opaqueVelocityUrisReturnUnparseableInvalidLink() {
+        entryPoints.forEach { entryPoint ->
+            val deepLink = VCLDeepLink(
+                "velocity-network:${entryPoint.schemePath}?request_uri=${entryPoint.encodedRequestUri}" +
+                    "&${entryPoint.didParam}=did:example:entity"
+            )
+            val error = getEntryPointError(entryPoint, deepLink)
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.InvalidLink.value,
+                    sourceErrorCode = VelocityDeepLinkValidator.SourceUnparseablePayload,
+                    validationPhase = "link_validation",
+                    requestUri = deepLink.requestUri,
+                ),
+                actual = error,
+            )
         }
     }
 
@@ -277,6 +302,24 @@ internal class ErrorTaxonomyContractTest {
             ),
             actual = error,
         )
+    }
+
+    @Test
+    fun repositoryNullEndpointFallbacksReturnInvalidLinkDiagnostics() {
+        mapOf(
+            EntryPoint.Issuing to getCredentialManifestRepositoryNullEndpointError(),
+            EntryPoint.Presentation to getPresentationRequestRepositoryNullEndpointError(),
+        ).forEach { (entryPoint, error) ->
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.InvalidLink.value,
+                    sourceErrorCode = VelocityDeepLinkValidator.SourceInvalidOrMissingRequestEndpoint,
+                    validationPhase = "link_validation",
+                ),
+                actual = error,
+            )
+            assertTrue(error.message!!.contains("endpoint = null"))
+        }
     }
 
     @Test
@@ -1200,6 +1243,47 @@ internal class ErrorTaxonomyContractTest {
         }
         return result ?: error("getPresentationRequest did not invoke errorHandler")
     }
+
+    private fun getCredentialManifestRepositoryNullEndpointError(): VCLError {
+        var result: VCLError? = null
+        CredentialManifestRepositoryImpl(unusedNetworkService()).getCredentialManifest(
+            credentialManifestDescriptor(VCLDeepLink("velocity-network://issue?issuerDid=${EntryPoint.Issuing.requestDid}"))
+        ) {
+            it.handleResult(
+                successHandler = { fail("Credential manifest repository failure expected: $it") },
+                errorHandler = { error -> result = error },
+            )
+        }
+        return result ?: error("getCredentialManifest did not invoke errorHandler")
+    }
+
+    private fun getPresentationRequestRepositoryNullEndpointError(): VCLError {
+        var result: VCLError? = null
+        PresentationRequestRepositoryImpl(unusedNetworkService()).getPresentationRequest(
+            presentationDescriptor(VCLDeepLink("velocity-network://inspect?inspectorDid=${EntryPoint.Presentation.requestDid}"))
+        ) {
+            it.handleResult(
+                successHandler = { fail("Presentation request repository failure expected: $it") },
+                errorHandler = { error -> result = error },
+            )
+        }
+        return result ?: error("getPresentationRequest did not invoke errorHandler")
+    }
+
+    private fun unusedNetworkService() =
+        object : NetworkService {
+            override fun sendRequest(
+                endpoint: String,
+                body: String?,
+                contentType: String,
+                method: Request.HttpMethod,
+                headers: List<Pair<String, String>>?,
+                useCaches: Boolean,
+                completionBlock: (VCLResult<Response>) -> Unit,
+            ) {
+                fail("Network should not be called for null endpoint")
+            }
+        }
 
     private fun fixedDidDocumentRepository() =
         object : ResolveDidDocumentRepository {

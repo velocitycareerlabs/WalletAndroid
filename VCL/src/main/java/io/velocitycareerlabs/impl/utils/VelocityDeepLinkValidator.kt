@@ -22,6 +22,14 @@ internal class VelocityDeepLinkValidator {
                 requestUri = deepLink.requestUri,
                 requestKind = requestKind,
             )
+        if (uri.isOpaque || uri.host == null) {
+            return ErrorTaxonomy.invalidLink(
+                message = "Payload is not a parseable URL",
+                sourceErrorCode = SourceUnparseablePayload,
+                requestUri = deepLink.requestUri,
+                requestKind = requestKind,
+            )
+        }
         if (uri.scheme !in AllowedVelocitySchemes || uri.host != expectedPath) {
             return ErrorTaxonomy.invalidLink(
                 message = "Unsupported Velocity link: ${deepLink.value}",

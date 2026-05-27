@@ -7,8 +7,6 @@ package io.velocitycareerlabs.impl.utils
 
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
-import io.velocitycareerlabs.impl.extensions.toJsonObject
-import org.json.JSONObject
 
 internal class ErrorTaxonomyCompatibilityMapper {
     fun map(
@@ -46,11 +44,16 @@ internal class ErrorTaxonomyCompatibilityMapper {
                     errorCode = VCLErrorCode.SdkError.value,
                     message = LegacyMissingDidMessage,
                 )
-            else ->
+            VelocityDeepLinkValidator.SourceUnsupportedVelocityLink ->
                 legacyCopy(
                     error,
                     errorCode = VCLErrorCode.SdkError.value,
                     message = endpointNullMessage,
+                )
+            else ->
+                legacyCopy(
+                    error,
+                    errorCode = VCLErrorCode.SdkError.value,
                 )
         }
     }
@@ -97,10 +100,7 @@ internal class ErrorTaxonomyCompatibilityMapper {
         )
     }
 
-    private fun mapNetworkStatus(error: VCLError): VCLError {
-        val payloadStatusCode = error.payload?.toJsonObject()?.optNullableInt(VCLError.KeyStatusCode)
-        return payloadStatusCode?.let { error.copy(statusCode = it) } ?: error
-    }
+    private fun mapNetworkStatus(error: VCLError): VCLError = error
 
     private fun legacyCopy(
         error: VCLError,
@@ -130,9 +130,6 @@ internal class ErrorTaxonomyCompatibilityMapper {
         } else {
             "credentialManifestDescriptor.endpoint = null"
         }
-
-    private fun JSONObject?.optNullableInt(key: String): Int? =
-        takeIf { it?.has(key) == true && !it.isNull(key) }?.optInt(key)
 
     private companion object {
         const val LegacyMissingDidMessage = "did was not found in Velocity link"

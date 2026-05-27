@@ -13,6 +13,7 @@ import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.repositories.CredentialManifestRepository
 import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
+import io.velocitycareerlabs.impl.utils.VelocityDeepLinkValidator
 import org.json.JSONObject
 import java.lang.Exception
 
@@ -77,7 +78,11 @@ internal class CredentialManifestRepositoryImpl(
         } ?: run {
             completionBlock(
                 VCLResult.Failure(
-                    VCLError(message = "credentialManifestDescriptor.endpoint = null")
+                    ErrorTaxonomy.invalidLink(
+                        message = "credentialManifestDescriptor.endpoint = null",
+                        sourceErrorCode = VelocityDeepLinkValidator.SourceInvalidOrMissingRequestEndpoint,
+                        requestKind = ErrorTaxonomy.RequestKindIssuing,
+                    )
                 )
             )
         }
