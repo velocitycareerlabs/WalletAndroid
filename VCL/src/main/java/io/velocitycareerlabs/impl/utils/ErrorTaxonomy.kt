@@ -152,19 +152,6 @@ internal object ErrorTaxonomy {
             )
         }
 
-    fun classifyRequestAuthorization(error: VCLError, requestDid: String? = null): VCLError =
-        if (error.isTaxonomyError()) error.withMissingTaxonomyContext(
-            requestDid = requestDid,
-            requestKind = RequestKindIssuing,
-            validationPhase = PhaseRequestAuthorization,
-        )
-        else error.withTaxonomy(
-            VCLErrorCode.IssuerRequestUnauthorized,
-            PhaseRequestAuthorization,
-            requestDid = requestDid,
-            requestKind = RequestKindIssuing,
-        )
-
     fun VCLError.isConnectivityFailure(): Boolean =
         errorCode == VCLErrorCode.ConnectivityFailure.value ||
             statusCode == VCLStatusCode.NetworkError.value

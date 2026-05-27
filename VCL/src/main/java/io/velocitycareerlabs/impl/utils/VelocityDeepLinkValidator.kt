@@ -68,7 +68,7 @@ internal class VelocityDeepLinkValidator {
         return null
     }
 
-    fun isAllowedRequestUri(requestUri: String?): Boolean {
+    private fun isAllowedRequestUri(requestUri: String?): Boolean {
         val uri = runCatching { URI(requestUri ?: return false) }.getOrNull() ?: return false
         return uri.scheme == "http" || uri.scheme == "https"
     }
