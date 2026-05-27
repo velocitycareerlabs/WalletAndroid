@@ -288,6 +288,29 @@ internal class ErrorTaxonomyContractTest {
         }
     }
 
+    @Test
+    fun didValidationDoesNotUseBacktrackingRegex() {
+        entryPoints.forEach { entryPoint ->
+            val did = "did:example:" + ":".repeat(10_000)
+            val deepLink = VCLDeepLink(
+                "velocity-network://${entryPoint.schemePath}?request_uri=${entryPoint.encodedRequestUri}" +
+                    "&${entryPoint.didParam}=$did"
+            )
+            val error = getEntryPointError(entryPoint, deepLink)
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.requestInvalidErrorCode,
+                    sourceErrorCode = entryPoint.legacyMismatchErrorCode,
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
+        }
+    }
+
     // Client request fetch -> client_request_unauthorized / client_request_rejected
 
     @Test

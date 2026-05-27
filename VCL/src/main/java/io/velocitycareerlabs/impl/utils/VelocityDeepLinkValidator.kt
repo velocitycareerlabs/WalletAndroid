@@ -71,7 +71,17 @@ internal class VelocityDeepLinkValidator {
     }
 
     private fun isSyntacticallyValidDid(did: String?): Boolean =
-        did?.matches(DidPattern) == true
+        did?.startsWith(VCLDeepLink.KeyDidPrefix) == true && hasValidDidParts(did)
+
+    private fun hasValidDidParts(did: String): Boolean {
+        val didParts = did.removePrefix(VCLDeepLink.KeyDidPrefix)
+        val methodEndIndex = didParts.indexOf(':')
+        if (methodEndIndex <= 0 || methodEndIndex == didParts.length - 1) {
+            return false
+        }
+        val method = didParts.substring(0, methodEndIndex)
+        return method.all { it in 'a'..'z' || it in '0'..'9' }
+    }
 
     companion object {
         val AllowedVelocitySchemes = setOf(
@@ -79,7 +89,6 @@ internal class VelocityDeepLinkValidator {
             "velocity-network-devnet",
             "velocity-network-testnet",
         )
-        val DidPattern = Regex("^did:[a-z0-9]+:[A-Za-z0-9._:%-]+(?:[:/][A-Za-z0-9._:%-]+)*$")
         const val SourceUnparseablePayload = "invalid_link_unparseable_payload"
         const val SourceUnsupportedVelocityLink = "invalid_link_unsupported_velocity_link"
         const val SourceInvalidOrMissingDid = "invalid_link_invalid_or_missing_did"
