@@ -169,25 +169,23 @@ internal object ErrorTaxonomy {
         errorCode == VCLErrorCode.ConnectivityFailure.value ||
             statusCode == VCLStatusCode.NetworkError.value
 
-    fun VCLError.isTaxonomyError(): Boolean =
-        VCLErrorCode.entries.any { it.value == errorCode && it.isTaxonomyCode }
+    private val taxonomyErrorCodes = setOf(
+        VCLErrorCode.InvalidLink.value,
+        VCLErrorCode.ConnectivityFailure.value,
+        VCLErrorCode.ClientRequestUnauthorized.value,
+        VCLErrorCode.ClientRequestRejected.value,
+        VCLErrorCode.IssuerDidUnresolvable.value,
+        VCLErrorCode.VerifierDidUnresolvable.value,
+        VCLErrorCode.IssuerNotRegistered.value,
+        VCLErrorCode.VerifierNotRegistered.value,
+        VCLErrorCode.IssuerRequestInvalid.value,
+        VCLErrorCode.VerifierRequestInvalid.value,
+        VCLErrorCode.IssuerRequestUnauthorized.value,
+        VCLErrorCode.VerifierRequestUnauthorized.value,
+    )
 
-    private val VCLErrorCode.isTaxonomyCode: Boolean
-        get() = when (this) {
-            VCLErrorCode.InvalidLink,
-            VCLErrorCode.ConnectivityFailure,
-            VCLErrorCode.ClientRequestUnauthorized,
-            VCLErrorCode.ClientRequestRejected,
-            VCLErrorCode.IssuerDidUnresolvable,
-            VCLErrorCode.VerifierDidUnresolvable,
-            VCLErrorCode.IssuerNotRegistered,
-            VCLErrorCode.VerifierNotRegistered,
-            VCLErrorCode.IssuerRequestInvalid,
-            VCLErrorCode.VerifierRequestInvalid,
-            VCLErrorCode.IssuerRequestUnauthorized,
-            VCLErrorCode.VerifierRequestUnauthorized -> true
-            else -> false
-        }
+    fun VCLError.isTaxonomyError(): Boolean =
+        errorCode in taxonomyErrorCodes
 
     fun VCLError.withMissingTaxonomyContext(
         requestDid: String? = null,

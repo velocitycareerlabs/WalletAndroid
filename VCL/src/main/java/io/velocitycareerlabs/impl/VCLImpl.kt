@@ -14,6 +14,7 @@ import io.velocitycareerlabs.api.entities.*
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.domain.models.CredentialTypeSchemasModel
 import io.velocitycareerlabs.api.entities.handleResult
+import io.velocitycareerlabs.api.entities.initialization.VCLErrorCodeCompatibilityMode
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.domain.models.CountriesModel
@@ -640,7 +641,7 @@ internal class VCLImpl(
     }
 
     private fun toPublicError(error: VCLError, requestKind: String): VCLError =
-        if (initializationDescriptor.isErrorTaxonomyBackwardCompatibilityEnabled) {
+        if (initializationDescriptor.errorCodeCompatibilityMode == VCLErrorCodeCompatibilityMode.Legacy) {
             errorTaxonomyCompatibilityMapper.map(
                 error = error,
                 requestKind = requestKind,

@@ -20,6 +20,7 @@ import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.api.entities.error.VCLStatusCode
 import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescriptor
+import io.velocitycareerlabs.api.entities.initialization.VCLErrorCodeCompatibilityMode
 import io.velocitycareerlabs.api.entities.initialization.VCLInjectedCryptoServicesDescriptor
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
 import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
@@ -548,7 +549,7 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
             context = ApplicationProvider.getApplicationContext(),
             initializationDescriptor = VCLInitializationDescriptor(
                 cacheSequence = cacheSequence.incrementAndGet(),
-                isErrorTaxonomyBackwardCompatibilityEnabled = true,
+                errorCodeCompatibilityMode = VCLErrorCodeCompatibilityMode.Legacy,
                 cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
                     cryptoServiceType = VCLCryptoServiceType.Injected,
                     injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
