@@ -10,25 +10,17 @@ import androidx.test.core.app.ApplicationProvider
 import io.velocitycareerlabs.api.VCLCryptoServiceType
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptor
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorByDeepLink
-import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorByService
 import io.velocitycareerlabs.api.entities.VCLDeepLink
-import io.velocitycareerlabs.api.entities.VCLDidDocument
-import io.velocitycareerlabs.api.entities.VCLDidJwk
-import io.velocitycareerlabs.api.entities.VCLIssuingType
 import io.velocitycareerlabs.api.entities.VCLJwt
-import io.velocitycareerlabs.api.entities.VCLJwtDescriptor
 import io.velocitycareerlabs.api.entities.VCLCredentialManifest
 import io.velocitycareerlabs.api.entities.VCLPresentationRequestDescriptor
 import io.velocitycareerlabs.api.entities.VCLPresentationRequest
 import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLResult
-import io.velocitycareerlabs.api.entities.VCLService
 import io.velocitycareerlabs.api.entities.VCLToken
-import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.api.entities.error.VCLStatusCode
-import io.velocitycareerlabs.api.entities.handleResult
 import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescriptor
 import io.velocitycareerlabs.api.entities.initialization.VCLInjectedCryptoServicesDescriptor
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
@@ -36,21 +28,8 @@ import io.velocitycareerlabs.api.entities.initialization.VCLErrorCodeCompatibili
 import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
 import io.velocitycareerlabs.impl.VCLImpl
 import io.velocitycareerlabs.impl.data.infrastructure.network.Request
-import io.velocitycareerlabs.impl.data.infrastructure.network.Response
-import io.velocitycareerlabs.impl.data.repositories.CredentialManifestRepositoryImpl
-import io.velocitycareerlabs.impl.data.repositories.PresentationRequestRepositoryImpl
-import io.velocitycareerlabs.impl.data.usecases.CredentialManifestUseCaseImpl
-import io.velocitycareerlabs.impl.data.usecases.PresentationRequestUseCaseImpl
-import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
-import io.velocitycareerlabs.impl.domain.repositories.CredentialManifestRepository
-import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
-import io.velocitycareerlabs.impl.domain.repositories.PresentationRequestRepository
-import io.velocitycareerlabs.impl.domain.repositories.ResolveDidDocumentRepository
-import io.velocitycareerlabs.impl.domain.verifiers.CredentialManifestByDeepLinkVerifier
-import io.velocitycareerlabs.impl.domain.verifiers.PresentationRequestByDeepLinkVerifier
 import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
 import io.velocitycareerlabs.impl.utils.VelocityDeepLinkValidator
-import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
 import io.velocitycareerlabs.infrastructure.resources.valid.CountriesMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypeSchemaMocks
@@ -78,7 +57,6 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
-import java.net.URLEncoder
 import java.net.UnknownHostException
 import java.util.Base64
 import java.util.Collections
@@ -197,9 +175,6 @@ internal fun EntryPoint.expectedDiagnostics(
 
 internal val EntryPoint.lastDid: String get() = "did:example:last"
 
-internal fun simpleRequestUri(): String =
-    URLEncoder.encode("https://example.com/request", "UTF-8")
-
 internal val EntryPoint.defaultRequestJwt: String
     get() = when (this) {
         EntryPoint.Issuing -> CredentialManifestMocks.JwtCredentialManifest1
@@ -289,18 +264,6 @@ internal fun getCredentialManifestError(
     return awaitCredentialManifestError(vcl, credentialManifestDescriptor(deepLink))
 }
 
-internal fun getLegacyCredentialManifestError(
-    deepLink: VCLDeepLink,
-    router: BaselineHttpRouter = BaselineHttpRouter(),
-    jwtVerificationResult: VCLResult<Boolean> = VCLResult.Success(true),
-): VCLError =
-    getCredentialManifestError(
-        deepLink,
-        router,
-        jwtVerificationResult,
-        VCLErrorCodeCompatibilityMode.Legacy,
-    )
-
 internal fun getPresentationRequestError(
     deepLink: VCLDeepLink,
     router: BaselineHttpRouter = BaselineHttpRouter(
@@ -313,173 +276,6 @@ internal fun getPresentationRequestError(
     val vcl = initializedVcl(router, jwtVerificationResult, errorCodeCompatibilityMode)
     return awaitPresentationRequestError(vcl, presentationDescriptor(deepLink))
 }
-
-internal fun getLegacyPresentationRequestError(
-    deepLink: VCLDeepLink,
-    router: BaselineHttpRouter = BaselineHttpRouter(
-        verifiedProfilePayload = VerifiedProfileMocks.VerifiedProfileInspectorJsonStr,
-        requestPayload = PresentationRequestMocks.EncodedPresentationRequestResponse,
-    ),
-    jwtVerificationResult: VCLResult<Boolean> = VCLResult.Success(true),
-): VCLError =
-    getPresentationRequestError(
-        deepLink,
-        router,
-        jwtVerificationResult,
-        VCLErrorCodeCompatibilityMode.Legacy,
-    )
-
-internal fun getCredentialManifestUseCaseVerificationFalseError(): VCLError {
-    var result: VCLError? = null
-    CredentialManifestUseCaseImpl(
-        credentialManifestRepository = object : CredentialManifestRepository {
-            override fun getCredentialManifest(
-                credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-                completionBlock: (VCLResult<String>) -> Unit,
-            ) {
-                completionBlock(VCLResult.Success(CredentialManifestMocks.JwtCredentialManifest1))
-            }
-        },
-        resolveDidDocumentRepository = fixedDidDocumentRepository(),
-        jwtServiceRepository = successfulJwtServiceRepository(),
-        credentialManifestByDeepLinkVerifier = object : CredentialManifestByDeepLinkVerifier {
-            override fun verifyCredentialManifest(
-                credentialManifest: VCLCredentialManifest,
-                deepLink: VCLDeepLink?,
-                didDocument: VCLDidDocument,
-                completionBlock: (VCLResult<Boolean>) -> Unit,
-            ) {
-                completionBlock(VCLResult.Success(false))
-            }
-        },
-        executor = EmptyExecutor(),
-    ).getCredentialManifest(
-        credentialManifestDescriptor = credentialManifestDescriptor(DeepLinkMocks.CredentialManifestDeepLinkDevNet),
-        verifiedProfile = VCLVerifiedProfile(JSONObject()),
-    ) {
-        it.handleResult(
-            successHandler = { fail("Credential manifest failure expected: $it") },
-            errorHandler = { error -> result = error },
-        )
-    }
-    return result ?: error("getCredentialManifest did not invoke errorHandler")
-}
-
-internal fun getPresentationRequestUseCaseVerificationFalseError(): VCLError {
-    var result: VCLError? = null
-    PresentationRequestUseCaseImpl(
-        presentationRequestRepository = object : PresentationRequestRepository {
-            override fun getPresentationRequest(
-                presentationRequestDescriptor: VCLPresentationRequestDescriptor,
-                completionBlock: (VCLResult<String>) -> Unit,
-            ) {
-                completionBlock(VCLResult.Success(PresentationRequestMocks.EncodedPresentationRequest))
-            }
-        },
-        resolveDidDocumentRepository = fixedDidDocumentRepository(),
-        jwtServiceRepository = successfulJwtServiceRepository(),
-        presentationRequestByDeepLinkVerifier = object : PresentationRequestByDeepLinkVerifier {
-            override fun verifyPresentationRequest(
-                presentationRequest: VCLPresentationRequest,
-                deepLink: VCLDeepLink,
-                didDocument: VCLDidDocument,
-                completionBlock: (VCLResult<Boolean>) -> Unit,
-            ) {
-                completionBlock(VCLResult.Success(false))
-            }
-        },
-        executor = EmptyExecutor(),
-    ).getPresentationRequest(
-        presentationRequestDescriptor = presentationDescriptor(DeepLinkMocks.PresentationRequestDeepLinkDevNet),
-        verifiedProfile = VCLVerifiedProfile(JSONObject()),
-    ) {
-        it.handleResult(
-            successHandler = { fail("Presentation request failure expected: $it") },
-            errorHandler = { error -> result = error },
-        )
-    }
-    return result ?: error("getPresentationRequest did not invoke errorHandler")
-}
-
-internal fun getCredentialManifestRepositoryNullEndpointError(): VCLError {
-    var result: VCLError? = null
-    CredentialManifestRepositoryImpl(unusedNetworkService()).getCredentialManifest(
-        credentialManifestDescriptor(VCLDeepLink("velocity-network://issue?issuerDid=${EntryPoint.Issuing.requestDid}"))
-    ) {
-        it.handleResult(
-            successHandler = { fail("Credential manifest repository failure expected: $it") },
-            errorHandler = { error -> result = error },
-        )
-    }
-    return result ?: error("getCredentialManifest did not invoke errorHandler")
-}
-
-internal fun getPresentationRequestRepositoryNullEndpointError(): VCLError {
-    var result: VCLError? = null
-    PresentationRequestRepositoryImpl(unusedNetworkService()).getPresentationRequest(
-        presentationDescriptor(VCLDeepLink("velocity-network://inspect?inspectorDid=${EntryPoint.Presentation.requestDid}"))
-    ) {
-        it.handleResult(
-            successHandler = { fail("Presentation request repository failure expected: $it") },
-            errorHandler = { error -> result = error },
-        )
-    }
-    return result ?: error("getPresentationRequest did not invoke errorHandler")
-}
-
-internal fun unusedNetworkService() =
-    object : NetworkService {
-        override fun sendRequest(
-            endpoint: String,
-            body: String?,
-            contentType: String,
-            method: Request.HttpMethod,
-            headers: List<Pair<String, String>>?,
-            useCaches: Boolean,
-            completionBlock: (VCLResult<Response>) -> Unit,
-        ) {
-            fail("Network should not be called for null endpoint")
-        }
-    }
-
-internal fun fixedDidDocumentRepository() =
-    object : ResolveDidDocumentRepository {
-        override fun resolveDidDocument(
-            did: String,
-            completionBlock: (VCLResult<VCLDidDocument>) -> Unit,
-        ) {
-            completionBlock(VCLResult.Success(DidDocumentMocks.DidDocumentMock))
-        }
-    }
-
-internal fun successfulJwtServiceRepository() =
-    object : JwtServiceRepository {
-        override fun decode(
-            encodedJwt: String,
-            completionBlock: (VCLResult<VCLJwt>) -> Unit,
-        ) {
-            completionBlock(VCLResult.Success(VCLJwt(encodedJwt)))
-        }
-
-        override fun verifyJwt(
-            jwt: VCLJwt,
-            publicJwk: VCLPublicJwk,
-            remoteCryptoServicesToken: VCLToken?,
-            completionBlock: (VCLResult<Boolean>) -> Unit,
-        ) {
-            completionBlock(VCLResult.Success(true))
-        }
-
-        override fun generateSignedJwt(
-            jwtDescriptor: VCLJwtDescriptor,
-            nonce: String?,
-            didJwk: VCLDidJwk,
-            remoteCryptoServicesToken: VCLToken?,
-            completionBlock: (VCLResult<VCLJwt>) -> Unit,
-        ) {
-            completionBlock(VCLResult.Success(VCLJwt("")))
-        }
-    }
 
 internal fun initializedVcl(
     router: BaselineHttpRouter,
@@ -536,29 +332,6 @@ internal fun awaitCredentialManifestError(
     return result ?: error("getCredentialManifest did not invoke errorHandler")
 }
 
-internal fun awaitCredentialManifest(
-    vcl: VCLImpl,
-    descriptor: VCLCredentialManifestDescriptor,
-): VCLCredentialManifest {
-    var result: VCLCredentialManifest? = null
-    var error: VCLError? = null
-    val latch = CountDownLatch(1)
-    vcl.getCredentialManifest(
-        credentialManifestDescriptor = descriptor,
-        successHandler = {
-            result = it
-            latch.countDown()
-        },
-        errorHandler = {
-            error = it
-            latch.countDown()
-        },
-    )
-    drainMainThreadUntil(latch)
-    error?.let { fail("Credential manifest success expected: $it") }
-    return result ?: error("getCredentialManifest did not invoke successHandler")
-}
-
 internal fun awaitPresentationRequestError(
     vcl: VCLImpl,
     descriptor: VCLPresentationRequestDescriptor,
@@ -593,25 +366,6 @@ internal fun credentialManifestDescriptor(deepLink: VCLDeepLink) =
     VCLCredentialManifestDescriptorByDeepLink(
         deepLink = deepLink,
         didJwk = DidJwkMocks.DidJwk,
-    )
-
-internal fun credentialManifestDescriptorByService(
-    endpoint: String? = DeepLinkMocks.CredentialManifestRequestDecodedUriStr,
-    did: String = DeepLinkMocks.IssuerDid,
-) =
-    VCLCredentialManifestDescriptorByService(
-        service = VCLService(
-            JSONObject().apply {
-                put(VCLService.KeyId, "${DeepLinkMocks.IssuerDid}#credential-agent-issuer-1")
-                put(VCLService.KeyType, "VelocityCredentialAgentIssuer_v1.0")
-                if (endpoint != null) {
-                    put(VCLService.KeyServiceEndpoint, endpoint)
-                }
-            }
-        ),
-        issuingType = VCLIssuingType.Career,
-        didJwk = DidJwkMocks.DidJwk,
-        did = did,
     )
 
 internal fun presentationDescriptor(deepLink: VCLDeepLink) =
