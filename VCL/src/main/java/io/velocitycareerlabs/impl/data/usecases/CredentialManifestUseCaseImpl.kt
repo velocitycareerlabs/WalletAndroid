@@ -39,31 +39,33 @@ internal class CredentialManifestUseCaseImpl(
             ) { jwtStrResult ->
                 jwtStrResult.handleResult(
                     { jwtStr ->
-                        try {
-                            val credentialManifest = VCLCredentialManifest(
-                                jwt = VCLJwt(jwtStr),
-                                vendorOriginContext = credentialManifestDescriptor.vendorOriginContext,
-                                verifiedProfile = verifiedProfile,
-                                deepLink = credentialManifestDescriptor.deepLink,
-                                didJwk = credentialManifestDescriptor.didJwk,
-                                remoteCryptoServicesToken = credentialManifestDescriptor.remoteCryptoServicesToken
-                            )
-                            resolveDidDocument(credentialManifest, completionBlock) { didDocument ->
-                                verifyCredentialManifestJwt(
-                                    credentialManifest,
-                                    didDocument,
+                        jwtServiceRepository.decode(jwtStr) { jwtResult ->
+                            jwtResult.handleResult({ jwt ->
+                                val credentialManifest = VCLCredentialManifest(
+                                    jwt = jwt,
+                                    vendorOriginContext = credentialManifestDescriptor.vendorOriginContext,
+                                    verifiedProfile = verifiedProfile,
+                                    deepLink = credentialManifestDescriptor.deepLink,
+                                    didJwk = credentialManifestDescriptor.didJwk,
+                                    remoteCryptoServicesToken = credentialManifestDescriptor.remoteCryptoServicesToken
+                                )
+                                resolveDidDocument(credentialManifest, completionBlock) { didDocument ->
+                                    verifyCredentialManifestJwt(
+                                        credentialManifest,
+                                        didDocument,
+                                        completionBlock
+                                    )
+                                }
+                            }, { error ->
+                                onError(
+                                    ErrorTaxonomy.toRequestValidationError(
+                                        error,
+                                        requestKind = ErrorTaxonomy.RequestKindIssuing,
+                                        requestDid = credentialManifestDescriptor.did,
+                                    ),
                                     completionBlock
                                 )
-                            }
-                        } catch (ex: Exception) {
-                            this.onError(
-                                ErrorTaxonomy.toClientRequestFetchError(
-                                    VCLError(ex),
-                                    requestUri = credentialManifestDescriptor.endpoint,
-                                    requestKind = ErrorTaxonomy.RequestKindIssuing,
-                                ),
-                                completionBlock
-                            )
+                            })
                         }
                     },
                     { error ->

@@ -19,8 +19,8 @@ class PresentationSubmissionMocks {
             pushUrl = "https://devservices.velocitycareerlabs.io/api/push-gateway",
             pushToken = "if0123asd129smw321"
         )
-        const val PresentationSubmissionResultJson =
-            "{\"token\":\"u7yLD8KS2eTEqkg9aRQE\",\"exchange\":{\"id\":\"64131231\",\"type\":\"DISCLOSURE\",\"disclosureComplete\":true,\"exchangeComplete\":true}}"
+        val PresentationSubmissionResultJson =
+            "{\"token\":\"${TokenMocks.TokenStr1}\",\"exchange\":{\"id\":\"64131231\",\"type\":\"DISCLOSURE\",\"disclosureComplete\":true,\"exchangeComplete\":true}}"
         val PresentationRequest = VCLPresentationRequest(
             jwt = JwtServiceMocks.JWT,
             verifiedProfile = VCLVerifiedProfile("{}".toJsonObject()!!),
