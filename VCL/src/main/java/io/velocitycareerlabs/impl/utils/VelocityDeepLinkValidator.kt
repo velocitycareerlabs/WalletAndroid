@@ -15,14 +15,8 @@ internal class VelocityDeepLinkValidator {
         expectedPath: String,
         requestKind: String,
     ): VCLError? {
-        val uri = runCatching { URI(deepLink.value) }.getOrNull()
-            ?: return ErrorTaxonomy.invalidLink(
-                message = "Payload is not a parseable URL",
-                sourceErrorCode = SourceUnparseablePayload,
-                requestUri = deepLink.requestUri,
-                requestKind = requestKind,
-            )
-        if (uri.isOpaque || uri.host == null) {
+        val uri = parseableVelocityPayload(deepLink)
+        if (uri == null) {
             return ErrorTaxonomy.invalidLink(
                 message = "Payload is not a parseable URL",
                 sourceErrorCode = SourceUnparseablePayload,
@@ -30,7 +24,7 @@ internal class VelocityDeepLinkValidator {
                 requestKind = requestKind,
             )
         }
-        if (uri.scheme !in AllowedVelocitySchemes || uri.host != expectedPath) {
+        if (isUnsupportedVelocityLink(uri, expectedPath)) {
             return ErrorTaxonomy.invalidLink(
                 message = "Unsupported Velocity link: ${deepLink.value}",
                 sourceErrorCode = SourceUnsupportedVelocityLink,
@@ -77,6 +71,14 @@ internal class VelocityDeepLinkValidator {
         val uri = runCatching { URI(requestUri ?: return false) }.getOrNull() ?: return false
         return uri.scheme == "http" || uri.scheme == "https"
     }
+
+    private fun parseableVelocityPayload(deepLink: VCLDeepLink): URI? =
+        runCatching { URI(deepLink.value) }
+            .getOrNull()
+            ?.takeIf { !it.isOpaque && it.host != null }
+
+    private fun isUnsupportedVelocityLink(uri: URI, expectedPath: String): Boolean =
+        uri.scheme !in AllowedVelocitySchemes || uri.host != expectedPath
 
     private fun isSyntacticallyValidDid(did: String?): Boolean =
         did?.startsWith(VCLDeepLink.KeyDidPrefix) == true && hasValidDidParts(did)

@@ -26,15 +26,7 @@ internal class ErrorTaxonomyCompatibilityMapper {
         val endpointNullMessage = requestKind.endpointNullMessage()
         return when (error.sourceErrorCode) {
             VelocityDeepLinkValidator.SourceInvalidOrMissingDid ->
-                if (error.requestUri != null) {
-                    legacyCopy(error, errorCode = requestKind.mismatchErrorCode())
-                } else {
-                    legacyCopy(
-                        error,
-                        errorCode = VCLErrorCode.SdkError.value,
-                        message = LegacyMissingDidMessage,
-                    )
-                }
+                mapInvalidOrMissingDid(error, requestKind)
             VelocityDeepLinkValidator.SourceInvalidOrMissingRequestUri,
             VelocityDeepLinkValidator.SourceInvalidOrMissingRequestEndpoint ->
                 mapInvalidRequestUri(error, endpointNullMessage)
@@ -57,6 +49,20 @@ internal class ErrorTaxonomyCompatibilityMapper {
                 )
         }
     }
+
+    private fun mapInvalidOrMissingDid(
+        error: VCLError,
+        requestKind: String,
+    ): VCLError =
+        if (error.requestUri != null) {
+            legacyCopy(error, errorCode = requestKind.mismatchErrorCode())
+        } else {
+            legacyCopy(
+                error,
+                errorCode = VCLErrorCode.SdkError.value,
+                message = LegacyMissingDidMessage,
+            )
+        }
 
     private fun mapInvalidRequestUri(error: VCLError, endpointNullMessage: String): VCLError {
         error.requestUri?.let { requestUri ->
