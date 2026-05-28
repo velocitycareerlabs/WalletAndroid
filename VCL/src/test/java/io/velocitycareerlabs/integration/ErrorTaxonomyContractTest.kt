@@ -528,27 +528,27 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun malformedIssuingRequestJwtReturnsRequestInvalid() {
-        val error = getEntryPointError(
-            EntryPoint.Issuing,
-            router = BaselineHttpRouter(
-                requestPayload = JSONObject()
-                    .put(VCLCredentialManifest.KeyIssuingRequest, "not-a-jwt")
-                    .toString(),
-            ),
-        )
+    fun malformedRequestJwtReturnsRequestInvalid() {
+        entryPoints.forEach { entryPoint ->
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(
+                    requestPayload = entryPoint.requestPayloadForJwt("not-a-jwt"),
+                ),
+            )
 
-        assertDiagnostics(
-            expected = EntryPoint.Issuing.expectedDiagnostics(
-                errorCode = VCLErrorCode.IssuerRequestInvalid.value,
-                sourceErrorCode = VCLErrorCode.SdkError.value,
-                validationPhase = "request_validation",
-                requestDid = DeepLinkMocks.IssuerDid,
-                requestKind = ErrorTaxonomy.RequestKindIssuing,
-            ),
-            actual = error,
-        )
-        assertEquals("Malformed JWT", error.message)
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.requestInvalidErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
+            assertEquals("Malformed JWT", error.message)
+        }
     }
 
     @Test

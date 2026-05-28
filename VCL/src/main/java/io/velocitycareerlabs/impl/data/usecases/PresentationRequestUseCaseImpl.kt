@@ -37,20 +37,33 @@ internal class PresentationRequestUseCaseImpl(
             ) { encodedJwtStrResult ->
                 encodedJwtStrResult.handleResult(
                     { encodedJwtStr ->
-                        val presentationRequest = VCLPresentationRequest(
-                            jwt = VCLJwt(encodedJwtStr),
-                            verifiedProfile = verifiedProfile,
-                            deepLink = presentationRequestDescriptor.deepLink,
-                            pushDelegate = presentationRequestDescriptor.pushDelegate,
-                            didJwk = presentationRequestDescriptor.didJwk,
-                            remoteCryptoServicesToken = presentationRequestDescriptor.remoteCryptoServicesToken
-                        )
-                        resolveDidDocument(presentationRequest, completionBlock) { didDocument ->
-                            verifyPresentationRequest(
-                                presentationRequest,
-                                didDocument,
-                                completionBlock
-                            )
+                        jwtServiceRepository.decode(encodedJwtStr) { jwtResult ->
+                            jwtResult.handleResult({ jwt ->
+                                val presentationRequest = VCLPresentationRequest(
+                                    jwt = jwt,
+                                    verifiedProfile = verifiedProfile,
+                                    deepLink = presentationRequestDescriptor.deepLink,
+                                    pushDelegate = presentationRequestDescriptor.pushDelegate,
+                                    didJwk = presentationRequestDescriptor.didJwk,
+                                    remoteCryptoServicesToken = presentationRequestDescriptor.remoteCryptoServicesToken
+                                )
+                                resolveDidDocument(presentationRequest, completionBlock) { didDocument ->
+                                    verifyPresentationRequest(
+                                        presentationRequest,
+                                        didDocument,
+                                        completionBlock
+                                    )
+                                }
+                            }, { error ->
+                                onError(
+                                    ErrorTaxonomy.toRequestValidationError(
+                                        error,
+                                        requestKind = ErrorTaxonomy.RequestKindPresentation,
+                                        requestDid = presentationRequestDescriptor.did,
+                                    ),
+                                    completionBlock
+                                )
+                            })
                         }
                     },
                     { error ->
