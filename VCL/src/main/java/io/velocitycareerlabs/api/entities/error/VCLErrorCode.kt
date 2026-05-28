@@ -26,6 +26,20 @@ enum class VCLErrorCode(val value: String) {
     MismatchedCredentialIssuerDid("mismatched_credential_issuer_did"),
     MismatchedPresentationRequestInspectorDid("mismatched_presentation_request_inspector_did"),
 
+    // Error taxonomy
+    InvalidLink("invalid_link"),
+    ConnectivityFailure("connectivity_failure"),
+    ClientRequestUnauthorized("client_request_unauthorized"),
+    ClientRequestRejected("client_request_rejected"),
+    IssuerDidUnresolvable("issuer_did_unresolvable"),
+    VerifierDidUnresolvable("verifier_did_unresolvable"),
+    IssuerNotRegistered("issuer_not_registered"),
+    VerifierNotRegistered("verifier_not_registered"),
+    IssuerRequestInvalid("issuer_request_invalid"),
+    VerifierRequestInvalid("verifier_request_invalid"),
+    IssuerRequestUnauthorized("issuer_request_unauthorized"),
+    VerifierRequestUnauthorized("verifier_request_unauthorized"),
+
     // General error
     SdkError("sdk_error"),
 }

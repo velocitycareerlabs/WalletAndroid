@@ -17,6 +17,11 @@ data class VCLError(
     val requestId: String? = null,
     override val message: String? = null,
     val statusCode: Int? = null,
+    val sourceErrorCode: String? = null,
+    val validationPhase: String? = null,
+    val requestDid: String? = null,
+    val requestUri: String? = null,
+    val requestKind: String? = null,
     override val cause: Throwable? = null,
 ) : Error(message, cause) {
     @Deprecated(
@@ -55,6 +60,11 @@ data class VCLError(
             putOpt(KeyRequestId, requestId)
             putOpt(KeyMessage, message)
             putOpt(KeyStatusCode, statusCode)
+            putOpt(KeySourceErrorCode, sourceErrorCode)
+            putOpt(KeyValidationPhase, validationPhase)
+            putOpt(KeyRequestDid, requestDid)
+            putOpt(KeyRequestUri, requestUri)
+            putOpt(KeyRequestKind, requestKind)
         }
 
     companion object CodingKeys {
@@ -69,6 +79,11 @@ data class VCLError(
             requestId = payloadJson.optNullableString(KeyRequestId),
             message = payloadJson.optNullableString(KeyMessage),
             statusCode = payloadJson.optNullableInt(KeyStatusCode),
+            sourceErrorCode = payloadJson.optNullableString(KeySourceErrorCode),
+            validationPhase = payloadJson.optNullableString(KeyValidationPhase),
+            requestDid = payloadJson.optNullableString(KeyRequestDid),
+            requestUri = payloadJson.optNullableString(KeyRequestUri),
+            requestKind = payloadJson.optNullableString(KeyRequestKind),
         )
 
         private fun JSONObject?.optNullableString(key: String): String? =
@@ -83,5 +98,10 @@ data class VCLError(
         const val KeyRequestId = "requestId"
         const val KeyMessage = "message"
         const val KeyStatusCode = "statusCode"
+        const val KeySourceErrorCode = "sourceErrorCode"
+        const val KeyValidationPhase = "validationPhase"
+        const val KeyRequestDid = "requestDid"
+        const val KeyRequestUri = "requestUri"
+        const val KeyRequestKind = "requestKind"
     }
 }

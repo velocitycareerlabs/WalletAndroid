@@ -39,7 +39,7 @@ internal class VCLCredentialManifestDescriptorByDeepLinkTest {
 
         assert(
             subject.endpoint?.decode()?.isUrlEquivalentTo(
-                CredentialManifestDescriptorMocks.DeepLinkRequestUri.decode() + "&push_delegate.push_url=some_url&push_delegate.push_token=some_token"
+                DeepLinkMocks.CredentialManifestRequestDecodedUriStr + "&push_delegate.push_url=some_url&push_delegate.push_token=some_token"
             ) == true
         )
         assert(subject.did == CredentialManifestDescriptorMocks.IssuerDid)

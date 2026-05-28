@@ -13,6 +13,7 @@ import io.velocitycareerlabs.impl.domain.repositories.*
 import io.velocitycareerlabs.impl.domain.usecases.PresentationRequestUseCase
 import io.velocitycareerlabs.impl.domain.verifiers.PresentationRequestByDeepLinkVerifier
 import io.velocitycareerlabs.impl.extensions.encode
+import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
 import io.velocitycareerlabs.impl.utils.VCLLog
 
 internal class PresentationRequestUseCaseImpl(
@@ -44,28 +45,11 @@ internal class PresentationRequestUseCaseImpl(
                             didJwk = presentationRequestDescriptor.didJwk,
                             remoteCryptoServicesToken = presentationRequestDescriptor.remoteCryptoServicesToken
                         )
-                        resolveDidDocumentRepository.resolveDidDocument(
-                            did = presentationRequest.iss
-                        ) { didDocumentResult ->
-                            didDocumentResult.handleResult(
-                                { didDocument ->
-                                    didDocument.getPublicJwk(kid = presentationRequest.jwt.kid ?: "")?.let { publicJwk ->
-                                        verifyPresentationRequest(
-                                            publicJwk,
-                                            presentationRequest,
-                                            didDocument,
-                                            completionBlock
-                                        )
-                                    } ?: run {
-                                        onError(
-                                            VCLError(message = "public jwk not found for kid: ${presentationRequest.jwt.kid}"),
-                                            completionBlock
-                                        )
-                                    }
-                                },
-                                { error ->
-                                    onError(error, completionBlock)
-                                }
+                        resolveDidDocument(presentationRequest, completionBlock) { didDocument ->
+                            verifyPresentationRequest(
+                                presentationRequest,
+                                didDocument,
+                                completionBlock
                             )
                         }
                     },
@@ -78,11 +62,20 @@ internal class PresentationRequestUseCaseImpl(
     }
 
     private fun verifyPresentationRequest(
-        publicJwk: VCLPublicJwk,
         presentationRequest: VCLPresentationRequest,
         didDocument: VCLDidDocument,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
+        val kid = presentationRequest.jwt.kid
+            ?: return onError(
+                missingJwtKidError(requestDid = presentationRequest.iss),
+                completionBlock
+            )
+        val publicJwk = didDocument.getPublicJwk(kid = kid)
+            ?: return onError(
+                unresolvedJwtKeyError(kid, requestDid = presentationRequest.iss),
+                completionBlock
+            )
         jwtServiceRepository.verifyJwt(
             presentationRequest.jwt,
             publicJwk,
@@ -102,14 +95,88 @@ internal class PresentationRequestUseCaseImpl(
                             completionBlock
                         )
                     }, { error ->
-                        onError(error, completionBlock)
+                        onError(
+                            ErrorTaxonomy.toRequestValidationError(
+                                error,
+                                requestKind = ErrorTaxonomy.RequestKindPresentation,
+                                requestDid = presentationRequest.iss,
+                            ),
+                            completionBlock
+                        )
                     })
                 }
             }, { error ->
-                onError(error, completionBlock)
+                onError(
+                    ErrorTaxonomy.toRequestValidationError(
+                        error,
+                        requestKind = ErrorTaxonomy.RequestKindPresentation,
+                        requestDid = presentationRequest.iss,
+                    ),
+                    completionBlock
+                )
             })
         }
     }
+
+    private fun resolveDidDocument(
+        presentationRequest: VCLPresentationRequest,
+        completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit,
+        successHandler: (VCLDidDocument) -> Unit,
+    ) {
+        resolveDidDocumentRepository.resolveDidDocument(
+            did = presentationRequest.iss
+        ) { didDocumentResult ->
+            didDocumentResult.handleResult(
+                { didDocument ->
+                    validateDidDocument(didDocument, presentationRequest)?.let { error ->
+                        onError(error, completionBlock)
+                    } ?: run {
+                        successHandler(didDocument)
+                    }
+                },
+                { error ->
+                    onError(
+                        ErrorTaxonomy.toDidResolutionError(
+                            error,
+                            requestKind = ErrorTaxonomy.RequestKindPresentation,
+                            requestDid = presentationRequest.iss,
+                        ),
+                        completionBlock
+                    )
+                }
+            )
+        }
+    }
+
+    private fun missingJwtKidError(requestDid: String?): VCLError =
+        ErrorTaxonomy.toRequestValidationError(
+            VCLError(message = "JWT kid is missing"),
+            requestKind = ErrorTaxonomy.RequestKindPresentation,
+            requestDid = requestDid,
+        )
+
+    private fun validateDidDocument(
+        didDocument: VCLDidDocument,
+        presentationRequest: VCLPresentationRequest,
+    ): VCLError? =
+        if (didDocument.payload.length() == 0 ||
+            (didDocument.payload.optJSONArray(VCLDidDocument.KeyVerificationMethod)?.length() ?: 0) == 0
+        ) {
+            ErrorTaxonomy.toDidResolutionError(
+                VCLError(message = "public jwk not found for kid"),
+                requestKind = ErrorTaxonomy.RequestKindPresentation,
+                requestDid = presentationRequest.iss,
+            )
+        } else {
+            null
+        }
+
+    private fun unresolvedJwtKeyError(kid: String, requestDid: String?): VCLError =
+        ErrorTaxonomy.toRequestValidationError(
+            VCLError(message = "public jwk not found for kid: $kid"),
+            requestKind = ErrorTaxonomy.RequestKindPresentation,
+            requestDid = requestDid,
+        )
 
     private fun onVerificationSuccess(
         isVerified: Boolean,
@@ -122,7 +189,11 @@ internal class PresentationRequestUseCaseImpl(
             }
         else
             onError(
-                VCLError(message = "Failed to verify: ${presentationRequest.jwt.payload}"),
+                ErrorTaxonomy.toRequestValidationError(
+                    VCLError(message = "Failed to verify: ${presentationRequest.jwt.payload}"),
+                    requestKind = ErrorTaxonomy.RequestKindPresentation,
+                    requestDid = presentationRequest.iss,
+                ),
                 completionBlock
             )
     }

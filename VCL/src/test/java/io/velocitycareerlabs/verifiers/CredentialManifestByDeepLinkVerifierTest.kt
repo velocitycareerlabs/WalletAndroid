@@ -59,9 +59,9 @@ class CredentialManifestByDeepLinkVerifierTest {
             DidDocumentMocks.DidDocumentWithWrongDidMock
         ) {
             it.handleResult({
-                assert(false) { "${VCLErrorCode.MismatchedRequestIssuerDid.value} error code is expected" }
+                assert(false) { "${VCLErrorCode.IssuerRequestInvalid.value} error code is expected" }
             }, { error ->
-                assert(error.errorCode == VCLErrorCode.MismatchedRequestIssuerDid.value)
+                assert(error.errorCode == VCLErrorCode.IssuerRequestInvalid.value)
             })
         }
     }

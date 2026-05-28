@@ -16,5 +16,6 @@ data class VCLInitializationDescriptor(
     val cacheSequence: Int = 0,
     val isDebugOn: Boolean = false,
     val cryptoServicesDescriptor: VCLCryptoServicesDescriptor = VCLCryptoServicesDescriptor(),
-    val isDirectIssuerCheckOn: Boolean = true
+    val isDirectIssuerCheckOn: Boolean = true,
+    val errorCodeCompatibilityMode: VCLErrorCodeCompatibilityMode = VCLErrorCodeCompatibilityMode.Taxonomy,
 )

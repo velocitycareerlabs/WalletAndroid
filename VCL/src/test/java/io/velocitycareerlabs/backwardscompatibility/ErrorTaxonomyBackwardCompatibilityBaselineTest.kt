@@ -8,18 +8,23 @@ package io.velocitycareerlabs.backwardscompatibility
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import io.velocitycareerlabs.api.VCLCryptoServiceType
+import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptor
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorByDeepLink
+import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorByService
 import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.api.entities.VCLDidJwk
+import io.velocitycareerlabs.api.entities.VCLIssuingType
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLPresentationRequestDescriptor
 import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.VCLService
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.api.entities.error.VCLStatusCode
 import io.velocitycareerlabs.api.entities.initialization.VCLCryptoServicesDescriptor
+import io.velocitycareerlabs.api.entities.initialization.VCLErrorCodeCompatibilityMode
 import io.velocitycareerlabs.api.entities.initialization.VCLInjectedCryptoServicesDescriptor
 import io.velocitycareerlabs.api.entities.initialization.VCLInitializationDescriptor
 import io.velocitycareerlabs.api.jwt.VCLJwtVerifyService
@@ -119,6 +124,16 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
     }
 
     @Test
+    fun missingDirectRequestDidPreservesLegacyDidMessage() {
+        val error = getCredentialManifestDescriptorError(
+            descriptor = credentialManifestDescriptorByService(did = ""),
+        )
+
+        assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
+        assertTrue(error.message!!.contains("did was not found"))
+    }
+
+    @Test
     fun malformedAndDisallowedRequestUriValuesReachTransportAsRawEndpointText() {
         entryPoints.forEach { entryPoint ->
             val malformedRequestUriDeepLink = VCLDeepLink(
@@ -174,7 +189,7 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
                 assertEquals(ErrorMocks.ErrorCode, error.errorCode)
                 assertEquals(ErrorMocks.RequestId, error.requestId)
                 assertEquals(ErrorMocks.Message, error.message)
-                assertEquals(ErrorMocks.StatusCode, error.statusCode)
+                assertEquals(statusCode, error.statusCode)
             }
         }
     }
@@ -240,7 +255,7 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
             assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
             assertEquals(ErrorMocks.RequestId, error.requestId)
             assertEquals(ErrorMocks.Message, error.message)
-            assertEquals(ErrorMocks.StatusCode, error.statusCode)
+            assertEquals(422, error.statusCode)
         }
     }
 
@@ -525,6 +540,15 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
         return awaitCredentialManifestError(vcl, credentialManifestDescriptor(deepLink))
     }
 
+    private fun getCredentialManifestDescriptorError(
+        descriptor: VCLCredentialManifestDescriptor,
+        router: BaselineHttpRouter = BaselineHttpRouter(),
+        jwtVerificationResult: VCLResult<Boolean> = VCLResult.Success(true),
+    ): VCLError {
+        val vcl = initializedVcl(router, jwtVerificationResult)
+        return awaitCredentialManifestError(vcl, descriptor)
+    }
+
     private fun getPresentationRequestError(
         deepLink: VCLDeepLink,
         router: BaselineHttpRouter = BaselineHttpRouter(
@@ -548,6 +572,7 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
             context = ApplicationProvider.getApplicationContext(),
             initializationDescriptor = VCLInitializationDescriptor(
                 cacheSequence = cacheSequence.incrementAndGet(),
+                errorCodeCompatibilityMode = VCLErrorCodeCompatibilityMode.Legacy,
                 cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
                     cryptoServiceType = VCLCryptoServiceType.Injected,
                     injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
@@ -572,7 +597,7 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
 
     private fun awaitCredentialManifestError(
         vcl: VCLImpl,
-        descriptor: VCLCredentialManifestDescriptorByDeepLink,
+        descriptor: VCLCredentialManifestDescriptor,
     ): VCLError {
         var result: VCLError? = null
         val latch = CountDownLatch(1)
@@ -624,6 +649,21 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
         VCLCredentialManifestDescriptorByDeepLink(
             deepLink = deepLink,
             didJwk = DidJwkMocks.DidJwk,
+        )
+
+    private fun credentialManifestDescriptorByService(
+        did: String = DeepLinkMocks.IssuerDid,
+    ) =
+        VCLCredentialManifestDescriptorByService(
+            service = VCLService(
+                JSONObject()
+                    .put(VCLService.KeyId, "${DeepLinkMocks.IssuerDid}#credential-agent-issuer-1")
+                    .put(VCLService.KeyType, "VelocityCredentialAgentIssuer_v1.0")
+                    .put(VCLService.KeyServiceEndpoint, DeepLinkMocks.CredentialManifestRequestDecodedUriStr)
+            ),
+            issuingType = VCLIssuingType.Career,
+            didJwk = DidJwkMocks.DidJwk,
+            did = did,
         )
 
     private fun presentationDescriptor(deepLink: VCLDeepLink) =

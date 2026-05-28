@@ -24,11 +24,11 @@ jobs:
 #        run: ./gradlew ktlintCheck
 
       - name: Run Unit Tests
-        run: ./gradlew test
+        run: ./gradlew testDebugUnitTest --no-parallel
 
       - name: Archive Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: '**/build/test-results/test/*.xml'
+          path: '**/build/test-results/**/*.xml'
