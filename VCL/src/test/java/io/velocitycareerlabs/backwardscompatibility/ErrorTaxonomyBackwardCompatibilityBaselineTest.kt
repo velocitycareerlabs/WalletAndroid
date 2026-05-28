@@ -125,10 +125,8 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
 
     @Test
     fun missingDirectRequestDidPreservesLegacyDidMessage() {
-        val vcl = initializedVcl(BaselineHttpRouter())
-        val error = awaitCredentialManifestError(
-            vcl,
-            credentialManifestDescriptorByService(did = ""),
+        val error = getCredentialManifestDescriptorError(
+            descriptor = credentialManifestDescriptorByService(did = ""),
         )
 
         assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
@@ -540,6 +538,15 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
     ): VCLError {
         val vcl = initializedVcl(router, jwtVerificationResult)
         return awaitCredentialManifestError(vcl, credentialManifestDescriptor(deepLink))
+    }
+
+    private fun getCredentialManifestDescriptorError(
+        descriptor: VCLCredentialManifestDescriptor,
+        router: BaselineHttpRouter = BaselineHttpRouter(),
+        jwtVerificationResult: VCLResult<Boolean> = VCLResult.Success(true),
+    ): VCLError {
+        val vcl = initializedVcl(router, jwtVerificationResult)
+        return awaitCredentialManifestError(vcl, descriptor)
     }
 
     private fun getPresentationRequestError(

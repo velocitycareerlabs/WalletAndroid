@@ -16,7 +16,7 @@ internal class ErrorTaxonomyCompatibilityMapper {
         when (error.errorCode) {
             VCLErrorCode.InvalidLink.value -> mapInvalidLink(error, requestKind)
             VCLErrorCode.ConnectivityFailure.value -> legacyCopy(error, errorCode = VCLErrorCode.SdkError.value)
-            else -> if (ErrorTaxonomy.run { error.isTaxonomyError() }) mapTaxonomyError(error) else mapNetworkStatus(error)
+            else -> if (ErrorTaxonomy.run { error.isTaxonomyError() }) mapTaxonomyError(error) else error
         }
 
     private fun mapInvalidLink(
@@ -83,24 +83,21 @@ internal class ErrorTaxonomyCompatibilityMapper {
     }
 
     private fun mapTaxonomyError(error: VCLError): VCLError {
-        val networkStatusError = mapNetworkStatus(error)
-        val sourceErrorCode = networkStatusError.sourceErrorCode
-        if (sourceErrorCode == networkStatusError.errorCode ||
+        val sourceErrorCode = error.sourceErrorCode
+        if (sourceErrorCode == error.errorCode ||
             sourceErrorCode == ProfileServiceTypeVerifier.SourceWrongServiceType ||
             sourceErrorCode == null
         ) {
             return legacyCopy(
-                networkStatusError,
+                error,
                 errorCode = VCLErrorCode.SdkError.value,
             )
         }
         return legacyCopy(
-            networkStatusError,
+            error,
             errorCode = sourceErrorCode,
         )
     }
-
-    private fun mapNetworkStatus(error: VCLError): VCLError = error
 
     private fun legacyCopy(
         error: VCLError,
