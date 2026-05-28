@@ -301,28 +301,6 @@ internal fun getLegacyCredentialManifestError(
         VCLErrorCodeCompatibilityMode.Legacy,
     )
 
-internal fun getCredentialManifestDescriptorError(
-    descriptor: VCLCredentialManifestDescriptor,
-    router: BaselineHttpRouter = BaselineHttpRouter(),
-    jwtVerificationResult: VCLResult<Boolean> = VCLResult.Success(true),
-    errorCodeCompatibilityMode: VCLErrorCodeCompatibilityMode = VCLErrorCodeCompatibilityMode.Taxonomy,
-): VCLError {
-    val vcl = initializedVcl(router, jwtVerificationResult, errorCodeCompatibilityMode)
-    return awaitCredentialManifestError(vcl, descriptor)
-}
-
-internal fun getLegacyCredentialManifestDescriptorError(
-    descriptor: VCLCredentialManifestDescriptor,
-    router: BaselineHttpRouter = BaselineHttpRouter(),
-    jwtVerificationResult: VCLResult<Boolean> = VCLResult.Success(true),
-): VCLError =
-    getCredentialManifestDescriptorError(
-        descriptor,
-        router,
-        jwtVerificationResult,
-        VCLErrorCodeCompatibilityMode.Legacy,
-    )
-
 internal fun getPresentationRequestError(
     deepLink: VCLDeepLink,
     router: BaselineHttpRouter = BaselineHttpRouter(

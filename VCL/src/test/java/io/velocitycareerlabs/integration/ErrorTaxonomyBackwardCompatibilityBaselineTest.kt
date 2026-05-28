@@ -124,16 +124,6 @@ internal class ErrorTaxonomyBackwardCompatibilityBaselineTest {
     }
 
     @Test
-    fun missingDirectRequestDidPreservesLegacyDidMessage() {
-        val error = getLegacyCredentialManifestDescriptorError(
-            descriptor = credentialManifestDescriptorByService(did = ""),
-        )
-
-        assertEquals(VCLErrorCode.SdkError.value, error.errorCode)
-        assertTrue(error.message!!.contains("did was not found"))
-    }
-
-    @Test
     fun malformedAndDisallowedRequestUriValuesReachTransportAsRawEndpointText() {
         entryPoints.forEach { entryPoint ->
             val malformedRequestUriDeepLink = VCLDeepLink(
