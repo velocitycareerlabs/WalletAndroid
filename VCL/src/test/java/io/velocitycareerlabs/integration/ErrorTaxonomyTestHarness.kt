@@ -10,6 +10,7 @@ import androidx.test.core.app.ApplicationProvider
 import io.velocitycareerlabs.api.VCLCryptoServiceType
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptor
 import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorByDeepLink
+import io.velocitycareerlabs.api.entities.VCLCredentialManifestDescriptorByService
 import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLCredentialManifest
@@ -17,6 +18,7 @@ import io.velocitycareerlabs.api.entities.VCLPresentationRequestDescriptor
 import io.velocitycareerlabs.api.entities.VCLPresentationRequest
 import io.velocitycareerlabs.api.entities.VCLPublicJwk
 import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.VCLService
 import io.velocitycareerlabs.api.entities.VCLToken
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
@@ -31,6 +33,7 @@ import io.velocitycareerlabs.impl.data.infrastructure.network.Request
 import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
 import io.velocitycareerlabs.impl.utils.VelocityDeepLinkValidator
 import io.velocitycareerlabs.infrastructure.resources.valid.CountriesMocks
+import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestDescriptorMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialManifestMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypeSchemaMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.CredentialTypesMocks
@@ -332,6 +335,29 @@ internal fun awaitCredentialManifestError(
     return result ?: error("getCredentialManifest did not invoke errorHandler")
 }
 
+internal fun awaitCredentialManifest(
+    vcl: VCLImpl,
+    descriptor: VCLCredentialManifestDescriptor,
+): VCLCredentialManifest {
+    var result: VCLCredentialManifest? = null
+    var error: VCLError? = null
+    val latch = CountDownLatch(1)
+    vcl.getCredentialManifest(
+        credentialManifestDescriptor = descriptor,
+        successHandler = { manifest ->
+            result = manifest
+            latch.countDown()
+        },
+        errorHandler = {
+            error = it
+            latch.countDown()
+        },
+    )
+    drainMainThreadUntil(latch)
+    assertNull("Credential manifest success expected: ${error?.toJsonObject()}", error)
+    return result ?: error("getCredentialManifest did not invoke successHandler")
+}
+
 internal fun awaitPresentationRequestError(
     vcl: VCLImpl,
     descriptor: VCLPresentationRequestDescriptor,
@@ -366,6 +392,21 @@ internal fun credentialManifestDescriptor(deepLink: VCLDeepLink) =
     VCLCredentialManifestDescriptorByDeepLink(
         deepLink = deepLink,
         didJwk = DidJwkMocks.DidJwk,
+    )
+
+internal fun credentialManifestDescriptorByService(
+    endpoint: String = CredentialManifestDescriptorMocks.IssuingServiceEndPoint,
+    did: String = DeepLinkMocks.IssuerDid,
+) =
+    VCLCredentialManifestDescriptorByService(
+        service = VCLService(
+            JSONObject(CredentialManifestDescriptorMocks.IssuingServiceJsonStr).put(
+                VCLService.KeyServiceEndpoint,
+                endpoint,
+            )
+        ),
+        didJwk = DidJwkMocks.DidJwk,
+        did = did,
     )
 
 internal fun presentationDescriptor(deepLink: VCLDeepLink) =

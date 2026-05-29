@@ -271,6 +271,63 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
+    fun invalidDirectRequestEndpointReturnsInvalidLink() {
+        val endpoint = "ftp://example.com/request"
+        val vcl = initializedVcl(defaultRouter(EntryPoint.Issuing))
+        val error = awaitCredentialManifestError(
+            vcl,
+            credentialManifestDescriptorByService(endpoint = endpoint),
+        )
+
+        assertDiagnostics(
+            expected = EntryPoint.Issuing.expectedDiagnostics(
+                errorCode = VCLErrorCode.InvalidLink.value,
+                sourceErrorCode = VelocityDeepLinkValidator.SourceInvalidOrMissingRequestEndpoint,
+                validationPhase = "link_validation",
+                requestUri = endpoint,
+            ),
+            actual = error,
+        )
+    }
+
+    @Test
+    fun missingDirectRequestEndpointReturnsInvalidLink() {
+        val vcl = initializedVcl(defaultRouter(EntryPoint.Issuing))
+        val error = awaitCredentialManifestError(
+            vcl,
+            credentialManifestDescriptorByService(endpoint = ""),
+        )
+
+        assertDiagnostics(
+            expected = EntryPoint.Issuing.expectedDiagnostics(
+                errorCode = VCLErrorCode.InvalidLink.value,
+                sourceErrorCode = VelocityDeepLinkValidator.SourceInvalidOrMissingRequestEndpoint,
+                validationPhase = "link_validation",
+                requestUri = "",
+            ),
+            actual = error,
+        )
+    }
+
+    @Test
+    fun missingDirectRequestDidReturnsInvalidLink() {
+        val vcl = initializedVcl(defaultRouter(EntryPoint.Issuing))
+        val error = awaitCredentialManifestError(
+            vcl,
+            credentialManifestDescriptorByService(did = ""),
+        )
+
+        assertDiagnostics(
+            expected = EntryPoint.Issuing.expectedDiagnostics(
+                errorCode = VCLErrorCode.InvalidLink.value,
+                validationPhase = "link_validation",
+            ),
+            actual = error,
+        )
+        assertTrue(error.message!!.contains("did was not found"))
+    }
+
+    @Test
     fun malformedDidSyntaxReturnsInvalidLink() {
         entryPoints.forEach { entryPoint ->
             listOf("not-a-did", "did:", "did:example", "did:Example:entity").forEach { did ->
@@ -581,6 +638,20 @@ internal class ErrorTaxonomyContractTest {
             actual = error,
         )
         assertEquals("Missing issuing_request", error.message)
+    }
+
+    @Test
+    fun credentialManifestByServiceSucceedsWithoutDeepLinkVerification() {
+        val router = defaultRouter(EntryPoint.Issuing)
+        val vcl = initializedVcl(router)
+        val credentialManifest = awaitCredentialManifest(
+            vcl,
+            credentialManifestDescriptorByService(),
+        )
+
+        assertNull(credentialManifest.deepLink)
+        assertEquals(DeepLinkMocks.IssuerDid, credentialManifest.did)
+        assertTrue(router.requestedEndpoints.any { it.contains("get-credential-manifest") })
     }
 
     @Test
