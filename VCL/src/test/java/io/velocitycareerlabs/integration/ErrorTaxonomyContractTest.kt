@@ -92,7 +92,7 @@ internal class ErrorTaxonomyContractTest {
     // Link validation -> invalid_link
 
     @Test
-    fun malformedLinksAndMissingRequiredParamsReturnSdkError() {
+    fun malformedLinksAndMissingRequiredParamsReturnInvalidLink() {
         entryPoints.forEach { entryPoint ->
             val missingDidDeepLink = VCLDeepLink("velocity-network://${entryPoint.schemePath}")
 
@@ -137,7 +137,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun unsupportedSchemeWithKnownQueryParamsReturnsNullEndpointSdkError() {
+    fun unsupportedSchemeWithKnownQueryParamsReturnsInvalidLink() {
         entryPoints.forEach { entryPoint ->
             val deepLink = VCLDeepLink(
                 "https://example.com/${entryPoint.schemePath}?${entryPoint.didParam}=did:example:entity"
@@ -215,7 +215,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun missingRequestUriProducesEndpointNullSdkErrors() {
+    fun missingRequestUriProducesInvalidLink() {
         entryPoints.forEach { entryPoint ->
             val deepLink = VCLDeepLink(
                 "velocity-network://${entryPoint.schemePath}?${entryPoint.didParam}=did:example:entity"
@@ -319,7 +319,7 @@ internal class ErrorTaxonomyContractTest {
     // Client request fetch -> client_request_unauthorized / client_request_rejected
 
     @Test
-    fun transportFailureReturnsSdkErrorWithNetworkStatusOnly() {
+    fun transportFailureReturnsConnectivityFailureWithNetworkStatusOnly() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -407,7 +407,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun plainTextRequestEndpointRejectionsDefaultToSdkErrorWithHttpStatusAndPayloadMessage() {
+    fun plainTextRequestEndpointRejectionsReturnClientRequestRejectedWithHttpStatusAndPayloadMessage() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -435,7 +435,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun jsonRequestEndpointRejectionsWithoutErrorCodeDefaultToSdkError() {
+    fun jsonRequestEndpointRejectionsWithoutErrorCodeReturnClientRequestRejected() {
         val payloadWithoutErrorCode = JSONObject(ErrorMocks.Payload).apply {
             remove(VCLError.KeyErrorCode)
         }.toString()
@@ -468,7 +468,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun emptyRequestEndpointResponseReturnsSdkError() {
+    fun emptyRequestEndpointResponseReturnsClientRequestRejected() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -488,7 +488,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun malformedRequestEndpointResponseReturnsSdkError() {
+    fun malformedRequestEndpointResponseReturnsClientRequestRejected() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -584,7 +584,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun didResolutionNetworkFailurePropagatesSdkErrorAndStatusFromNetwork() {
+    fun didResolutionNetworkFailureReturnsDidUnresolvableWithStatusFromNetwork() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -634,7 +634,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun missingDidDocumentVerificationMaterialReturnsSdkError() {
+    fun missingDidDocumentVerificationMaterialReturnsDidUnresolvable() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -784,7 +784,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun wrongIssuerOrVerifierServiceTypeReturnsSdkErrorWithVerificationStatus() {
+    fun wrongIssuerOrVerifierServiceTypeReturnsRequestUnauthorizedWithVerificationStatus() {
         entryPoints.forEach { entryPoint ->
             val wrongServiceProfile = when (entryPoint) {
                 EntryPoint.Issuing -> VerifiedProfileMocks.VerifiedProfileInspectorJsonStr
@@ -859,7 +859,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun jwtVerificationFailurePropagatesSdkErrorFromInjectedJwtService() {
+    fun jwtVerificationFailureReturnsRequestInvalidFromInjectedJwtService() {
         val expectedError = VCLError(
             errorCode = VCLErrorCode.SdkError.value,
             message = "jwt signature verification failed",
