@@ -33,9 +33,8 @@ internal class CredentialManifestRepositoryImpl(
                 result.handleResult(
                     { credentialManifestResponse ->
                         try {
-                            val jwtStr = JSONObject(credentialManifestResponse.payload)
-                                .optString(VCLCredentialManifest.KeyIssuingRequest)
-                            if (jwtStr.isBlank()) {
+                            val payload = JSONObject(credentialManifestResponse.payload)
+                            if (!payload.has(VCLCredentialManifest.KeyIssuingRequest)) {
                                 completionBlock(
                                     VCLResult.Failure(
                                         ErrorTaxonomy.toClientRequestFetchError(
@@ -46,7 +45,11 @@ internal class CredentialManifestRepositoryImpl(
                                     )
                                 )
                             } else {
-                                completionBlock(VCLResult.Success(jwtStr))
+                                completionBlock(
+                                    VCLResult.Success(
+                                        payload.optString(VCLCredentialManifest.KeyIssuingRequest)
+                                    )
+                                )
                             }
                         } catch (ex: Exception) {
                             completionBlock(

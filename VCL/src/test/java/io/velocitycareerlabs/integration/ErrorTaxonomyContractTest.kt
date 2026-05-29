@@ -552,7 +552,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun emptyIssuingRequestReturnsSdkErrorAfterRequestFetch() {
+    fun emptyIssuingRequestReturnsRequestInvalid() {
         val error = getEntryPointError(
             EntryPoint.Issuing,
             router = BaselineHttpRouter(
@@ -564,14 +564,15 @@ internal class ErrorTaxonomyContractTest {
 
         assertDiagnostics(
             expected = EntryPoint.Issuing.expectedDiagnostics(
-                errorCode = VCLErrorCode.ClientRequestRejected.value,
+                errorCode = VCLErrorCode.IssuerRequestInvalid.value,
                 sourceErrorCode = VCLErrorCode.SdkError.value,
-                validationPhase = "client_request_fetch",
-                requestUri = EntryPoint.Issuing.defaultDeepLink.requestUri,
+                validationPhase = "request_validation",
+                requestDid = EntryPoint.Issuing.requestDid,
+                requestKind = EntryPoint.Issuing.requestKind,
             ),
             actual = error,
         )
-        assertEquals("Missing issuing_request", error.message)
+        assertEquals("Malformed JWT", error.message)
     }
 
     @Test
