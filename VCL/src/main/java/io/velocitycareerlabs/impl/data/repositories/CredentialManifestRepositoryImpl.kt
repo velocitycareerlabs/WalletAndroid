@@ -14,7 +14,6 @@ import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.domain.repositories.CredentialManifestRepository
 import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
 import org.json.JSONObject
-import java.lang.Exception
 
 internal class CredentialManifestRepositoryImpl(
     val networkService: NetworkService
@@ -32,32 +31,23 @@ internal class CredentialManifestRepositoryImpl(
             completionBlock = { result ->
                 result.handleResult(
                     { credentialManifestResponse ->
-                        try {
-                            val jwtStr = JSONObject(credentialManifestResponse.payload)
+                        val jwtStr = runCatching {
+                            JSONObject(credentialManifestResponse.payload)
                                 .optString(VCLCredentialManifest.KeyIssuingRequest)
-                            if (jwtStr.isBlank()) {
-                                completionBlock(
-                                    VCLResult.Failure(
-                                        ErrorTaxonomy.toRequestValidationError(
-                                            VCLError(message = "Missing issuing_request"),
-                                            requestKind = ErrorTaxonomy.RequestKindIssuing,
-                                            requestDid = credentialManifestDescriptor.did,
-                                        )
-                                    )
-                                )
-                            } else {
-                                completionBlock(VCLResult.Success(jwtStr))
-                            }
-                        } catch (ex: Exception) {
+                        }.getOrDefault("")
+                        if (jwtStr.isBlank()) {
                             completionBlock(
                                 VCLResult.Failure(
-                                    ErrorTaxonomy.toClientRequestFetchError(
-                                        VCLError(ex),
-                                        requestUri = endpoint,
+                                    ErrorTaxonomy.toRequestValidationError(
+                                        VCLError(message = "Missing issuing_request"),
                                         requestKind = ErrorTaxonomy.RequestKindIssuing,
+                                        requestDid = credentialManifestDescriptor.did,
+                                        requestUri = endpoint,
                                     )
                                 )
                             )
+                        } else {
+                            completionBlock(VCLResult.Success(jwtStr))
                         }
                     },
                     { error ->

@@ -48,18 +48,19 @@ internal class PublicRequestUseCasePhases(
         didDocument: VCLDidDocument,
         remoteCryptoServicesToken: VCLToken?,
         requestDid: String?,
+        requestUri: String?,
         requestKind: String,
     ): VCLAsyncResult<Unit> =
         vclAsyncResult { completion ->
             val kid = jwt.kid
             if (kid == null) {
-                completion(VCLResult.Failure(missingJwtKidError(requestDid, requestKind)))
+                completion(VCLResult.Failure(missingJwtKidError(requestDid, requestUri, requestKind)))
                 return@vclAsyncResult
             }
 
             val publicJwk = didDocument.getPublicJwk(kid)
             if (publicJwk == null) {
-                completion(VCLResult.Failure(unresolvedJwtKeyError(kid, requestDid, requestKind)))
+                completion(VCLResult.Failure(unresolvedJwtKeyError(kid, requestDid, requestUri, requestKind)))
                 return@vclAsyncResult
             }
 
@@ -74,6 +75,7 @@ internal class PublicRequestUseCasePhases(
                             requestValidationError(
                                 jwtVerificationResult.error,
                                 requestDid,
+                                requestUri,
                                 requestKind,
                             )
                         )
@@ -93,12 +95,14 @@ internal class PublicRequestUseCasePhases(
     fun requestValidationError(
         error: VCLError,
         requestDid: String?,
+        requestUri: String?,
         requestKind: String,
     ): VCLError =
         ErrorTaxonomy.toRequestValidationError(
             error,
             requestKind = requestKind,
             requestDid = requestDid,
+            requestUri = requestUri,
         )
 
     private fun VCLDidDocument.validatedForResolution(
@@ -119,21 +123,28 @@ internal class PublicRequestUseCasePhases(
             null
         }
 
-    private fun missingJwtKidError(requestDid: String?, requestKind: String): VCLError =
+    private fun missingJwtKidError(
+        requestDid: String?,
+        requestUri: String?,
+        requestKind: String,
+    ): VCLError =
         requestValidationError(
             VCLError(message = "JWT kid is missing"),
             requestDid,
+            requestUri,
             requestKind,
         )
 
     private fun unresolvedJwtKeyError(
         kid: String,
         requestDid: String?,
+        requestUri: String?,
         requestKind: String,
     ): VCLError =
         requestValidationError(
             VCLError(message = "public jwk not found for kid: $kid"),
             requestDid,
+            requestUri,
             requestKind,
         )
 }

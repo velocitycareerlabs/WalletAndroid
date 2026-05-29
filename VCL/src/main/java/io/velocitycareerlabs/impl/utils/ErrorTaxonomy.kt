@@ -90,7 +90,12 @@ internal object ErrorTaxonomy {
             ),
         )
 
-    fun toRequestValidationError(error: VCLError, requestKind: String, requestDid: String?): VCLError =
+    fun toRequestValidationError(
+        error: VCLError,
+        requestKind: String,
+        requestDid: String?,
+        requestUri: String? = null,
+    ): VCLError =
         error.toTaxonomyError(
             taxonomyCode = if (error.isConnectivityFailure()) {
                 VCLErrorCode.ConnectivityFailure
@@ -100,6 +105,7 @@ internal object ErrorTaxonomy {
             context = TaxonomyContext(
                 validationPhase = PhaseRequestValidation,
                 requestDid = requestDid,
+                requestUri = requestUri,
                 requestKind = requestKind,
             ),
         )

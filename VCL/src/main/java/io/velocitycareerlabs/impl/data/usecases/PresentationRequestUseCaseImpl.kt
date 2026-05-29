@@ -71,6 +71,7 @@ internal class PresentationRequestUseCaseImpl(
                         context.didDocument,
                         context.presentationRequest.remoteCryptoServicesToken,
                         context.presentationRequest.iss,
+                        presentationRequestDescriptor.endpoint,
                         ErrorTaxonomy.RequestKindPresentation,
                     )
                         .map { context }
@@ -105,6 +106,7 @@ internal class PresentationRequestUseCaseImpl(
                             phases.requestValidationError(
                                 jwtResult.error,
                                 presentationRequestDescriptor.did,
+                                presentationRequestDescriptor.endpoint,
                                 ErrorTaxonomy.RequestKindPresentation,
                             )
                         )
@@ -136,6 +138,7 @@ internal class PresentationRequestUseCaseImpl(
                             phases.requestValidationError(
                                 byDeepLinkVerificationResult.error,
                                 presentationRequest.iss,
+                                presentationRequest.deepLink.requestUri,
                                 ErrorTaxonomy.RequestKindPresentation,
                             )
                         )
@@ -149,6 +152,7 @@ internal class PresentationRequestUseCaseImpl(
                                     phases.requestValidationError(
                                         VCLError(message = "Failed to verify: ${presentationRequest.jwt.payload}"),
                                         presentationRequest.iss,
+                                        presentationRequest.deepLink.requestUri,
                                         ErrorTaxonomy.RequestKindPresentation,
                                     )
                                 )

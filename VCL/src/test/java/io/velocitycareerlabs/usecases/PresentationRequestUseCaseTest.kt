@@ -114,10 +114,11 @@ internal class PresentationRequestUseCaseTest {
         ) {
             it.handleResult(
                 successHandler = {
-                    assert(false) { "${VCLErrorCode.ClientRequestRejected.value} error code is expected" }
+                    assert(false) { "${VCLErrorCode.VerifierRequestInvalid.value} error code is expected" }
                 },
                 errorHandler = { error ->
-                    assert(error.errorCode == VCLErrorCode.ClientRequestRejected.value)
+                    assert(error.errorCode == VCLErrorCode.VerifierRequestInvalid.value)
+                    assert(error.requestUri == DeepLinkMocks.PresentationRequestDeepLinkDevNet.requestUri)
                 }
             )
         }

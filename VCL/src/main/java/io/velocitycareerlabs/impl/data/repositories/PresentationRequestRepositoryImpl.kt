@@ -14,7 +14,6 @@ import io.velocitycareerlabs.impl.domain.repositories.PresentationRequestReposit
 import io.velocitycareerlabs.impl.domain.infrastructure.network.NetworkService
 import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
 import org.json.JSONObject
-import java.lang.Exception
 
 internal class PresentationRequestRepositoryImpl(
     private val networkService: NetworkService
@@ -33,32 +32,23 @@ internal class PresentationRequestRepositoryImpl(
             headers = listOf(Pair(HeaderKeys.XVnfProtocolVersion, HeaderValues.XVnfProtocolVersion)),
             completionBlock = { encodedJwtResult ->
                 encodedJwtResult.handleResult({ presentationRequestResponse ->
-                    try {
-                        val encodedJwtStr = JSONObject(presentationRequestResponse.payload)
+                    val encodedJwtStr = runCatching {
+                        JSONObject(presentationRequestResponse.payload)
                             .optString(VCLPresentationRequest.KeyPresentationRequest)
-                        if (encodedJwtStr.isBlank()) {
-                            completionBlock(
-                                VCLResult.Failure(
-                                    ErrorTaxonomy.toRequestValidationError(
-                                        VCLError(message = "Missing presentation_request"),
-                                        requestKind = ErrorTaxonomy.RequestKindPresentation,
-                                        requestDid = presentationRequestDescriptor.did,
-                                    )
-                                )
-                            )
-                        } else {
-                            completionBlock(VCLResult.Success(encodedJwtStr))
-                        }
-                    } catch (ex: Exception) {
+                    }.getOrDefault("")
+                    if (encodedJwtStr.isBlank()) {
                         completionBlock(
                             VCLResult.Failure(
-                                ErrorTaxonomy.toClientRequestFetchError(
-                                    VCLError(ex),
-                                    requestUri = endpoint,
+                                ErrorTaxonomy.toRequestValidationError(
+                                    VCLError(message = "Missing presentation_request"),
                                     requestKind = ErrorTaxonomy.RequestKindPresentation,
+                                    requestDid = presentationRequestDescriptor.did,
+                                    requestUri = endpoint,
                                 )
                             )
                         )
+                    } else {
+                        completionBlock(VCLResult.Success(encodedJwtStr))
                     }
                 }, {
                     completionBlock(

@@ -35,11 +35,13 @@ internal class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByD
                 onError(
                     errorCode = VCLErrorCode.MismatchedPresentationRequestInspectorDid,
                     errorMessage = "presentation request: ${presentationRequest.jwt.encodedJwt} \ndid document: $didDocument",
+                    requestUri = deepLink.requestUri,
                     completionBlock = completionBlock
                 )
             }
         } ?: onError(
             errorMessage = "DID not found in deep link: ${deepLink.value}",
+            requestUri = deepLink.requestUri,
             completionBlock = completionBlock,
         )
     }
@@ -50,11 +52,12 @@ internal class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByD
     private fun onError(
         errorCode: VCLErrorCode = VCLErrorCode.SdkError,
         errorMessage: String,
+        requestUri: String?,
         completionBlock: (VCLResult<Boolean>) -> Unit
 
     ) {
         VCLLog.e(TAG, errorMessage)
-        val error = VCLError(errorCode = errorCode.value, message = errorMessage)
+        val error = VCLError(errorCode = errorCode.value, message = errorMessage, requestUri = requestUri)
         completionBlock(
             (VCLResult.Failure(
                 ErrorTaxonomy.toRequestValidationError(

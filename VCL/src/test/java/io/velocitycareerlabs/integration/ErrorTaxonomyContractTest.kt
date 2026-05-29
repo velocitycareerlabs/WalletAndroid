@@ -192,6 +192,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = entryPoint.legacyMismatchErrorCode,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = deepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -366,6 +367,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = entryPoint.legacyMismatchErrorCode,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = deepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -525,7 +527,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun emptyRequestEndpointResponseReturnsClientRequestRejected() {
+    fun emptyRequestEndpointResponseReturnsRequestInvalid() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -534,18 +536,27 @@ internal class ErrorTaxonomyContractTest {
 
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
-                    errorCode = VCLErrorCode.ClientRequestRejected.value,
+                    errorCode = entryPoint.requestInvalidErrorCode,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
-                    validationPhase = "client_request_fetch",
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
                     requestUri = entryPoint.defaultDeepLink.requestUri,
+                    requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
+            )
+            assertEquals(
+                when (entryPoint) {
+                    EntryPoint.Issuing -> "Missing issuing_request"
+                    EntryPoint.Presentation -> "Missing presentation_request"
+                },
+                error.message,
             )
         }
     }
 
     @Test
-    fun malformedRequestEndpointResponseReturnsClientRequestRejected() {
+    fun malformedRequestEndpointResponseReturnsRequestInvalid() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -554,12 +565,21 @@ internal class ErrorTaxonomyContractTest {
 
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
-                    errorCode = VCLErrorCode.ClientRequestRejected.value,
+                    errorCode = entryPoint.requestInvalidErrorCode,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
-                    validationPhase = "client_request_fetch",
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
                     requestUri = entryPoint.defaultDeepLink.requestUri,
+                    requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
+            )
+            assertEquals(
+                when (entryPoint) {
+                    EntryPoint.Issuing -> "Missing issuing_request"
+                    EntryPoint.Presentation -> "Missing presentation_request"
+                },
+                error.message,
             )
         }
     }
@@ -578,6 +598,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = VCLErrorCode.SdkError.value,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -608,6 +629,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = VCLErrorCode.SdkError.value,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -633,6 +655,7 @@ internal class ErrorTaxonomyContractTest {
                 sourceErrorCode = VCLErrorCode.SdkError.value,
                 validationPhase = "request_validation",
                 requestDid = EntryPoint.Issuing.requestDid,
+                requestUri = EntryPoint.Issuing.defaultDeepLink.requestUri,
                 requestKind = EntryPoint.Issuing.requestKind,
             ),
             actual = error,
@@ -766,6 +789,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = VCLErrorCode.SdkError.value,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -793,6 +817,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = VCLErrorCode.SdkError.value,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -899,6 +924,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = entryPoint.legacyMismatchErrorCode,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = deepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -922,6 +948,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = entryPoint.legacyMismatchErrorCode,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = deepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -948,6 +975,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = VCLErrorCode.SdkError.value,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,

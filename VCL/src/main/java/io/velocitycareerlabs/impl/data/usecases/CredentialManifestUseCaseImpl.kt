@@ -72,6 +72,7 @@ internal class CredentialManifestUseCaseImpl(
                         context.didDocument,
                         context.credentialManifest.remoteCryptoServicesToken,
                         context.credentialManifest.iss,
+                        credentialManifestDescriptor.endpoint,
                         ErrorTaxonomy.RequestKindIssuing,
                     )
                         .map { context }
@@ -106,6 +107,7 @@ internal class CredentialManifestUseCaseImpl(
                             phases.requestValidationError(
                                 jwtResult.error,
                                 credentialManifestDescriptor.did,
+                                credentialManifestDescriptor.endpoint,
                                 ErrorTaxonomy.RequestKindIssuing,
                             )
                         )
@@ -144,6 +146,7 @@ internal class CredentialManifestUseCaseImpl(
                             phases.requestValidationError(
                                 verificationResult.error,
                                 credentialManifest.iss,
+                                credentialManifest.deepLink?.requestUri,
                                 ErrorTaxonomy.RequestKindIssuing,
                             )
                         )
@@ -157,6 +160,7 @@ internal class CredentialManifestUseCaseImpl(
                                     phases.requestValidationError(
                                         VCLError(message = "Failed to verify credentialManifest jwt:\n${credentialManifest.jwt}"),
                                         credentialManifest.iss,
+                                        credentialManifest.deepLink?.requestUri,
                                         ErrorTaxonomy.RequestKindIssuing,
                                     )
                                 )

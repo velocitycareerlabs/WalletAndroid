@@ -34,12 +34,14 @@ internal class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDee
                 onError(
                     errorCode = VCLErrorCode.MismatchedRequestIssuerDid,
                     errorMessage = "credential manifest: ${credentialManifest.jwt.encodedJwt} \ndidDocument: $didDocument",
+                    requestUri = deepLink.requestUri,
                     completionBlock = completionBlock
                 )
             }
         }  ?: run {
             onError(
                 errorMessage = "DID not found in deep link: ${deepLink?.value}",
+                requestUri = deepLink?.requestUri,
                 completionBlock = completionBlock
             )
         }
@@ -48,11 +50,12 @@ internal class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDee
     private fun onError(
         errorCode: VCLErrorCode = VCLErrorCode.SdkError,
         errorMessage: String,
+        requestUri: String?,
         completionBlock: (VCLResult<Boolean>) -> Unit
 
     ) {
         VCLLog.e(TAG, errorMessage)
-        val error = VCLError(errorCode = errorCode.value, message = errorMessage)
+        val error = VCLError(errorCode = errorCode.value, message = errorMessage, requestUri = requestUri)
         completionBlock(
             (VCLResult.Failure(
                 ErrorTaxonomy.toRequestValidationError(
