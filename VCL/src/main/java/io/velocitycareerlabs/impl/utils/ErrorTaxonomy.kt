@@ -68,11 +68,7 @@ internal object ErrorTaxonomy {
 
     fun toRegistrationCheckError(error: VCLError, requestKind: String, requestDid: String?): VCLError =
         error.toTaxonomyError(
-            taxonomyCode = if (error.isConnectivityFailure()) {
-                VCLErrorCode.ConnectivityFailure
-            } else {
-                requestKind.notRegisteredCode()
-            },
+            taxonomyCode = registrationCheckCode(error, requestKind),
             context = TaxonomyContext(
                 validationPhase = PhaseRegistrationCheck,
                 requestDid = requestDid,
@@ -121,6 +117,7 @@ internal object ErrorTaxonomy {
         VCLErrorCode.ClientRequestRejected.value,
         VCLErrorCode.IssuerDidUnresolvable.value,
         VCLErrorCode.VerifierDidUnresolvable.value,
+        VCLErrorCode.RegistrationCheckInconclusive.value,
         VCLErrorCode.IssuerNotRegistered.value,
         VCLErrorCode.VerifierNotRegistered.value,
         VCLErrorCode.IssuerRequestInvalid.value,
@@ -166,6 +163,13 @@ internal object ErrorTaxonomy {
             error.isConnectivityFailure() -> VCLErrorCode.ConnectivityFailure
             error.statusCode == 401 || error.statusCode == 403 -> VCLErrorCode.ClientRequestUnauthorized
             else -> VCLErrorCode.ClientRequestRejected
+        }
+
+    private fun registrationCheckCode(error: VCLError, requestKind: String): VCLErrorCode =
+        when {
+            error.isConnectivityFailure() -> VCLErrorCode.ConnectivityFailure
+            error.statusCode == 404 -> requestKind.notRegisteredCode()
+            else -> VCLErrorCode.RegistrationCheckInconclusive
         }
 
     private data class TaxonomyContext(

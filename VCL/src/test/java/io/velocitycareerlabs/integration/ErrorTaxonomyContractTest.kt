@@ -881,6 +881,84 @@ internal class ErrorTaxonomyContractTest {
         }
     }
 
+    @Test
+    fun verifiedProfileServerErrorReturnsRegistrationCheckInconclusive() {
+        entryPoints.forEach { entryPoint ->
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(
+                    verifiedProfileStatusCode = 500,
+                    verifiedProfilePayload = """{"message":"profile lookup failed","errorCode":"sdk_error"}""",
+                    verifiedProfileContentType = Request.ContentTypeApplicationJson,
+                ),
+            )
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.RegistrationCheckInconclusive.value,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    statusCode = 500,
+                    validationPhase = "registration_check",
+                    payload = """{"message":"profile lookup failed","errorCode":"sdk_error"}""",
+                    requestKind = entryPoint.requestKind,
+                    requestDid = entryPoint.requestDid,
+                ),
+                actual = error,
+            )
+            assertEquals("profile lookup failed", error.message)
+        }
+    }
+
+    @Test
+    fun unexpectedVerifiedProfileClientErrorReturnsRegistrationCheckInconclusive() {
+        entryPoints.forEach { entryPoint ->
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(
+                    verifiedProfileStatusCode = 400,
+                    verifiedProfilePayload = """{"message":"bad profile lookup","errorCode":"sdk_error"}""",
+                    verifiedProfileContentType = Request.ContentTypeApplicationJson,
+                ),
+            )
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.RegistrationCheckInconclusive.value,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    statusCode = 400,
+                    validationPhase = "registration_check",
+                    payload = """{"message":"bad profile lookup","errorCode":"sdk_error"}""",
+                    requestKind = entryPoint.requestKind,
+                    requestDid = entryPoint.requestDid,
+                ),
+                actual = error,
+            )
+            assertEquals("bad profile lookup", error.message)
+        }
+    }
+
+    @Test
+    fun malformedVerifiedProfileSuccessReturnsRegistrationCheckInconclusive() {
+        entryPoints.forEach { entryPoint ->
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(verifiedProfilePayload = "not json"),
+            )
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.RegistrationCheckInconclusive.value,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "registration_check",
+                    requestKind = entryPoint.requestKind,
+                    requestDid = entryPoint.requestDid,
+                ),
+                actual = error,
+            )
+            assertTrue(error.message!!.isNotBlank())
+        }
+    }
+
     // Request authorization -> issuer_request_unauthorized / verifier_request_unauthorized
 
     @Test
