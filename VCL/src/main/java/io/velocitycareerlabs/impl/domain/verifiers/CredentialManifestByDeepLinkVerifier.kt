@@ -14,7 +14,7 @@ import io.velocitycareerlabs.api.entities.VCLResult
 internal interface CredentialManifestByDeepLinkVerifier {
     fun verifyCredentialManifest(
         credentialManifest: VCLCredentialManifest,
-        deepLink: VCLDeepLink?,
+        deepLink: VCLDeepLink,
         didDocument: VCLDidDocument,
         completionBlock: (VCLResult<Unit>) -> Unit
     )

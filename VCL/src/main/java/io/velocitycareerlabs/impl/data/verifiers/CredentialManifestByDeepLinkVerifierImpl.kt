@@ -21,27 +21,20 @@ internal class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDee
 
     override fun verifyCredentialManifest(
         credentialManifest: VCLCredentialManifest,
-        deepLink: VCLDeepLink?,
+        deepLink: VCLDeepLink,
         didDocument: VCLDidDocument,
         completionBlock: (VCLResult<Unit>) -> Unit
     ) {
-        deepLink?.did?.let { deepLinkDid ->
-            if (didDocument.id == credentialManifest.issuerId && didDocument.id == deepLinkDid ||
-                didDocument.alsoKnownAs.contains(credentialManifest.issuerId) && didDocument.alsoKnownAs.contains(deepLinkDid)
-            ) {
-                completionBlock(VCLResult.Success(Unit))
-            } else {
-                onError(
-                    errorCode = VCLErrorCode.MismatchedRequestIssuerDid,
-                    errorMessage = "credential manifest: ${credentialManifest.jwt.encodedJwt} \ndidDocument: $didDocument",
-                    requestUri = deepLink.requestUri,
-                    completionBlock = completionBlock
-                )
-            }
-        }  ?: run {
+        val deepLinkDid = deepLink.did!!
+        if (didDocument.id == credentialManifest.issuerId && didDocument.id == deepLinkDid ||
+            didDocument.alsoKnownAs.contains(credentialManifest.issuerId) && didDocument.alsoKnownAs.contains(deepLinkDid)
+        ) {
+            completionBlock(VCLResult.Success(Unit))
+        } else {
             onError(
-                errorMessage = "DID not found in deep link: ${deepLink?.value}",
-                requestUri = deepLink?.requestUri,
+                errorCode = VCLErrorCode.MismatchedRequestIssuerDid,
+                errorMessage = "credential manifest: ${credentialManifest.jwt.encodedJwt} \ndidDocument: $didDocument",
+                requestUri = deepLink.requestUri,
                 completionBlock = completionBlock
             )
         }

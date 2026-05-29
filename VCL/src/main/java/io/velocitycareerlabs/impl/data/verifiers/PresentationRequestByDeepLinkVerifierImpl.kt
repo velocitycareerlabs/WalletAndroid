@@ -25,25 +25,20 @@ internal class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByD
         didDocument: VCLDidDocument,
         completionBlock: (VCLResult<Unit>) -> Unit
     ) {
-        deepLink.did?.let { deepLinkDid ->
-            if (
-                isDidBoundToDidDocument(presentationRequest.iss, didDocument) &&
-                isDidBoundToDidDocument(deepLinkDid, didDocument)
-            ) {
-                completionBlock(VCLResult.Success(Unit))
-            } else {
-                onError(
-                    errorCode = VCLErrorCode.MismatchedPresentationRequestInspectorDid,
-                    errorMessage = "presentation request: ${presentationRequest.jwt.encodedJwt} \ndid document: $didDocument",
-                    requestUri = deepLink.requestUri,
-                    completionBlock = completionBlock
-                )
-            }
-        } ?: onError(
-            errorMessage = "DID not found in deep link: ${deepLink.value}",
-            requestUri = deepLink.requestUri,
-            completionBlock = completionBlock,
-        )
+        val deepLinkDid = deepLink.did!!
+        if (
+            isDidBoundToDidDocument(presentationRequest.iss, didDocument) &&
+            isDidBoundToDidDocument(deepLinkDid, didDocument)
+        ) {
+            completionBlock(VCLResult.Success(Unit))
+        } else {
+            onError(
+                errorCode = VCLErrorCode.MismatchedPresentationRequestInspectorDid,
+                errorMessage = "presentation request: ${presentationRequest.jwt.encodedJwt} \ndid document: $didDocument",
+                requestUri = deepLink.requestUri,
+                completionBlock = completionBlock
+            )
+        }
     }
 
     private fun isDidBoundToDidDocument(requestDid: String, didDocument: VCLDidDocument): Boolean =
