@@ -34,23 +34,20 @@ internal class PresentationRequestRepositoryImpl(
             completionBlock = { encodedJwtResult ->
                 encodedJwtResult.handleResult({ presentationRequestResponse ->
                     try {
-                        val payload = JSONObject(presentationRequestResponse.payload)
-                        if (!payload.has(VCLPresentationRequest.KeyPresentationRequest)) {
+                        val encodedJwtStr = JSONObject(presentationRequestResponse.payload)
+                            .optString(VCLPresentationRequest.KeyPresentationRequest)
+                        if (encodedJwtStr.isBlank()) {
                             completionBlock(
                                 VCLResult.Failure(
-                                    ErrorTaxonomy.toClientRequestFetchError(
+                                    ErrorTaxonomy.toRequestValidationError(
                                         VCLError(message = "Missing presentation_request"),
-                                        requestUri = endpoint,
                                         requestKind = ErrorTaxonomy.RequestKindPresentation,
+                                        requestDid = presentationRequestDescriptor.did,
                                     )
                                 )
                             )
                         } else {
-                            completionBlock(
-                                VCLResult.Success(
-                                    payload.optString(VCLPresentationRequest.KeyPresentationRequest)
-                                )
-                            )
+                            completionBlock(VCLResult.Success(encodedJwtStr))
                         }
                     } catch (ex: Exception) {
                         completionBlock(

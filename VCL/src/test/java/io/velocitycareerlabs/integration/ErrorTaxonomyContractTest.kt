@@ -508,7 +508,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun missingExpectedRequestFieldsReturnSdkErrorAfterEmptyJwtIsDecoded() {
+    fun missingExpectedRequestFieldsReturnRequestInvalid() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -517,12 +517,20 @@ internal class ErrorTaxonomyContractTest {
 
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
-                    errorCode = VCLErrorCode.ClientRequestRejected.value,
+                    errorCode = entryPoint.requestInvalidErrorCode,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
-                    validationPhase = "client_request_fetch",
-                    requestUri = entryPoint.defaultDeepLink.requestUri,
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
+                    requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
+            )
+            assertEquals(
+                when (entryPoint) {
+                    EntryPoint.Issuing -> "Missing issuing_request"
+                    EntryPoint.Presentation -> "Missing presentation_request"
+                },
+                error.message,
             )
         }
     }
@@ -572,7 +580,7 @@ internal class ErrorTaxonomyContractTest {
             ),
             actual = error,
         )
-        assertEquals("Malformed JWT", error.message)
+        assertEquals("Missing issuing_request", error.message)
     }
 
     @Test

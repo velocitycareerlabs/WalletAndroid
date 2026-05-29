@@ -33,23 +33,20 @@ internal class CredentialManifestRepositoryImpl(
                 result.handleResult(
                     { credentialManifestResponse ->
                         try {
-                            val payload = JSONObject(credentialManifestResponse.payload)
-                            if (!payload.has(VCLCredentialManifest.KeyIssuingRequest)) {
+                            val jwtStr = JSONObject(credentialManifestResponse.payload)
+                                .optString(VCLCredentialManifest.KeyIssuingRequest)
+                            if (jwtStr.isBlank()) {
                                 completionBlock(
                                     VCLResult.Failure(
-                                        ErrorTaxonomy.toClientRequestFetchError(
+                                        ErrorTaxonomy.toRequestValidationError(
                                             VCLError(message = "Missing issuing_request"),
-                                            requestUri = endpoint,
                                             requestKind = ErrorTaxonomy.RequestKindIssuing,
+                                            requestDid = credentialManifestDescriptor.did,
                                         )
                                     )
                                 )
                             } else {
-                                completionBlock(
-                                    VCLResult.Success(
-                                        payload.optString(VCLCredentialManifest.KeyIssuingRequest)
-                                    )
-                                )
+                                completionBlock(VCLResult.Success(jwtStr))
                             }
                         } catch (ex: Exception) {
                             completionBlock(
