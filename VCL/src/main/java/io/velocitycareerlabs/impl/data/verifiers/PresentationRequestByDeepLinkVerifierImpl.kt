@@ -23,14 +23,14 @@ internal class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByD
         presentationRequest: VCLPresentationRequest,
         deepLink: VCLDeepLink,
         didDocument: VCLDidDocument,
-        completionBlock: (VCLResult<Boolean>) -> Unit
+        completionBlock: (VCLResult<Unit>) -> Unit
     ) {
         deepLink.did?.let { deepLinkDid ->
             if (
                 isDidBoundToDidDocument(presentationRequest.iss, didDocument) &&
                 isDidBoundToDidDocument(deepLinkDid, didDocument)
             ) {
-                completionBlock(VCLResult.Success(true))
+                completionBlock(VCLResult.Success(Unit))
             } else {
                 onError(
                     errorCode = VCLErrorCode.MismatchedPresentationRequestInspectorDid,
@@ -53,7 +53,7 @@ internal class PresentationRequestByDeepLinkVerifierImpl: PresentationRequestByD
         errorCode: VCLErrorCode = VCLErrorCode.SdkError,
         errorMessage: String,
         requestUri: String?,
-        completionBlock: (VCLResult<Boolean>) -> Unit
+        completionBlock: (VCLResult<Unit>) -> Unit
 
     ) {
         VCLLog.e(TAG, errorMessage)

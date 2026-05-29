@@ -117,7 +117,15 @@ internal class CredentialManifestUseCaseImpl(
                                 credentialManifestDescriptor,
                                 verifiedProfile
                             )
-                        )
+                        ).takeUnless { it.data.iss.isBlank() }
+                            ?: VCLResult.Failure(
+                                phases.requestValidationError(
+                                    VCLError(message = "Missing iss"),
+                                    credentialManifestDescriptor.did,
+                                    credentialManifestDescriptor.endpoint,
+                                    ErrorTaxonomy.RequestKindIssuing,
+                                )
+                            )
                     }
                 )
             }
@@ -151,20 +159,8 @@ internal class CredentialManifestUseCaseImpl(
                             )
                         )
                         is VCLResult.Success -> {
-                            val isVerified = verificationResult.data
-                            VCLLog.d(TAG, "Credential manifest deep link verification result: $isVerified")
-                            if (isVerified) {
-                                VCLResult.Success(credentialManifest)
-                            } else {
-                                VCLResult.Failure(
-                                    phases.requestValidationError(
-                                        VCLError(message = "Failed to verify credentialManifest jwt:\n${credentialManifest.jwt}"),
-                                        credentialManifest.iss,
-                                        credentialManifest.deepLink?.requestUri,
-                                        ErrorTaxonomy.RequestKindIssuing,
-                                    )
-                                )
-                            }
+                            VCLLog.d(TAG, "Credential manifest deep link verification succeeded")
+                            VCLResult.Success(credentialManifest)
                         }
                     }
                 )

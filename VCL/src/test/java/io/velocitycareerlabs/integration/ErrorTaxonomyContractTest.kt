@@ -639,6 +639,33 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
+    fun requestJwtWithoutIssReturnsRequestInvalid() {
+        entryPoints.forEach { entryPoint ->
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(
+                    requestPayload = entryPoint.requestPayloadForJwt(
+                        encodedJwtWithoutIss(entryPoint.defaultRequestJwt)
+                    ),
+                ),
+            )
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.requestInvalidErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
+            assertEquals("Missing iss", error.message)
+        }
+    }
+
+    @Test
     fun emptyIssuingRequestReturnsRequestInvalid() {
         val error = getEntryPointError(
             EntryPoint.Issuing,

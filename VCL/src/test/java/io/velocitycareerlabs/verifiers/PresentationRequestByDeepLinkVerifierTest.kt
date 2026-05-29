@@ -32,9 +32,7 @@ class PresentationRequestByDeepLinkVerifierTest {
             DeepLinkMocks.PresentationRequestDeepLinkDevNet,
             DidDocumentMocks.DidDocumentMock
         ) {
-            it.handleResult({ isVerified ->
-                assertTrue(isVerified)
-            }, { error ->
+            it.handleResult({}, { error ->
                 fail("${error.toJsonObject()}")
             })
         }
@@ -50,9 +48,7 @@ class PresentationRequestByDeepLinkVerifierTest {
             deepLinkWithDidDocumentId,
             DidDocumentMocks.DidDocumentMock
         ) {
-            it.handleResult({ isVerified ->
-                assertTrue(isVerified)
-            }, { error ->
+            it.handleResult({}, { error ->
                 fail("${error.toJsonObject()}")
             })
         }
@@ -82,9 +78,7 @@ class PresentationRequestByDeepLinkVerifierTest {
             deepLinkWithDidDocumentAlias,
             didDocumentWithPresentationRequestIss
         ) {
-            it.handleResult({ isVerified ->
-                assertTrue(isVerified)
-            }, { error ->
+            it.handleResult({}, { error ->
                 fail("${error.toJsonObject()}")
             })
         }

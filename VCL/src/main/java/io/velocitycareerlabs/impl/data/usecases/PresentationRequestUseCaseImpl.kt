@@ -116,7 +116,15 @@ internal class PresentationRequestUseCaseImpl(
                                 presentationRequestDescriptor,
                                 verifiedProfile
                             )
-                        )
+                        ).takeUnless { it.data.iss.isBlank() }
+                            ?: VCLResult.Failure(
+                                phases.requestValidationError(
+                                    VCLError(message = "Missing iss"),
+                                    presentationRequestDescriptor.did,
+                                    presentationRequestDescriptor.endpoint,
+                                    ErrorTaxonomy.RequestKindPresentation,
+                                )
+                            )
                     }
                 )
             }
@@ -143,20 +151,8 @@ internal class PresentationRequestUseCaseImpl(
                             )
                         )
                         is VCLResult.Success -> {
-                            val isVerified = byDeepLinkVerificationResult.data
-                            VCLLog.d(TAG, "Presentation request by deep link verification result: $isVerified")
-                            if (isVerified) {
-                                VCLResult.Success(presentationRequest)
-                            } else {
-                                VCLResult.Failure(
-                                    phases.requestValidationError(
-                                        VCLError(message = "Failed to verify: ${presentationRequest.jwt.payload}"),
-                                        presentationRequest.iss,
-                                        presentationRequest.deepLink.requestUri,
-                                        ErrorTaxonomy.RequestKindPresentation,
-                                    )
-                                )
-                            }
+                            VCLLog.d(TAG, "Presentation request by deep link verification succeeded")
+                            VCLResult.Success(presentationRequest)
                         }
                     }
                 )

@@ -204,12 +204,27 @@ internal fun encodedJwtWithKid(encodedJwt: String, kid: String): String {
     return encodedJwtWithHeader(encodedJwt, headerJson)
 }
 
+internal fun encodedJwtWithoutIss(encodedJwt: String): String {
+    val parts = encodedJwt.split(".")
+    val payloadJson = JSONObject(String(Base64.getUrlDecoder().decode(parts[1])))
+    payloadJson.remove(VCLJwt.KeyIss)
+    return encodedJwtWithPayload(encodedJwt, payloadJson)
+}
+
 internal fun encodedJwtWithHeader(encodedJwt: String, headerJson: JSONObject): String {
     val parts = encodedJwt.split(".")
     val encodedHeader = Base64.getUrlEncoder()
         .withoutPadding()
         .encodeToString(headerJson.toString().toByteArray(Charsets.UTF_8))
     return listOf(encodedHeader, parts[1], parts[2]).joinToString(".")
+}
+
+internal fun encodedJwtWithPayload(encodedJwt: String, payloadJson: JSONObject): String {
+    val parts = encodedJwt.split(".")
+    val encodedPayload = Base64.getUrlEncoder()
+        .withoutPadding()
+        .encodeToString(payloadJson.toString().toByteArray(Charsets.UTF_8))
+    return listOf(parts[0], encodedPayload, parts[2]).joinToString(".")
 }
 
 internal fun defaultRouter(entryPoint: EntryPoint): BaselineHttpRouter =

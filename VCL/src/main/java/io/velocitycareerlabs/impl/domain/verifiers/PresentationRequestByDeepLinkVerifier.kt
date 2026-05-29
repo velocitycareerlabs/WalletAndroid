@@ -16,6 +16,6 @@ internal interface PresentationRequestByDeepLinkVerifier {
         presentationRequest: VCLPresentationRequest,
         deepLink: VCLDeepLink,
         didDocument: VCLDidDocument,
-        completionBlock: (VCLResult<Boolean>) -> Unit
+        completionBlock: (VCLResult<Unit>) -> Unit
     )
 }

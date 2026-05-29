@@ -16,6 +16,6 @@ internal interface CredentialManifestByDeepLinkVerifier {
         credentialManifest: VCLCredentialManifest,
         deepLink: VCLDeepLink?,
         didDocument: VCLDidDocument,
-        completionBlock: (VCLResult<Boolean>) -> Unit
+        completionBlock: (VCLResult<Unit>) -> Unit
     )
 }

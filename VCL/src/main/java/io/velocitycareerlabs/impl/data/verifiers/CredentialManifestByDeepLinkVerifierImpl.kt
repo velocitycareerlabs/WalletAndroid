@@ -23,13 +23,13 @@ internal class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDee
         credentialManifest: VCLCredentialManifest,
         deepLink: VCLDeepLink?,
         didDocument: VCLDidDocument,
-        completionBlock: (VCLResult<Boolean>) -> Unit
+        completionBlock: (VCLResult<Unit>) -> Unit
     ) {
         deepLink?.did?.let { deepLinkDid ->
             if (didDocument.id == credentialManifest.issuerId && didDocument.id == deepLinkDid ||
                 didDocument.alsoKnownAs.contains(credentialManifest.issuerId) && didDocument.alsoKnownAs.contains(deepLinkDid)
             ) {
-                completionBlock(VCLResult.Success(true))
+                completionBlock(VCLResult.Success(Unit))
             } else {
                 onError(
                     errorCode = VCLErrorCode.MismatchedRequestIssuerDid,
@@ -51,7 +51,7 @@ internal class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDee
         errorCode: VCLErrorCode = VCLErrorCode.SdkError,
         errorMessage: String,
         requestUri: String?,
-        completionBlock: (VCLResult<Boolean>) -> Unit
+        completionBlock: (VCLResult<Unit>) -> Unit
 
     ) {
         VCLLog.e(TAG, errorMessage)
