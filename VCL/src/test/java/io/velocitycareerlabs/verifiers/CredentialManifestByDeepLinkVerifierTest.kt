@@ -41,9 +41,7 @@ class CredentialManifestByDeepLinkVerifierTest {
             DeepLinkMocks.CredentialManifestDeepLinkDevNet,
             DidDocumentMocks.DidDocumentMock
         ) {
-            it.handleResult({ isVerified ->
-                assert(isVerified)
-            }, { error ->
+            it.handleResult({}, { error ->
                 assert(false) { "${error.toJsonObject()}" }
             })
         }

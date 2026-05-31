@@ -6,13 +6,19 @@
  */
 package io.velocitycareerlabs.impl.data.usecases
 
-import io.velocitycareerlabs.api.entities.*
+import io.velocitycareerlabs.api.entities.VCLDidDocument
+import io.velocitycareerlabs.api.entities.VCLJwt
+import io.velocitycareerlabs.api.entities.VCLPresentationRequest
+import io.velocitycareerlabs.api.entities.VCLPresentationRequestDescriptor
+import io.velocitycareerlabs.api.entities.VCLResult
+import io.velocitycareerlabs.api.entities.VCLVerifiedProfile
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.impl.domain.infrastructure.executors.Executor
-import io.velocitycareerlabs.impl.domain.repositories.*
+import io.velocitycareerlabs.impl.domain.repositories.JwtServiceRepository
+import io.velocitycareerlabs.impl.domain.repositories.PresentationRequestRepository
+import io.velocitycareerlabs.impl.domain.repositories.ResolveDidDocumentRepository
 import io.velocitycareerlabs.impl.domain.usecases.PresentationRequestUseCase
 import io.velocitycareerlabs.impl.domain.verifiers.PresentationRequestByDeepLinkVerifier
-import io.velocitycareerlabs.impl.extensions.encode
 import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
 import io.velocitycareerlabs.impl.utils.VCLLog
 
@@ -25,185 +31,149 @@ internal class PresentationRequestUseCaseImpl(
 ): PresentationRequestUseCase {
 
     private val TAG = PresentationRequestUseCaseImpl::class.simpleName
+    private val phases = PublicRequestUseCasePhases(
+        resolveDidDocumentRepository,
+        jwtServiceRepository,
+        executor,
+    )
 
     override fun getPresentationRequest(
         presentationRequestDescriptor: VCLPresentationRequestDescriptor,
         verifiedProfile: VCLVerifiedProfile,
         completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
     ) {
+        val complete = phases.mainThreadCompletion(completionBlock)
+
         executor.runOnBackground {
-            presentationRequestRepository.getPresentationRequest(
-                presentationRequestDescriptor
-            ) { encodedJwtStrResult ->
-                encodedJwtStrResult.handleResult(
-                    { encodedJwtStr ->
-                        val presentationRequest = VCLPresentationRequest(
-                            jwt = VCLJwt(encodedJwtStr),
-                            verifiedProfile = verifiedProfile,
-                            deepLink = presentationRequestDescriptor.deepLink,
-                            pushDelegate = presentationRequestDescriptor.pushDelegate,
-                            didJwk = presentationRequestDescriptor.didJwk,
-                            remoteCryptoServicesToken = presentationRequestDescriptor.remoteCryptoServicesToken
-                        )
-                        resolveDidDocument(presentationRequest, completionBlock) { didDocument ->
-                            verifyPresentationRequest(
-                                presentationRequest,
-                                didDocument,
-                                completionBlock
-                            )
-                        }
-                    },
-                    { error ->
-                        onError(error, completionBlock)
-                    }
-                )
-            }
-        }
-    }
-
-    private fun verifyPresentationRequest(
-        presentationRequest: VCLPresentationRequest,
-        didDocument: VCLDidDocument,
-        completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
-    ) {
-        val kid = presentationRequest.jwt.kid
-            ?: return onError(
-                missingJwtKidError(requestDid = presentationRequest.iss),
-                completionBlock
-            )
-        val publicJwk = didDocument.getPublicJwk(kid = kid)
-            ?: return onError(
-                unresolvedJwtKeyError(kid, requestDid = presentationRequest.iss),
-                completionBlock
-            )
-        jwtServiceRepository.verifyJwt(
-            presentationRequest.jwt,
-            publicJwk,
-            presentationRequest.remoteCryptoServicesToken
-        ) { jwtVerificationRes ->
-            jwtVerificationRes.handleResult({
-                presentationRequestByDeepLinkVerifier.verifyPresentationRequest(
-                    presentationRequest,
-                    presentationRequest.deepLink,
-                    didDocument
-                ) { byDeepLinkVerificationRes ->
-                    byDeepLinkVerificationRes.handleResult({ isVerified ->
-                        VCLLog.d(TAG, "Presentation request by deep link verification result: $isVerified")
-                        onVerificationSuccess(
-                            isVerified,
-                            presentationRequest,
-                            completionBlock
-                        )
-                    }, { error ->
-                        onError(
-                            ErrorTaxonomy.toRequestValidationError(
-                                error,
-                                requestKind = ErrorTaxonomy.RequestKindPresentation,
-                                requestDid = presentationRequest.iss,
-                            ),
-                            completionBlock
-                        )
-                    })
-                }
-            }, { error ->
-                onError(
-                    ErrorTaxonomy.toRequestValidationError(
-                        error,
-                        requestKind = ErrorTaxonomy.RequestKindPresentation,
-                        requestDid = presentationRequest.iss,
-                    ),
-                    completionBlock
-                )
-            })
-        }
-    }
-
-    private fun resolveDidDocument(
-        presentationRequest: VCLPresentationRequest,
-        completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit,
-        successHandler: (VCLDidDocument) -> Unit,
-    ) {
-        resolveDidDocumentRepository.resolveDidDocument(
-            did = presentationRequest.iss
-        ) { didDocumentResult ->
-            didDocumentResult.handleResult(
-                { didDocument ->
-                    validateDidDocument(didDocument, presentationRequest)?.let { error ->
-                        onError(error, completionBlock)
-                    } ?: run {
-                        successHandler(didDocument)
-                    }
-                },
-                { error ->
-                    onError(
-                        ErrorTaxonomy.toDidResolutionError(
-                            error,
-                            requestKind = ErrorTaxonomy.RequestKindPresentation,
-                            requestDid = presentationRequest.iss,
-                        ),
-                        completionBlock
+            clientRequestFetch(presentationRequestDescriptor)
+                .then { encodedJwtStr ->
+                    requestValidationDecode(
+                        encodedJwtStr,
+                        presentationRequestDescriptor,
+                        verifiedProfile
                     )
                 }
-            )
+                .then { presentationRequest ->
+                    phases.didResolution(
+                        presentationRequest.iss,
+                        ErrorTaxonomy.RequestKindPresentation,
+                    )
+                        .map { didDocument ->
+                            PresentationRequestVerificationContext(
+                                presentationRequest,
+                                didDocument
+                            )
+                        }
+                }
+                .then { context ->
+                    phases.requestValidationVerifyJwt(
+                        context.presentationRequest.jwt,
+                        context.didDocument,
+                        context.presentationRequest.remoteCryptoServicesToken,
+                        context.presentationRequest.iss,
+                        presentationRequestDescriptor.endpoint,
+                        ErrorTaxonomy.RequestKindPresentation,
+                    )
+                        .map { context }
+                }
+                .then { context ->
+                    requestValidationVerifyDeepLink(context.presentationRequest, context.didDocument)
+                }
+                .invoke(complete)
         }
     }
 
-    private fun missingJwtKidError(requestDid: String?): VCLError =
-        ErrorTaxonomy.toRequestValidationError(
-            VCLError(message = "JWT kid is missing"),
-            requestKind = ErrorTaxonomy.RequestKindPresentation,
-            requestDid = requestDid,
-        )
-
-    private fun validateDidDocument(
-        didDocument: VCLDidDocument,
-        presentationRequest: VCLPresentationRequest,
-    ): VCLError? =
-        if (didDocument.payload.length() == 0 ||
-            (didDocument.payload.optJSONArray(VCLDidDocument.KeyVerificationMethod)?.length() ?: 0) == 0
-        ) {
-            ErrorTaxonomy.toDidResolutionError(
-                VCLError(message = "public jwk not found for kid"),
-                requestKind = ErrorTaxonomy.RequestKindPresentation,
-                requestDid = presentationRequest.iss,
+    private fun clientRequestFetch(
+        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
+    ): VCLAsyncResult<String> =
+        vclAsyncResult { completion ->
+            presentationRequestRepository.getPresentationRequest(
+                presentationRequestDescriptor,
+                completion
             )
-        } else {
-            null
         }
 
-    private fun unresolvedJwtKeyError(kid: String, requestDid: String?): VCLError =
-        ErrorTaxonomy.toRequestValidationError(
-            VCLError(message = "public jwk not found for kid: $kid"),
-            requestKind = ErrorTaxonomy.RequestKindPresentation,
-            requestDid = requestDid,
-        )
-
-    private fun onVerificationSuccess(
-        isVerified: Boolean,
-        presentationRequest: VCLPresentationRequest,
-        completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
-    ) {
-        if (isVerified)
-            executor.runOnMain {
-                completionBlock(VCLResult.Success(presentationRequest))
+    private fun requestValidationDecode(
+        encodedJwtStr: String,
+        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
+        verifiedProfile: VCLVerifiedProfile,
+    ): VCLAsyncResult<VCLPresentationRequest> =
+        vclAsyncResult { completion ->
+            jwtServiceRepository.decode(encodedJwtStr) { jwtResult ->
+                completion(
+                    when (jwtResult) {
+                        is VCLResult.Failure -> VCLResult.Failure(
+                            phases.requestValidationError(
+                                jwtResult.error,
+                                presentationRequestDescriptor.did,
+                                presentationRequestDescriptor.endpoint,
+                                ErrorTaxonomy.RequestKindPresentation,
+                            )
+                        )
+                        is VCLResult.Success -> VCLResult.Success(
+                            presentationRequest(
+                                jwtResult.data,
+                                presentationRequestDescriptor,
+                                verifiedProfile
+                            )
+                        ).takeUnless { it.data.iss.isBlank() }
+                            ?: VCLResult.Failure(
+                                phases.requestValidationError(
+                                    VCLError(message = "Missing iss"),
+                                    presentationRequestDescriptor.did,
+                                    presentationRequestDescriptor.endpoint,
+                                    ErrorTaxonomy.RequestKindPresentation,
+                                )
+                            )
+                    }
+                )
             }
-        else
-            onError(
-                ErrorTaxonomy.toRequestValidationError(
-                    VCLError(message = "Failed to verify: ${presentationRequest.jwt.payload}"),
-                    requestKind = ErrorTaxonomy.RequestKindPresentation,
-                    requestDid = presentationRequest.iss,
-                ),
-                completionBlock
-            )
-    }
-
-    private fun onError(
-        error: VCLError,
-        completionBlock: (VCLResult<VCLPresentationRequest>) -> Unit
-    ) {
-        executor.runOnMain {
-            completionBlock(VCLResult.Failure(error))
         }
-    }
+
+    private fun requestValidationVerifyDeepLink(
+        presentationRequest: VCLPresentationRequest,
+        didDocument: VCLDidDocument,
+    ): VCLAsyncResult<VCLPresentationRequest> =
+        vclAsyncResult { completion ->
+            presentationRequestByDeepLinkVerifier.verifyPresentationRequest(
+                presentationRequest,
+                presentationRequest.deepLink,
+                didDocument
+            ) { byDeepLinkVerificationResult ->
+                completion(
+                    when (byDeepLinkVerificationResult) {
+                        is VCLResult.Failure -> VCLResult.Failure(
+                            phases.requestValidationError(
+                                byDeepLinkVerificationResult.error,
+                                presentationRequest.iss,
+                                presentationRequest.deepLink.requestUri,
+                                ErrorTaxonomy.RequestKindPresentation,
+                            )
+                        )
+                        is VCLResult.Success -> {
+                            VCLLog.d(TAG, "Presentation request by deep link verification succeeded")
+                            VCLResult.Success(presentationRequest)
+                        }
+                    }
+                )
+            }
+        }
+
+    private fun presentationRequest(
+        jwt: VCLJwt,
+        presentationRequestDescriptor: VCLPresentationRequestDescriptor,
+        verifiedProfile: VCLVerifiedProfile,
+    ) = VCLPresentationRequest(
+        jwt = jwt,
+        verifiedProfile = verifiedProfile,
+        deepLink = presentationRequestDescriptor.deepLink,
+        pushDelegate = presentationRequestDescriptor.pushDelegate,
+        didJwk = presentationRequestDescriptor.didJwk,
+        remoteCryptoServicesToken = presentationRequestDescriptor.remoteCryptoServicesToken
+    )
+
+    private data class PresentationRequestVerificationContext(
+        val presentationRequest: VCLPresentationRequest,
+        val didDocument: VCLDidDocument,
+    )
 }

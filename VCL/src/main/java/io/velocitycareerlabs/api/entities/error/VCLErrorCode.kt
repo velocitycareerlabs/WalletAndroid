@@ -33,6 +33,7 @@ enum class VCLErrorCode(val value: String) {
     ClientRequestRejected("client_request_rejected"),
     IssuerDidUnresolvable("issuer_did_unresolvable"),
     VerifierDidUnresolvable("verifier_did_unresolvable"),
+    RegistrationCheckInconclusive("registration_check_inconclusive"),
     IssuerNotRegistered("issuer_not_registered"),
     VerifierNotRegistered("verifier_not_registered"),
     IssuerRequestInvalid("issuer_request_invalid"),

@@ -21,25 +21,20 @@ internal class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDee
 
     override fun verifyCredentialManifest(
         credentialManifest: VCLCredentialManifest,
-        deepLink: VCLDeepLink?,
+        deepLink: VCLDeepLink,
         didDocument: VCLDidDocument,
-        completionBlock: (VCLResult<Boolean>) -> Unit
+        completionBlock: (VCLResult<Unit>) -> Unit
     ) {
-        deepLink?.did?.let { deepLinkDid ->
-            if (didDocument.id == credentialManifest.issuerId && didDocument.id == deepLinkDid ||
-                didDocument.alsoKnownAs.contains(credentialManifest.issuerId) && didDocument.alsoKnownAs.contains(deepLinkDid)
-            ) {
-                completionBlock(VCLResult.Success(true))
-            } else {
-                onError(
-                    errorCode = VCLErrorCode.MismatchedRequestIssuerDid,
-                    errorMessage = "credential manifest: ${credentialManifest.jwt.encodedJwt} \ndidDocument: $didDocument",
-                    completionBlock = completionBlock
-                )
-            }
-        }  ?: run {
+        val deepLinkDid = deepLink.did!!
+        if (didDocument.id == credentialManifest.issuerId && didDocument.id == deepLinkDid ||
+            didDocument.alsoKnownAs.contains(credentialManifest.issuerId) && didDocument.alsoKnownAs.contains(deepLinkDid)
+        ) {
+            completionBlock(VCLResult.Success(Unit))
+        } else {
             onError(
-                errorMessage = "DID not found in deep link: ${deepLink?.value}",
+                errorCode = VCLErrorCode.MismatchedRequestIssuerDid,
+                errorMessage = "credential manifest: ${credentialManifest.jwt.encodedJwt} \ndidDocument: $didDocument",
+                requestUri = deepLink.requestUri,
                 completionBlock = completionBlock
             )
         }
@@ -48,11 +43,12 @@ internal class CredentialManifestByDeepLinkVerifierImpl: CredentialManifestByDee
     private fun onError(
         errorCode: VCLErrorCode = VCLErrorCode.SdkError,
         errorMessage: String,
-        completionBlock: (VCLResult<Boolean>) -> Unit
+        requestUri: String?,
+        completionBlock: (VCLResult<Unit>) -> Unit
 
     ) {
         VCLLog.e(TAG, errorMessage)
-        val error = VCLError(errorCode = errorCode.value, message = errorMessage)
+        val error = VCLError(errorCode = errorCode.value, message = errorMessage, requestUri = requestUri)
         completionBlock(
             (VCLResult.Failure(
                 ErrorTaxonomy.toRequestValidationError(

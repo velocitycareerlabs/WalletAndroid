@@ -130,10 +130,11 @@ internal class CredentialManifestUseCaseTest {
         ) {
             it.handleResult(
                 successHandler = {
-                    assert(false) { "${VCLErrorCode.ClientRequestRejected.value} error code is expected" }
+                    assert(false) { "${VCLErrorCode.IssuerRequestInvalid.value} error code is expected" }
                 },
                 errorHandler = { error ->
-                    assert(error.errorCode == VCLErrorCode.ClientRequestRejected.value)
+                    assert(error.errorCode == VCLErrorCode.IssuerRequestInvalid.value)
+                    assert(error.requestUri == DeepLinkMocks.CredentialManifestDeepLinkDevNet.requestUri)
                 }
             )
         }

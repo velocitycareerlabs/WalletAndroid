@@ -24,9 +24,12 @@ internal class JwtServiceRepositoryImpl(
         completionBlock: (VCLResult<VCLJwt>) -> Unit
     ) {
         try {
-            completionBlock(
-                VCLResult.Success(VCLJwt(encodedJwt))
-            )
+            val jwt = VCLJwt(encodedJwt)
+            if (jwt.signedJwt == null) {
+                completionBlock(VCLResult.Failure(VCLError(message = "Malformed JWT")))
+            } else {
+                completionBlock(VCLResult.Success(jwt))
+            }
         } catch (ex: Exception) {
             completionBlock(VCLResult.Failure(VCLError(ex)))
         }

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.velocitycareerlabs.backwardscompatibility
+package io.velocitycareerlabs.integration
 
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
@@ -47,6 +47,7 @@ import io.velocitycareerlabs.impl.domain.repositories.PresentationRequestReposit
 import io.velocitycareerlabs.impl.domain.repositories.ResolveDidDocumentRepository
 import io.velocitycareerlabs.impl.domain.verifiers.CredentialManifestByDeepLinkVerifier
 import io.velocitycareerlabs.impl.domain.verifiers.PresentationRequestByDeepLinkVerifier
+import io.velocitycareerlabs.impl.utils.ErrorTaxonomy
 import io.velocitycareerlabs.impl.utils.ProfileServiceTypeVerifier
 import io.velocitycareerlabs.impl.utils.VelocityDeepLinkValidator
 import io.velocitycareerlabs.infrastructure.resources.EmptyExecutor
@@ -91,7 +92,7 @@ internal class ErrorTaxonomyContractTest {
     // Link validation -> invalid_link
 
     @Test
-    fun malformedLinksAndMissingRequiredParamsReturnSdkError() {
+    fun malformedLinksAndMissingRequiredParamsReturnInvalidLink() {
         entryPoints.forEach { entryPoint ->
             val missingDidDeepLink = VCLDeepLink("velocity-network://${entryPoint.schemePath}")
 
@@ -136,7 +137,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun unsupportedSchemeWithKnownQueryParamsReturnsNullEndpointSdkError() {
+    fun unsupportedSchemeWithKnownQueryParamsReturnsInvalidLink() {
         entryPoints.forEach { entryPoint ->
             val deepLink = VCLDeepLink(
                 "https://example.com/${entryPoint.schemePath}?${entryPoint.didParam}=did:example:entity"
@@ -191,6 +192,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = entryPoint.legacyMismatchErrorCode,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = deepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -214,7 +216,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun missingRequestUriProducesEndpointNullSdkErrors() {
+    fun missingRequestUriProducesInvalidLink() {
         entryPoints.forEach { entryPoint ->
             val deepLink = VCLDeepLink(
                 "velocity-network://${entryPoint.schemePath}?${entryPoint.didParam}=did:example:entity"
@@ -272,8 +274,10 @@ internal class ErrorTaxonomyContractTest {
     @Test
     fun invalidDirectRequestEndpointReturnsInvalidLink() {
         val endpoint = "ftp://example.com/request"
-        val error = getCredentialManifestDescriptorError(
-            descriptor = credentialManifestDescriptorByService(endpoint = endpoint),
+        val vcl = initializedVcl(defaultRouter(EntryPoint.Issuing))
+        val error = awaitCredentialManifestError(
+            vcl,
+            credentialManifestDescriptorByService(endpoint = endpoint),
         )
 
         assertDiagnostics(
@@ -289,8 +293,10 @@ internal class ErrorTaxonomyContractTest {
 
     @Test
     fun missingDirectRequestEndpointReturnsInvalidLink() {
-        val error = getCredentialManifestDescriptorError(
-            descriptor = credentialManifestDescriptorByService(endpoint = null),
+        val vcl = initializedVcl(defaultRouter(EntryPoint.Issuing))
+        val error = awaitCredentialManifestError(
+            vcl,
+            credentialManifestDescriptorByService(endpoint = ""),
         )
 
         assertDiagnostics(
@@ -305,27 +311,11 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun repositoryNullEndpointFallbacksReturnInvalidLinkDiagnostics() {
-        mapOf(
-            EntryPoint.Issuing to getCredentialManifestRepositoryNullEndpointError(),
-            EntryPoint.Presentation to getPresentationRequestRepositoryNullEndpointError(),
-        ).forEach { (entryPoint, error) ->
-            assertDiagnostics(
-                expected = entryPoint.expectedDiagnostics(
-                    errorCode = VCLErrorCode.InvalidLink.value,
-                    sourceErrorCode = VelocityDeepLinkValidator.SourceInvalidOrMissingRequestEndpoint,
-                    validationPhase = "link_validation",
-                ),
-                actual = error,
-            )
-            assertTrue(error.message!!.contains("endpoint = null"))
-        }
-    }
-
-    @Test
     fun missingDirectRequestDidReturnsInvalidLink() {
-        val error = getCredentialManifestDescriptorError(
-            descriptor = credentialManifestDescriptorByService(did = ""),
+        val vcl = initializedVcl(defaultRouter(EntryPoint.Issuing))
+        val error = awaitCredentialManifestError(
+            vcl,
+            credentialManifestDescriptorByService(did = ""),
         )
 
         assertDiagnostics(
@@ -377,6 +367,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = entryPoint.legacyMismatchErrorCode,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = deepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -387,7 +378,7 @@ internal class ErrorTaxonomyContractTest {
     // Client request fetch -> client_request_unauthorized / client_request_rejected
 
     @Test
-    fun transportFailureReturnsSdkErrorWithNetworkStatusOnly() {
+    fun transportFailureReturnsConnectivityFailureWithNetworkStatusOnly() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -475,7 +466,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun plainTextRequestEndpointRejectionsDefaultToSdkErrorWithHttpStatusAndPayloadMessage() {
+    fun plainTextRequestEndpointRejectionsReturnClientRequestRejectedWithHttpStatusAndPayloadMessage() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -503,7 +494,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun jsonRequestEndpointRejectionsWithoutErrorCodeDefaultToSdkError() {
+    fun jsonRequestEndpointRejectionsWithoutErrorCodeReturnClientRequestRejected() {
         val payloadWithoutErrorCode = JSONObject(ErrorMocks.Payload).apply {
             remove(VCLError.KeyErrorCode)
         }.toString()
@@ -536,7 +527,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun emptyRequestEndpointResponseReturnsSdkError() {
+    fun emptyRequestEndpointResponseReturnsRequestInvalid() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -545,18 +536,27 @@ internal class ErrorTaxonomyContractTest {
 
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
-                    errorCode = VCLErrorCode.ClientRequestRejected.value,
+                    errorCode = entryPoint.requestInvalidErrorCode,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
-                    validationPhase = "client_request_fetch",
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
                     requestUri = entryPoint.defaultDeepLink.requestUri,
+                    requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
+            )
+            assertEquals(
+                when (entryPoint) {
+                    EntryPoint.Issuing -> "Missing issuing_request"
+                    EntryPoint.Presentation -> "Missing presentation_request"
+                },
+                error.message,
             )
         }
     }
 
     @Test
-    fun malformedRequestEndpointResponseReturnsSdkError() {
+    fun malformedRequestEndpointResponseReturnsRequestInvalid() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -565,18 +565,27 @@ internal class ErrorTaxonomyContractTest {
 
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
-                    errorCode = VCLErrorCode.ClientRequestRejected.value,
+                    errorCode = entryPoint.requestInvalidErrorCode,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
-                    validationPhase = "client_request_fetch",
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
                     requestUri = entryPoint.defaultDeepLink.requestUri,
+                    requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
+            )
+            assertEquals(
+                when (entryPoint) {
+                    EntryPoint.Issuing -> "Missing issuing_request"
+                    EntryPoint.Presentation -> "Missing presentation_request"
+                },
+                error.message,
             )
         }
     }
 
     @Test
-    fun missingExpectedRequestFieldsReturnSdkErrorAfterEmptyJwtIsDecoded() {
+    fun missingExpectedRequestFieldsReturnRequestInvalid() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -585,20 +594,81 @@ internal class ErrorTaxonomyContractTest {
 
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
-                    errorCode = VCLErrorCode.ClientRequestRejected.value,
+                    errorCode = entryPoint.requestInvalidErrorCode,
                     sourceErrorCode = VCLErrorCode.SdkError.value,
-                    validationPhase = "client_request_fetch",
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
                     requestUri = entryPoint.defaultDeepLink.requestUri,
+                    requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
+            )
+            assertEquals(
+                when (entryPoint) {
+                    EntryPoint.Issuing -> "Missing issuing_request"
+                    EntryPoint.Presentation -> "Missing presentation_request"
+                },
+                error.message,
             )
         }
     }
 
     @Test
-    fun emptyIssuingRequestReturnsSdkErrorAfterRequestFetch() {
-        val error = getCredentialManifestDescriptorError(
-            descriptor = credentialManifestDescriptorByService(),
+    fun malformedRequestJwtReturnsRequestInvalid() {
+        entryPoints.forEach { entryPoint ->
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(
+                    requestPayload = entryPoint.requestPayloadForJwt("not-a-jwt"),
+                ),
+            )
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.requestInvalidErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
+            assertEquals("Malformed JWT", error.message)
+        }
+    }
+
+    @Test
+    fun requestJwtWithoutIssReturnsRequestInvalid() {
+        entryPoints.forEach { entryPoint ->
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(
+                    requestPayload = entryPoint.requestPayloadForJwt(
+                        encodedJwtWithoutIss(entryPoint.defaultRequestJwt)
+                    ),
+                ),
+            )
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = entryPoint.requestInvalidErrorCode,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "request_validation",
+                    requestDid = entryPoint.requestDid,
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
+                    requestKind = entryPoint.requestKind,
+                ),
+                actual = error,
+            )
+            assertEquals("Missing iss", error.message)
+        }
+    }
+
+    @Test
+    fun emptyIssuingRequestReturnsRequestInvalid() {
+        val error = getEntryPointError(
+            EntryPoint.Issuing,
             router = BaselineHttpRouter(
                 requestPayload = JSONObject()
                     .put(VCLCredentialManifest.KeyIssuingRequest, "")
@@ -608,10 +678,12 @@ internal class ErrorTaxonomyContractTest {
 
         assertDiagnostics(
             expected = EntryPoint.Issuing.expectedDiagnostics(
-                errorCode = VCLErrorCode.ClientRequestRejected.value,
+                errorCode = VCLErrorCode.IssuerRequestInvalid.value,
                 sourceErrorCode = VCLErrorCode.SdkError.value,
-                validationPhase = "client_request_fetch",
-                requestUri = credentialManifestDescriptorByService().endpoint,
+                validationPhase = "request_validation",
+                requestDid = EntryPoint.Issuing.requestDid,
+                requestUri = EntryPoint.Issuing.defaultDeepLink.requestUri,
+                requestKind = EntryPoint.Issuing.requestKind,
             ),
             actual = error,
         )
@@ -620,20 +692,20 @@ internal class ErrorTaxonomyContractTest {
 
     @Test
     fun credentialManifestByServiceSucceedsWithoutDeepLinkVerification() {
-        val vcl = initializedVcl(BaselineHttpRouter())
+        val router = defaultRouter(EntryPoint.Issuing)
+        val vcl = initializedVcl(router)
         val credentialManifest = awaitCredentialManifest(
-            vcl = vcl,
-            descriptor = credentialManifestDescriptorByService(),
+            vcl,
+            credentialManifestDescriptorByService(),
         )
 
         assertNull(credentialManifest.deepLink)
         assertEquals(DeepLinkMocks.IssuerDid, credentialManifest.did)
+        assertTrue(router.requestedEndpoints.any { it.contains("get-credential-manifest") })
     }
 
-    // DID resolution -> issuer_did_unresolvable / verifier_did_unresolvable
-
     @Test
-    fun didResolutionNetworkFailurePropagatesSdkErrorAndStatusFromNetwork() {
+    fun didResolutionNetworkFailureReturnsDidUnresolvableWithStatusFromNetwork() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -683,7 +755,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun missingDidDocumentVerificationMaterialReturnsSdkError() {
+    fun missingDidDocumentVerificationMaterialReturnsDidUnresolvable() {
         entryPoints.forEach { entryPoint ->
             val error = getEntryPointError(
                 entryPoint,
@@ -744,6 +816,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = VCLErrorCode.SdkError.value,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -771,6 +844,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = VCLErrorCode.SdkError.value,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -778,36 +852,6 @@ internal class ErrorTaxonomyContractTest {
             assertEquals("public jwk not found for kid: $missingVerificationMethodKid", error.message)
         }
     }
-
-    @Test
-    fun responseVerificationFalseReturnsRequestInvalid() {
-        listOf(
-            Triple(
-                EntryPoint.Issuing,
-                getCredentialManifestUseCaseVerificationFalseError(),
-                "Failed to verify credentialManifest jwt",
-            ),
-            Triple(
-                EntryPoint.Presentation,
-                getPresentationRequestUseCaseVerificationFalseError(),
-                "Failed to verify:",
-            ),
-        ).forEach { (entryPoint, error, message) ->
-            assertDiagnostics(
-                expected = entryPoint.expectedDiagnostics(
-                    errorCode = entryPoint.requestInvalidErrorCode,
-                    sourceErrorCode = VCLErrorCode.SdkError.value,
-                    validationPhase = "request_validation",
-                    requestDid = entryPoint.requestDid,
-                    requestKind = entryPoint.requestKind,
-                ),
-                actual = error,
-            )
-            assertTrue(error.message!!.contains(message))
-        }
-    }
-
-    // Registration / profile check -> issuer_not_registered / verifier_not_registered
 
     @Test
     fun verifiedProfileLookupFailurePropagatesNetworkErrorDetails() {
@@ -837,6 +881,84 @@ internal class ErrorTaxonomyContractTest {
         }
     }
 
+    @Test
+    fun verifiedProfileServerErrorReturnsRegistrationCheckInconclusive() {
+        entryPoints.forEach { entryPoint ->
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(
+                    verifiedProfileStatusCode = 500,
+                    verifiedProfilePayload = """{"message":"profile lookup failed","errorCode":"sdk_error"}""",
+                    verifiedProfileContentType = Request.ContentTypeApplicationJson,
+                ),
+            )
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.RegistrationCheckInconclusive.value,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    statusCode = 500,
+                    validationPhase = "registration_check",
+                    payload = """{"message":"profile lookup failed","errorCode":"sdk_error"}""",
+                    requestKind = entryPoint.requestKind,
+                    requestDid = entryPoint.requestDid,
+                ),
+                actual = error,
+            )
+            assertEquals("profile lookup failed", error.message)
+        }
+    }
+
+    @Test
+    fun unexpectedVerifiedProfileClientErrorReturnsRegistrationCheckInconclusive() {
+        entryPoints.forEach { entryPoint ->
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(
+                    verifiedProfileStatusCode = 400,
+                    verifiedProfilePayload = """{"message":"bad profile lookup","errorCode":"sdk_error"}""",
+                    verifiedProfileContentType = Request.ContentTypeApplicationJson,
+                ),
+            )
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.RegistrationCheckInconclusive.value,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    statusCode = 400,
+                    validationPhase = "registration_check",
+                    payload = """{"message":"bad profile lookup","errorCode":"sdk_error"}""",
+                    requestKind = entryPoint.requestKind,
+                    requestDid = entryPoint.requestDid,
+                ),
+                actual = error,
+            )
+            assertEquals("bad profile lookup", error.message)
+        }
+    }
+
+    @Test
+    fun malformedVerifiedProfileSuccessReturnsRegistrationCheckInconclusive() {
+        entryPoints.forEach { entryPoint ->
+            val error = getEntryPointError(
+                entryPoint,
+                router = defaultRouter(entryPoint).copy(verifiedProfilePayload = "not json"),
+            )
+
+            assertDiagnostics(
+                expected = entryPoint.expectedDiagnostics(
+                    errorCode = VCLErrorCode.RegistrationCheckInconclusive.value,
+                    sourceErrorCode = VCLErrorCode.SdkError.value,
+                    validationPhase = "registration_check",
+                    requestKind = entryPoint.requestKind,
+                    requestDid = entryPoint.requestDid,
+                ),
+                actual = error,
+            )
+            assertTrue(error.message!!.isNotBlank())
+        }
+    }
+
     // Request authorization -> issuer_request_unauthorized / verifier_request_unauthorized
 
     @Test
@@ -863,7 +985,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun wrongIssuerOrVerifierServiceTypeReturnsSdkErrorWithVerificationStatus() {
+    fun wrongIssuerOrVerifierServiceTypeReturnsRequestUnauthorizedWithVerificationStatus() {
         entryPoints.forEach { entryPoint ->
             val wrongServiceProfile = when (entryPoint) {
                 EntryPoint.Issuing -> VerifiedProfileMocks.VerifiedProfileInspectorJsonStr
@@ -895,21 +1017,11 @@ internal class ErrorTaxonomyContractTest {
     fun duplicateQueryParamsUseLastDidValueAtSdkEntryPoint() {
         entryPoints.forEach { entryPoint ->
             val router = defaultRouter(entryPoint)
-            val vcl = initializedVcl(router)
             val deepLink = VCLDeepLink(
                 "velocity-network://${entryPoint.schemePath}?request_uri=${entryPoint.encodedRequestUri}" +
                     "&${entryPoint.didParam}=did:example:first&${entryPoint.didParam}=${entryPoint.lastDid}"
             )
-            val error = when (entryPoint) {
-                EntryPoint.Issuing -> awaitCredentialManifestError(
-                    vcl,
-                    credentialManifestDescriptor(deepLink),
-                )
-                EntryPoint.Presentation -> awaitPresentationRequestError(
-                    vcl,
-                    presentationDescriptor(deepLink),
-                )
-            }
+            val error = getEntryPointError(entryPoint, deepLink, router)
 
             assertDiagnostics(
                 expected = entryPoint.expectedDiagnostics(
@@ -917,6 +1029,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = entryPoint.legacyMismatchErrorCode,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = deepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -940,6 +1053,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = entryPoint.legacyMismatchErrorCode,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = deepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -948,7 +1062,7 @@ internal class ErrorTaxonomyContractTest {
     }
 
     @Test
-    fun jwtVerificationFailurePropagatesSdkErrorFromInjectedJwtService() {
+    fun jwtVerificationFailureReturnsRequestInvalidFromInjectedJwtService() {
         val expectedError = VCLError(
             errorCode = VCLErrorCode.SdkError.value,
             message = "jwt signature verification failed",
@@ -966,6 +1080,7 @@ internal class ErrorTaxonomyContractTest {
                     sourceErrorCode = VCLErrorCode.SdkError.value,
                     validationPhase = "request_validation",
                     requestDid = entryPoint.requestDid,
+                    requestUri = entryPoint.defaultDeepLink.requestUri,
                     requestKind = entryPoint.requestKind,
                 ),
                 actual = error,
@@ -974,599 +1089,4 @@ internal class ErrorTaxonomyContractTest {
         }
     }
 
-    private enum class EntryPoint(
-        val defaultDeepLink: VCLDeepLink,
-        val requestKind: String,
-        val requestDid: String,
-        val legacyMismatchErrorCode: String,
-        val requestInvalidErrorCode: String,
-        val didUnresolvableErrorCode: String,
-        val notRegisteredErrorCode: String,
-        val requestUnauthorizedErrorCode: String,
-        val didParam: String,
-        val otherDidParam: String,
-        val schemePath: String,
-        val encodedRequestUri: String,
-    ) {
-        Issuing(
-            defaultDeepLink = DeepLinkMocks.CredentialManifestDeepLinkDevNet,
-            requestKind = "issuing_request",
-            requestDid = DeepLinkMocks.IssuerDid,
-            legacyMismatchErrorCode = VCLErrorCode.MismatchedRequestIssuerDid.value,
-            requestInvalidErrorCode = VCLErrorCode.IssuerRequestInvalid.value,
-            didUnresolvableErrorCode = VCLErrorCode.IssuerDidUnresolvable.value,
-            notRegisteredErrorCode = VCLErrorCode.IssuerNotRegistered.value,
-            requestUnauthorizedErrorCode = VCLErrorCode.IssuerRequestUnauthorized.value,
-            didParam = "issuerDid",
-            otherDidParam = "inspectorDid",
-            schemePath = "issue",
-            encodedRequestUri = DeepLinkMocks.CredentialManifestRequestUriStr,
-        ),
-        Presentation(
-            defaultDeepLink = DeepLinkMocks.PresentationRequestDeepLinkDevNet,
-            requestKind = "presentation_request",
-            requestDid = DeepLinkMocks.InspectorDid,
-            legacyMismatchErrorCode = VCLErrorCode.MismatchedPresentationRequestInspectorDid.value,
-            requestInvalidErrorCode = VCLErrorCode.VerifierRequestInvalid.value,
-            didUnresolvableErrorCode = VCLErrorCode.VerifierDidUnresolvable.value,
-            notRegisteredErrorCode = VCLErrorCode.VerifierNotRegistered.value,
-            requestUnauthorizedErrorCode = VCLErrorCode.VerifierRequestUnauthorized.value,
-            didParam = "inspectorDid",
-            otherDidParam = "issuerDid",
-            schemePath = "inspect",
-            encodedRequestUri = DeepLinkMocks.PresentationRequestRequestUriStr,
-        ),
-    }
-
-    private val entryPoints = EntryPoint.entries
-
-    private data class ErrorDiagnostics(
-        val payload: String? = null,
-        val error: String? = null,
-        val errorCode: String,
-        val sourceErrorCode: String? = null,
-        val requestId: String? = null,
-        val statusCode: Int? = null,
-        val validationPhase: String? = null,
-        val requestDid: String? = null,
-        val requestUri: String? = null,
-        val requestKind: String? = null,
-    )
-
-    private fun assertDiagnostics(
-        expected: ErrorDiagnostics,
-        actual: VCLError,
-    ) {
-        assertEquals(expected.canonicalizePayload(), actual.toDiagnostics())
-    }
-
-    private fun VCLError.toDiagnostics() = ErrorDiagnostics(
-        payload = payload?.canonicalJsonOrSelf(),
-        error = error,
-        errorCode = errorCode,
-        sourceErrorCode = sourceErrorCode,
-        requestId = requestId,
-        statusCode = statusCode,
-        validationPhase = validationPhase,
-        requestDid = requestDid,
-        requestUri = requestUri,
-        requestKind = requestKind,
-    )
-
-    private fun ErrorDiagnostics.canonicalizePayload() =
-        copy(payload = payload?.canonicalJsonOrSelf())
-
-    private fun String.canonicalJsonOrSelf(): String =
-        runCatching { JSONObject(this).toString() }.getOrDefault(this)
-
-    private fun EntryPoint.expectedDiagnostics(
-        errorCode: String,
-        payload: String? = null,
-        error: String? = null,
-        sourceErrorCode: String? = null,
-        requestId: String? = null,
-        statusCode: Int? = null,
-        validationPhase: String? = null,
-        requestDid: String? = null,
-        requestUri: String? = null,
-        requestKind: String? = this.requestKind,
-    ) = ErrorDiagnostics(
-        payload = payload,
-        error = error,
-        errorCode = errorCode,
-        sourceErrorCode = sourceErrorCode,
-        requestId = requestId,
-        statusCode = statusCode,
-        validationPhase = validationPhase,
-        requestDid = requestDid,
-        requestUri = requestUri,
-        requestKind = requestKind,
-    )
-
-    private val EntryPoint.lastDid: String get() = "did:example:last"
-
-    private fun simpleRequestUri(): String =
-        URLEncoder.encode("https://example.com/request", "UTF-8")
-
-    private val EntryPoint.defaultRequestJwt: String
-        get() = when (this) {
-            EntryPoint.Issuing -> CredentialManifestMocks.JwtCredentialManifest1
-            EntryPoint.Presentation -> PresentationRequestMocks.EncodedPresentationRequest
-        }
-
-    private fun EntryPoint.requestPayloadForJwt(encodedJwt: String): String =
-        when (this) {
-            EntryPoint.Issuing -> JSONObject().put(VCLCredentialManifest.KeyIssuingRequest, encodedJwt)
-            EntryPoint.Presentation -> JSONObject().put(VCLPresentationRequest.KeyPresentationRequest, encodedJwt)
-        }.toString()
-
-    private fun encodedJwtWithoutKid(encodedJwt: String): String {
-        val parts = encodedJwt.split(".")
-        val headerJson = JSONObject(String(Base64.getUrlDecoder().decode(parts[0])))
-        headerJson.remove(VCLJwt.KeyKid)
-        return encodedJwtWithHeader(encodedJwt, headerJson)
-    }
-
-    private fun encodedJwtWithKid(encodedJwt: String, kid: String): String {
-        val parts = encodedJwt.split(".")
-        val headerJson = JSONObject(String(Base64.getUrlDecoder().decode(parts[0])))
-        headerJson.put(VCLJwt.KeyKid, kid)
-        return encodedJwtWithHeader(encodedJwt, headerJson)
-    }
-
-    private fun encodedJwtWithHeader(encodedJwt: String, headerJson: JSONObject): String {
-        val parts = encodedJwt.split(".")
-        val encodedHeader = Base64.getUrlEncoder()
-            .withoutPadding()
-            .encodeToString(headerJson.toString().toByteArray(Charsets.UTF_8))
-        return listOf(encodedHeader, parts[1], parts[2]).joinToString(".")
-    }
-
-    private fun defaultRouter(entryPoint: EntryPoint): BaselineHttpRouter =
-        when (entryPoint) {
-            EntryPoint.Issuing -> BaselineHttpRouter()
-            EntryPoint.Presentation -> BaselineHttpRouter(
-                verifiedProfilePayload = VerifiedProfileMocks.VerifiedProfileInspectorJsonStr,
-                requestPayload = PresentationRequestMocks.EncodedPresentationRequestResponse,
-            )
-        }
-
-    private fun getEntryPointError(
-        entryPoint: EntryPoint,
-        deepLink: VCLDeepLink = entryPoint.defaultDeepLink,
-        router: BaselineHttpRouter = defaultRouter(entryPoint),
-        jwtVerificationResult: VCLResult<Boolean> = VCLResult.Success(true),
-    ): VCLError =
-        when (entryPoint) {
-            EntryPoint.Issuing -> getCredentialManifestError(deepLink, router, jwtVerificationResult)
-            EntryPoint.Presentation -> getPresentationRequestError(deepLink, router, jwtVerificationResult)
-        }
-
-    private fun getCredentialManifestError(
-        deepLink: VCLDeepLink,
-        router: BaselineHttpRouter = BaselineHttpRouter(),
-        jwtVerificationResult: VCLResult<Boolean> = VCLResult.Success(true),
-    ): VCLError {
-        val vcl = initializedVcl(router, jwtVerificationResult)
-        return awaitCredentialManifestError(vcl, credentialManifestDescriptor(deepLink))
-    }
-
-    private fun getCredentialManifestDescriptorError(
-        descriptor: VCLCredentialManifestDescriptor,
-        router: BaselineHttpRouter = BaselineHttpRouter(),
-        jwtVerificationResult: VCLResult<Boolean> = VCLResult.Success(true),
-    ): VCLError {
-        val vcl = initializedVcl(router, jwtVerificationResult)
-        return awaitCredentialManifestError(vcl, descriptor)
-    }
-
-    private fun getPresentationRequestError(
-        deepLink: VCLDeepLink,
-        router: BaselineHttpRouter = BaselineHttpRouter(
-            verifiedProfilePayload = VerifiedProfileMocks.VerifiedProfileInspectorJsonStr,
-            requestPayload = PresentationRequestMocks.EncodedPresentationRequestResponse,
-        ),
-        jwtVerificationResult: VCLResult<Boolean> = VCLResult.Success(true),
-    ): VCLError {
-        val vcl = initializedVcl(router, jwtVerificationResult)
-        return awaitPresentationRequestError(vcl, presentationDescriptor(deepLink))
-    }
-
-    private fun getCredentialManifestUseCaseVerificationFalseError(): VCLError {
-        var result: VCLError? = null
-        CredentialManifestUseCaseImpl(
-            credentialManifestRepository = object : CredentialManifestRepository {
-                override fun getCredentialManifest(
-                    credentialManifestDescriptor: VCLCredentialManifestDescriptor,
-                    completionBlock: (VCLResult<String>) -> Unit,
-                ) {
-                    completionBlock(VCLResult.Success(CredentialManifestMocks.JwtCredentialManifest1))
-                }
-            },
-            resolveDidDocumentRepository = fixedDidDocumentRepository(),
-            jwtServiceRepository = successfulJwtServiceRepository(),
-            credentialManifestByDeepLinkVerifier = object : CredentialManifestByDeepLinkVerifier {
-                override fun verifyCredentialManifest(
-                    credentialManifest: VCLCredentialManifest,
-                    deepLink: VCLDeepLink?,
-                    didDocument: VCLDidDocument,
-                    completionBlock: (VCLResult<Boolean>) -> Unit,
-                ) {
-                    completionBlock(VCLResult.Success(false))
-                }
-            },
-            executor = EmptyExecutor(),
-        ).getCredentialManifest(
-            credentialManifestDescriptor = credentialManifestDescriptor(DeepLinkMocks.CredentialManifestDeepLinkDevNet),
-            verifiedProfile = VCLVerifiedProfile(JSONObject()),
-        ) {
-            it.handleResult(
-                successHandler = { fail("Credential manifest failure expected: $it") },
-                errorHandler = { error -> result = error },
-            )
-        }
-        return result ?: error("getCredentialManifest did not invoke errorHandler")
-    }
-
-    private fun getPresentationRequestUseCaseVerificationFalseError(): VCLError {
-        var result: VCLError? = null
-        PresentationRequestUseCaseImpl(
-            presentationRequestRepository = object : PresentationRequestRepository {
-                override fun getPresentationRequest(
-                    presentationRequestDescriptor: VCLPresentationRequestDescriptor,
-                    completionBlock: (VCLResult<String>) -> Unit,
-                ) {
-                    completionBlock(VCLResult.Success(PresentationRequestMocks.EncodedPresentationRequest))
-                }
-            },
-            resolveDidDocumentRepository = fixedDidDocumentRepository(),
-            jwtServiceRepository = successfulJwtServiceRepository(),
-            presentationRequestByDeepLinkVerifier = object : PresentationRequestByDeepLinkVerifier {
-                override fun verifyPresentationRequest(
-                    presentationRequest: VCLPresentationRequest,
-                    deepLink: VCLDeepLink,
-                    didDocument: VCLDidDocument,
-                    completionBlock: (VCLResult<Boolean>) -> Unit,
-                ) {
-                    completionBlock(VCLResult.Success(false))
-                }
-            },
-            executor = EmptyExecutor(),
-        ).getPresentationRequest(
-            presentationRequestDescriptor = presentationDescriptor(DeepLinkMocks.PresentationRequestDeepLinkDevNet),
-            verifiedProfile = VCLVerifiedProfile(JSONObject()),
-        ) {
-            it.handleResult(
-                successHandler = { fail("Presentation request failure expected: $it") },
-                errorHandler = { error -> result = error },
-            )
-        }
-        return result ?: error("getPresentationRequest did not invoke errorHandler")
-    }
-
-    private fun getCredentialManifestRepositoryNullEndpointError(): VCLError {
-        var result: VCLError? = null
-        CredentialManifestRepositoryImpl(unusedNetworkService()).getCredentialManifest(
-            credentialManifestDescriptor(VCLDeepLink("velocity-network://issue?issuerDid=${EntryPoint.Issuing.requestDid}"))
-        ) {
-            it.handleResult(
-                successHandler = { fail("Credential manifest repository failure expected: $it") },
-                errorHandler = { error -> result = error },
-            )
-        }
-        return result ?: error("getCredentialManifest did not invoke errorHandler")
-    }
-
-    private fun getPresentationRequestRepositoryNullEndpointError(): VCLError {
-        var result: VCLError? = null
-        PresentationRequestRepositoryImpl(unusedNetworkService()).getPresentationRequest(
-            presentationDescriptor(VCLDeepLink("velocity-network://inspect?inspectorDid=${EntryPoint.Presentation.requestDid}"))
-        ) {
-            it.handleResult(
-                successHandler = { fail("Presentation request repository failure expected: $it") },
-                errorHandler = { error -> result = error },
-            )
-        }
-        return result ?: error("getPresentationRequest did not invoke errorHandler")
-    }
-
-    private fun unusedNetworkService() =
-        object : NetworkService {
-            override fun sendRequest(
-                endpoint: String,
-                body: String?,
-                contentType: String,
-                method: Request.HttpMethod,
-                headers: List<Pair<String, String>>?,
-                useCaches: Boolean,
-                completionBlock: (VCLResult<Response>) -> Unit,
-            ) {
-                fail("Network should not be called for null endpoint")
-            }
-        }
-
-    private fun fixedDidDocumentRepository() =
-        object : ResolveDidDocumentRepository {
-            override fun resolveDidDocument(
-                did: String,
-                completionBlock: (VCLResult<VCLDidDocument>) -> Unit,
-            ) {
-                completionBlock(VCLResult.Success(DidDocumentMocks.DidDocumentMock))
-            }
-        }
-
-    private fun successfulJwtServiceRepository() =
-        object : JwtServiceRepository {
-            override fun decode(
-                encodedJwt: String,
-                completionBlock: (VCLResult<VCLJwt>) -> Unit,
-            ) {
-                completionBlock(VCLResult.Success(VCLJwt(encodedJwt)))
-            }
-
-            override fun verifyJwt(
-                jwt: VCLJwt,
-                publicJwk: VCLPublicJwk,
-                remoteCryptoServicesToken: VCLToken?,
-                completionBlock: (VCLResult<Boolean>) -> Unit,
-            ) {
-                completionBlock(VCLResult.Success(true))
-            }
-
-            override fun generateSignedJwt(
-                jwtDescriptor: VCLJwtDescriptor,
-                nonce: String?,
-                didJwk: VCLDidJwk,
-                remoteCryptoServicesToken: VCLToken?,
-                completionBlock: (VCLResult<VCLJwt>) -> Unit,
-            ) {
-                completionBlock(VCLResult.Success(VCLJwt("")))
-            }
-        }
-
-    private fun initializedVcl(
-        router: BaselineHttpRouter,
-        jwtVerificationResult: VCLResult<Boolean> = VCLResult.Success(true),
-    ): VCLImpl {
-        val vcl = VCLImpl(router::connectionFor)
-        var initError: VCLError? = null
-        val latch = CountDownLatch(1)
-        vcl.initialize(
-            context = ApplicationProvider.getApplicationContext(),
-            initializationDescriptor = VCLInitializationDescriptor(
-                cacheSequence = cacheSequence.incrementAndGet(),
-                cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
-                    cryptoServiceType = VCLCryptoServiceType.Injected,
-                    injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
-                        keyService = VCLKeyServiceMock(),
-                        jwtSignService = VCLJwtSignServiceMock(),
-                        jwtVerifyService = FixedJwtVerifyService(jwtVerificationResult),
-                    ),
-                ),
-            ),
-            successHandler = {
-                latch.countDown()
-            },
-            errorHandler = {
-                initError = it
-                latch.countDown()
-            },
-        )
-        drainMainThreadUntil(latch)
-        assertNull("VCL initialization failed: ${initError?.toJsonObject()}", initError)
-        return vcl
-    }
-
-    private fun awaitCredentialManifestError(
-        vcl: VCLImpl,
-        descriptor: VCLCredentialManifestDescriptor,
-    ): VCLError {
-        var result: VCLError? = null
-        val latch = CountDownLatch(1)
-        vcl.getCredentialManifest(
-            credentialManifestDescriptor = descriptor,
-            successHandler = { manifest ->
-                fail("Credential manifest failure expected: $manifest")
-            },
-            errorHandler = {
-                result = it
-                latch.countDown()
-            },
-        )
-        drainMainThreadUntil(latch)
-        return result ?: error("getCredentialManifest did not invoke errorHandler")
-    }
-
-    private fun awaitCredentialManifest(
-        vcl: VCLImpl,
-        descriptor: VCLCredentialManifestDescriptor,
-    ): VCLCredentialManifest {
-        var result: VCLCredentialManifest? = null
-        var error: VCLError? = null
-        val latch = CountDownLatch(1)
-        vcl.getCredentialManifest(
-            credentialManifestDescriptor = descriptor,
-            successHandler = {
-                result = it
-                latch.countDown()
-            },
-            errorHandler = {
-                error = it
-                latch.countDown()
-            },
-        )
-        drainMainThreadUntil(latch)
-        error?.let { fail("Credential manifest success expected: $it") }
-        return result ?: error("getCredentialManifest did not invoke successHandler")
-    }
-
-    private fun awaitPresentationRequestError(
-        vcl: VCLImpl,
-        descriptor: VCLPresentationRequestDescriptor,
-    ): VCLError {
-        var result: VCLError? = null
-        val latch = CountDownLatch(1)
-        vcl.getPresentationRequest(
-            presentationRequestDescriptor = descriptor,
-            successHandler = { presentationRequest ->
-                fail("Presentation request failure expected: $presentationRequest")
-            },
-            errorHandler = {
-                result = it
-                latch.countDown()
-            },
-        )
-        drainMainThreadUntil(latch)
-        return result ?: error("getPresentationRequest did not invoke errorHandler")
-    }
-
-    private fun drainMainThreadUntil(latch: CountDownLatch) {
-        val deadline = System.currentTimeMillis() + 5_000
-        while (latch.count > 0 && System.currentTimeMillis() < deadline) {
-            shadowOf(android.os.Looper.getMainLooper()).idle()
-            latch.await(20, TimeUnit.MILLISECONDS)
-        }
-        shadowOf(android.os.Looper.getMainLooper()).idle()
-        assertEquals("Timed out waiting for callback", 0, latch.count)
-    }
-
-    private fun credentialManifestDescriptor(deepLink: VCLDeepLink) =
-        VCLCredentialManifestDescriptorByDeepLink(
-            deepLink = deepLink,
-            didJwk = DidJwkMocks.DidJwk,
-        )
-
-    private fun credentialManifestDescriptorByService(
-        endpoint: String? = DeepLinkMocks.CredentialManifestRequestDecodedUriStr,
-        did: String = DeepLinkMocks.IssuerDid,
-    ) =
-        VCLCredentialManifestDescriptorByService(
-            service = VCLService(
-                JSONObject().apply {
-                    put(VCLService.KeyId, "${DeepLinkMocks.IssuerDid}#credential-agent-issuer-1")
-                    put(VCLService.KeyType, "VelocityCredentialAgentIssuer_v1.0")
-                    if (endpoint != null) {
-                        put(VCLService.KeyServiceEndpoint, endpoint)
-                    }
-                }
-            ),
-            issuingType = VCLIssuingType.Career,
-            didJwk = DidJwkMocks.DidJwk,
-            did = did,
-        )
-
-    private fun presentationDescriptor(deepLink: VCLDeepLink) =
-        VCLPresentationRequestDescriptor(
-            deepLink = deepLink,
-            didJwk = DidJwkMocks.DidJwk,
-        )
-
-    private class FixedJwtVerifyService(
-        private val result: VCLResult<Boolean>,
-    ) : VCLJwtVerifyService {
-        override fun verify(
-            jwt: VCLJwt,
-            publicJwk: VCLPublicJwk,
-            remoteCryptoServicesToken: VCLToken?,
-            completionBlock: (VCLResult<Boolean>) -> Unit,
-        ) {
-            completionBlock(result)
-        }
-    }
-
-    private data class BaselineHttpRouter(
-        private val verifiedProfilePayload: String = VerifiedProfileMocks.VerifiedProfileIssuerJsonStr1,
-        private val verifiedProfileStatusCode: Int = 200,
-        private val verifiedProfileContentType: String? = Request.ContentTypeApplicationJson,
-        private val requestPayload: String = CredentialManifestMocks.CredentialManifest1,
-        private val requestStatusCode: Int = 200,
-        private val requestContentType: String? = Request.ContentTypeApplicationJson,
-        private val requestFailure: Exception? = null,
-        private val didDocumentPayload: String = DidDocumentMocks.DidDocumentMockStr,
-        private val didDocumentStatusCode: Int = 200,
-        private val didDocumentContentType: String? = Request.ContentTypeApplicationJson,
-    ) {
-        val requestedEndpoints: MutableList<String> = Collections.synchronizedList(mutableListOf())
-
-        fun connectionFor(request: Request): HttpURLConnection {
-            requestedEndpoints.add(request.endpoint)
-            if (isSdkRequestEndpoint(request.endpoint)) {
-                requestFailure?.let { throw it }
-                if (request.endpoint.startsWith("not-a-url")) {
-                    throw MalformedURLException("no protocol: ${request.endpoint}")
-                }
-                if (request.endpoint.startsWith("ftp://")) {
-                    throw MalformedURLException("unknown protocol: ftp")
-                }
-            }
-            val route = routeFor(request.endpoint)
-            return FakeHttpURLConnection(
-                url = URL(request.endpoint),
-                responseCodeValue = route.statusCode,
-                contentTypeValue = route.contentType,
-                payload = route.payload,
-            )
-        }
-
-        private fun routeFor(endpoint: String): Route =
-            when {
-                endpoint.contains("/reference/countries") ->
-                    Route(200, Request.ContentTypeApplicationJson, CountriesMocks.CountriesJson)
-                endpoint.contains("/api/v0.6/credential-types") ->
-                    Route(200, Request.ContentTypeApplicationJson, CredentialTypesMocks.CredentialTypesJson)
-                endpoint.contains("/schemas/") ->
-                    Route(200, Request.ContentTypeApplicationJson, CredentialTypeSchemaMocks.CredentialTypeSchemaJson)
-                endpoint.contains("/verified-profile") ->
-                    Route(verifiedProfileStatusCode, verifiedProfileContentType, verifiedProfilePayload)
-                endpoint.contains("/resolve-did/") ->
-                    Route(didDocumentStatusCode, didDocumentContentType, didDocumentPayload)
-                isSdkRequestEndpoint(endpoint) ->
-                    Route(requestStatusCode, requestContentType, requestPayload)
-                else ->
-                    error("Unhandled HTTP endpoint in baseline test: $endpoint")
-            }
-
-        private fun isSdkRequestEndpoint(endpoint: String): Boolean =
-            endpoint.contains("get-credential-manifest") ||
-                endpoint.contains("get-presentation-request") ||
-                endpoint.startsWith("not-a-url") ||
-                endpoint.startsWith("ftp://")
-    }
-
-    private data class Route(
-        val statusCode: Int,
-        val contentType: String?,
-        val payload: String,
-    )
-
-    private class FakeHttpURLConnection(
-        url: URL,
-        private val responseCodeValue: Int,
-        private val contentTypeValue: String?,
-        private val payload: String,
-    ) : HttpURLConnection(url) {
-        override fun connect() = Unit
-
-        override fun disconnect() = Unit
-
-        override fun usingProxy() = false
-
-        override fun getResponseCode(): Int = responseCodeValue
-
-        override fun getContentType(): String? = contentTypeValue
-
-        override fun getErrorStream(): InputStream? =
-            if (responseCodeValue >= HTTP_OK && responseCodeValue <= 299) {
-                null
-            } else {
-                ByteArrayInputStream(payload.toByteArray())
-            }
-
-        override fun getInputStream(): InputStream =
-            ByteArrayInputStream(payload.toByteArray())
-    }
-
-    private companion object {
-        val cacheSequence = AtomicInteger(1000)
-    }
 }
