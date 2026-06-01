@@ -7,7 +7,7 @@ plugins {
 
 ext {
     publishCode = 175
-    publishVersion = "2.9.2"
+    publishVersion = "2.10.0"
     publishArtifactId = "vcl"
     publishGroupId = "io.velocitycareerlabs"
 }
@@ -142,12 +142,21 @@ tasks.register("verifyExpectedArtifactsExist") {
 }
 
 tasks.register("stageArtifacts", Copy) {
-    def mavenPath = "${publishGroupId.replace('.', '/')}/${publishArtifactId}/${publishVersion}/"
+    def isPrerelease = providers.gradleProperty("prerelease")
+        .map { it.toBoolean() }
+        .getOrElse(false)
+    def mavenVersion = isPrerelease ? "${publishVersion}-rc" : publishVersion
+    def mavenPath = "${publishGroupId.replace('.', '/')}/${publishArtifactId}/${mavenVersion}/"
     from("${layout.buildDirectory.get()}/outputs/aar") {
         include("**/*.aar")
     }
     from("${layout.buildDirectory.get()}/libs") {
         include("**/*.jar")
+        if (isPrerelease) {
+            rename { fileName ->
+                fileName.replace("${publishArtifactId}-${publishVersion}-", "${publishArtifactId}-${mavenVersion}-")
+            }
+        }
     }
     into("target/staging-deploy/${mavenPath}")
 }
