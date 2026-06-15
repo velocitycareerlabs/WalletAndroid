@@ -54,6 +54,7 @@ jobs:
           PUBLICATION_NAME=release
           PUBLICATION_TASK_SUFFIX=Release
           MAVEN_VERSION="$BASE_MAVEN_VERSION"
+          PRERELEASE_PATTERN=OFF
 
           if [[ "$ENVIRONMENT" == "rc" ]]; then
             if [[ ! "$RC_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
@@ -66,6 +67,7 @@ jobs:
             PUBLICATION_NAME=rc
             PUBLICATION_TASK_SUFFIX=Rc
             MAVEN_VERSION="${BASE_MAVEN_VERSION}-rc.${RC_NUMBER}"
+            PRERELEASE_PATTERN='^[0-9]+\.[0-9]+\.[0-9]+-rc\.[1-9][0-9]*$'
           elif [[ -n "$RC_NUMBER" ]]; then
             echo "::warning::rc_number is ignored when environment is ${ENVIRONMENT}."
           fi
@@ -81,6 +83,7 @@ jobs:
             echo "PUBLICATION_NAME=${PUBLICATION_NAME}"
             echo "PUBLICATION_TASK_SUFFIX=${PUBLICATION_TASK_SUFFIX}"
             echo "POM_FILE_NAME=vcl-${MAVEN_VERSION}.pom"
+            echo "PRERELEASE_PATTERN=${PRERELEASE_PATTERN}"
           } >> "$GITHUB_ENV"
 
           {
@@ -92,6 +95,7 @@ jobs:
             echo "publication_name=${PUBLICATION_NAME}"
             echo "publication_task_suffix=${PUBLICATION_TASK_SUFFIX}"
             echo "pom_file_name=vcl-${MAVEN_VERSION}.pom"
+            echo "prerelease_pattern=${PRERELEASE_PATTERN}"
           } >> "$GITHUB_OUTPUT"
 
           echo "Base Maven version: ${BASE_MAVEN_VERSION}"
@@ -185,4 +189,4 @@ jobs:
           JRELEASER_GPG_PASSPHRASE: ${{ secrets.MAVEN_CENTRAL_SIGNING_PASSWORD }}
           JRELEASER_TAG_NAME: ${{ steps.versions.outputs.release_version }}
           JRELEASER_RELEASE_NAME: ${{ steps.versions.outputs.release_version }}
-          JRELEASER_PRERELEASE_PATTERN: ${{ github.event.inputs.environment == 'rc' && steps.versions.outputs.maven_version || 'OFF' }}
+          JRELEASER_PRERELEASE_PATTERN: ${{ steps.versions.outputs.prerelease_pattern }}
