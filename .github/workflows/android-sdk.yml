@@ -25,6 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: ☕ Set up Java 17
         uses: actions/setup-java@v4
@@ -37,11 +38,14 @@ jobs:
 
       - name: 📝 Validate inputs and compute versions
         id: versions
+        env:
+          INPUT_ENVIRONMENT: ${{ github.event.inputs.environment }}
+          INPUT_RC_NUMBER: ${{ github.event.inputs.rc_number }}
         run: |
           set -euo pipefail
 
-          ENVIRONMENT="${{ github.event.inputs.environment }}"
-          RC_NUMBER="${{ github.event.inputs.rc_number }}"
+          ENVIRONMENT="${INPUT_ENVIRONMENT}"
+          RC_NUMBER="${INPUT_RC_NUMBER}"
           BASE_MAVEN_VERSION=$(grep 'publishVersion *= *".*"' VCL/build.gradle | sed -n 's/.*publishVersion *= *"\([^"]*\)".*/\1/p')
 
           if [[ ! "$BASE_MAVEN_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -110,8 +114,16 @@ jobs:
           set -euo pipefail
 
           MAVEN_POM_URL="https://repo.maven.apache.org/maven2/io/velocitycareerlabs/vcl/${MAVEN_VERSION}/vcl-${MAVEN_VERSION}.pom"
-          if curl --silent --fail --head "$MAVEN_POM_URL" >/dev/null; then
+          if ! MAVEN_STATUS=$(curl --silent --head --output /dev/null --write-out "%{http_code}" "$MAVEN_POM_URL"); then
+            echo "::error::Unable to verify Maven Central artifact for ${MAVEN_POM_URL}."
+            exit 1
+          fi
+
+          if [[ "$MAVEN_STATUS" == "200" ]]; then
             echo "::error::Maven Central artifact already exists: ${MAVEN_POM_URL}"
+            exit 1
+          elif [[ "$MAVEN_STATUS" != "404" ]]; then
+            echo "::error::Unable to verify Maven Central artifact. HTTP ${MAVEN_STATUS} for ${MAVEN_POM_URL}"
             exit 1
           fi
 
