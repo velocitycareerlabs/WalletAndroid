@@ -12,8 +12,22 @@ ext {
     publishGroupId = "io.velocitycareerlabs"
 }
 
+def requestedProjectVersion = findProperty("projectVersion")?.toString()?.trim()
+def isPrerelease = providers.gradleProperty("prerelease")
+    .map { it.toBoolean() }
+    .getOrElse(false)
+
+ext.resolvedPublishVersion = requestedProjectVersion ?: publishVersion
+def rcVersionPattern = /^[0-9]+\.[0-9]+\.[0-9]+-rc\.[1-9][0-9]*$/
+def baseVersionPattern = /^[0-9]+\.[0-9]+\.[0-9]+$/
+def baseArtifactVersion = resolvedPublishVersion.replaceFirst(/-rc\.[1-9][0-9]*$/, "")
+ext.releaseArtifactVersion = baseArtifactVersion
+ext.rcArtifactVersion = isPrerelease ? resolvedPublishVersion : "${baseArtifactVersion}-rc"
+ext.releasePublicationVersion = releaseArtifactVersion
+ext.rcPublicationVersion = rcArtifactVersion
+
 group = publishGroupId
-version = publishVersion
+version = resolvedPublishVersion
 
 android {
     namespace = publishGroupId
@@ -36,12 +50,12 @@ android {
         }
         rc {
             initWith(debug)
-            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}-rc\""
+            buildConfigField "String", "VERSION_NAME", "\"${rcArtifactVersion}\""
             buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
         }
         release {
             initWith(debug)
-            buildConfigField "String", "VERSION_NAME", "\"${defaultConfig.versionName}\""
+            buildConfigField "String", "VERSION_NAME", "\"${releaseArtifactVersion}\""
             buildConfigField "int", "VERSION_CODE", "${defaultConfig.versionCode}"
         }
     }
@@ -67,12 +81,20 @@ android {
     libraryVariants.configureEach { variant ->
         variant.outputs.all {
             if (variant.name == "release") {
-                outputFileName = "${publishArtifactId}-${publishVersion}.aar"
+                outputFileName = "${publishArtifactId}-${releaseArtifactVersion}.aar"
             } else if (variant.name == "rc") {
-                outputFileName = "${publishArtifactId}-${publishVersion}-rc.aar"
+                outputFileName = "${publishArtifactId}-${rcArtifactVersion}.aar"
             }
         }
     }
+}
+
+if (isPrerelease && !(resolvedPublishVersion ==~ rcVersionPattern)) {
+    throw new GradleException("RC builds require -PprojectVersion=<base>-rc.<positive integer>. Found: ${resolvedPublishVersion}")
+}
+
+if (!isPrerelease && requestedProjectVersion != null && !(resolvedPublishVersion ==~ baseVersionPattern)) {
+    throw new GradleException("Release builds require -PprojectVersion=<base semver>. Found: ${resolvedPublishVersion}")
 }
 
 apply from: 'publish.gradle'
@@ -142,21 +164,13 @@ tasks.register("verifyExpectedArtifactsExist") {
 }
 
 tasks.register("stageArtifacts", Copy) {
-    def isPrerelease = providers.gradleProperty("prerelease")
-        .map { it.toBoolean() }
-        .getOrElse(false)
-    def mavenVersion = isPrerelease ? "${publishVersion}-rc" : publishVersion
+    def mavenVersion = resolvedPublishVersion
     def mavenPath = "${publishGroupId.replace('.', '/')}/${publishArtifactId}/${mavenVersion}/"
     from("${layout.buildDirectory.get()}/outputs/aar") {
-        include("**/*.aar")
+        include("${publishArtifactId}-${mavenVersion}.aar")
     }
     from("${layout.buildDirectory.get()}/libs") {
-        include("**/*.jar")
-        if (isPrerelease) {
-            rename { fileName ->
-                fileName.replace("${publishArtifactId}-${publishVersion}-", "${publishArtifactId}-${mavenVersion}-")
-            }
-        }
+        include("${publishArtifactId}-${mavenVersion}-*.jar")
     }
     into("target/staging-deploy/${mavenPath}")
 }

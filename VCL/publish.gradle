@@ -7,15 +7,15 @@
 //}
 
 afterEvaluate {
-    def releaseAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${publishVersion}.aar")
-    def rcAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${publishVersion}-rc.aar")
+    def releaseAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${releaseArtifactVersion}.aar")
+    def rcAar = file("${layout.buildDirectory.get()}/outputs/aar/${publishArtifactId}-${rcArtifactVersion}.aar")
 
     publishing {
         publications {
             create("release", MavenPublication) {
                 groupId = publishGroupId
                 artifactId = publishArtifactId
-                version = publishVersion
+                version = releasePublicationVersion
 
                 artifact(releaseAar) { builtBy(tasks.named("assembleRelease")) }
                 artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
@@ -50,7 +50,7 @@ afterEvaluate {
             create("rc", MavenPublication) {
                 groupId = publishGroupId
                 artifactId = publishArtifactId
-                version = "${publishVersion}-rc"
+                version = rcPublicationVersion
 
                 artifact(rcAar) { builtBy(tasks.named("assembleRc")) }
                 artifact(tasks.named("generateSourcesJar").get()) { classifier = "sources" }
