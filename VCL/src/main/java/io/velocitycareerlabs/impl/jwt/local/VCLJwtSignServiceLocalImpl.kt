@@ -45,7 +45,7 @@ class VCLJwtSignServiceLocalImpl(
                 successHandler = { ecKey ->
                     try {
                         val header = JWSHeader.Builder(
-                            VCLSignatureAlgorithm.fromString(didJwk.publicJwk.curve).jwsAlgorithm
+                            VCLSignatureAlgorithm.fromString(ecKey.curve.name).jwsAlgorithm
                         )
                             .type(JOSEObjectType(GlobalConfig.TypeJwt))
 //        HeaderValues.XVnfProtocolVersion == VCLXVnfProtocolVersion.XVnfProtocolVersion1
