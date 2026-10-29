@@ -61,6 +61,9 @@ internal class CredentialIssuerVerifierTest {
     private lateinit var finalizeOffersDescriptorOfIdentityIssuer: VCLFinalizeOffersDescriptor
     private lateinit var credentialManifestFromIdentityIssuer: VCLCredentialManifest
 
+    private lateinit var finalizeOffersDescriptorOfIdentityAndNotaryIssuer: VCLFinalizeOffersDescriptor
+    private lateinit var finalizeOffersDescriptorOfIdentityAndRegularIssuer: VCLFinalizeOffersDescriptor
+
     private lateinit var finalizeOffersDescriptorOfMicrosoftQa: VCLFinalizeOffersDescriptor
     private lateinit var CredentialManifestForValidCredentialMicrsoftQa: VCLCredentialManifest
     private lateinit var CredentialManifestForInvalidCredentialMicrsoftQa: VCLCredentialManifest
@@ -120,6 +123,13 @@ internal class CredentialIssuerVerifierTest {
             rejectedOfferIds = listOf()
         )
 
+        finalizeOffersDescriptorOfIdentityAndNotaryIssuer = finalizeOffersDescriptorOf(
+            VerifiedProfileMocks.VerifiedProfileOfIdentityAndNotaryIssuer
+        )
+        finalizeOffersDescriptorOfIdentityAndRegularIssuer = finalizeOffersDescriptorOf(
+            VerifiedProfileMocks.VerifiedProfileOfIdentityAndRegularIssuer
+        )
+
         CredentialManifestForValidCredentialMicrsoftQa = VCLCredentialManifest(
             jwt = VCLJwt(CredentialManifestMocks.JwtCredentialManifestForValidCredentialMicrsoftQa),
             verifiedProfile = VCLVerifiedProfile(VerifiedProfileMocks.VerifiedProfileIssuerInspectorMicrosoftQa.toJsonObject()!!),
@@ -137,6 +147,17 @@ internal class CredentialIssuerVerifierTest {
             rejectedOfferIds = listOf()
         )
     }
+
+    private fun finalizeOffersDescriptorOf(verifiedProfile: String) = VCLFinalizeOffersDescriptor(
+        credentialManifest = VCLCredentialManifest(
+            jwt = VCLJwt(CredentialManifestMocks.JwtCredentialManifestFromRegularIssuer),
+            verifiedProfile = VCLVerifiedProfile(verifiedProfile.toJsonObject()!!),
+            didJwk = DidJwkMocks.DidJwk
+        ),
+        challenge = OffersMock.challenge,
+        approvedOfferIds = listOf(),
+        rejectedOfferIds = listOf()
+    )
 
     private fun setUpSubjects() {
         subject1 = CredentialIssuerVerifierImpl(
@@ -470,6 +491,74 @@ internal class CredentialIssuerVerifierTest {
                 },
                 errorHandler = { error ->
                     assert(error.errorCode == VCLErrorCode.IssuerRequiresIdentityPermission.value)
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testVerifyRegularCredentialFromIdentityAndNotaryIssuerSuccess() {
+        subject3.verifyCredentials(
+            jwtCredentials = CredentialMocks.JwtCredentialsFromNotaryIssuer.toJwtList()!!,
+            finalizeOffersDescriptor = finalizeOffersDescriptorOfIdentityAndNotaryIssuer,
+        ) { verificationResult ->
+            verificationResult.handleResult(
+                successHandler = {
+                    assert(it)
+                },
+                errorHandler = { error ->
+                    assert(false) { "${error.toJsonObject()}" }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testVerifyRegularCredentialFromIdentityAndRegularIssuerSuccess() {
+        subject5.verifyCredentials(
+            jwtCredentials = CredentialMocks.JwtCredentialsFromRegularIssuer.toJwtList()!!,
+            finalizeOffersDescriptor = finalizeOffersDescriptorOfIdentityAndRegularIssuer,
+        ) { verificationResult ->
+            verificationResult.handleResult(
+                successHandler = {
+                    assert(it)
+                },
+                errorHandler = { error ->
+                    assert(false) { "${error.toJsonObject()}" }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testVerifyRegularCredentialFromIdentityAndRegularIssuerWrongDidFailed() {
+        subject6.verifyCredentials(
+            jwtCredentials = CredentialMocks.JwtCredentialsFromNotaryIssuer.toJwtList()!!,
+            finalizeOffersDescriptor = finalizeOffersDescriptorOfIdentityAndRegularIssuer,
+        ) { verificationResult ->
+            verificationResult.handleResult(
+                successHandler = {
+                    assert(false) { "${VCLErrorCode.IssuerRequiresNotaryPermission.value} error code is expected" }
+                },
+                errorHandler = { error ->
+                    assert(error.errorCode == VCLErrorCode.IssuerRequiresNotaryPermission.value)
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testVerifyIdentityCredentialFromIdentityAndRegularIssuerSuccess() {
+        subject9.verifyCredentials(
+            jwtCredentials = CredentialMocks.JwtCredentialsFromNotaryIssuer.toJwtList()!!,
+            finalizeOffersDescriptor = finalizeOffersDescriptorOfIdentityAndRegularIssuer,
+        ) { verificationResult ->
+            verificationResult.handleResult(
+                successHandler = {
+                    assert(it)
+                },
+                errorHandler = { error ->
+                    assert(false) { "${error.toJsonObject()}" }
                 }
             )
         }
