@@ -8,14 +8,25 @@
 package io.velocitycareerlabs
 
 import io.velocitycareerlabs.api.VCLSignatureAlgorithm
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class VCLSignatureAlgorithmTest {
     @Test
-    fun fromStringTest() {
-        assert(VCLSignatureAlgorithm.fromString(value = "P-256") == VCLSignatureAlgorithm.ES256)
-        assert(VCLSignatureAlgorithm.fromString(value = "secp256k1") == VCLSignatureAlgorithm.SECP256k1)
-        assert(VCLSignatureAlgorithm.fromString(value = "") == VCLSignatureAlgorithm.SECP256k1)
-        assert(VCLSignatureAlgorithm.fromString(value = "wrong alg") == VCLSignatureAlgorithm.SECP256k1)
+    fun fromStringAcceptsCurveNames() {
+        assertEquals(VCLSignatureAlgorithm.ES256, VCLSignatureAlgorithm.fromString(value = "P-256"))
+        assertEquals(VCLSignatureAlgorithm.SECP256k1, VCLSignatureAlgorithm.fromString(value = "secp256k1"))
+    }
+
+    @Test
+    fun fromStringAcceptsJwsAlgorithmNames() {
+        assertEquals(VCLSignatureAlgorithm.ES256, VCLSignatureAlgorithm.fromString(value = "ES256"))
+        assertEquals(VCLSignatureAlgorithm.SECP256k1, VCLSignatureAlgorithm.fromString(value = "ES256K"))
+    }
+
+    @Test
+    fun fromStringDefaultsEmptyAndUnknownValuesToES256() {
+        assertEquals(VCLSignatureAlgorithm.ES256, VCLSignatureAlgorithm.fromString(value = ""))
+        assertEquals(VCLSignatureAlgorithm.ES256, VCLSignatureAlgorithm.fromString(value = "wrong alg"))
     }
 }

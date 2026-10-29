@@ -299,6 +299,14 @@ internal fun initializedVcl(
     router: BaselineHttpRouter,
     jwtVerificationResult: VCLResult<Boolean> = VCLResult.Success(true),
     errorCodeCompatibilityMode: VCLErrorCodeCompatibilityMode = VCLErrorCodeCompatibilityMode.Taxonomy,
+    cryptoServicesDescriptor: VCLCryptoServicesDescriptor = VCLCryptoServicesDescriptor(
+        cryptoServiceType = VCLCryptoServiceType.Injected,
+        injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
+            keyService = VCLKeyServiceMock(),
+            jwtSignService = VCLJwtSignServiceMock(),
+            jwtVerifyService = FixedJwtVerifyService(jwtVerificationResult),
+        ),
+    ),
 ): VCLImpl {
     val vcl = VCLImpl(router::connectionFor)
     var initError: VCLError? = null
@@ -308,14 +316,7 @@ internal fun initializedVcl(
         initializationDescriptor = VCLInitializationDescriptor(
             cacheSequence = cacheSequence.incrementAndGet(),
             errorCodeCompatibilityMode = errorCodeCompatibilityMode,
-            cryptoServicesDescriptor = VCLCryptoServicesDescriptor(
-                cryptoServiceType = VCLCryptoServiceType.Injected,
-                injectedCryptoServicesDescriptor = VCLInjectedCryptoServicesDescriptor(
-                    keyService = VCLKeyServiceMock(),
-                    jwtSignService = VCLJwtSignServiceMock(),
-                    jwtVerifyService = FixedJwtVerifyService(jwtVerificationResult),
-                ),
-            ),
+            cryptoServicesDescriptor = cryptoServicesDescriptor,
         ),
         successHandler = {
             latch.countDown()
@@ -371,6 +372,29 @@ internal fun awaitCredentialManifest(
     drainMainThreadUntil(latch)
     assertNull("Credential manifest success expected: ${error?.toJsonObject()}", error)
     return result ?: error("getCredentialManifest did not invoke successHandler")
+}
+
+internal fun awaitPresentationRequest(
+    vcl: VCLImpl,
+    descriptor: VCLPresentationRequestDescriptor,
+): VCLPresentationRequest {
+    var result: VCLPresentationRequest? = null
+    var error: VCLError? = null
+    val latch = CountDownLatch(1)
+    vcl.getPresentationRequest(
+        presentationRequestDescriptor = descriptor,
+        successHandler = { presentationRequest ->
+            result = presentationRequest
+            latch.countDown()
+        },
+        errorHandler = {
+            error = it
+            latch.countDown()
+        },
+    )
+    drainMainThreadUntil(latch)
+    assertNull("Presentation request success expected: ${error?.toJsonObject()}", error)
+    return result ?: error("getPresentationRequest did not invoke successHandler")
 }
 
 internal fun awaitPresentationRequestError(
