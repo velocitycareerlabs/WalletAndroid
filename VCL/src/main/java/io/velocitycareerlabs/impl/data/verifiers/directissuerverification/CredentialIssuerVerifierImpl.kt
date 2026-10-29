@@ -10,6 +10,7 @@ import io.velocitycareerlabs.api.entities.VCLCredentialType
 import io.velocitycareerlabs.api.entities.error.VCLError
 import io.velocitycareerlabs.api.entities.error.VCLErrorCode
 import io.velocitycareerlabs.api.entities.VCLFinalizeOffersDescriptor
+import io.velocitycareerlabs.api.entities.VCLIssuingType
 import io.velocitycareerlabs.api.entities.VCLJwt
 import io.velocitycareerlabs.api.entities.VCLResult
 import io.velocitycareerlabs.api.entities.VCLServiceType
@@ -89,12 +90,13 @@ internal class CredentialIssuerVerifierImpl(
         serviceTypes: VCLServiceTypes,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
+        // An organization can hold both identity and career issuing permissions. Its
+        // identity credentials are checked against the identity ones and its other
+        // credentials against the career ones.
         if (
-            serviceTypes.contains(VCLServiceType.IdentityIssuer) ||
-            serviceTypes.contains(VCLServiceType.IdDocumentIssuer) ||
-            serviceTypes.contains(VCLServiceType.NotaryIdDocumentIssuer) ||
-            serviceTypes.contains(VCLServiceType.NotaryContactIssuer) ||
-            serviceTypes.contains(VCLServiceType.ContactIssuer)
+            serviceTypes.containsAtLeastOneOf(IdentityIssuerTypes) &&
+            (isIdentityCredentialType(credentialType) ||
+                !serviceTypes.containsAtLeastOneOf(CareerIssuerTypes))
         ) {
             verifyIdentityIssuer(
                 credentialType,
@@ -109,17 +111,14 @@ internal class CredentialIssuerVerifierImpl(
         }
     }
 
+    private fun isIdentityCredentialType(credentialType: VCLCredentialType) =
+        IdentityIssuerTypes.all.any { it.value == credentialType.issuerCategory }
+
     private fun verifyIdentityIssuer(
         credentialType: VCLCredentialType,
         completionBlock: (VCLResult<Boolean>) -> Unit
     ) {
-        if (
-            credentialType.issuerCategory == VCLServiceType.IdentityIssuer.value ||
-            credentialType.issuerCategory == VCLServiceType.IdDocumentIssuer.value ||
-            credentialType.issuerCategory == VCLServiceType.NotaryIdDocumentIssuer.value ||
-            credentialType.issuerCategory == VCLServiceType.NotaryContactIssuer.value ||
-            credentialType.issuerCategory == VCLServiceType.ContactIssuer.value
-        ) {
+        if (isIdentityCredentialType(credentialType)) {
             completionBlock(VCLResult.Success(true))
         } else {
             onError(
@@ -319,3 +318,6 @@ internal class CredentialIssuerVerifierImpl(
             "https://velocitynetwork.foundation/contexts#primarySourceProfile"
     }
 }
+
+private val IdentityIssuerTypes = VCLServiceTypes(VCLIssuingType.Identity)
+private val CareerIssuerTypes = VCLServiceTypes(VCLIssuingType.Career)
