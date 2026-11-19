@@ -125,6 +125,15 @@ internal class VCLDeepLinkTest {
         assert(subject.did == DeepLinkMocks.HubIssuerDid)
     }
 
+    @Test
+    fun testCredentialManifestDeepLinkTakesCredentialTypesFromRequestUri() {
+        subject = VCLDeepLink(value = DeepLinkMocks.StrayCredentialTypeDeepLinkStr)
+
+        assert(
+            subject.requestUri?.decode()?.getUrlQueryParamValues("credential_types") == DeepLinkMocks.HubCredentialTypes
+        )
+    }
+
     @After
     fun tearDown() {
     }

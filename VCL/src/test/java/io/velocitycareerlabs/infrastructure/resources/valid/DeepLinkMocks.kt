@@ -85,6 +85,11 @@ class DeepLinkMocks {
             "$DevNetProtocol://issue?request_uri=${HubCredentialManifestRequestUriStr.encode()}" +
                     "&issuerDid=${HubIssuerDid.encode()}&vendorOriginContext=${HubVendorOriginContext.encode()}"
 
+        // A hub link whose vendorOriginContext encodes another credential_types
+        val StrayCredentialTypeDeepLinkStr =
+            "$DevNetProtocol://issue?vendorOriginContext=depot%3A123%3Acode%3Fcredential_types%3DDriversLicenseV1.0" +
+                    "&request_uri=${HubCredentialManifestRequestUriStr.encode()}"
+
         val CredentialManifestDeepLinkDevNet = VCLDeepLink(value = CredentialManifestDeepLinkDevNetStr)
         val CredentialManifestDeepLinkTestNet = VCLDeepLink(value = CredentialManifestDeepLinkTestNetStr)
         val CredentialManifestDeepLinkMainNet = VCLDeepLink(value = CredentialManifestDeepLinkMainNetStr)

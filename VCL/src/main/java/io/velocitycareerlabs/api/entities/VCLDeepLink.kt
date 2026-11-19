@@ -22,17 +22,21 @@ data class VCLDeepLink(val value: String) {
     val did: String? = (retrieveQueryParam(KeyIssuerDid) ?: retrieveQueryParam(KeyInspectorDid))
         ?: requestUri?.getUrlSubPath(KeyDidPrefix) // fallback for old agents
 
-    // The map keeps one value per key, so credential_types, which a link repeats once per type, is added with
-    // every value instead
+    // The map keeps one value per key, so credential_types, which a link repeats once per type, comes with every
+    // value from the request URI's own query instead. The request URI is taken from the link before the rest is
+    // decoded, so text encoded in another value can't add a type. A request URI without credential_types of its
+    // own is handled as before.
     private fun generateUri(uriKey: String, asSubParams: Boolean = false): String? {
-        val decodedValue = this.value.decode()
-        decodedValue.getUrlQueryParams()?.let { queryParams ->
+        this.value.decode().getUrlQueryParams()?.let { queryParams ->
             queryParams[uriKey]?.let { uri ->
-                val credentialTypes = decodedValue.getUrlQueryParamValues(KeyCredentialTypes)
+                val credentialTypes = rawQueryParam(uriKey)?.decode()
+                    ?.getUrlQueryParamValues(KeyCredentialTypes)
+                    .orEmpty()
                     .filter { it.isNotEmpty() }
                     .distinct()
                 val queryItems = (queryParams
-                    .filter { it.key != uriKey && it.key != KeyCredentialTypes && it.value.isNotEmpty() }
+                    .filter { it.key != uriKey && it.value.isNotEmpty() }
+                    .filter { credentialTypes.isEmpty() || it.key != KeyCredentialTypes }
                     .map { (key, value) -> "$key=${value.encode()}" } +
                         credentialTypes.map { "$KeyCredentialTypes=${it.encode()}" })
                     .joinToString("&")
@@ -44,6 +48,12 @@ data class VCLDeepLink(val value: String) {
         }
         return null
     }
+
+    // A parameter of the link as it's written, before anything is decoded
+    private fun rawQueryParam(key: String): String? =
+        value.substringAfter('?', "").split('&')
+            .lastOrNull { it.substringBefore('=') == key }
+            ?.substringAfter('=', "")
 
     private fun retrieveQueryParam(key: String): String? =
         this.value.decode().getUrlQueryParams()?.get(key)
