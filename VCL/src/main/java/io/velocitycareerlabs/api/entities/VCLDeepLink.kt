@@ -30,19 +30,21 @@ data class VCLDeepLink(val value: String) {
         val linkNames = linkParams.map { (name, _) -> name }.toSet()
         val params = (uri.getUrlQueryItems(lenient = true).filter { (name, _) -> name !in linkNames } + linkParams)
             .filter { (_, item) -> item.isNotEmpty() }
+        val base = uri.substringBefore('?')
         if (params.isEmpty()) {
-            return uri
+            return base
         }
-        return params.joinToString("&", prefix = "${uri.substringBefore('?')}?") { (name, item) ->
-            "${name.encode()}=${item.encode()}"
-        }
+        return params.joinToString("&", prefix = "$base?") { (name, item) -> "${name.encode()}=${item.encode()}" }
     }
 
-    // The link's own parameter, else one inside a URL the link carries, such as request_uri or an OpenID issuer
+    // The link's own parameter, else one inside a URL the link carries, such as request_uri or an OpenID issuer.
+    // Other values, such as vendorOriginContext, aren't read as queries.
     private fun retrieveQueryParam(key: String): String? {
         val linkItems = value.getUrlQueryItems()
         return linkItems.lastOrNull { (name, _) -> name == key }?.second
-            ?: linkItems.asReversed().firstNotNullOfOrNull { (_, item) -> item.getUrlQueryParams()?.get(key) }
+            ?: linkItems.asReversed()
+                .filter { (_, item) -> item.contains("://") }
+                .firstNotNullOfOrNull { (_, item) -> item.getUrlQueryParams()?.get(key) }
     }
 
     companion object CodingKeys {

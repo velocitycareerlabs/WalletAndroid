@@ -144,6 +144,21 @@ internal class VCLDeepLinkTest {
         assert(requestUriValues("id") == listOf("1"))
     }
 
+    @Test
+    fun testDeepLinkReadsNestedParametersOnlyFromUrls() {
+        subject = VCLDeepLink(value = DeepLinkMocks.QueryLikeVendorOriginContextDeepLinkStr)
+
+        assert(subject.did == "did:web:issuer")
+        assert(subject.vendorOriginContext == "issuerDid=did:web:other")
+    }
+
+    @Test
+    fun testEmptyDeepLinkParameterRemovesRequestUriParameter() {
+        subject = VCLDeepLink(value = DeepLinkMocks.EmptyIdDeepLinkStr)
+
+        assert(subject.requestUri == "https://issuer.example/manifest")
+    }
+
     private fun requestUriValues(name: String) =
         subject.requestUri?.getUrlQueryItems()?.filter { (itemName, _) -> itemName == name }?.map { (_, value) -> value }
 

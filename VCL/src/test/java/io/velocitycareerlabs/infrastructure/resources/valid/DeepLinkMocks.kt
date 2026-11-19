@@ -90,6 +90,15 @@ class DeepLinkMocks {
             "$MainNetProtocol://issue?request_uri=https%3A%2F%2Fissuer.example%2Fmanifest%3FissuerDid%3Ddid%3Aweb%3Ac" +
                     "&issuerDid=did:web:a&issuerDid=did:web:b&issuerDid=did:web:a"
 
+        // A vendorOriginContext that reads like a query, in a link whose issuer DID is in the request_uri's path
+        const val QueryLikeVendorOriginContextDeepLinkStr =
+            "$MainNetProtocol://issue?request_uri=https%3A%2F%2Fissuer.example%2Fdid%3Aweb%3Aissuer%2Fmanifest%3Fid%3D1" +
+                    "&vendorOriginContext=issuerDid%3Ddid%3Aweb%3Aother"
+
+        // An empty id in the link and another in its request_uri
+        const val EmptyIdDeepLinkStr =
+            "$MainNetProtocol://issue?request_uri=https%3A%2F%2Fissuer.example%2Fmanifest%3Fid%3Dstale&id="
+
         // A vendorOriginContext with characters that delimit a query
         const val ReservedCharactersVendorOriginContext = "a=1&b=2?c"
         val ReservedCharactersDeepLinkStr =
