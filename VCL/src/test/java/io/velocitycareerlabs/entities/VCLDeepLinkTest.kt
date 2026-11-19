@@ -9,6 +9,7 @@ package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.impl.extensions.decode
+import io.velocitycareerlabs.impl.extensions.getUrlQueryParamList
 import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import org.junit.After
@@ -111,6 +112,21 @@ internal class VCLDeepLinkTest {
         )
         assert(subject.vendorOriginContext == null)
         assert(subject.did == DeepLinkMocks.IssuerDid)
+    }
+
+    @Test
+    fun testCredentialManifestDeepLinkKeepsRepeatedCredentialTypes() {
+        subject = VCLDeepLink(value = DeepLinkMocks.HubCredentialManifestDeepLinkStr)
+
+        val requestUri = subject.requestUri?.decode()
+        assert(
+            requestUri?.getUrlQueryParamList()
+                ?.filter { (key, _) -> key == "credential_types" }
+                ?.map { (_, value) -> value } == DeepLinkMocks.HubCredentialTypes
+        )
+        assert(requestUri?.isUrlEquivalentTo(DeepLinkMocks.HubCredentialManifestRequestDecodedUriStr) == true)
+        assert(subject.vendorOriginContext == DeepLinkMocks.HubVendorOriginContext)
+        assert(subject.did == DeepLinkMocks.HubIssuerDid)
     }
 
     @After

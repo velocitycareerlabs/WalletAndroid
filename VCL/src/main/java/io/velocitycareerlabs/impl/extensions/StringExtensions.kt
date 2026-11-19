@@ -49,21 +49,21 @@ internal fun String.decode(): String = URLDecoder.decode(this, "UTF-8")
 
 internal fun String.encode(): String = URLEncoder.encode(this, "UTF-8")
 
-internal fun String.getUrlQueryParams(): Map<String, String>? {
-    var map: MutableMap<String, String>? = null
+// A repeated key keeps its last value
+internal fun String.getUrlQueryParams(): Map<String, String>? =
+    getUrlQueryParamList()?.toMap()
+
+// Every pair in order, so a repeated key such as credential_types keeps all its values
+internal fun String.getUrlQueryParamList(): List<Pair<String, String>>? =
     try {
-        val params = this.split("[${Pattern.quote("?")}&]".toRegex()).toTypedArray()
-        map = HashMap()
-        for (param in params) {
-            val pair = param.split("=".toRegex()).toTypedArray()
-            if (pair.size == 2)
-                map[pair[0]] = pair[1]
-        }
+        this.split("[${Pattern.quote("?")}&]".toRegex())
+            .map { it.split("=".toRegex()) }
+            .filter { it.size == 2 }
+            .map { it[0] to it[1] }
     } catch (e: Exception) {
         VCLLog.e("", "", e)
+        null
     }
-    return map
-}
 
 internal fun String.getUrlSubPath(subPathPrefix: String) =
     URI(this)

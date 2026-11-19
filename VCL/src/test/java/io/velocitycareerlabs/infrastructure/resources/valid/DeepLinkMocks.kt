@@ -71,6 +71,20 @@ class DeepLinkMocks {
         const val CredentialManifestDeepLinkMainNetStr = "$MainNetProtocol://issue?request_uri=$CredentialManifestRequestUriStr&issuerDid=$IssuerDidEncoded"
         const val CredentialManifestDeepLinkMainNetWithIdStr = "$MainNetProtocol://issue?request_uri=$CredentialManifestRequestUriWithIdStr&issuerDid=$IssuerDidEncoded"
 
+        // A Credentialing Hub depot link, whose request_uri repeats credential_types
+        const val HubIssuerDid = "did:web:devregistrar.velocitynetwork.foundation:d:example.com"
+        const val HubVendorOriginContext = "depot:65f0c0ffee0000000000d3a1:code"
+        val HubCredentialTypes =
+            listOf("PassportV1.0", "NationalIdCardV1.0", "DriversLicenseV1.0", "IdDocumentV1.0")
+        private val HubCredentialManifestRequestUriStr =
+            "https://devcih.velocitycareerlabs.io/vn-api/r/$HubIssuerDid/get-credential-manifest?id=65f0c0ffee0000000000e1f2&" +
+                    HubCredentialTypes.joinToString("&") { "credential_types=$it" }
+        val HubCredentialManifestRequestDecodedUriStr =
+            "$HubCredentialManifestRequestUriStr&issuerDid=$HubIssuerDid&vendorOriginContext=$HubVendorOriginContext"
+        val HubCredentialManifestDeepLinkStr =
+            "$DevNetProtocol://issue?request_uri=${HubCredentialManifestRequestUriStr.encode()}" +
+                    "&issuerDid=${HubIssuerDid.encode()}&vendorOriginContext=${HubVendorOriginContext.encode()}"
+
         val CredentialManifestDeepLinkDevNet = VCLDeepLink(value = CredentialManifestDeepLinkDevNetStr)
         val CredentialManifestDeepLinkTestNet = VCLDeepLink(value = CredentialManifestDeepLinkTestNetStr)
         val CredentialManifestDeepLinkMainNet = VCLDeepLink(value = CredentialManifestDeepLinkMainNetStr)
