@@ -8,9 +8,12 @@
 package io.velocitycareerlabs.api.entities
 
 import io.velocitycareerlabs.impl.extensions.*
-import io.velocitycareerlabs.impl.extensions.encode
+import io.velocitycareerlabs.impl.extensions.decode
+import io.velocitycareerlabs.impl.extensions.decodeOrSelf
+import io.velocitycareerlabs.impl.extensions.encodeIllegalQueryCharacters
 import io.velocitycareerlabs.impl.extensions.getUrlQueryItems
 import io.velocitycareerlabs.impl.extensions.getUrlQueryParams
+import io.velocitycareerlabs.impl.extensions.getUrlQuerySegments
 import java.net.URI
 
 data class VCLDeepLink(val value: String) {
@@ -19,32 +22,34 @@ data class VCLDeepLink(val value: String) {
     val did: String? = (retrieveQueryParam(KeyIssuerDid) ?: retrieveQueryParam(KeyInspectorDid))
         ?: requestUri?.getUrlSubPath(KeyDidPrefix) // fallback for old agents
 
-    // The link's query is read before anything is decoded, so the request URI's own query stays apart: a repeated
-    // name such as credential_types keeps every value, and a value keeps any &, = or ? it encodes. The link's other
-    // parameters are added to the request URI and replace any it carries under the same name. A malformed escape in
-    // the request URI's own query is kept as it is, as before.
+    // The link's query is split before anything is decoded, so the request URI's own query stays apart. The request
+    // URI keeps its query items as the issuer wrote them and gets the link's other parameters as the link wrote them,
+    // so a repeated name such as credential_types keeps every value and no value is decoded and encoded again. A link
+    // parameter replaces any the request URI carries under the same name. Characters a URL can't hold are escaped.
     private fun generateUri(uriKey: String): String? {
-        val linkItems = value.getUrlQueryItems()
-        val uri = linkItems.lastOrNull { (name, _) -> name == uriKey }?.second ?: return null
-        val linkParams = linkItems.filter { (name, _) -> name != uriKey }
-        val linkNames = linkParams.map { (name, _) -> name }.toSet()
-        val params = (uri.getUrlQueryItems(lenient = true).filter { (name, _) -> name !in linkNames } + linkParams)
-            .filter { (_, item) -> item.isNotEmpty() }
+        val linkSegments = value.getUrlQuerySegments()
+        val uri = linkSegments.lastOrNull { it.segmentName() == uriKey }?.segmentValue()?.decode() ?: return null
+        val linkParams = linkSegments.filter { it.segmentName() != uriKey }
+        val linkNames = linkParams.map { it.segmentName() }.toSet()
+        val params = (uri.getUrlQuerySegments().filter { it.segmentName() !in linkNames } + linkParams)
+            .filter { it.segmentValue().isNotEmpty() }
+            .map { it.encodeIllegalQueryCharacters() }
         val base = uri.substringBefore('?')
-        if (params.isEmpty()) {
-            return base
-        }
-        return params.joinToString("&", prefix = "$base?") { (name, item) -> "${name.encode()}=${item.encode()}" }
+        return if (params.isEmpty()) base else "$base?${params.joinToString("&")}"
     }
 
-    // The link's own parameter, else one inside a URL the link carries, such as request_uri or an OpenID issuer.
-    // Other values, such as vendorOriginContext, aren't read as queries.
+    private fun String.segmentName() = substringBefore('=').decodeOrSelf()
+
+    private fun String.segmentValue() = substringAfter('=', "")
+
+    // The link's own parameter, else one inside a URL the link carries, such as request_uri or an OpenID issuer,
+    // decoded once as the server decodes it. Other values, such as vendorOriginContext, aren't read as queries.
     private fun retrieveQueryParam(key: String): String? {
         val linkItems = value.getUrlQueryItems()
         return linkItems.lastOrNull { (name, _) -> name == key }?.second
             ?: linkItems.asReversed()
                 .filter { (_, item) -> item.contains("://") }
-                .firstNotNullOfOrNull { (_, item) -> item.getUrlQueryParams()?.get(key) }
+                .firstNotNullOfOrNull { (_, item) -> item.getUrlQueryParams()?.get(key)?.decodeOrSelf() }
     }
 
     companion object CodingKeys {

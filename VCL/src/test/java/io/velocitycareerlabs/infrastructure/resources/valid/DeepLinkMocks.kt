@@ -95,6 +95,16 @@ class DeepLinkMocks {
             "$MainNetProtocol://issue?request_uri=https%3A%2F%2Fissuer.example%2Fdid%3Aweb%3Aissuer%2Fmanifest%3Fid%3D1" +
                     "&vendorOriginContext=issuerDid%3Ddid%3Aweb%3Aother"
 
+        // A request_uri whose own query carries an encoded vendorOriginContext
+        val NestedVendorOriginContextDeepLinkStr =
+            "$MainNetProtocol://inspect?request_uri=" +
+                    "https://rp.example/request?inspectorDid=did:web:rp.example&vendorOriginContext=a%3Db+c".encode()
+
+        // A request_uri whose own query has a + and an escaped +
+        val PlusDeepLinkStr =
+            "$MainNetProtocol://issue?request_uri=" +
+                    "https://issuer.example/manifest?issuerDid=did:web:good&state=Jane+Doe&claim%2Btype=A".encode()
+
         // An empty id in the link and another in its request_uri
         const val EmptyIdDeepLinkStr =
             "$MainNetProtocol://issue?request_uri=https%3A%2F%2Fissuer.example%2Fmanifest%3Fid%3Dstale&id="

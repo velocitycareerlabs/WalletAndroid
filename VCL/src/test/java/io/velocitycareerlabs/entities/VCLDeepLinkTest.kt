@@ -153,6 +153,21 @@ internal class VCLDeepLinkTest {
     }
 
     @Test
+    fun testNestedParameterMatchesRequestUri() {
+        subject = VCLDeepLink(value = DeepLinkMocks.NestedVendorOriginContextDeepLinkStr)
+
+        assert(subject.vendorOriginContext == "a=b c")
+        assert(requestUriValues("vendorOriginContext") == listOf("a=b c"))
+    }
+
+    @Test
+    fun testRequestUriKeepsItsQueryAsWritten() {
+        subject = VCLDeepLink(value = DeepLinkMocks.PlusDeepLinkStr)
+
+        assert(subject.requestUri == "https://issuer.example/manifest?issuerDid=did:web:good&state=Jane+Doe&claim%2Btype=A")
+    }
+
+    @Test
     fun testEmptyDeepLinkParameterRemovesRequestUriParameter() {
         subject = VCLDeepLink(value = DeepLinkMocks.EmptyIdDeepLinkStr)
 

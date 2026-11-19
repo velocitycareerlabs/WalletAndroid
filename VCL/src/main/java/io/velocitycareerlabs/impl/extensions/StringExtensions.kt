@@ -65,28 +65,28 @@ internal fun String.getUrlQueryParams(): Map<String, String>? {
     return map
 }
 
-// The query's items in order, each name and value decoded once, as a browser reads a query: a value keeps any
-// &, = or ? it encodes, and a repeated name keeps every value. A malformed escape throws, as decode() does,
-// unless lenient, which keeps that part as it is.
-internal fun String.getUrlQueryItems(lenient: Boolean = false): List<Pair<String, String>> =
-    substringAfter('?', "").substringBefore('#')
-        .split('&')
-        .filter { it.isNotEmpty() }
-        .map { item ->
-            item.substringBefore('=').decodeQueryPart(lenient) to
-                    item.substringAfter('=', "").decodeQueryPart(lenient)
-        }
+// The query's items as they're written
+internal fun String.getUrlQuerySegments(): List<String> =
+    substringAfter('?', "").substringBefore('#').split('&').filter { it.isNotEmpty() }
 
-private fun String.decodeQueryPart(lenient: Boolean): String =
-    if (lenient) {
-        try {
-            decode()
-        } catch (e: IllegalArgumentException) {
-            this
-        }
-    } else {
+// The query's items in order, each name and value decoded once, as a browser reads a query: a value keeps any
+// &, = or ? it encodes, and a repeated name keeps every value. A malformed escape throws, as decode() does.
+internal fun String.getUrlQueryItems(): List<Pair<String, String>> =
+    getUrlQuerySegments().map { it.substringBefore('=').decode() to it.substringAfter('=', "").decode() }
+
+internal fun String.decodeOrSelf(): String =
+    try {
         decode()
+    } catch (e: IllegalArgumentException) {
+        this
     }
+
+// Escapes the characters a URL query can't hold as they are, such as a space or a quote, and leaves escapes and
+// delimiters as they are
+internal fun String.encodeIllegalQueryCharacters(): String =
+    IllegalQueryCharacters.replace(this) { URLEncoder.encode(it.value, "UTF-8") }
+
+private val IllegalQueryCharacters = Regex("[^A-Za-z0-9\\-._~!$&'()*+,;=:@/?%]+")
 
 internal fun String.getUrlSubPath(subPathPrefix: String) =
     URI(this)
