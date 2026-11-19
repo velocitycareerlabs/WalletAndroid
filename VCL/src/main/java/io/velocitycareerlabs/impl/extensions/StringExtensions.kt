@@ -55,7 +55,8 @@ internal fun String.getUrlQueryParams(): Map<String, String>? {
         val params = this.split("[${Pattern.quote("?")}&]".toRegex()).toTypedArray()
         map = HashMap()
         for (param in params) {
-            val pair = param.split("=".toRegex()).toTypedArray()
+            // Split at the first `=` only, so a value can contain `=`, e.g. base64 padding
+            val pair = param.split("=", limit = 2).toTypedArray()
             if (pair.size == 2)
                 map[pair[0]] = pair[1]
         }
@@ -68,7 +69,7 @@ internal fun String.getUrlQueryParams(): Map<String, String>? {
 // Every value of a key that the query repeats, in order, split as getUrlQueryParams splits
 internal fun String.getUrlQueryParamValues(key: String): List<String> =
     split("[${Pattern.quote("?")}&]".toRegex())
-        .map { it.split("=".toRegex()) }
+        .map { it.split("=", limit = 2) }
         .filter { it.size == 2 && it[0] == key }
         .map { it[1] }
 

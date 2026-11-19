@@ -168,17 +168,16 @@ class VCLDeepLinkProducedLinksTest {
                 "vendorOriginContext" to "a,b,c"
             )
         ),
-        // Should be fixed: the value is dropped. The link is decoded before each parameter is split at `=`, so the
-        // parameter has more than two parts and is skipped.
         Case(
             name = "vendorOriginContext with base64 = padding",
             link = "velocity-network-devnet://inspect?request_uri=https%3A%2F%2Fdevagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Aion%3AEiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA%2Finspect%2Fget-presentation-request%3Fid%3D6630aa11bb22cc33dd44ee55&inspectorDid=did%3Aion%3AEiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA&vendorOriginContext=dGVzdA%2B%2Fx9Q%3D%3D",
             did = "did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA",
-            vendorOriginContext = null,
+            vendorOriginContext = "dGVzdA+/x9Q==",
             requestUri = "https://devagent.velocitycareerlabs.io/api/holder/v0.6/org/did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA/inspect/get-presentation-request",
             query = listOf(
                 "id" to "6630aa11bb22cc33dd44ee55",
-                "inspectorDid" to "did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA"
+                "inspectorDid" to "did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA",
+                "vendorOriginContext" to "dGVzdA+/x9Q=="
             )
         ),
         // Should be fixed: the value is cut at `?`, and `a=1` and `b=2` become parameters of the request URI. The
