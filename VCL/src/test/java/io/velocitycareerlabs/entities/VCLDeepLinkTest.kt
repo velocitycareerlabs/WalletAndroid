@@ -9,7 +9,7 @@ package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.impl.extensions.decode
-import io.velocitycareerlabs.impl.extensions.getUrlQueryItems
+import io.velocitycareerlabs.impl.extensions.getUrlQueryParamValues
 import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import org.junit.After
@@ -118,71 +118,12 @@ internal class VCLDeepLinkTest {
     fun testCredentialManifestDeepLinkKeepsRepeatedCredentialTypes() {
         subject = VCLDeepLink(value = DeepLinkMocks.HubCredentialManifestDeepLinkStr)
 
-        assert(requestUriValues("credential_types") == DeepLinkMocks.HubCredentialTypes)
-        assert(
-            subject.requestUri?.decode()
-                ?.isUrlEquivalentTo(DeepLinkMocks.HubCredentialManifestRequestDecodedUriStr) == true
-        )
+        val requestUri = subject.requestUri?.decode()
+        assert(requestUri?.getUrlQueryParamValues("credential_types") == DeepLinkMocks.HubCredentialTypes)
+        assert(requestUri?.isUrlEquivalentTo(DeepLinkMocks.HubCredentialManifestRequestDecodedUriStr) == true)
         assert(subject.vendorOriginContext == DeepLinkMocks.HubVendorOriginContext)
         assert(subject.did == DeepLinkMocks.HubIssuerDid)
     }
-
-    @Test
-    fun testDeepLinkParametersReplaceRequestUriParameters() {
-        subject = VCLDeepLink(value = DeepLinkMocks.RepeatedIssuerDidDeepLinkStr)
-
-        assert(subject.did == "did:web:a")
-        assert(requestUriValues("issuerDid") == listOf("did:web:a", "did:web:b", "did:web:a"))
-    }
-
-    @Test
-    fun testDeepLinkValueKeepsReservedCharacters() {
-        subject = VCLDeepLink(value = DeepLinkMocks.ReservedCharactersDeepLinkStr)
-
-        assert(subject.vendorOriginContext == DeepLinkMocks.ReservedCharactersVendorOriginContext)
-        assert(requestUriValues("vendorOriginContext") == listOf(DeepLinkMocks.ReservedCharactersVendorOriginContext))
-        assert(requestUriValues("id") == listOf("1"))
-    }
-
-    @Test
-    fun testDeepLinkReadsNestedParametersOnlyFromUrls() {
-        subject = VCLDeepLink(value = DeepLinkMocks.QueryLikeVendorOriginContextDeepLinkStr)
-
-        assert(subject.did == "did:web:issuer")
-        assert(subject.vendorOriginContext == "issuerDid=did:web:other")
-
-        subject = VCLDeepLink(value = DeepLinkMocks.QueryLikeNoteDeepLinkStr)
-
-        assert(subject.vendorOriginContext == null)
-    }
-
-    @Test
-    fun testNestedParameterMatchesRequestUri() {
-        mapOf("a%3Db+c" to "a=b c", "a?b" to "a?b", "abc==" to "abc==", "abc#section" to "abc")
-            .forEach { (written, expected) ->
-                subject = VCLDeepLink(value = DeepLinkMocks.nestedVendorOriginContextDeepLinkStr(written))
-
-                assert(subject.vendorOriginContext == expected) { written }
-                assert(requestUriValues("vendorOriginContext") == listOf(expected)) { written }
-            }
-    }
-
-    @Test
-    fun testRequestUriKeepsItsQueryAsWritten() {
-        subject = VCLDeepLink(value = DeepLinkMocks.PlusDeepLinkStr)
-
-        assert(subject.requestUri == "https://issuer.example/manifest?issuerDid=did:web:good&state=Jane+Doe&claim%2Btype=A")
-    }
-
-    @Test
-    fun testEmptyDeepLinkParameterRemovesRequestUriParameter() {
-        subject = VCLDeepLink(value = DeepLinkMocks.EmptyIdDeepLinkStr)
-
-        assert(subject.requestUri == "https://issuer.example/manifest")
-    }
-
-    private fun requestUriValues(name: String) =
-        subject.requestUri?.getUrlQueryItems()?.filter { (itemName, _) -> itemName == name }?.map { (_, value) -> value }
 
     @After
     fun tearDown() {

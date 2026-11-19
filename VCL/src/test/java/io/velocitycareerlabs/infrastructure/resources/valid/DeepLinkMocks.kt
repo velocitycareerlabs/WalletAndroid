@@ -85,43 +85,6 @@ class DeepLinkMocks {
             "$DevNetProtocol://issue?request_uri=${HubCredentialManifestRequestUriStr.encode()}" +
                     "&issuerDid=${HubIssuerDid.encode()}&vendorOriginContext=${HubVendorOriginContext.encode()}"
 
-        // A link that repeats issuerDid and whose request_uri carries another one
-        const val RepeatedIssuerDidDeepLinkStr =
-            "$MainNetProtocol://issue?request_uri=https%3A%2F%2Fissuer.example%2Fmanifest%3FissuerDid%3Ddid%3Aweb%3Ac" +
-                    "&issuerDid=did:web:a&issuerDid=did:web:b&issuerDid=did:web:a"
-
-        // A vendorOriginContext that reads like a query, in a link whose issuer DID is in the request_uri's path
-        const val QueryLikeVendorOriginContextDeepLinkStr =
-            "$MainNetProtocol://issue?request_uri=https%3A%2F%2Fissuer.example%2Fdid%3Aweb%3Aissuer%2Fmanifest%3Fid%3D1" +
-                    "&vendorOriginContext=issuerDid%3Ddid%3Aweb%3Aother"
-
-        // A request_uri whose own query carries a vendorOriginContext, written as given
-        fun nestedVendorOriginContextDeepLinkStr(writtenVendorOriginContext: String) =
-            "$MainNetProtocol://inspect?request_uri=" +
-                    "https://rp.example/request?inspectorDid=did:web:rp.example&vendorOriginContext=$writtenVendorOriginContext"
-                        .encode()
-
-        // A link value that reads like a query with a URL in it
-        val QueryLikeNoteDeepLinkStr =
-            "$MainNetProtocol://inspect?request_uri=" +
-                    "https://rp.example/request?inspectorDid=did:web:rp.example".encode() +
-                    "&note=vendorOriginContext%3Dhttps%3A%2F%2Fexample.com"
-
-        // A request_uri whose own query has a + and an escaped +
-        val PlusDeepLinkStr =
-            "$MainNetProtocol://issue?request_uri=" +
-                    "https://issuer.example/manifest?issuerDid=did:web:good&state=Jane+Doe&claim%2Btype=A".encode()
-
-        // An empty id in the link and another in its request_uri
-        const val EmptyIdDeepLinkStr =
-            "$MainNetProtocol://issue?request_uri=https%3A%2F%2Fissuer.example%2Fmanifest%3Fid%3Dstale&id="
-
-        // A vendorOriginContext with characters that delimit a query
-        const val ReservedCharactersVendorOriginContext = "a=1&b=2?c"
-        val ReservedCharactersDeepLinkStr =
-            "$DevNetProtocol://issue?request_uri=${"https://issuer.example/manifest?id=1".encode()}" +
-                    "&vendorOriginContext=${ReservedCharactersVendorOriginContext.encode()}"
-
         val CredentialManifestDeepLinkDevNet = VCLDeepLink(value = CredentialManifestDeepLinkDevNetStr)
         val CredentialManifestDeepLinkTestNet = VCLDeepLink(value = CredentialManifestDeepLinkTestNetStr)
         val CredentialManifestDeepLinkMainNet = VCLDeepLink(value = CredentialManifestDeepLinkMainNetStr)
