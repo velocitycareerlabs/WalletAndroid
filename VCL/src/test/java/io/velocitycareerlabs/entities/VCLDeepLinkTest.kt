@@ -150,14 +150,21 @@ internal class VCLDeepLinkTest {
 
         assert(subject.did == "did:web:issuer")
         assert(subject.vendorOriginContext == "issuerDid=did:web:other")
+
+        subject = VCLDeepLink(value = DeepLinkMocks.QueryLikeNoteDeepLinkStr)
+
+        assert(subject.vendorOriginContext == null)
     }
 
     @Test
     fun testNestedParameterMatchesRequestUri() {
-        subject = VCLDeepLink(value = DeepLinkMocks.NestedVendorOriginContextDeepLinkStr)
+        mapOf("a%3Db+c" to "a=b c", "a?b" to "a?b", "abc==" to "abc==", "abc#section" to "abc")
+            .forEach { (written, expected) ->
+                subject = VCLDeepLink(value = DeepLinkMocks.nestedVendorOriginContextDeepLinkStr(written))
 
-        assert(subject.vendorOriginContext == "a=b c")
-        assert(requestUriValues("vendorOriginContext") == listOf("a=b c"))
+                assert(subject.vendorOriginContext == expected) { written }
+                assert(requestUriValues("vendorOriginContext") == listOf(expected)) { written }
+            }
     }
 
     @Test

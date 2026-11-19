@@ -95,10 +95,17 @@ class DeepLinkMocks {
             "$MainNetProtocol://issue?request_uri=https%3A%2F%2Fissuer.example%2Fdid%3Aweb%3Aissuer%2Fmanifest%3Fid%3D1" +
                     "&vendorOriginContext=issuerDid%3Ddid%3Aweb%3Aother"
 
-        // A request_uri whose own query carries an encoded vendorOriginContext
-        val NestedVendorOriginContextDeepLinkStr =
+        // A request_uri whose own query carries a vendorOriginContext, written as given
+        fun nestedVendorOriginContextDeepLinkStr(writtenVendorOriginContext: String) =
             "$MainNetProtocol://inspect?request_uri=" +
-                    "https://rp.example/request?inspectorDid=did:web:rp.example&vendorOriginContext=a%3Db+c".encode()
+                    "https://rp.example/request?inspectorDid=did:web:rp.example&vendorOriginContext=$writtenVendorOriginContext"
+                        .encode()
+
+        // A link value that reads like a query with a URL in it
+        val QueryLikeNoteDeepLinkStr =
+            "$MainNetProtocol://inspect?request_uri=" +
+                    "https://rp.example/request?inspectorDid=did:web:rp.example".encode() +
+                    "&note=vendorOriginContext%3Dhttps%3A%2F%2Fexample.com"
 
         // A request_uri whose own query has a + and an escaped +
         val PlusDeepLinkStr =

@@ -12,7 +12,6 @@ import io.velocitycareerlabs.impl.extensions.decode
 import io.velocitycareerlabs.impl.extensions.decodeOrSelf
 import io.velocitycareerlabs.impl.extensions.encodeIllegalQueryCharacters
 import io.velocitycareerlabs.impl.extensions.getUrlQueryItems
-import io.velocitycareerlabs.impl.extensions.getUrlQueryParams
 import io.velocitycareerlabs.impl.extensions.getUrlQuerySegments
 import java.net.URI
 
@@ -42,17 +41,30 @@ data class VCLDeepLink(val value: String) {
 
     private fun String.segmentValue() = substringAfter('=', "")
 
-    // The link's own parameter, else one inside a URL the link carries, such as request_uri or an OpenID issuer,
-    // decoded once as the server decodes it. Other values, such as vendorOriginContext, aren't read as queries.
+    // The link's own parameter, else one in the query of a URL the link carries, such as request_uri or an OpenID
+    // issuer. Other values, such as vendorOriginContext, aren't read as queries.
     private fun retrieveQueryParam(key: String): String? {
         val linkItems = value.getUrlQueryItems()
         return linkItems.lastOrNull { (name, _) -> name == key }?.second
-            ?: linkItems.asReversed()
-                .filter { (_, item) -> item.contains("://") }
-                .firstNotNullOfOrNull { (_, item) -> item.getUrlQueryParams()?.get(key)?.decodeOrSelf() }
+            ?: linkItems.asReversed().firstNotNullOfOrNull { (_, item) -> item.urlQueryValue(key) }
+    }
+
+    // The parameter in this value's query when the value is a URL, read as the request URI is built and decoded once,
+    // as the server decodes it, so it matches what's sent. A URL that starts its query with & instead of ?, as some
+    // OpenID issuer links do, is read the same way.
+    private fun String.urlQueryValue(key: String): String? {
+        if (!UrlStart.containsMatchIn(this)) {
+            return null
+        }
+        val query = if (contains('?')) substringAfter('?') else substringAfter('&', "")
+        return query.substringBefore('#').split('&')
+            .lastOrNull { it.segmentName() == key }
+            ?.segmentValue()?.decodeOrSelf()
     }
 
     companion object CodingKeys {
+        private val UrlStart = Regex("^[A-Za-z][A-Za-z0-9+.-]*://")
+
         const val KeyDidPrefix = "did:"
         const val KeyRequestUri = "request_uri"
         const val KeyVendorOriginContext = "vendorOriginContext"
