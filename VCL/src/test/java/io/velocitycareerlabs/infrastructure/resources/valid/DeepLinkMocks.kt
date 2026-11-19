@@ -85,6 +85,17 @@ class DeepLinkMocks {
             "$DevNetProtocol://issue?request_uri=${HubCredentialManifestRequestUriStr.encode()}" +
                     "&issuerDid=${HubIssuerDid.encode()}&vendorOriginContext=${HubVendorOriginContext.encode()}"
 
+        // A link that repeats issuerDid and whose request_uri carries another one
+        const val RepeatedIssuerDidDeepLinkStr =
+            "$MainNetProtocol://issue?request_uri=https%3A%2F%2Fissuer.example%2Fmanifest%3FissuerDid%3Ddid%3Aweb%3Ac" +
+                    "&issuerDid=did:web:a&issuerDid=did:web:b&issuerDid=did:web:a"
+
+        // A vendorOriginContext with characters that delimit a query
+        const val ReservedCharactersVendorOriginContext = "a=1&b=2?c"
+        val ReservedCharactersDeepLinkStr =
+            "$DevNetProtocol://issue?request_uri=${"https://issuer.example/manifest?id=1".encode()}" +
+                    "&vendorOriginContext=${ReservedCharactersVendorOriginContext.encode()}"
+
         val CredentialManifestDeepLinkDevNet = VCLDeepLink(value = CredentialManifestDeepLinkDevNetStr)
         val CredentialManifestDeepLinkTestNet = VCLDeepLink(value = CredentialManifestDeepLinkTestNetStr)
         val CredentialManifestDeepLinkMainNet = VCLDeepLink(value = CredentialManifestDeepLinkMainNetStr)

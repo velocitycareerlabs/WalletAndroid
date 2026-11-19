@@ -49,20 +49,43 @@ internal fun String.decode(): String = URLDecoder.decode(this, "UTF-8")
 
 internal fun String.encode(): String = URLEncoder.encode(this, "UTF-8")
 
-// A repeated key keeps its last value
-internal fun String.getUrlQueryParams(): Map<String, String>? =
-    getUrlQueryParamList()?.toMap()
-
-// Every pair in order, so a repeated key such as credential_types keeps all its values
-internal fun String.getUrlQueryParamList(): List<Pair<String, String>>? =
+internal fun String.getUrlQueryParams(): Map<String, String>? {
+    var map: MutableMap<String, String>? = null
     try {
-        this.split("[${Pattern.quote("?")}&]".toRegex())
-            .map { it.split("=".toRegex()) }
-            .filter { it.size == 2 }
-            .map { it[0] to it[1] }
+        val params = this.split("[${Pattern.quote("?")}&]".toRegex()).toTypedArray()
+        map = HashMap()
+        for (param in params) {
+            val pair = param.split("=".toRegex()).toTypedArray()
+            if (pair.size == 2)
+                map[pair[0]] = pair[1]
+        }
     } catch (e: Exception) {
         VCLLog.e("", "", e)
-        null
+    }
+    return map
+}
+
+// The query's items in order, each name and value decoded once, as a browser reads a query: a value keeps any
+// &, = or ? it encodes, and a repeated name keeps every value. A malformed escape throws, as decode() does,
+// unless lenient, which keeps that part as it is.
+internal fun String.getUrlQueryItems(lenient: Boolean = false): List<Pair<String, String>> =
+    substringAfter('?', "").substringBefore('#')
+        .split('&')
+        .filter { it.isNotEmpty() }
+        .map { item ->
+            item.substringBefore('=').decodeQueryPart(lenient) to
+                    item.substringAfter('=', "").decodeQueryPart(lenient)
+        }
+
+private fun String.decodeQueryPart(lenient: Boolean): String =
+    if (lenient) {
+        try {
+            decode()
+        } catch (e: IllegalArgumentException) {
+            this
+        }
+    } else {
+        decode()
     }
 
 internal fun String.getUrlSubPath(subPathPrefix: String) =
