@@ -105,7 +105,7 @@ class VCLDeepLinkProducedLinksTest {
                 "vendorOriginContext" to "abc123"
             )
         ),
-        // The agent repeats EmailV1.0. The request URI carries it once.
+        // The agent repeats EmailV1.0, and the request URI keeps both as the link has them.
         Case(
             name = "Agent exchange issuing link with two credential types",
             link = "velocity-network-devnet://issue?request_uri=https%3A%2F%2Fdevagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Aion%3AEiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA%2Fissue%2Fget-credential-manifest%3Fid%3D6630aa11bb22cc33dd44ee55%26exchange_id%3D6630ff00ee11dd22cc33bb44%26credential_types%3DEmailV1.0%26credential_types%3DPhoneV1.0%26credential_types%3DEmailV1.0&issuerDid=did%3Aion%3AEiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA&vendorOriginContext=abc123",
@@ -113,6 +113,7 @@ class VCLDeepLinkProducedLinksTest {
             vendorOriginContext = "abc123",
             requestUri = "https://devagent.velocitycareerlabs.io/api/holder/v0.6/org/did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA/issue/get-credential-manifest",
             query = listOf(
+                "credential_types" to "EmailV1.0",
                 "credential_types" to "EmailV1.0",
                 "credential_types" to "PhoneV1.0",
                 "exchange_id" to "6630ff00ee11dd22cc33bb44",
@@ -180,20 +181,16 @@ class VCLDeepLinkProducedLinksTest {
                 "vendorOriginContext" to "dGVzdA+/x9Q=="
             )
         ),
-        // Should be fixed: the value is cut at `?`, and `a=1` and `b=2` become parameters of the request URI. The
-        // link is decoded before it's split at `?` and `&`.
         Case(
             name = "vendorOriginContext with ? and &",
             link = "velocity-network-devnet://inspect?request_uri=https%3A%2F%2Fdevagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Aion%3AEiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA%2Finspect%2Fget-presentation-request%3Fid%3D6630aa11bb22cc33dd44ee55&inspectorDid=did%3Aion%3AEiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA&vendorOriginContext=https%3A%2F%2Fexample.com%2Fcb%3Fa%3D1%26b%3D2",
             did = "did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA",
-            vendorOriginContext = "https://example.com/cb",
+            vendorOriginContext = "https://example.com/cb?a=1&b=2",
             requestUri = "https://devagent.velocitycareerlabs.io/api/holder/v0.6/org/did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA/inspect/get-presentation-request",
             query = listOf(
-                "a" to "1",
-                "b" to "2",
                 "id" to "6630aa11bb22cc33dd44ee55",
                 "inspectorDid" to "did:ion:EiApMLdMb4NPb8sae9-hXGHP79W1gisApVSE80USPEbtJA",
-                "vendorOriginContext" to "https://example.com/cb"
+                "vendorOriginContext" to "https://example.com/cb?a=1&b=2"
             )
         ),
         Case(
@@ -280,8 +277,8 @@ class VCLDeepLinkProducedLinksTest {
                 "vendorOriginContext" to "second-ctx"
             )
         ),
-        // The app relies on this. The SDK finds vendorOriginContext inside request_uri because it decodes the
-        // whole link before splitting it.
+        // The app relies on this. The link has no vendorOriginContext of its own, so the SDK reads the one in
+        // request_uri's query.
         Case(
             name = "Holder app email/phone verification link, with vendorOriginContext inside request_uri",
             link = "velocity-network-devnet://issue?request_uri=https%3A%2F%2Fdevagent.velocitycareerlabs.io%2Fapi%2Fholder%2Fv0.6%2Forg%2Fdid%3Avelocity%3A0xd4df29726d500f9b85bc6c7f1b3c021f16305692%2Fissue%2Fget-credential-manifest%3FvendorOriginContext%3DeyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.abc-_def",

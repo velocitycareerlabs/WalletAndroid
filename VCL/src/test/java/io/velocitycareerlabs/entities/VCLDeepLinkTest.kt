@@ -9,12 +9,12 @@ package io.velocitycareerlabs.entities
 
 import io.velocitycareerlabs.api.entities.VCLDeepLink
 import io.velocitycareerlabs.impl.extensions.decode
-import io.velocitycareerlabs.impl.extensions.getUrlQueryParamValues
 import io.velocitycareerlabs.impl.extensions.isUrlEquivalentTo
 import io.velocitycareerlabs.infrastructure.resources.valid.DeepLinkMocks
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import java.net.URLDecoder
 
 internal class VCLDeepLinkTest {
 
@@ -118,9 +118,11 @@ internal class VCLDeepLinkTest {
     fun testCredentialManifestDeepLinkKeepsRepeatedCredentialTypes() {
         subject = VCLDeepLink(value = DeepLinkMocks.HubCredentialManifestDeepLinkStr)
 
-        val requestUri = subject.requestUri?.decode()
-        assert(requestUri?.getUrlQueryParamValues("credential_types") == DeepLinkMocks.HubCredentialTypes)
-        assert(requestUri?.isUrlEquivalentTo(DeepLinkMocks.HubCredentialManifestRequestDecodedUriStr) == true)
+        assert(serverQueryValues(subject.requestUri, "credential_types") == DeepLinkMocks.HubCredentialTypes)
+        assert(
+            subject.requestUri?.decode()
+                ?.isUrlEquivalentTo(DeepLinkMocks.HubCredentialManifestRequestDecodedUriStr) == true
+        )
         assert(subject.vendorOriginContext == DeepLinkMocks.HubVendorOriginContext)
         assert(subject.did == DeepLinkMocks.HubIssuerDid)
     }
@@ -129,10 +131,16 @@ internal class VCLDeepLinkTest {
     fun testCredentialManifestDeepLinkTakesCredentialTypesFromRequestUri() {
         subject = VCLDeepLink(value = DeepLinkMocks.StrayCredentialTypeDeepLinkStr)
 
-        assert(
-            subject.requestUri?.decode()?.getUrlQueryParamValues("credential_types") == DeepLinkMocks.HubCredentialTypes
-        )
+        assert(serverQueryValues(subject.requestUri, "credential_types") == DeepLinkMocks.HubCredentialTypes)
     }
+
+    // Every value of a key in the URL's query, read as a server reads it: split at `&`, then at the first `=`, with
+    // each value form-decoded. Text encoded inside another value stays in that value.
+    private fun serverQueryValues(url: String?, key: String): List<String> =
+        url?.substringAfter('?', "").orEmpty().split('&')
+            .map { it.split("=", limit = 2) }
+            .filter { it.size == 2 && it[0] == key }
+            .map { URLDecoder.decode(it[1], "UTF-8") }
 
     @After
     fun tearDown() {
