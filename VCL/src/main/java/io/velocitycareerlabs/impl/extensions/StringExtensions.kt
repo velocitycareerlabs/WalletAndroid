@@ -55,7 +55,8 @@ internal fun String.getUrlQueryParams(): Map<String, String>? {
         val params = this.split("[${Pattern.quote("?")}&]".toRegex()).toTypedArray()
         map = HashMap()
         for (param in params) {
-            val pair = param.split("=".toRegex()).toTypedArray()
+            // Split at the first `=` only, so a value can contain `=`, e.g. base64 padding
+            val pair = param.split("=", limit = 2).toTypedArray()
             if (pair.size == 2)
                 map[pair[0]] = pair[1]
         }
@@ -64,6 +65,29 @@ internal fun String.getUrlQueryParams(): Map<String, String>? {
     }
     return map
 }
+
+// The query's items as they're written
+internal fun String.getUrlQuerySegments(): List<String> =
+    substringAfter('?', "").substringBefore('#').split('&').filter { it.isNotEmpty() }
+
+// The query's items in order, each name and value decoded once, as a server reads a query: a `+` is a space, a
+// value keeps any &, = or ? it encodes, and a repeated name keeps every value. A malformed escape throws, as decode() does.
+internal fun String.getUrlQueryItems(): List<Pair<String, String>> =
+    getUrlQuerySegments().map { it.substringBefore('=').decode() to it.substringAfter('=', "").decode() }
+
+internal fun String.decodeOrSelf(): String =
+    try {
+        decode()
+    } catch (e: IllegalArgumentException) {
+        this
+    }
+
+// Escapes the characters a URL query can't hold as they are, such as a space or a quote, and leaves escapes and
+// delimiters as they are
+internal fun String.encodeIllegalQueryCharacters(): String =
+    IllegalQueryCharacters.replace(this) { URLEncoder.encode(it.value, "UTF-8") }
+
+private val IllegalQueryCharacters = Regex("[^A-Za-z0-9\\-._~!$&'()*+,;=:@/?%]+")
 
 internal fun String.getUrlSubPath(subPathPrefix: String) =
     URI(this)
