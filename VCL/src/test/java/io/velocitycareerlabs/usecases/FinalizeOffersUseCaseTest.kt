@@ -25,6 +25,7 @@ import io.velocitycareerlabs.impl.data.verifiers.directissuerverification.reposi
 import io.velocitycareerlabs.impl.domain.usecases.FinalizeOffersUseCase
 import io.velocitycareerlabs.impl.extensions.toJsonArray
 import io.velocitycareerlabs.impl.extensions.toJsonObject
+import io.velocitycareerlabs.impl.extensions.toListOfStrings
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtSignServiceLocalImpl
 import io.velocitycareerlabs.impl.jwt.local.VCLJwtVerifyServiceLocalImpl
 import io.velocitycareerlabs.infrastructure.db.SecretStoreServiceMock
@@ -193,10 +194,8 @@ internal class FinalizeOffersUseCaseTest {
 
     @Test
     fun testPassedCredentialsPreserveIssuerResponseOrderOnEveryCall() {
-        val credentialFixtures = listOf(
-            CredentialMocks.JwtCredentialEducationDegreeRegistrationFromRegularIssuer,
-            CredentialMocks.JwtCredentialEmploymentPastFromRegularIssuer
-        )
+        val credentialFixtures =
+            JSONArray(CredentialMocks.JwtCredentialsFromRegularIssuer).toListOfStrings()
         val expectedOrder = List(32) { it % credentialFixtures.size }
         val issuerResponse = JSONArray(expectedOrder.map { credentialFixtures[it] }).toString()
         subject2 = FinalizeOffersUseCaseImpl(
