@@ -38,6 +38,9 @@ import io.velocitycareerlabs.infrastructure.resources.valid.DidDocumentMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.GenerateOffersMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.JsonLdMocks
 import io.velocitycareerlabs.infrastructure.resources.valid.VerifiedProfileMocks
+import org.json.JSONArray
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -189,10 +192,16 @@ internal class FinalizeOffersUseCaseTest {
     }
 
     @Test
-    fun testPassedCredentials() {
+    fun testPassedCredentialsPreserveIssuerResponseOrderOnEveryCall() {
+        val credentialFixtures = listOf(
+            CredentialMocks.JwtCredentialEducationDegreeRegistrationFromRegularIssuer,
+            CredentialMocks.JwtCredentialEmploymentPastFromRegularIssuer
+        )
+        val expectedOrder = List(32) { it % credentialFixtures.size }
+        val issuerResponse = JSONArray(expectedOrder.map { credentialFixtures[it] }).toString()
         subject2 = FinalizeOffersUseCaseImpl(
             FinalizeOffersRepositoryImpl(
-                NetworkServiceSuccess(validResponse = CredentialMocks.JwtCredentialsFromRegularIssuer)
+                NetworkServiceSuccess(validResponse = issuerResponse)
             ),
             JwtServiceRepositoryImpl(
                 VCLJwtSignServiceLocalImpl(keyService),
@@ -215,27 +224,24 @@ internal class FinalizeOffersUseCaseTest {
             EmptyExecutor()
         )
 
-        subject2.finalizeOffers(
-            finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
-            sessionToken = VCLToken(value = ""),
-        ) {
-            it.handleResult(
+        repeat(20) { attempt ->
+            val call = "Finalize call ${attempt + 1}"
+            var result: VCLResult<VCLJwtVerifiableCredentials>? = null
+            subject2.finalizeOffers(
+                finalizeOffersDescriptor = finalizeOffersDescriptorPassed,
+                sessionToken = VCLToken(value = ""),
+            ) { result = it }
+            checkNotNull(result) { "$call did not complete" }.handleResult(
                 successHandler = { finalizeOffers ->
-                    assert(finalizeOffers.passedCredentials.size == credentialsAmount)
-                    assert(
-                        finalizeOffers.passedCredentials.find { cred ->
-                            cred.encodedJwt == CredentialMocks.JwtCredentialEducationDegreeRegistrationFromRegularIssuer
-                        } != null
+                    assertEquals(
+                        "$call should return all JWTs in issuer response order (by fixture index)",
+                        expectedOrder,
+                        finalizeOffers.passedCredentials.map { credentialFixtures.indexOf(it.encodedJwt) }
                     )
-                    assert(
-                        finalizeOffers.passedCredentials.find { cred ->
-                            cred.encodedJwt == CredentialMocks.JwtCredentialEmploymentPastFromRegularIssuer
-                        } != null
-                    )
-                    assert(finalizeOffers.failedCredentials.isEmpty())
+                    assertTrue("$call should have no failed credentials", finalizeOffers.failedCredentials.isEmpty())
                 },
                 errorHandler = { error ->
-                    assert(false) { "${error.toJsonObject()}" }
+                    throw AssertionError("$call failed: ${error.toJsonObject()}")
                 }
             )
         }
